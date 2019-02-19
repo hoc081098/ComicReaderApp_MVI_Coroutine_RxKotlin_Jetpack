@@ -1,38 +1,60 @@
 package com.hoc.comicapp.data
 
 import com.hoc.comicapp.CoroutinesDispatcherProvider
+import com.hoc.comicapp.Either
 import com.hoc.comicapp.data.models.Comic
+import com.hoc.comicapp.data.models.Error
+import com.hoc.comicapp.data.models.toError
 import com.hoc.comicapp.data.remote.ComicApiService
+import com.hoc.comicapp.left
+import com.hoc.comicapp.right
 import kotlinx.coroutines.withContext
+import retrofit2.Retrofit
 
 class ComicRepositoryImpl(
+  private val retrofit: Retrofit,
   private val comicApiService: ComicApiService,
-  private val coroutinesDispatcherProvider: CoroutinesDispatcherProvider
+  private val dispatcherProvider: CoroutinesDispatcherProvider
 ) : ComicRepository {
-  override suspend fun getTopMonth(): List<Comic> {
-    return withContext(coroutinesDispatcherProvider.io) {
-      comicApiService
-        .topMonth()
-        .await()
-        .map(Mapper::comicResponseToComicModel)
+  override suspend fun getTopMonth(): Either<Error, List<Comic>> {
+    return try {
+      withContext(dispatcherProvider.io) {
+        comicApiService
+          .topMonth()
+          .await()
+          .map(Mapper::comicResponseToComicModel)
+          .right()
+      }
+    } catch (throwable: Throwable) {
+      throwable.toError(retrofit).left()
     }
   }
 
-  override suspend fun getUpdate(page: Int?): List<Comic> {
-    return withContext(coroutinesDispatcherProvider.io) {
-      comicApiService
-        .update(page = page)
-        .await()
-        .map(Mapper::comicResponseToComicModel)
+  override suspend fun getUpdate(page: Int?): Either<Error, List<Comic>> {
+    return try {
+      withContext(dispatcherProvider.io) {
+        comicApiService
+          .update(page = page)
+          .await()
+          .map(Mapper::comicResponseToComicModel)
+          .right()
+      }
+    } catch (throwable: Throwable) {
+      throwable.toError(retrofit).left()
     }
   }
 
-  override suspend fun getSuggest(): List<Comic> {
-    return withContext(coroutinesDispatcherProvider.io) {
-      comicApiService
-        .suggest()
-        .await()
-        .map(Mapper::comicResponseToComicModel)
+  override suspend fun getSuggest(): Either<Error, List<Comic>> {
+    return try {
+      withContext(dispatcherProvider.io) {
+        comicApiService
+          .suggest()
+          .await()
+          .map(Mapper::comicResponseToComicModel)
+          .right()
+      }
+    } catch (throwable: Throwable) {
+      throwable.toError(retrofit).left()
     }
   }
 }

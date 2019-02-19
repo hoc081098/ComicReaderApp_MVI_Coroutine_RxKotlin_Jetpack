@@ -64,6 +64,7 @@ dependencies {
   implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
   implementation("androidx.lifecycle:lifecycle-livedata:$lifecycleVersion")
   implementation("androidx.lifecycle:lifecycle-reactivestreams-ktx:$lifecycleVersion")
+  implementation("com.shopify:livedata-ktx:3.0.0")
 
   implementation("com.google.android.material:material:1.1.0-alpha03")
 

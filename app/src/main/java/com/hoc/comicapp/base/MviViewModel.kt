@@ -1,9 +1,10 @@
 package com.hoc.comicapp.base
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.hoc.comicapp.Event
-import kotlinx.coroutines.channels.ReceiveChannel
+import com.shopify.livedataktx.LiveDataKtx
+import io.reactivex.Observable
+import io.reactivex.disposables.Disposable
 
 /**
  * Object that will subscribes to a [MviView]'s [MviIntent]s,
@@ -13,11 +14,10 @@ import kotlinx.coroutines.channels.ReceiveChannel
  * to.
  * @param S Top class of the [MviViewState] the [MviViewModel] will be emitting.
  */
-interface MviViewModel<I : Intent, S : ViewState, E: SingleEvent> {
-  val state: LiveData<S>
+interface MviViewModel<I : Intent, S : ViewState, E : SingleEvent> {
+  val state: LiveDataKtx<S>
 
   val singleEvent: LiveData<Event<E>>
 
-  fun processIntents(intents: ReceiveChannel<I>)
-
+  fun processIntents(intents: Observable<I>): Disposable
 }

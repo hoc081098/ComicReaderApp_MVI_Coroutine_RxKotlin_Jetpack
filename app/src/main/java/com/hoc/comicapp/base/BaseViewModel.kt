@@ -1,54 +1,38 @@
 package com.hoc.comicapp.base
 
+import androidx.annotation.CallSuper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.hoc.comicapp.CoroutinesDispatcherProvider
 import com.hoc.comicapp.Event
+import com.shopify.livedataktx.LiveDataKtx
+import com.shopify.livedataktx.MutableLiveDataKtx
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 
-abstract class BaseViewModel<I : Intent, S : ViewState, E : SingleEvent>(
-  coroutinesDispatcherProvider: CoroutinesDispatcherProvider
-) : ViewModel(), CoroutineScope, MviViewModel<I, S, E> {
+@ExperimentalCoroutinesApi
+abstract class BaseViewModel<I : Intent, S : ViewState, E : SingleEvent> : ViewModel(),
+  CoroutineScope by MainScope(), MviViewModel<I, S, E> {
 
-  override fun processIntents(intents: ReceiveChannel<I>) {
-    processIntents(intents, _state, _singleEvent)
-  }
-
+  abstract val initialState: S
   /**
    * ViewState
    */
-  private val _state = MutableLiveData<S>()
-  override val state: LiveData<S> get() = _state
+  protected val stateD = MutableLiveDataKtx<S>().apply { value = initialState }
+  override val state: LiveDataKtx<S> get() = stateD
 
   /**
    * Single event
    * Like: snackbar message, navigation event or a dialog trigger
    */
-  private val _singleEvent = MutableLiveData<Event<E>>()
-  override val singleEvent: LiveData<Event<E>> get() = _singleEvent
+  protected val singleEventD = MutableLiveData<Event<E>>()
+  override val singleEvent: LiveData<Event<E>> get() = singleEventD
 
-  private val job = Job()
-  /**
-   * Context of this scope.
-   */
-  override val coroutineContext: CoroutineContext = job + coroutinesDispatcherProvider.ui
-
-  init {
-
-  }
-
-  abstract fun processIntents(
-    intents: ReceiveChannel<I>,
-    state: MutableLiveData<S>,
-    singleEvent: MutableLiveData<Event<E>>
-  )
-
+  @CallSuper
   override fun onCleared() {
     super.onCleared()
-    job.cancel()
+    cancel()
   }
 }

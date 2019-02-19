@@ -2,6 +2,7 @@ package com.hoc.comicapp.koin
 
 import com.hoc.comicapp.BuildConfig
 import com.hoc.comicapp.data.remote.COMIC_BASE_URL
+import com.hoc.comicapp.data.remote.ComicApiService
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -15,6 +16,12 @@ val networkModule = module {
   single { getOkHttpClient() }
 
   single { getRetrofit(get()) }
+
+  single { getComicApiService(get()) }
+}
+
+fun getComicApiService(retrofit: Retrofit): ComicApiService {
+  return ComicApiService(retrofit)
 }
 
 private fun getRetrofit(client: OkHttpClient): Retrofit {
