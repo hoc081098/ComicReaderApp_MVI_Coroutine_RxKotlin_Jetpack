@@ -5,7 +5,7 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/home_fragment"
+            android:id="@+id/home_fragment_dest"
             android:icon="@drawable/ic_home_white_24dp"
             android:title="Home" />
     </group>

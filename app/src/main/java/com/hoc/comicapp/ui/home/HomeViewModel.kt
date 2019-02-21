@@ -1,7 +1,7 @@
 package com.hoc.comicapp.ui.home
 
-import android.util.Log
-import com.hoc.comicapp.*
+import com.hoc.comicapp.Event
+import com.hoc.comicapp.Left
 import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.base.Intent
 import com.hoc.comicapp.base.SingleEvent
@@ -11,6 +11,8 @@ import com.hoc.comicapp.data.models.Comic
 import com.hoc.comicapp.data.models.NetworkError
 import com.hoc.comicapp.data.models.ServerError
 import com.hoc.comicapp.data.models.UnexpectedError
+import com.hoc.comicapp.getOrNull
+import com.hoc.comicapp.setValueIfNew
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
@@ -21,6 +23,7 @@ import io.reactivex.rxkotlin.ofType
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.rx2.rxObservable
+import timber.log.Timber
 import com.hoc.comicapp.data.models.Error as RepoError
 
 fun getMessageFromError(error: RepoError): String {
@@ -74,9 +77,10 @@ sealed class HomeSingleEvent : SingleEvent {
 
 @ExperimentalCoroutinesApi
 class HomeViewModel(
-  dispatcherProvider: CoroutinesDispatcherProvider,
   private val comicRepository: ComicRepository
 ) : BaseViewModel<HomeViewIntent, HomeViewState, HomeSingleEvent>() {
+  private val timberTree = Timber.tag("###")
+
   private val intentsSubject = PublishRelay.create<HomeViewIntent>()
 
   override val initialState = HomeViewState.initialState()
@@ -127,25 +131,28 @@ class HomeViewModel(
             .doOnNext {
               if (it is HomePartialChange.SuggestHomePartialChange.Error) {
                 singleEventD.value =
-                  "Get suggest list error: ${getMessageFromError(it.error)}".let {
-                    HomeSingleEvent.MessageEvent(it)
-                  }.let(::Event)
+                  "Get suggest list error: ${getMessageFromError(it.error)}"
+                    .let { HomeSingleEvent.MessageEvent(it) }
+                    .let(::Event)
               }
             },
           topMonthChanges
             .doOnNext {
               if (it is HomePartialChange.TopMonthHomePartialChange.Error) {
                 singleEventD.value =
-                  "Get top month list error: ${getMessageFromError(it.error)}".let {
-                    HomeSingleEvent.MessageEvent(it)
-                  }.let(::Event)
+                  "Get top month list error: ${getMessageFromError(it.error)}"
+                    .let { HomeSingleEvent.MessageEvent(it) }
+                    .let(::Event)
               }
             }
         )
       }
     }
   private val refreshProcessor =
-    ObservableTransformer<HomeViewIntent.Refresh, HomePartialChange> { Observable.empty() }
+    ObservableTransformer<HomeViewIntent.Refresh, HomePartialChange> {
+      timberTree.d("inside refreshProcessor")
+      Observable.empty()
+    }
 
   private val intentToViewState = ObservableTransformer<HomeViewIntent, HomeViewState> {
     it.publish { shared ->
@@ -157,7 +164,9 @@ class HomeViewModel(
           .ofType<HomeViewIntent.Refresh>()
           .compose(refreshProcessor)
       )
-    }.scan(HomeViewState.initialState(), ::reducer)
+    }
+      .doOnNext { timberTree.d("partial_change=$it") }
+      .scan(HomeViewState.initialState(), ::reducer)
       .distinctUntilChanged()
       .observeOn(AndroidSchedulers.mainThread())
   }
@@ -178,21 +187,18 @@ class HomeViewModel(
   override fun onCleared() {
     super.onCleared()
     compositeDisposable.clear()
-    Log.d("@@@", "onCleared")
+    timberTree.d("onCleared")
   }
 
   override fun processIntents(intents: Observable<HomeViewIntent>) =
     intents.subscribe(intentsSubject::accept)!!
 
   init {
-    val tag = "@@@"
-
     intentsSubject
-      .doOnNext { Log.d(tag, "intent[1]=$it") }
       .compose(intentFilter)
-      .doOnNext { Log.d(tag, "intent[2]=$it") }
+      .doOnNext { timberTree.d("intent=$it") }
       .compose(intentToViewState)
-      .doOnNext { Log.d(tag, "view_state=$it") }
+      .doOnNext { timberTree.d("view_state=$it") }
       .subscribeBy(onNext = stateD::setValueIfNew)
       .addTo(compositeDisposable)
   }

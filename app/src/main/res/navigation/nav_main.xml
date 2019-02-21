@@ -2,10 +2,23 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_main.xml"
-    app:startDestination="@id/home_fragment">
+    app:startDestination="@id/home_fragment_dest">
 
     <fragment
-        android:id="@+id/home_fragment"
+        android:id="@+id/home_fragment_dest"
         android:name="com.hoc.comicapp.ui.home.HomeFragment"
-        android:label="Home page" />
+        android:label="Home page">
+        <action
+            android:id="@+id/action_home_fragment_dest_to_settings_fragment_dest"
+            app:destination="@id/settings_fragment_dest"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/settings_fragment_dest"
+        android:name="com.hoc.comicapp.ui.settings.SettingsFragment"
+        android:label="SettingsFragment" />
 </navigation>

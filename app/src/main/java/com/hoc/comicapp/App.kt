@@ -7,6 +7,7 @@ import com.hoc.comicapp.koin.networkModule
 import com.hoc.comicapp.koin.viewModelModule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.android.ext.android.startKoin
+import timber.log.Timber
 
 @ExperimentalCoroutinesApi
 class App : Application() {
@@ -21,5 +22,8 @@ class App : Application() {
         viewModelModule
       )
     )
+    if (BuildConfig.DEBUG) {
+      Timber.plant(Timber.DebugTree())
+    }
   }
 }

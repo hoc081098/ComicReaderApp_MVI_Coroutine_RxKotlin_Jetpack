@@ -4,16 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.hoc.comicapp.R
+import androidx.swiperefreshlayout.widget.CircularProgressDrawable
+import com.hoc.comicapp.*
 import com.hoc.comicapp.data.models.Comic
-import com.hoc.comicapp.observe
-import com.hoc.comicapp.observeEvent
+import com.jakewharton.rxbinding3.swiperefreshlayout.refreshes
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
@@ -21,6 +20,7 @@ import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.item_recyclerview_top_month_comic.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import timber.log.Timber
 
 class ComicDiffUtilItemCallback : DiffUtil.ItemCallback<Comic>() {
   override fun areItemsTheSame(oldItem: Comic, newItem: Comic): Boolean {
@@ -50,10 +50,20 @@ class TopMonthAdapter :
     private val textChapter = itemView.text_chapter!!
 
     fun bind(item: Comic) {
-      item.run {
-        textComicName.text = title
-        textChapter.text = chapters.first().chapterName
+      val circularProgressDrawable = CircularProgressDrawable(itemView.context).apply {
+        strokeWidth = 5f
+        centerRadius = 30f
+        start()
       }
+
+      textComicName.text = item.title
+      textChapter.text = item.chapters.first().chapterName
+      GlideApp
+        .with(itemView.context)
+        .load(item.thumbnail)
+        .fitCenter()
+        .placeholder(circularProgressDrawable)
+        .into(imageComic)
     }
   }
 }
@@ -79,6 +89,7 @@ class HomeFragment : Fragment() {
       layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
       adapter = topMonthAdapter
     }
+    swipe_refresh_layout.setColorSchemeColors(*resources.getIntArray(R.array.swipe_refresh_colors))
 
     homeViewModel.state.observe(this) {
       updateTopMonth(it)
@@ -86,7 +97,7 @@ class HomeFragment : Fragment() {
     homeViewModel.singleEvent.observeEvent(this) {
       when (it) {
         is HomeSingleEvent.MessageEvent -> {
-          Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
+          view.snack(it.message)
         }
       }
     }
@@ -96,7 +107,8 @@ class HomeFragment : Fragment() {
     super.onResume()
     homeViewModel.processIntents(
       Observable.mergeArray(
-        Observable.just(HomeViewIntent.Initial)
+        Observable.just(HomeViewIntent.Initial),
+        swipe_refresh_layout.refreshes().map { HomeViewIntent.Refresh }
       )
     ).addTo(compositeDisposable)
   }
@@ -107,6 +119,10 @@ class HomeFragment : Fragment() {
   }
 
   private fun updateTopMonth(it: HomeViewState) {
+    Timber
+      .tag("###")
+      .d("top_month_state=[${it.topMonthLoading}, ${it.topMonthErrorMessage}, ${it.topMonthComics}]")
+
     if (it.topMonthLoading) {
       top_month_progress_bar.visibility = View.VISIBLE
     } else {
@@ -121,3 +137,4 @@ class HomeFragment : Fragment() {
     topMonthAdapter.submitList(it.topMonthComics)
   }
 }
+

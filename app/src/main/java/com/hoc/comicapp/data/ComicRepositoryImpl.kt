@@ -1,5 +1,6 @@
 package com.hoc.comicapp.data
 
+import android.util.Log
 import com.hoc.comicapp.CoroutinesDispatcherProvider
 import com.hoc.comicapp.Either
 import com.hoc.comicapp.data.models.Comic
@@ -26,6 +27,7 @@ class ComicRepositoryImpl(
           .right()
       }
     } catch (throwable: Throwable) {
+      Log.d("@@@", "getTopMonth $throwable", throwable)
       throwable.toError(retrofit).left()
     }
   }
@@ -40,6 +42,7 @@ class ComicRepositoryImpl(
           .right()
       }
     } catch (throwable: Throwable) {
+      Log.d("@@@", "getUpdate $throwable", throwable)
       throwable.toError(retrofit).left()
     }
   }
@@ -54,6 +57,7 @@ class ComicRepositoryImpl(
           .right()
       }
     } catch (throwable: Throwable) {
+      Log.d("@@@", "getSuggest $throwable", throwable)
       throwable.toError(retrofit).left()
     }
   }

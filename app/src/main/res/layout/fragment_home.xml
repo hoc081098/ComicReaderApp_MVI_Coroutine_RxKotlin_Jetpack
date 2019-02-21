@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/swipe_refresh_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:layout_height="match_parent">
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipe_refresh_layout"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -24,18 +23,18 @@
                 android:gravity="center"
                 android:indeterminate="true"
                 android:padding="8dp"
+                android:text="TOP MONTH"
                 android:textAlignment="center"
                 android:textColor="@color/colorAccent"
                 android:textSize="20sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:text="TOP MONTH"
                 tools:visibility="visible" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_top_month"
                 android:layout_width="0dp"
-                android:layout_height="300dp"
+                android:layout_height="250dp"
                 android:background="@color/colorBackground"
                 android:clipToPadding="false"
                 android:padding="8dp"
@@ -74,8 +73,96 @@
                 tools:text="Error"
                 tools:visibility="visible" />
 
+            <TextView
+                android:id="@+id/text_placeholder1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="72dp"
+                android:fontFamily="@font/google_sans"
+                android:gravity="center"
+                android:indeterminate="true"
+                android:textAlignment="center"
+                android:textSize="18sp"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/recycler_top_month"
+                tools:text="PLACEHOLDER"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/text_placeholder2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="72dp"
+                android:fontFamily="@font/google_sans"
+                android:gravity="center"
+                android:indeterminate="true"
+                android:textAlignment="center"
+                android:textSize="18sp"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/text_placeholder1"
+                tools:text="PLACEHOLDER"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/text_placeholder3"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="72dp"
+                android:fontFamily="@font/google_sans"
+                android:gravity="center"
+                android:indeterminate="true"
+                android:textAlignment="center"
+                android:textSize="18sp"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/text_placeholder2"
+                tools:text="PLACEHOLDER"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/text_placeholder4"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="72dp"
+                android:fontFamily="@font/google_sans"
+                android:gravity="center"
+                android:indeterminate="true"
+                android:textAlignment="center"
+                android:textSize="18sp"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/text_placeholder3"
+                tools:text="PLACEHOLDER"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/text_placeholder5"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="72dp"
+                android:fontFamily="@font/google_sans"
+                android:gravity="center"
+                android:indeterminate="true"
+                android:textAlignment="center"
+                android:textSize="18sp"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/text_placeholder4"
+                tools:text="PLACEHOLDER"
+                tools:visibility="visible" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
-</androidx.core.widget.NestedScrollView>
+    </androidx.core.widget.NestedScrollView>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

@@ -81,9 +81,14 @@ dependencies {
   implementation("com.jakewharton.rxbinding3:rxbinding:3.0.0-alpha2")
   implementation("com.jakewharton.rxbinding3:rxbinding-core:3.0.0-alpha2")
   implementation("com.jakewharton.rxbinding3:rxbinding-material:3.0.0-alpha2")
+  implementation("com.jakewharton.rxbinding3:rxbinding-swiperefreshlayout:3.0.0-alpha2")
+  implementation("com.jakewharton.timber:timber:4.7.1")
 
   implementation("io.reactivex.rxjava2:rxkotlin:2.3.0")
   implementation("io.reactivex.rxjava2:rxandroid:2.1.1")
+
+  implementation("com.github.bumptech.glide:glide:4.9.0")
+  kapt("com.github.bumptech.glide:compiler:4.9.0")
 
   testImplementation("junit:junit:4.12")
   androidTestImplementation("androidx.test:runner:1.1.2-alpha01")
