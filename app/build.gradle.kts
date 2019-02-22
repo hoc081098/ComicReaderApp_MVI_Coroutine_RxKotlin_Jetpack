@@ -82,6 +82,7 @@ dependencies {
   implementation("com.jakewharton.rxbinding3:rxbinding-core:3.0.0-alpha2")
   implementation("com.jakewharton.rxbinding3:rxbinding-material:3.0.0-alpha2")
   implementation("com.jakewharton.rxbinding3:rxbinding-swiperefreshlayout:3.0.0-alpha2")
+  implementation("com.jakewharton.rxbinding3:rxbinding-recyclerview:3.0.0-alpha2")
   implementation("com.jakewharton.timber:timber:4.7.1")
 
   implementation("io.reactivex.rxjava2:rxkotlin:2.3.0")

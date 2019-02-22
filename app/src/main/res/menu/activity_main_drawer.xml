@@ -8,6 +8,12 @@
             android:id="@+id/home_fragment_dest"
             android:icon="@drawable/ic_home_white_24dp"
             android:title="Home" />
+
+        <item
+            android:id="@+id/action_home_fragment_dest_to_placeholder_fragment_dest"
+            android:icon="@drawable/ic_home_white_24dp"
+            android:title="Placeholder" />
+
     </group>
 
     <item android:title="Communicate">

@@ -12,7 +12,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.shopify.livedataktx.LiveDataKtx
 import com.shopify.livedataktx.MutableLiveDataKtx
 
-inline fun Context.toast(
+fun Context.toast(
   @StringRes messageRes: Int,
   short: Boolean = true
 ) = toast(getString(messageRes), short)

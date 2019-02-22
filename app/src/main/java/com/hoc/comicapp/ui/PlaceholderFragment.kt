@@ -1,4 +1,4 @@
-package com.hoc.comicapp.ui.settings
+package com.hoc.comicapp.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,17 +8,17 @@ import androidx.fragment.app.Fragment
 import com.hoc.comicapp.R
 import timber.log.Timber
 
-class SettingsFragment : Fragment() {
+class PlaceholderFragment : Fragment() {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View = inflater.inflate(R.layout.fragment_settings, container, false).also {
-    Timber.d("SettingsFragment::onCreateView")
+    Timber.d("PlaceholderFragment::onCreateView")
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
-    Timber.d("SettingsFragment::onViewCreated")
+    Timber.d("PlaceholderFragment::onViewCreated")
   }
 }

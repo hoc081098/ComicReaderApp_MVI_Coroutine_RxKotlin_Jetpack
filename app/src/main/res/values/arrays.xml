@@ -2,7 +2,7 @@
 <resources>
     <string-array name="swipe_refresh_colors">
         <item>@color/colorAccent</item>
-        <item>#F71A08</item>
+        <item>@color/colorRedAccent</item>
         <item>@color/colorPrimary</item>
     </string-array>
 </resources>

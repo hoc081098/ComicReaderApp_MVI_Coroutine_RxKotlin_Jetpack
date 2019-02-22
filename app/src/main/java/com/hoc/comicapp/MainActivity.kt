@@ -4,11 +4,10 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.*
-import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlin.LazyThreadSafetyMode.NONE
 
 class MainActivity : AppCompatActivity() {
@@ -28,9 +27,10 @@ class MainActivity : AppCompatActivity() {
     setContentView(R.layout.activity_main)
     setSupportActionBar(toolbar)
 
-    fab.setOnClickListener { view ->
-      Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-        .setAction("Action", null).show()
+    fab.setOnClickListener {
+      it.snack("Replace with your own action", SnackbarLength.LONG) {
+        action("Action") { toast("Action clicked") }
+      }
     }
 
     val navController = findNavController(R.id.main_nav_fragment)
@@ -50,6 +50,14 @@ class MainActivity : AppCompatActivity() {
     // Inflate the menu; this adds items to the action bar if it is present.
     menuInflater.inflate(R.menu.main, menu)
     return true
+  }
+
+  override fun onBackPressed() {
+    if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
+      drawer_layout.closeDrawer(GravityCompat.START)
+    } else {
+      super.onBackPressed()
+    }
   }
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {

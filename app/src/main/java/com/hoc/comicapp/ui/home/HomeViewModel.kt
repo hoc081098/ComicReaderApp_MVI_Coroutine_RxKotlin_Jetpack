@@ -79,7 +79,6 @@ sealed class HomeSingleEvent : SingleEvent {
 class HomeViewModel(
   private val comicRepository: ComicRepository
 ) : BaseViewModel<HomeViewIntent, HomeViewState, HomeSingleEvent>() {
-  private val timberTree = Timber.tag("###")
 
   private val intentsSubject = PublishRelay.create<HomeViewIntent>()
 
@@ -150,7 +149,7 @@ class HomeViewModel(
     }
   private val refreshProcessor =
     ObservableTransformer<HomeViewIntent.Refresh, HomePartialChange> {
-      timberTree.d("inside refreshProcessor")
+      Timber.d("inside refreshProcessor")
       Observable.empty()
     }
 
@@ -165,7 +164,7 @@ class HomeViewModel(
           .compose(refreshProcessor)
       )
     }
-      .doOnNext { timberTree.d("partial_change=$it") }
+      .doOnNext { Timber.d("partial_change=$it") }
       .scan(HomeViewState.initialState(), ::reducer)
       .distinctUntilChanged()
       .observeOn(AndroidSchedulers.mainThread())
@@ -187,18 +186,19 @@ class HomeViewModel(
   override fun onCleared() {
     super.onCleared()
     compositeDisposable.clear()
-    timberTree.d("onCleared")
+    Timber.d("onCleared")
   }
 
   override fun processIntents(intents: Observable<HomeViewIntent>) =
     intents.subscribe(intentsSubject::accept)!!
 
   init {
+    Timber.d("")
     intentsSubject
       .compose(intentFilter)
-      .doOnNext { timberTree.d("intent=$it") }
+      .doOnNext { Timber.d("intent=$it") }
       .compose(intentToViewState)
-      .doOnNext { timberTree.d("view_state=$it") }
+      .doOnNext { Timber.d("view_state=$it") }
       .subscribeBy(onNext = stateD::setValueIfNew)
       .addTo(compositeDisposable)
   }
