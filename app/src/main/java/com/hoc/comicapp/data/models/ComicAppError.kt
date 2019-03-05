@@ -7,21 +7,21 @@ import java.io.IOException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 
-sealed class Error : Throwable()
+sealed class ComicAppError : Throwable()
 
-object NetworkError : Error()
+object NetworkError : ComicAppError()
 
 data class ServerError(
   override val message: String,
   val statusCode: Int
-) : Error()
+) : ComicAppError()
 
 data class UnexpectedError(
   override val message: String,
   override val cause: Throwable?
-) : Error()
+) : ComicAppError()
 
-fun Throwable.toError(retrofit: Retrofit): Error {
+fun Throwable.toError(retrofit: Retrofit): ComicAppError {
   return when (this) {
     is IOException -> when (this) {
       is UnknownHostException -> NetworkError
@@ -43,5 +43,14 @@ fun Throwable.toError(retrofit: Retrofit): Error {
       cause = this,
       message = "Unknown throwable $this"
     )
+  }
+}
+
+
+fun getMessageFromError(error: ComicAppError): String {
+  return when (error) {
+    NetworkError -> "Network error"
+    is ServerError -> "Server error: ${error.message}"
+    is UnexpectedError -> "An unexpected error occurred"
   }
 }

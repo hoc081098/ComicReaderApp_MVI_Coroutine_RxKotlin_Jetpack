@@ -1,4 +1,4 @@
-package com.hoc.comicapp
+package com.hoc.comicapp.utils
 
 sealed class Either<out L, out R>
 

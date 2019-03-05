@@ -1,7 +1,7 @@
 package com.hoc.comicapp.base
 
 import androidx.lifecycle.LiveData
-import com.hoc.comicapp.Event
+import com.hoc.comicapp.utils.Event
 import com.shopify.livedataktx.LiveDataKtx
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable

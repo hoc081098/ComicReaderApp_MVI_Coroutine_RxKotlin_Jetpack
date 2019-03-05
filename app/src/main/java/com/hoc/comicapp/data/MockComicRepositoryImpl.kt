@@ -1,11 +1,11 @@
 package com.hoc.comicapp.data
 
 import com.hoc.comicapp.CoroutinesDispatcherProvider
-import com.hoc.comicapp.Either
 import com.hoc.comicapp.data.models.Chapter
 import com.hoc.comicapp.data.models.Comic
-import com.hoc.comicapp.data.models.Error
-import com.hoc.comicapp.right
+import com.hoc.comicapp.data.models.ComicAppError
+import com.hoc.comicapp.utils.Either
+import com.hoc.comicapp.utils.right
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import java.text.DecimalFormat
@@ -14,7 +14,7 @@ import kotlin.random.nextInt
 
 class MockComicRepositoryImpl(private val dispatcherProvider: CoroutinesDispatcherProvider) :
   ComicRepository {
-  override suspend fun getTopMonth(): Either<Error, List<Comic>> {
+  override suspend fun getTopMonth(): Either<ComicAppError, List<Comic>> {
     delay(2_000L)
 
     return withContext(dispatcherProvider.io) {
@@ -37,11 +37,11 @@ class MockComicRepositoryImpl(private val dispatcherProvider: CoroutinesDispatch
     }
   }
 
-  override suspend fun getUpdate(page: Int?): Either<Error, List<Comic>> {
+  override suspend fun getUpdate(page: Int?): Either<ComicAppError, List<Comic>> {
     TODO()
   }
 
-  override suspend fun getSuggest(): Either<Error, List<Comic>> {
+  override suspend fun getSuggest(): Either<ComicAppError, List<Comic>> {
     delay(2_000L)
 
     return withContext(dispatcherProvider.io) {

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/home_recycler_horizontal"
+        android:layout_width="0dp"
+        android:layout_height="250dp"
+        android:background="@color/colorBackground"
+        android:clipToPadding="false"
+        android:padding="4dp"
+        android:scrollbars="none"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:listitem="@layout/item_recyclerview_top_month_comic_or_recommened" />
+
+    <ProgressBar
+        android:id="@+id/home_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="@id/home_recycler_horizontal"
+        app:layout_constraintEnd_toEndOf="@id/home_recycler_horizontal"
+        app:layout_constraintStart_toStartOf="@id/home_recycler_horizontal"
+        app:layout_constraintTop_toTopOf="@id/home_recycler_horizontal"
+        tools:visibility="invisible" />
+
+    <TextView
+        android:id="@+id/home_error_message"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/google_sans"
+        android:gravity="center"
+        android:indeterminate="true"
+        android:textAlignment="center"
+        android:textSize="18sp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/button_home_horizontal_retry"
+        app:layout_constraintEnd_toEndOf="@id/home_recycler_horizontal"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="@id/home_recycler_horizontal"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="Error"
+        tools:visibility="visible" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_home_horizontal_retry"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@color/colorAccent"
+        android:fontFamily="@font/google_sans"
+        android:padding="12dp"
+        android:text="RETRY"
+        android:textAlignment="center"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        app:backgroundTint="@color/colorAccent"
+        app:cornerRadius="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/home_error_message" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

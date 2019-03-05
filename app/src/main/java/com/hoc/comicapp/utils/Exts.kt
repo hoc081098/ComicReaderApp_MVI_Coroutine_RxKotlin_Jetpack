@@ -1,7 +1,9 @@
-package com.hoc.comicapp
+package com.hoc.comicapp.utils
 
 import android.content.Context
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.MainThread
 import androidx.annotation.StringRes
@@ -9,13 +11,31 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import com.google.android.material.snackbar.Snackbar
+import com.jakewharton.rxrelay2.Relay
 import com.shopify.livedataktx.LiveDataKtx
 import com.shopify.livedataktx.MutableLiveDataKtx
+import io.reactivex.BackpressureStrategy
+import io.reactivex.Observable
+
+
+@Suppress("nothing_to_inline")
+inline fun <T> Relay<T>.asObservable(): Observable<T> = this
+
+inline fun <T, R> Observable<T>.exhaustMap(crossinline transform: (T) -> Observable<R>): Observable<R> {
+  return this
+    .toFlowable(BackpressureStrategy.DROP)
+    .flatMap({ transform(it).toFlowable(BackpressureStrategy.MISSING) }, 1)
+    .toObservable()
+}
+
+
+infix fun ViewGroup.inflate(layoutRes: Int) =
+  LayoutInflater.from(context).inflate(layoutRes, this, false)!!
 
 fun Context.toast(
   @StringRes messageRes: Int,
   short: Boolean = true
-) = toast(getString(messageRes), short)
+) = this.toast(getString(messageRes), short)
 
 fun Context.toast(
   message: String,

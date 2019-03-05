@@ -46,6 +46,7 @@ dependencies {
   val coroutinesVersion = "1.1.1"
   val lifecycleVersion = "2.0.0"
   val navVersion = "1.0.0-beta02"
+  val paging_version = "2.1.0"
 
   implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
@@ -60,6 +61,8 @@ dependencies {
 
   implementation("android.arch.navigation:navigation-fragment-ktx:$navVersion")
   implementation("android.arch.navigation:navigation-ui-ktx:$navVersion")
+
+  implementation("androidx.paging:paging-runtime-ktx:$paging_version")
 
   implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
   implementation("androidx.lifecycle:lifecycle-livedata:$lifecycleVersion")

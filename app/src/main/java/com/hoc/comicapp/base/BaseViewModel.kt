@@ -4,7 +4,7 @@ import androidx.annotation.CallSuper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.hoc.comicapp.Event
+import com.hoc.comicapp.utils.Event
 import com.shopify.livedataktx.LiveDataKtx
 import com.shopify.livedataktx.MutableLiveDataKtx
 import kotlinx.coroutines.CoroutineScope

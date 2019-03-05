@@ -1,132 +1,100 @@
 package com.hoc.comicapp.ui.home
 
-import com.hoc.comicapp.Event
-import com.hoc.comicapp.Left
 import com.hoc.comicapp.base.BaseViewModel
-import com.hoc.comicapp.base.Intent
-import com.hoc.comicapp.base.SingleEvent
-import com.hoc.comicapp.base.ViewState
 import com.hoc.comicapp.data.ComicRepository
-import com.hoc.comicapp.data.models.Comic
-import com.hoc.comicapp.data.models.NetworkError
-import com.hoc.comicapp.data.models.ServerError
-import com.hoc.comicapp.data.models.UnexpectedError
-import com.hoc.comicapp.getOrNull
-import com.hoc.comicapp.setValueIfNew
+import com.hoc.comicapp.data.models.getMessageFromError
+import com.hoc.comicapp.utils.Event
+import com.hoc.comicapp.utils.Left
+import com.hoc.comicapp.utils.exhaustMap
+import com.hoc.comicapp.utils.flatMap
+import com.hoc.comicapp.utils.fold
+import com.hoc.comicapp.utils.getOrNull
+import com.hoc.comicapp.utils.map
+import com.hoc.comicapp.utils.setValueIfNew
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.ofType
 import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.rxkotlin.toObservable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.rx2.rxObservable
 import timber.log.Timber
-import com.hoc.comicapp.data.models.Error as RepoError
-
-fun getMessageFromError(error: RepoError): String {
-  return when (error) {
-    NetworkError -> "Network error"
-    is ServerError -> "Server error: ${error.message}"
-    is UnexpectedError -> "An unexpected error occurred"
-  }
-}
-
-data class HomeViewState(
-  val suggestComics: List<Comic> = emptyList(),
-  val suggestLoading: Boolean = true,
-  val suggestErrorMessage: String? = null,
-
-  val topMonthComics: List<Comic> = emptyList(),
-  val topMonthLoading: Boolean = true,
-  val topMonthErrorMessage: String? = null,
-
-  val updatedComics: List<Comic> = emptyList(),
-  val updatedLoading: Boolean = true,
-  val updatedErrorMessage: String? = null
-) : ViewState {
-  companion object {
-    fun initialState() = HomeViewState()
-  }
-}
-
-sealed class HomeViewIntent : Intent {
-  object Initial : HomeViewIntent()
-  object Refresh : HomeViewIntent()
-}
-
-sealed class HomePartialChange {
-  sealed class SuggestHomePartialChange : HomePartialChange() {
-    data class Data(val comics: List<Comic>) : SuggestHomePartialChange()
-    object Loading : SuggestHomePartialChange()
-    data class Error(val error: RepoError) : SuggestHomePartialChange()
-  }
-
-  sealed class TopMonthHomePartialChange : HomePartialChange() {
-    data class Data(val comics: List<Comic>) : TopMonthHomePartialChange()
-    object Loading : TopMonthHomePartialChange()
-    data class Error(val error: RepoError) : TopMonthHomePartialChange()
-  }
-}
-
-sealed class HomeSingleEvent : SingleEvent {
-  data class MessageEvent(val message: String) : HomeSingleEvent()
-}
 
 @ExperimentalCoroutinesApi
-class HomeViewModel(
-  private val comicRepository: ComicRepository
-) : BaseViewModel<HomeViewIntent, HomeViewState, HomeSingleEvent>() {
-
-  private val intentsSubject = PublishRelay.create<HomeViewIntent>()
-
+class HomeViewModel(private val comicRepository: ComicRepository) :
+  BaseViewModel<HomeViewIntent, HomeViewState, HomeSingleEvent>() {
   override val initialState = HomeViewState.initialState()
+  private val intentsSubject = PublishRelay.create<HomeViewIntent>()
+  private val compositeDisposable = CompositeDisposable()
 
   private val initialProcessor =
     ObservableTransformer<HomeViewIntent.Initial, HomePartialChange> {
-      it.flatMap {
-        val suggestChanges = rxObservable {
-          send(HomePartialChange.SuggestHomePartialChange.Loading)
 
-          val suggestResult = comicRepository.getSuggest()
+      val suggestChangesStartsWithLoading = rxObservable {
+        send(HomePartialChange.SuggestHomePartialChange.Loading)
 
+        val suggestResult = comicRepository.getSuggest()
+
+        suggestResult
+          .getOrNull()
+          .orEmpty()
+          .let { HomePartialChange.SuggestHomePartialChange.Data(it) }
+          .let { send(it) }
+
+        if (suggestResult is Left) {
           suggestResult
-            .getOrNull()
-            .orEmpty()
-            .let { HomePartialChange.SuggestHomePartialChange.Data(it) }
+            .value
+            .let { HomePartialChange.SuggestHomePartialChange.Error(it) }
             .let { send(it) }
-
-          if (suggestResult is Left) {
-            suggestResult
-              .value
-              .let { HomePartialChange.SuggestHomePartialChange.Error(it) }
-              .let { send(it) }
-          }
         }
+      }
 
-        val topMonthChanges = rxObservable {
-          send(HomePartialChange.TopMonthHomePartialChange.Loading)
+      val topMonthChangesStartsWithLoading = rxObservable {
+        send(HomePartialChange.TopMonthHomePartialChange.Loading)
 
-          val topMonthResult = comicRepository.getTopMonth()
+        val topMonthResult = comicRepository.getTopMonth()
 
+        topMonthResult
+          .getOrNull()
+          .orEmpty()
+          .let { HomePartialChange.TopMonthHomePartialChange.Data(it) }
+          .let { send(it) }
+
+        if (topMonthResult is Left) {
           topMonthResult
-            .getOrNull()
-            .orEmpty()
-            .let { HomePartialChange.TopMonthHomePartialChange.Data(it) }
+            .value
+            .let { HomePartialChange.TopMonthHomePartialChange.Error(it) }
             .let { send(it) }
-
-          if (topMonthResult is Left) {
-            topMonthResult
-              .value
-              .let { HomePartialChange.TopMonthHomePartialChange.Error(it) }
-              .let { send(it) }
-          }
         }
+      }
 
+      val updatedChangesStartsWithLoading = rxObservable {
+        send(HomePartialChange.UpdatedPartialChange.Loading)
+
+        val topMonthResult = comicRepository.getUpdate()
+
+        topMonthResult
+          .getOrNull()
+          .orEmpty()
+          .let { HomePartialChange.UpdatedPartialChange.Data(it) }
+          .let { send(it) }
+
+        if (topMonthResult is Left) {
+          topMonthResult
+            .value
+            .let { HomePartialChange.UpdatedPartialChange.Error(it) }
+            .let { send(it) }
+        }
+      }
+
+      it.flatMap {
         Observable.mergeArray(
-          suggestChanges
+          suggestChangesStartsWithLoading
             .doOnNext {
               if (it is HomePartialChange.SuggestHomePartialChange.Error) {
                 singleEventD.value =
@@ -135,7 +103,7 @@ class HomeViewModel(
                     .let(::Event)
               }
             },
-          topMonthChanges
+          topMonthChangesStartsWithLoading
             .doOnNext {
               if (it is HomePartialChange.TopMonthHomePartialChange.Error) {
                 singleEventD.value =
@@ -143,14 +111,89 @@ class HomeViewModel(
                     .let { HomeSingleEvent.MessageEvent(it) }
                     .let(::Event)
               }
+            },
+          updatedChangesStartsWithLoading
+            .doOnNext {
+              if (it is HomePartialChange.UpdatedPartialChange.Error) {
+                singleEventD.value =
+                  "Get updated list error: ${getMessageFromError(it.error)}"
+                    .let { HomeSingleEvent.MessageEvent(it) }
+                    .let(::Event)
+              }
             }
         )
       }
     }
+
   private val refreshProcessor =
-    ObservableTransformer<HomeViewIntent.Refresh, HomePartialChange> {
-      Timber.d("inside refreshProcessor")
-      Observable.empty()
+    ObservableTransformer<HomeViewIntent.Refresh, HomePartialChange> { intent ->
+      intent
+        .exhaustMap {
+          Observables.zip(
+            rxObservable { send(comicRepository.getSuggest()) },
+            rxObservable { send(comicRepository.getTopMonth()) },
+            rxObservable { send(comicRepository.getUpdate()) }
+          ).flatMap { (suggest, topMonth, updated) ->
+            suggest.flatMap { suggestList ->
+              topMonth.flatMap { topMonthList ->
+                updated.map { updatedList ->
+                  listOf(
+                    HomePartialChange.TopMonthHomePartialChange.Data(topMonthList),
+                    HomePartialChange.SuggestHomePartialChange.Data(suggestList),
+                    HomePartialChange.UpdatedPartialChange.Data(updatedList),
+                    HomePartialChange.RefreshSuccess
+                  ).toObservable()
+                }
+              }
+            }.fold({ Observable.just(HomePartialChange.RefreshFailure(it)) }, { it })
+          }.doOnNext {
+            if (it is HomePartialChange.RefreshSuccess) {
+              singleEventD.value = HomeSingleEvent.MessageEvent("Refresh successfully").let(::Event)
+            } else if (it is HomePartialChange.RefreshFailure) {
+              singleEventD.value =
+                HomeSingleEvent.MessageEvent("Refresh not successfully").let(::Event)
+            }
+          }
+        }
+    }
+
+  private val loadNextPageProcessor =
+    ObservableTransformer<HomeViewIntent.LoadNextPageUpdatedComic, HomePartialChange> { intent ->
+      intent
+        .filter {
+          !stateD.value.items.any {
+            it is HomeListItem.UpdatedItem.Error || it is HomeListItem.UpdatedItem.Loading
+          }
+        }
+        .map { stateD.value.updatedPage }
+        .doOnNext { Timber.d("load_next_page = $it") }
+        .exhaustMap { currentPage ->
+          rxObservable<HomePartialChange> {
+            send(HomePartialChange.UpdatedPartialChange.Loading)
+
+            val result = comicRepository.getUpdate(page = currentPage + 1)
+
+            result
+              .getOrNull()
+              .orEmpty()
+              .let { HomePartialChange.UpdatedPartialChange.Data(it) }
+              .let { send(it) }
+
+            if (result is Left) {
+              result
+                .value
+                .let { HomePartialChange.UpdatedPartialChange.Error(it) }
+                .let { send(it) }
+            }
+          }.doOnNext {
+            if (it is HomePartialChange.UpdatedPartialChange.Error) {
+              singleEventD.value =
+                "Get updated list error: ${getMessageFromError(it.error)}"
+                  .let { HomeSingleEvent.MessageEvent(it) }
+                  .let(::Event)
+            }
+          }
+        }
     }
 
   private val intentToViewState = ObservableTransformer<HomeViewIntent, HomeViewState> {
@@ -161,39 +204,26 @@ class HomeViewModel(
           .compose(initialProcessor),
         shared
           .ofType<HomeViewIntent.Refresh>()
-          .compose(refreshProcessor)
+          .compose(refreshProcessor),
+        shared
+          .ofType<HomeViewIntent.LoadNextPageUpdatedComic>()
+          .compose(loadNextPageProcessor),
+        shared
+          .ofType<HomeViewIntent.RetryUpdate>()
+          .compose(TODO()),
+        TODO()
       )
-    }
-      .doOnNext { Timber.d("partial_change=$it") }
-      .scan(HomeViewState.initialState(), ::reducer)
+    }.doOnNext { Timber.d("partial_change=$it") }
+      .scan(HomeViewState.initialState()) { state, change -> change.reducer(state) }
       .distinctUntilChanged()
       .observeOn(AndroidSchedulers.mainThread())
   }
 
-  private val intentFilter = ObservableTransformer<HomeViewIntent, HomeViewIntent> {
-    it.publish { shared ->
-      Observable.mergeArray(
-        shared
-          .ofType<HomeViewIntent.Initial>()
-          .take(1),
-        shared.filter { it !is HomeViewIntent.Initial }
-      )
-    }
-  }
-
-  private val compositeDisposable = CompositeDisposable()
-
-  override fun onCleared() {
-    super.onCleared()
-    compositeDisposable.clear()
-    Timber.d("onCleared")
-  }
 
   override fun processIntents(intents: Observable<HomeViewIntent>) =
     intents.subscribe(intentsSubject::accept)!!
 
   init {
-    Timber.d("")
     intentsSubject
       .compose(intentFilter)
       .doOnNext { Timber.d("intent=$it") }
@@ -203,33 +233,23 @@ class HomeViewModel(
       .addTo(compositeDisposable)
   }
 
-  private fun reducer(state: HomeViewState, change: HomePartialChange): HomeViewState {
-    return when (change) {
-      is HomePartialChange.SuggestHomePartialChange -> when (change) {
-        is HomePartialChange.SuggestHomePartialChange.Data -> state.copy(
-          suggestComics = change.comics,
-          suggestLoading = false,
-          suggestErrorMessage = null
-        )
-        HomePartialChange.SuggestHomePartialChange.Loading -> state.copy(suggestLoading = true)
-        is HomePartialChange.SuggestHomePartialChange.Error -> state.copy(
-          suggestLoading = false,
-          suggestErrorMessage = getMessageFromError(change.error)
-        )
-      }
-      is HomePartialChange.TopMonthHomePartialChange -> when (change) {
-        is HomePartialChange.TopMonthHomePartialChange.Data -> state.copy(
-          topMonthComics = change.comics,
-          topMonthLoading = false,
-          topMonthErrorMessage = null
-        )
-        HomePartialChange.TopMonthHomePartialChange.Loading -> state.copy(topMonthLoading = true)
-        is HomePartialChange.TopMonthHomePartialChange.Error -> state.copy(
-          topMonthLoading = false,
-          topMonthErrorMessage = getMessageFromError(change.error)
+  override fun onCleared() {
+    super.onCleared()
+    compositeDisposable.clear()
+    Timber.d("onCleared")
+  }
+
+  private companion object {
+    @JvmStatic
+    private val intentFilter = ObservableTransformer<HomeViewIntent, HomeViewIntent> {
+      it.publish { shared ->
+        Observable.mergeArray(
+          shared
+            .ofType<HomeViewIntent.Initial>()
+            .take(1),
+          shared.filter { it !is HomeViewIntent.Initial }
         )
       }
     }
   }
 }
-

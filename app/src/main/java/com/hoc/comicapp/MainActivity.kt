@@ -7,6 +7,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.*
+import com.hoc.comicapp.utils.SnackbarLength
+import com.hoc.comicapp.utils.action
+import com.hoc.comicapp.utils.snack
+import com.hoc.comicapp.utils.toast
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlin.LazyThreadSafetyMode.NONE
 
