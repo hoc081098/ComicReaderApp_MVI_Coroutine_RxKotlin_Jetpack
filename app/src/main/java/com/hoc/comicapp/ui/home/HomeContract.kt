@@ -71,7 +71,7 @@ data class HomeViewState(
         HomeListItem.UpdatedItem.Loading
       ),
       refreshLoading = false,
-      updatedPage = 1
+      updatedPage = 0
     )
   }
 }
@@ -231,20 +231,35 @@ sealed class HomePartialChange {
     data class Error(val error: com.hoc.comicapp.data.models.ComicAppError) : UpdatedPartialChange()
   }
 
-  data class RefreshSuccess(
-    val suggestComics: List<Comic>,
-    val topMonthComics: List<Comic>,
-    val updatedComics: List<Comic>
-  ) : HomePartialChange() {
-    override fun reducer(state: HomeViewState) = listOf(
-      SuggestHomePartialChange.Data(suggestComics),
-      TopMonthHomePartialChange.Data(topMonthComics),
-      UpdatedPartialChange.Data(updatedComics, append = false)
-    ).fold(state) { acc, homePartialChange -> homePartialChange.reducer(acc) }.copy(refreshLoading = false)
-  }
+  sealed class RefreshPartialChange : HomePartialChange() {
 
-  data class RefreshFailure(val error: ComicAppError) : HomePartialChange() {
-    override fun reducer(state: HomeViewState): HomeViewState = state.copy(refreshLoading = false)
+    override fun reducer(state: HomeViewState): HomeViewState {
+      return when (this) {
+        is RefreshSuccess -> {
+          listOf(
+            SuggestHomePartialChange.Data(suggestComics),
+            TopMonthHomePartialChange.Data(topMonthComics),
+            UpdatedPartialChange.Data(updatedComics, append = false)
+          ).fold(state) { acc, homePartialChange ->
+            homePartialChange.reducer(acc)
+          }.copy(refreshLoading = false)
+        }
+        is RefreshFailure -> {
+          state.copy(refreshLoading = false)
+        }
+        is Loading -> {
+          state.copy(refreshLoading = true)
+        }
+      }
+    }
+
+    data class RefreshSuccess(
+      val suggestComics: List<Comic>,
+      val topMonthComics: List<Comic>,
+      val updatedComics: List<Comic>
+    ) : RefreshPartialChange()
+    object Loading : RefreshPartialChange()
+    data class RefreshFailure(val error: ComicAppError) : RefreshPartialChange()
   }
 }
 

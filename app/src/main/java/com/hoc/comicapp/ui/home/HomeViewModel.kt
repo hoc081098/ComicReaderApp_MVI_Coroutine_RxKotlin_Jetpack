@@ -5,6 +5,7 @@ import com.hoc.comicapp.data.models.getMessageFromError
 import com.hoc.comicapp.utils.Event
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.setValueIfNew
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
@@ -13,6 +14,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.ofType
 import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.rxkotlin.withLatestFrom
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import timber.log.Timber
 
@@ -22,6 +24,7 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
   override val initialState = HomeViewState.initialState()
 
   private val intentS = PublishRelay.create<HomeViewIntent>()
+  private val stateS = BehaviorRelay.createDefault<HomeViewState>(initialState)
   private val compositeDisposable = CompositeDisposable()
 
   /**
@@ -75,8 +78,8 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
             .doOnNext {
               sendMessageEvent(
                 when (it) {
-                  is HomePartialChange.RefreshSuccess -> "Refresh successfully"
-                  is HomePartialChange.RefreshFailure -> "Refresh not successfully"
+                  is HomePartialChange.RefreshPartialChange.RefreshSuccess -> "Refresh successfully"
+                  is HomePartialChange.RefreshPartialChange.RefreshFailure -> "Refresh not successfully"
                   else -> return@doOnNext
                 }
               )
@@ -90,14 +93,14 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
   private val loadNextPageProcessor =
     ObservableTransformer<HomeViewIntent.LoadNextPageUpdatedComic, HomePartialChange> { intent ->
       intent
+        .withLatestFrom(stateS)
         .filter {
-          !stateD
-            .value
+          !it.second
             .items
             .any(HomeListItem::isLoadingOrError)
         }
-        .map { stateD.value.updatedPage + 1 }
-        .doOnNext { Timber.d("load_next_page = $it") }
+        .map { it.second.updatedPage + 1 }
+        .doOnNext { Timber.d("[~~~] load_next_page = $it") }
         .exhaustMap {
           homeInteractor.updatedComicsPartialChanges(
             page = it,
@@ -112,12 +115,12 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
   private val retryUpdateProcessor =
     ObservableTransformer<HomeViewIntent.RetryUpdate, HomePartialChange> { intent ->
       intent
+        .withLatestFrom(stateS)
+        .map { it.second.updatedPage + 1 }
+        .doOnNext { Timber.d("[~~~] refresh_page=$it") }
         .exhaustMap {
           homeInteractor
-            .updatedComicsPartialChanges(
-              page = stateD.value.updatedPage + 1,
-              coroutineScope = scope
-            )
+            .updatedComicsPartialChanges(page = it, coroutineScope = scope)
             .doOnNext {
               val messageFromError = (it as? HomePartialChange.UpdatedPartialChange.Error)
                 ?.error
@@ -205,6 +208,10 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
       .doOnNext { Timber.d("intent=$it") }
       .compose(intentToViewState)
       .doOnNext { Timber.d("view_state=$it") }
+      .subscribeBy(onNext = stateS::accept)
+      .addTo(compositeDisposable)
+
+    stateS
       .subscribeBy(onNext = stateD::setValueIfNew)
       .addTo(compositeDisposable)
   }

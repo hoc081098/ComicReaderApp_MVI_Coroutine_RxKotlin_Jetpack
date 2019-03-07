@@ -60,23 +60,12 @@ class HomeInteractorImpl(private val comicRepository: ComicRepository) : HomeInt
       val topMonthResult = comicRepository.getTopMonth()
 
       /**
-       * Send success change
+       * Send success change or error change
        */
-      topMonthResult
-        .getOrNull()
-        .orEmpty()
-        .let { HomePartialChange.TopMonthHomePartialChange.Data(it) }
-        .let { this.send(it) }
-
-      /**
-       * Send error change
-       */
-      if (topMonthResult is Left) {
-        topMonthResult
-          .value
-          .let { HomePartialChange.TopMonthHomePartialChange.Error(it) }
-          .let { this.send(it) }
-      }
+      topMonthResult.fold(
+        { HomePartialChange.TopMonthHomePartialChange.Error(it) },
+        { HomePartialChange.TopMonthHomePartialChange.Data(it) }
+      ).let { send(it) }
     }
   }
 
@@ -121,18 +110,18 @@ class HomeInteractorImpl(private val comicRepository: ComicRepository) : HomeInt
       coroutineScope.rxObservable { send(comicRepository.getSuggest()) },
       coroutineScope.rxObservable { send(comicRepository.getTopMonth()) },
       coroutineScope.rxObservable { send(comicRepository.getUpdate()) }
-    ).flatMap { (suggest, topMonth, updated) ->
+    ).map<HomePartialChange> { (suggest, topMonth, updated) ->
       suggest.flatMap { suggestList ->
         topMonth.flatMap { topMonthList ->
           updated.map { updatedList ->
-            HomePartialChange.RefreshSuccess(
+            HomePartialChange.RefreshPartialChange.RefreshSuccess(
               suggestComics = suggestList,
               topMonthComics = topMonthList,
               updatedComics = updatedList
             )
           }
         }
-      }.fold({ HomePartialChange.RefreshFailure(it) }, { it }).let { Observable.just(it) }
-    }
+      }.fold({ HomePartialChange.RefreshPartialChange.RefreshFailure(it) }, { it })
+    }.startWith(HomePartialChange.RefreshPartialChange.Loading)
   }
 }

@@ -49,10 +49,12 @@ class HomeFragment : Fragment() {
 
   private fun observeViewModel() {
     homeViewModel.state.observe(this) { (items, refreshLoading) ->
-      Timber.d("[VER] ${items.size}")
+      Timber.d("state=${items.size} $refreshLoading")
 
       homeAdapter.submitList(items)
-      if (!refreshLoading) {
+      if (refreshLoading) {
+        swipe_refresh_layout.post { swipe_refresh_layout.isRefreshing = true }
+      } else {
         swipe_refresh_layout.isRefreshing = false
       }
     }
