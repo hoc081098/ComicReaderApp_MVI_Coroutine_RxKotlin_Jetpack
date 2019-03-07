@@ -6,6 +6,21 @@ import com.hoc.comicapp.base.ViewState
 import com.hoc.comicapp.data.models.Comic
 import com.hoc.comicapp.data.models.ComicAppError
 import com.hoc.comicapp.data.models.getMessageFromError
+import io.reactivex.Observable
+import kotlinx.coroutines.CoroutineScope
+
+interface HomeInteractor {
+  fun suggestComicsPartialChanges(coroutineScope: CoroutineScope): Observable<HomePartialChange>
+
+  fun topMonthComicsPartialChanges(coroutineScope: CoroutineScope): Observable<HomePartialChange>
+
+  fun updatedComicsPartialChanges(
+    coroutineScope: CoroutineScope,
+    page: Int
+  ): Observable<HomePartialChange>
+
+  fun refreshAllPartialChanges(coroutineScope: CoroutineScope): Observable<HomePartialChange>
+}
 
 sealed class HomeListItem {
   data class SuggestListState(
@@ -182,26 +197,20 @@ sealed class HomePartialChange {
       return when (this) {
         is HomePartialChange.UpdatedPartialChange.Data -> {
           state.copy(
-            items = state
-              .items
-              .filterNot { it is HomeListItem.UpdatedItem.Loading || it is HomeListItem.UpdatedItem.Error } +
+            items = state.items.filterNot(HomeListItem::isLoadingOrError) +
               this.comics.map { HomeListItem.UpdatedItem.ComicItem(it) },
-            updatedPage = state.updatedPage + 1
+            updatedPage = state.updatedPage
           )
         }
         HomePartialChange.UpdatedPartialChange.Loading -> {
           state.copy(
-            items = state
-              .items
-              .filterNot { it is HomeListItem.UpdatedItem.Loading || it is HomeListItem.UpdatedItem.Error } +
+            items = state.items.filterNot(HomeListItem::isLoadingOrError) +
               HomeListItem.UpdatedItem.Loading
           )
         }
         is HomePartialChange.UpdatedPartialChange.Error -> {
           state.copy(
-            items = state
-              .items
-              .filterNot { it is HomeListItem.UpdatedItem.Loading || it is HomeListItem.UpdatedItem.Error } +
+            items = state.items.filterNot(HomeListItem::isLoadingOrError) +
               HomeListItem.UpdatedItem.Error(getMessageFromError(this.error))
           )
         }
@@ -224,4 +233,8 @@ sealed class HomePartialChange {
 
 sealed class HomeSingleEvent : SingleEvent {
   data class MessageEvent(val message: String) : HomeSingleEvent()
+}
+
+fun HomeListItem.isLoadingOrError(): Boolean {
+  return this is HomeListItem.UpdatedItem.Loading || this is HomeListItem.UpdatedItem.Error
 }

@@ -71,4 +71,11 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/home_error_message" />
 
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/error_group"
+        tools:visibility="visible"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="button_home_horizontal_retry,home_error_message" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

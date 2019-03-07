@@ -6,11 +6,11 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.navigation.findNavController
-import androidx.navigation.ui.*
-import com.hoc.comicapp.utils.SnackbarLength
-import com.hoc.comicapp.utils.action
-import com.hoc.comicapp.utils.snack
-import com.hoc.comicapp.utils.toast
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.navigateUp
+import androidx.navigation.ui.onNavDestinationSelected
+import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.navigation.ui.setupWithNavController
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlin.LazyThreadSafetyMode.NONE
 
@@ -30,12 +30,6 @@ class MainActivity : AppCompatActivity() {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
     setSupportActionBar(toolbar)
-
-    fab.setOnClickListener {
-      it.snack("Replace with your own action", SnackbarLength.LONG) {
-        action("Action") { toast("Action clicked") }
-      }
-    }
 
     val navController = findNavController(R.id.main_nav_fragment)
     // Set up action bar

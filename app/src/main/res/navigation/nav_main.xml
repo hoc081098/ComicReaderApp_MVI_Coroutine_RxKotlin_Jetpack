@@ -11,25 +11,48 @@
         <action
             android:id="@+id/action_home_fragment_dest_to_settings_fragment_dest"
             app:destination="@id/settings_fragment_dest"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
         <action
             android:id="@+id/action_home_fragment_dest_to_placeholder_fragment_dest"
             app:destination="@id/placeholder_fragment_dest"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
+        <action
+            android:id="@+id/action_home_fragment_dest_to_comicDetailFragment"
+            app:destination="@id/comicDetailFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
 
     <fragment
         android:id="@+id/settings_fragment_dest"
         android:name="com.hoc.comicapp.ui.settings.SettingsFragment"
         android:label="SettingsFragment" />
+
     <fragment
         android:id="@+id/placeholder_fragment_dest"
         android:name="com.hoc.comicapp.ui.PlaceholderFragment"
         android:label="PlaceholderFragment" />
+
+    <fragment
+        android:id="@+id/comicDetailFragment"
+        android:name="com.hoc.comicapp.ui.ComicDetailFragment"
+        android:label="ComicDetailFragment">
+
+        <argument
+            android:name="comic"
+            app:argType="com.hoc.comicapp.data.models.Comic"
+            app:nullable="false" />
+
+    </fragment>
+
 </navigation>

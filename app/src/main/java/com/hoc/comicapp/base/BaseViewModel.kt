@@ -7,14 +7,13 @@ import androidx.lifecycle.ViewModel
 import com.hoc.comicapp.utils.Event
 import com.shopify.livedataktx.LiveDataKtx
 import com.shopify.livedataktx.MutableLiveDataKtx
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 
 @ExperimentalCoroutinesApi
-abstract class BaseViewModel<I : Intent, S : ViewState, E : SingleEvent> : ViewModel(),
-  CoroutineScope by MainScope(), MviViewModel<I, S, E> {
+abstract class BaseViewModel<I : Intent, S : ViewState, E : SingleEvent> : ViewModel(), MviViewModel<I, S, E> {
+  protected val scope = MainScope()
 
   abstract val initialState: S
   /**
@@ -33,6 +32,6 @@ abstract class BaseViewModel<I : Intent, S : ViewState, E : SingleEvent> : ViewM
   @CallSuper
   override fun onCleared() {
     super.onCleared()
-    cancel()
+    scope.cancel()
   }
 }

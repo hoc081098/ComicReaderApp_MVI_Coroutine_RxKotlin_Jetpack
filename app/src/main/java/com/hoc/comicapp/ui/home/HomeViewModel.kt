@@ -1,201 +1,173 @@
 package com.hoc.comicapp.ui.home
 
 import com.hoc.comicapp.base.BaseViewModel
-import com.hoc.comicapp.data.ComicRepository
 import com.hoc.comicapp.data.models.getMessageFromError
 import com.hoc.comicapp.utils.Event
-import com.hoc.comicapp.utils.Left
 import com.hoc.comicapp.utils.exhaustMap
-import com.hoc.comicapp.utils.flatMap
-import com.hoc.comicapp.utils.fold
-import com.hoc.comicapp.utils.getOrNull
-import com.hoc.comicapp.utils.map
 import com.hoc.comicapp.utils.setValueIfNew
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.cast
 import io.reactivex.rxkotlin.ofType
 import io.reactivex.rxkotlin.subscribeBy
-import io.reactivex.rxkotlin.toObservable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.rx2.rxObservable
 import timber.log.Timber
 
 @ExperimentalCoroutinesApi
-class HomeViewModel(private val comicRepository: ComicRepository) :
+class HomeViewModel(private val homeInteractor: HomeInteractor) :
   BaseViewModel<HomeViewIntent, HomeViewState, HomeSingleEvent>() {
   override val initialState = HomeViewState.initialState()
-  private val intentsSubject = PublishRelay.create<HomeViewIntent>()
+
+  private val intentS = PublishRelay.create<HomeViewIntent>()
   private val compositeDisposable = CompositeDisposable()
 
+  /**
+   * Transform [HomeViewIntent.Initial]s to [HomePartialChange]s
+   */
   private val initialProcessor =
-    ObservableTransformer<HomeViewIntent.Initial, HomePartialChange> {
-
-      val suggestChangesStartsWithLoading = rxObservable {
-        send(HomePartialChange.SuggestHomePartialChange.Loading)
-
-        val suggestResult = comicRepository.getSuggest()
-
-        suggestResult
-          .getOrNull()
-          .orEmpty()
-          .let { HomePartialChange.SuggestHomePartialChange.Data(it) }
-          .let { send(it) }
-
-        if (suggestResult is Left) {
-          suggestResult
-            .value
-            .let { HomePartialChange.SuggestHomePartialChange.Error(it) }
-            .let { send(it) }
-        }
-      }
-
-      val topMonthChangesStartsWithLoading = rxObservable {
-        send(HomePartialChange.TopMonthHomePartialChange.Loading)
-
-        val topMonthResult = comicRepository.getTopMonth()
-
-        topMonthResult
-          .getOrNull()
-          .orEmpty()
-          .let { HomePartialChange.TopMonthHomePartialChange.Data(it) }
-          .let { send(it) }
-
-        if (topMonthResult is Left) {
-          topMonthResult
-            .value
-            .let { HomePartialChange.TopMonthHomePartialChange.Error(it) }
-            .let { send(it) }
-        }
-      }
-
-      val updatedChangesStartsWithLoading = rxObservable {
-        send(HomePartialChange.UpdatedPartialChange.Loading)
-
-        val topMonthResult = comicRepository.getUpdate()
-
-        topMonthResult
-          .getOrNull()
-          .orEmpty()
-          .let { HomePartialChange.UpdatedPartialChange.Data(it) }
-          .let { send(it) }
-
-        if (topMonthResult is Left) {
-          topMonthResult
-            .value
-            .let { HomePartialChange.UpdatedPartialChange.Error(it) }
-            .let { send(it) }
-        }
-      }
-
-      it.flatMap {
-        Observable.mergeArray(
-          suggestChangesStartsWithLoading
-            .doOnNext {
-              if (it is HomePartialChange.SuggestHomePartialChange.Error) {
-                singleEventD.value =
-                  "Get suggest list error: ${getMessageFromError(it.error)}"
-                    .let { HomeSingleEvent.MessageEvent(it) }
-                    .let(::Event)
+    ObservableTransformer<HomeViewIntent.Initial, HomePartialChange> { intent ->
+      intent
+        .flatMap {
+          Observable.mergeArray(
+            homeInteractor
+              .suggestComicsPartialChanges(coroutineScope = scope)
+              .doOnNext {
+                val messageFromError = (it as? HomePartialChange.SuggestHomePartialChange.Error)
+                  ?.error
+                  ?.let(::getMessageFromError)
+                  ?: return@doOnNext
+                sendMessageEvent("Get suggest list error: $messageFromError")
+              },
+            homeInteractor
+              .topMonthComicsPartialChanges(coroutineScope = scope)
+              .doOnNext {
+                val messageFromError = (it as? HomePartialChange.TopMonthHomePartialChange.Error)
+                  ?.error
+                  ?.let(::getMessageFromError)
+                  ?: return@doOnNext
+                sendMessageEvent("Get top month list error: $messageFromError")
+              },
+            homeInteractor
+              .updatedComicsPartialChanges(page = 1, coroutineScope = scope)
+              .doOnNext {
+                val messageFromError = (it as? HomePartialChange.UpdatedPartialChange.Error)
+                  ?.error
+                  ?.let(::getMessageFromError)
+                  ?: return@doOnNext
+                sendMessageEvent("Get updated list error: $messageFromError")
               }
-            },
-          topMonthChangesStartsWithLoading
-            .doOnNext {
-              if (it is HomePartialChange.TopMonthHomePartialChange.Error) {
-                singleEventD.value =
-                  "Get top month list error: ${getMessageFromError(it.error)}"
-                    .let { HomeSingleEvent.MessageEvent(it) }
-                    .let(::Event)
-              }
-            },
-          updatedChangesStartsWithLoading
-            .doOnNext {
-              if (it is HomePartialChange.UpdatedPartialChange.Error) {
-                singleEventD.value =
-                  "Get updated list error: ${getMessageFromError(it.error)}"
-                    .let { HomeSingleEvent.MessageEvent(it) }
-                    .let(::Event)
-              }
-            }
-        )
-      }
+          )
+        }
     }
 
+  /**
+   * Transform [HomeViewIntent.Refresh]s to [HomePartialChange]s
+   */
   private val refreshProcessor =
     ObservableTransformer<HomeViewIntent.Refresh, HomePartialChange> { intent ->
       intent
         .exhaustMap {
-          Observables.zip(
-            rxObservable { send(comicRepository.getSuggest()) },
-            rxObservable { send(comicRepository.getTopMonth()) },
-            rxObservable { send(comicRepository.getUpdate()) }
-          ).flatMap { (suggest, topMonth, updated) ->
-            suggest.flatMap { suggestList ->
-              topMonth.flatMap { topMonthList ->
-                updated.map { updatedList ->
-                  listOf(
-                    HomePartialChange.TopMonthHomePartialChange.Data(topMonthList),
-                    HomePartialChange.SuggestHomePartialChange.Data(suggestList),
-                    HomePartialChange.UpdatedPartialChange.Data(updatedList),
-                    HomePartialChange.RefreshSuccess
-                  ).toObservable()
+          homeInteractor
+            .refreshAllPartialChanges(coroutineScope = scope)
+            .doOnNext {
+              sendMessageEvent(
+                when (it) {
+                  is HomePartialChange.RefreshSuccess -> "Refresh successfully"
+                  is HomePartialChange.RefreshFailure -> "Refresh not successfully"
+                  else -> return@doOnNext
                 }
-              }
-            }.fold({ Observable.just(HomePartialChange.RefreshFailure(it)) }, { it })
-          }.doOnNext {
-            if (it is HomePartialChange.RefreshSuccess) {
-              singleEventD.value = HomeSingleEvent.MessageEvent("Refresh successfully").let(::Event)
-            } else if (it is HomePartialChange.RefreshFailure) {
-              singleEventD.value =
-                HomeSingleEvent.MessageEvent("Refresh not successfully").let(::Event)
+              )
             }
-          }
         }
     }
 
+  /**
+   * Transform [HomeViewIntent.LoadNextPageUpdatedComic]s to [HomePartialChange]s
+   */
   private val loadNextPageProcessor =
     ObservableTransformer<HomeViewIntent.LoadNextPageUpdatedComic, HomePartialChange> { intent ->
       intent
         .filter {
-          !stateD.value.items.any {
-            it is HomeListItem.UpdatedItem.Error || it is HomeListItem.UpdatedItem.Loading
-          }
+          !stateD
+            .value
+            .items
+            .any(HomeListItem::isLoadingOrError)
         }
         .map { stateD.value.updatedPage }
         .doOnNext { Timber.d("load_next_page = $it") }
-        .exhaustMap { currentPage ->
-          rxObservable<HomePartialChange> {
-            send(HomePartialChange.UpdatedPartialChange.Loading)
-
-            val result = comicRepository.getUpdate(page = currentPage + 1)
-
-            result
-              .getOrNull()
-              .orEmpty()
-              .let { HomePartialChange.UpdatedPartialChange.Data(it) }
-              .let { send(it) }
-
-            if (result is Left) {
-              result
-                .value
-                .let { HomePartialChange.UpdatedPartialChange.Error(it) }
-                .let { send(it) }
-            }
-          }.doOnNext {
-            if (it is HomePartialChange.UpdatedPartialChange.Error) {
-              singleEventD.value =
-                "Get updated list error: ${getMessageFromError(it.error)}"
-                  .let { HomeSingleEvent.MessageEvent(it) }
-                  .let(::Event)
-            }
-          }
+        .exhaustMap {
+          homeInteractor
+            .updatedComicsPartialChanges(page = it + 1, coroutineScope = scope)
+            .cast<HomePartialChange>()
         }
     }
 
+  /**
+   * Transform [HomeViewIntent.RetryUpdate]s to [HomePartialChange]s
+   */
+  private val retryUpdateProcessor =
+    ObservableTransformer<HomeViewIntent.RetryUpdate, HomePartialChange> { intent ->
+      intent
+        .doOnNext { Timber.d("retry_page = $it") }
+        .exhaustMap {
+          homeInteractor
+            .updatedComicsPartialChanges(page = stateD.value.updatedPage, coroutineScope = scope)
+            .doOnNext {
+              val messageFromError = (it as? HomePartialChange.UpdatedPartialChange.Error)
+                ?.error
+                ?.let(::getMessageFromError)
+                ?: return@doOnNext
+              sendMessageEvent("Error when retry get updated list: $messageFromError")
+            }
+        }
+    }
+
+  /**
+   * Transform [HomeViewIntent.RetrySuggest]s to [HomePartialChange]s
+   */
+  private val retrySuggestProcessor =
+    ObservableTransformer<HomeViewIntent.RetrySuggest, HomePartialChange> {
+      it.exhaustMap {
+        homeInteractor
+          .suggestComicsPartialChanges(coroutineScope = scope)
+          .doOnNext {
+            val messageFromError = (it as? HomePartialChange.SuggestHomePartialChange.Error)
+              ?.error
+              ?.let(::getMessageFromError)
+              ?: return@doOnNext
+            sendMessageEvent("Error when retry get suggest list: $messageFromError")
+          }
+          .filter { it !is HomePartialChange.SuggestHomePartialChange.Error } // not show error when retry fail
+      }
+    }
+
+  /**
+   * Transform [HomeViewIntent.RetryTopMonth]s to [HomePartialChange]s
+   */
+  private val retryTopMonthProcessor =
+    ObservableTransformer<HomeViewIntent.RetryTopMonth, HomePartialChange> {
+      it.exhaustMap {
+        homeInteractor
+          .topMonthComicsPartialChanges(coroutineScope = scope)
+          .doOnNext {
+            val messageFromError = (it as? HomePartialChange.TopMonthHomePartialChange.Error)
+              ?.error
+              ?.let(::getMessageFromError)
+              ?: return@doOnNext
+            sendMessageEvent("Error when retry get top month list: $messageFromError")
+          }
+          .filter { it !is HomePartialChange.TopMonthHomePartialChange.Error } // not show error when retry fail
+      }
+    }
+
+  /**
+   * Filters intent by type, then compose with [ObservableTransformer] to transform [HomeViewIntent] to [HomePartialChange].
+   * Then using [Observable.scan] operator with reducer to transform [HomePartialChange] [HomeViewState]
+   */
   private val intentToViewState = ObservableTransformer<HomeViewIntent, HomeViewState> {
     it.publish { shared ->
       Observable.mergeArray(
@@ -210,8 +182,13 @@ class HomeViewModel(private val comicRepository: ComicRepository) :
           .compose(loadNextPageProcessor),
         shared
           .ofType<HomeViewIntent.RetryUpdate>()
-          .compose(TODO()),
-        TODO()
+          .compose(retryUpdateProcessor),
+        shared
+          .ofType<HomeViewIntent.RetrySuggest>()
+          .compose(retrySuggestProcessor),
+        shared
+          .ofType<HomeViewIntent.RetryTopMonth>()
+          .compose(retryTopMonthProcessor)
       )
     }.doOnNext { Timber.d("partial_change=$it") }
       .scan(HomeViewState.initialState()) { state, change -> change.reducer(state) }
@@ -219,12 +196,11 @@ class HomeViewModel(private val comicRepository: ComicRepository) :
       .observeOn(AndroidSchedulers.mainThread())
   }
 
-
   override fun processIntents(intents: Observable<HomeViewIntent>) =
-    intents.subscribe(intentsSubject::accept)!!
+    intents.subscribe(intentS::accept)!!
 
   init {
-    intentsSubject
+    intentS
       .compose(intentFilter)
       .doOnNext { Timber.d("intent=$it") }
       .compose(intentToViewState)
@@ -239,7 +215,14 @@ class HomeViewModel(private val comicRepository: ComicRepository) :
     Timber.d("onCleared")
   }
 
+  private fun sendMessageEvent(message: String) {
+    singleEventD.value = Event(HomeSingleEvent.MessageEvent(message))
+  }
+
   private companion object {
+    /**
+     * Only take 1 [HomeViewIntent.Initial]
+     */
     @JvmStatic
     private val intentFilter = ObservableTransformer<HomeViewIntent, HomeViewIntent> {
       it.publish { shared ->

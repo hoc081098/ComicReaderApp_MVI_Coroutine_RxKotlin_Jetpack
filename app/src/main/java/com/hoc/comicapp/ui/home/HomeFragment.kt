@@ -2,9 +2,11 @@ package com.hoc.comicapp.ui.home
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.hoc.comicapp.R
@@ -16,6 +18,7 @@ import com.jakewharton.rxbinding3.swiperefreshlayout.refreshes
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -78,7 +81,23 @@ class HomeFragment : Fragment() {
         }
       }
       adapter = homeAdapter
+
+      recycler_home.addOnItemTouchListener(object : RecyclerView.OnItemTouchListener {
+        override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) = Unit
+
+        override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
+          if (e.action == MotionEvent.ACTION_DOWN && rv.scrollState == RecyclerView.SCROLL_STATE_SETTLING) {
+            rv.stopScroll()
+          }
+          return false
+        }
+
+        override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) = Unit
+      })
     }
+
+
+    fab.setOnClickListener { recycler_home.scrollToPosition(0) }
   }
 
   override fun onResume() {
@@ -95,10 +114,20 @@ class HomeFragment : Fragment() {
         homeAdapter.updatedRetryObservable.map { HomeViewIntent.RetryUpdate }
       )
     ).addTo(compositeDisposableDisposeOnPause)
+
+    homeAdapter
+      .clickComicObservable
+      .subscribeBy {
+        val toComicDetailFragment =
+          HomeFragmentDirections.actionHomeFragmentDestToComicDetailFragment(it)
+        findNavController().navigate(toComicDetailFragment)
+      }
+      .addTo(compositeDisposableDisposeOnPause)
   }
 
   private fun loadNextPageIntent(): Observable<HomeViewIntent.LoadNextPageUpdatedComic> {
-    return recycler_home.scrollStateChanges()
+    return recycler_home
+      .scrollStateChanges()
       .filter { it == RecyclerView.SCROLL_STATE_IDLE }
       .filter {
         (recycler_home.layoutManager as GridLayoutManager).findLastCompletelyVisibleItemPosition() +
@@ -115,6 +144,6 @@ class HomeFragment : Fragment() {
   }
 
   private companion object {
-    const val VISIBLE_THRESHOLD = 5
+    const val VISIBLE_THRESHOLD = 4
   }
 }
