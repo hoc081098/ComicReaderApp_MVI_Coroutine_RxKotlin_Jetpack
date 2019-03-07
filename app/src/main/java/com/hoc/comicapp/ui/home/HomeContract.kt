@@ -196,10 +196,19 @@ sealed class HomePartialChange {
     override fun reducer(state: HomeViewState): HomeViewState {
       return when (this) {
         is HomePartialChange.UpdatedPartialChange.Data -> {
+          val newData = this.comics.map { HomeListItem.UpdatedItem.ComicItem(it) }
+
           state.copy(
-            items = state.items.filterNot(HomeListItem::isLoadingOrError) +
-              this.comics.map { HomeListItem.UpdatedItem.ComicItem(it) },
-            updatedPage = state.updatedPage
+            items = if (this.append) {
+              state.items.filterNot(HomeListItem::isLoadingOrError) + newData
+            } else {
+              state.items.filterNot { it is HomeListItem.UpdatedItem } + newData
+            },
+            updatedPage = if (this.append) {
+              state.updatedPage + 1
+            } else {
+              1
+            }
           )
         }
         HomePartialChange.UpdatedPartialChange.Loading -> {
@@ -217,13 +226,21 @@ sealed class HomePartialChange {
       }
     }
 
-    data class Data(val comics: List<Comic>) : UpdatedPartialChange()
+    data class Data(val comics: List<Comic>, val append: Boolean = true) : UpdatedPartialChange()
     object Loading : UpdatedPartialChange()
     data class Error(val error: com.hoc.comicapp.data.models.ComicAppError) : UpdatedPartialChange()
   }
 
-  object RefreshSuccess : HomePartialChange() {
-    override fun reducer(state: HomeViewState) = state.copy(refreshLoading = false)
+  data class RefreshSuccess(
+    val suggestComics: List<Comic>,
+    val topMonthComics: List<Comic>,
+    val updatedComics: List<Comic>
+  ) : HomePartialChange() {
+    override fun reducer(state: HomeViewState) = listOf(
+      SuggestHomePartialChange.Data(suggestComics),
+      TopMonthHomePartialChange.Data(topMonthComics),
+      UpdatedPartialChange.Data(updatedComics, append = false)
+    ).fold(state) { acc, homePartialChange -> homePartialChange.reducer(acc) }.copy(refreshLoading = false)
   }
 
   data class RefreshFailure(val error: ComicAppError) : HomePartialChange() {

@@ -1,6 +1,10 @@
 import org.jetbrains.kotlin.gradle.internal.AndroidExtensionsExtension
 
 val kotlinVersion: String by rootProject.extra
+val navVersion: String by rootProject.extra
+val coroutinesVersion: String by rootProject.extra
+val lifecycleVersion: String by rootProject.extra
+val pagingVersion: String by rootProject.extra
 
 plugins {
   id("com.android.application")
@@ -43,11 +47,6 @@ android {
 }
 
 dependencies {
-  val coroutinesVersion = "1.1.1"
-  val lifecycleVersion = "2.0.0"
-  val navVersion = "1.0.0-beta02"
-  val paging_version = "2.1.0"
-
   implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
   implementation(kotlin("stdlib-jdk8", kotlinVersion))
@@ -59,10 +58,10 @@ dependencies {
   implementation("androidx.core:core-ktx:1.1.0-alpha04")
   implementation("androidx.constraintlayout:constraintlayout:1.1.3")
 
-  implementation("android.arch.navigation:navigation-fragment-ktx:$navVersion")
-  implementation("android.arch.navigation:navigation-ui-ktx:$navVersion")
+  implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
+  implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
 
-  implementation("androidx.paging:paging-runtime-ktx:$paging_version")
+  implementation("androidx.paging:paging-runtime-ktx:$pagingVersion")
 
   implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
   implementation("androidx.lifecycle:lifecycle-livedata:$lifecycleVersion")

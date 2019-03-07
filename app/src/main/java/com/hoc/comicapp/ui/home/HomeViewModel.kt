@@ -11,7 +11,6 @@ import io.reactivex.ObservableTransformer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.cast
 import io.reactivex.rxkotlin.ofType
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -97,12 +96,13 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
             .items
             .any(HomeListItem::isLoadingOrError)
         }
-        .map { stateD.value.updatedPage }
+        .map { stateD.value.updatedPage + 1 }
         .doOnNext { Timber.d("load_next_page = $it") }
         .exhaustMap {
-          homeInteractor
-            .updatedComicsPartialChanges(page = it + 1, coroutineScope = scope)
-            .cast<HomePartialChange>()
+          homeInteractor.updatedComicsPartialChanges(
+            page = it,
+            coroutineScope = scope
+          )
         }
     }
 
@@ -112,10 +112,12 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
   private val retryUpdateProcessor =
     ObservableTransformer<HomeViewIntent.RetryUpdate, HomePartialChange> { intent ->
       intent
-        .doOnNext { Timber.d("retry_page = $it") }
         .exhaustMap {
           homeInteractor
-            .updatedComicsPartialChanges(page = stateD.value.updatedPage, coroutineScope = scope)
+            .updatedComicsPartialChanges(
+              page = stateD.value.updatedPage + 1,
+              coroutineScope = scope
+            )
             .doOnNext {
               val messageFromError = (it as? HomePartialChange.UpdatedPartialChange.Error)
                 ?.error
@@ -141,7 +143,6 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
               ?: return@doOnNext
             sendMessageEvent("Error when retry get suggest list: $messageFromError")
           }
-          .filter { it !is HomePartialChange.SuggestHomePartialChange.Error } // not show error when retry fail
       }
     }
 
@@ -160,7 +161,6 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
               ?: return@doOnNext
             sendMessageEvent("Error when retry get top month list: $messageFromError")
           }
-          .filter { it !is HomePartialChange.TopMonthHomePartialChange.Error } // not show error when retry fail
       }
     }
 

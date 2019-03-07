@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 import com.hoc.comicapp.R
 import com.hoc.comicapp.utils.observe
@@ -97,7 +98,11 @@ class HomeFragment : Fragment() {
     }
 
 
-    fab.setOnClickListener { recycler_home.scrollToPosition(0) }
+    fab.setOnClickListener {
+      object : LinearSmoothScroller(it.context) {
+        override fun getVerticalSnapPreference() = LinearSmoothScroller.SNAP_TO_START
+      }.apply { targetPosition = 0 }.let { recycler_home.layoutManager!!.startSmoothScroll(it) }
+    }
   }
 
   override fun onResume() {
