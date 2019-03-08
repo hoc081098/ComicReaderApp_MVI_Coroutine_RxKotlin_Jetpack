@@ -45,7 +45,7 @@
 
     <fragment
         android:id="@+id/comicDetailFragment"
-        android:name="com.hoc.comicapp.ui.ComicDetailFragment"
+        android:name="com.hoc.comicapp.ui.detail.ComicDetailFragment"
         android:label="ComicDetailFragment">
 
         <argument

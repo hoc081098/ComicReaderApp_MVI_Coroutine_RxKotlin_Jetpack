@@ -12,10 +12,11 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 
 @ExperimentalCoroutinesApi
-abstract class BaseViewModel<I : Intent, S : ViewState, E : SingleEvent> : ViewModel(), MviViewModel<I, S, E> {
+abstract class BaseViewModel<I : Intent, S : ViewState, E : SingleEvent> : ViewModel(),
+  MviViewModel<I, S, E> {
   protected val scope = MainScope()
 
-  abstract val initialState: S
+  protected abstract val initialState: S
   /**
    * ViewState
    */

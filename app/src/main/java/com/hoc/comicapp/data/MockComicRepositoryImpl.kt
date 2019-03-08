@@ -14,6 +14,10 @@ import kotlin.random.nextInt
 
 class MockComicRepositoryImpl(private val dispatcherProvider: CoroutinesDispatcherProvider) :
   ComicRepository {
+  override suspend fun getComicDetail(comicLink: String): Either<ComicAppError, Comic> {
+    TODO()
+  }
+
   override suspend fun getTopMonth(): Either<ComicAppError, List<Comic>> {
     delay(2_000L)
 

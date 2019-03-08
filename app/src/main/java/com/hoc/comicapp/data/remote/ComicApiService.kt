@@ -10,17 +10,16 @@ const val COMIC_BASE_URL = "https://comic-app-081098.herokuapp.com"
 
 interface ComicApiService {
 
-  @GET("top_thang")
-  fun topMonth(): Deferred<List<ComicResponse>>
+  @GET("top_thang") fun topMonthAsync(): Deferred<List<ComicResponse>>
 
   @GET("truyen_moi_cap_nhat")
-  fun update(@Query("page") page: Int? = null): Deferred<List<ComicResponse>>
+  fun updateAsync(@Query("page") page: Int? = null): Deferred<List<ComicResponse>>
 
-  @GET("truyen_de_cu")
-  fun suggest(): Deferred<List<ComicResponse>>
+  @GET("truyen_de_cu") fun suggestAsync(): Deferred<List<ComicResponse>>
+
+  @GET("comic_detail") fun comicDetailAsync(@Query("link") link: String): Deferred<ComicResponse>
 
   companion object {
-    operator fun invoke(retrofit: Retrofit): ComicApiService =
-      retrofit.create(ComicApiService::class.java)
+    operator fun invoke(retrofit: Retrofit): ComicApiService = retrofit.create(ComicApiService::class.java)
   }
 }

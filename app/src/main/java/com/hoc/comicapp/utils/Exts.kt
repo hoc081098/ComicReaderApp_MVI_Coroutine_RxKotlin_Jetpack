@@ -16,7 +16,13 @@ import com.shopify.livedataktx.LiveDataKtx
 import com.shopify.livedataktx.MutableLiveDataKtx
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
+import io.reactivex.annotations.CheckReturnValue
+import io.reactivex.annotations.SchedulerSupport
 
+
+@CheckReturnValue
+@SchedulerSupport(SchedulerSupport.NONE)
+inline fun <reified U : Any, T : Any> Observable<T>.notOfType() = filter { it !is U }!!
 
 @Suppress("nothing_to_inline")
 inline fun <T> Relay<T>.asObservable(): Observable<T> = this

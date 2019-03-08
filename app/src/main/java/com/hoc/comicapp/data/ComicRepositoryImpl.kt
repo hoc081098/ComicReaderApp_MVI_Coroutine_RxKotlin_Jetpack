@@ -1,6 +1,7 @@
 package com.hoc.comicapp.data
 
 import com.hoc.comicapp.CoroutinesDispatcherProvider
+import com.hoc.comicapp.data.Mapper.comicResponseToComicModel
 import com.hoc.comicapp.data.models.Comic
 import com.hoc.comicapp.data.models.ComicAppError
 import com.hoc.comicapp.data.models.toError
@@ -21,7 +22,7 @@ class ComicRepositoryImpl(
     return try {
       withContext(dispatcherProvider.io) {
         comicApiService
-          .topMonth()
+          .topMonthAsync()
           .await()
           .map { Mapper.comicResponseToComicModel(it) }
           .right()
@@ -36,9 +37,9 @@ class ComicRepositoryImpl(
     return try {
       withContext(dispatcherProvider.io) {
         comicApiService
-          .update(page = page)
+          .updateAsync(page = page)
           .await()
-          .map { Mapper.comicResponseToComicModel(it) }
+          .map(::comicResponseToComicModel)
           .right()
       }
     } catch (throwable: Throwable) {
@@ -51,9 +52,24 @@ class ComicRepositoryImpl(
     return try {
       withContext(dispatcherProvider.io) {
         comicApiService
-          .suggest()
+          .suggestAsync()
           .await()
-          .map { Mapper.comicResponseToComicModel(it) }
+          .map(::comicResponseToComicModel)
+          .right()
+      }
+    } catch (throwable: Throwable) {
+      Timber.d(throwable, "getSuggest $throwable")
+      throwable.toError(retrofit).left()
+    }
+  }
+
+  override suspend fun getComicDetail(comicLink: String): Either<ComicAppError, Comic> {
+    return try {
+      withContext(dispatcherProvider.io) {
+        comicApiService
+          .comicDetailAsync(link = comicLink)
+          .await()
+          .let(::comicResponseToComicModel)
           .right()
       }
     } catch (throwable: Throwable) {

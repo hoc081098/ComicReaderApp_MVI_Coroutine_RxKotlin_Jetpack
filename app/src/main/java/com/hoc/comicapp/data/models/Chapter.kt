@@ -7,5 +7,7 @@ import kotlinx.android.parcel.Parcelize
 data class Chapter(
   val chapterLink: String,
   val chapterName: String,
-  val time: String?
+  val time: String?,
+  val images: List<String>?,
+  val view: String?
 ) : Parcelable

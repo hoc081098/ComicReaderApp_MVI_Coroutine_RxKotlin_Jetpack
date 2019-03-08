@@ -4,6 +4,7 @@ import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.data.models.getMessageFromError
 import com.hoc.comicapp.utils.Event
 import com.hoc.comicapp.utils.exhaustMap
+import com.hoc.comicapp.utils.notOfType
 import com.hoc.comicapp.utils.setValueIfNew
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
@@ -237,7 +238,7 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
           shared
             .ofType<HomeViewIntent.Initial>()
             .take(1),
-          shared.filter { it !is HomeViewIntent.Initial }
+          shared.notOfType<HomeViewIntent.Initial,HomeViewIntent >()
         )
       }
     }

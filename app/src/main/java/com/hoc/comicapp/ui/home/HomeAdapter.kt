@@ -46,16 +46,14 @@ class HomeAdapter(private val lifecycleOwner: LifecycleOwner) :
   private val updatedRetryS = PublishRelay.create<Unit>()
   private val clickComicS = PublishRelay.create<Comic>()
 
-  private val _clickComicObservable = Observable.mergeArray(
+  val suggestRetryObservable = suggestRetryS.throttleFirst(500, TimeUnit.MILLISECONDS)!!
+  val topMonthRetryObservable = topMonthRetryS.throttleFirst(500, TimeUnit.MILLISECONDS)!!
+  val updatedRetryObservable = updatedRetryS.throttleFirst(500, TimeUnit.MILLISECONDS)!!
+  val clickComicObservable = Observable.mergeArray(
     suggestAdapter.clickComicObservable,
     topMonthAdapter.clickComicObservable,
     clickComicS.asObservable()
   )!!
-
-  val suggestRetryObservable get() = suggestRetryS.asObservable()
-  val topMonthRetryObservable get() = topMonthRetryS.asObservable()
-  val updatedRetryObservable get() = updatedRetryS.asObservable()
-  val clickComicObservable get() = _clickComicObservable
 
   override fun onCreateViewHolder(parent: ViewGroup, @ViewType viewType: Int): VH {
     return when (viewType) {

@@ -9,5 +9,16 @@ data class Comic(
   val link: String,
   val thumbnail: String,
   val title: String,
-  val view: String?
+  val view: String?,
+  val moreDetail: MoreDetail?
+) : Parcelable
+
+@Parcelize
+data class MoreDetail(
+  val lastUpdated: String,
+  val author: String,
+  val status: String,
+  val categories: List<Category>,
+  val otherName: String?,
+  val shortenedContent: String
 ) : Parcelable
