@@ -56,26 +56,30 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:background="@color/colorAccent"
         android:fontFamily="@font/google_sans"
-        android:padding="12dp"
+        android:paddingStart="24dp"
+        android:paddingTop="16dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="12dp"
         android:text="RETRY"
         android:textAlignment="center"
-        android:textColor="@android:color/white"
+        android:textColor="@color/colorAccent"
         android:textSize="18sp"
-        app:backgroundTint="@color/colorAccent"
+        app:backgroundTint="@color/colorBackground"
         app:cornerRadius="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/home_error_message" />
+        app:layout_constraintTop_toBottomOf="@+id/home_error_message"
+        app:strokeColor="@color/colorAccent"
+        app:strokeWidth="1dp" />
 
     <androidx.constraintlayout.widget.Group
         android:id="@+id/error_group"
-        tools:visibility="visible"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:constraint_referenced_ids="button_home_horizontal_retry,home_error_message" />
+        app:constraint_referenced_ids="button_home_horizontal_retry,home_error_message"
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

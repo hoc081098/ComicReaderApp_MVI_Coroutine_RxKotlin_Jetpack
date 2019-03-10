@@ -7,12 +7,14 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import com.hoc.comicapp.R
-import com.hoc.comicapp.ui.ComicDetailFragmentArgs
+import com.hoc.comicapp.utils.observe
+import com.hoc.comicapp.utils.toast
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import timber.log.Timber
 
 @ExperimentalCoroutinesApi
 class ComicDetailFragment : Fragment() {
@@ -29,6 +31,15 @@ class ComicDetailFragment : Fragment() {
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
+
+    subscribeVM()
+  }
+
+  private fun subscribeVM() {
+    viewModel.state.observe(this) {
+      Timber.d("state=$it")
+      requireContext().toast(it.comicDetail.toString())
+    }
   }
 
   override fun onResume() {

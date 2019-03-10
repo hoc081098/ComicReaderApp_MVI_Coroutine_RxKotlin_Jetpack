@@ -8,14 +8,18 @@ import com.hoc.comicapp.utils.getOrNull
 import com.hoc.comicapp.utils.map
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.Observables
+import io.reactivex.rxkotlin.cast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.rx2.rxObservable
 
 @ExperimentalCoroutinesApi
 class HomeInteractorImpl(private val comicRepository: ComicRepository) : HomeInteractor {
+  /**
+   * Suggest list
+   */
   override fun suggestComicsPartialChanges(coroutineScope: CoroutineScope): Observable<HomePartialChange> {
-    return coroutineScope.rxObservable<HomePartialChange> {
+    return coroutineScope.rxObservable {
       /**
        * Send loading
        */
@@ -44,11 +48,14 @@ class HomeInteractorImpl(private val comicRepository: ComicRepository) : HomeInt
           .let { HomePartialChange.SuggestHomePartialChange.Error(it) }
           .let { this.send(it) }
       }
-    }
+    }.cast()
   }
 
+  /**
+   * Top month list
+   */
   override fun topMonthComicsPartialChanges(coroutineScope: CoroutineScope): Observable<HomePartialChange> {
-    return coroutineScope.rxObservable<HomePartialChange> {
+    return coroutineScope.rxObservable {
       /**
        * Send loading
        */
@@ -60,37 +67,12 @@ class HomeInteractorImpl(private val comicRepository: ComicRepository) : HomeInt
       val topMonthResult = comicRepository.getTopMonth()
 
       /**
-       * Send success change or error change
-       */
-      topMonthResult.fold(
-        { HomePartialChange.TopMonthHomePartialChange.Error(it) },
-        { HomePartialChange.TopMonthHomePartialChange.Data(it) }
-      ).let { send(it) }
-    }
-  }
-
-  override fun updatedComicsPartialChanges(
-    coroutineScope: CoroutineScope,
-    page: Int
-  ): Observable<HomePartialChange> {
-    return coroutineScope.rxObservable<HomePartialChange> {
-      /**
-       * Send loading
-       */
-      this.send(HomePartialChange.UpdatedPartialChange.Loading)
-
-      /**
-       * Get updated comics list
-       */
-      val topMonthResult = comicRepository.getUpdate(page = page)
-
-      /**
        * Send success change
        */
       topMonthResult
         .getOrNull()
         .orEmpty()
-        .let { HomePartialChange.UpdatedPartialChange.Data(it) }
+        .let { HomePartialChange.TopMonthHomePartialChange.Data(it) }
         .let { this.send(it) }
 
       /**
@@ -99,10 +81,39 @@ class HomeInteractorImpl(private val comicRepository: ComicRepository) : HomeInt
       if (topMonthResult is Left) {
         topMonthResult
           .value
-          .let { HomePartialChange.UpdatedPartialChange.Error(it) }
+          .let { HomePartialChange.TopMonthHomePartialChange.Error(it) }
           .let { this.send(it) }
       }
-    }
+    }.cast()
+  }
+
+  /**
+   * Updated list
+   */
+  override fun updatedComicsPartialChanges(
+    coroutineScope: CoroutineScope,
+    page: Int
+  ): Observable<HomePartialChange> {
+    return coroutineScope.rxObservable {
+      /**
+       * Send loading
+       */
+      this.send(HomePartialChange.UpdatedPartialChange.Loading)
+
+      /**
+       * Get updated comics list
+       */
+      val updatedResult = comicRepository.getUpdate(page = page)
+
+
+      /**
+       * Send success change or error change
+       */
+      updatedResult.fold(
+        { HomePartialChange.UpdatedPartialChange.Error(it) },
+        { HomePartialChange.UpdatedPartialChange.Data(it) }
+      ).let { send(it) }
+    }.cast()
   }
 
   override fun refreshAllPartialChanges(coroutineScope: CoroutineScope): Observable<HomePartialChange> {

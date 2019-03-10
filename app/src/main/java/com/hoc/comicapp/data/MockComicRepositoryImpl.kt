@@ -32,10 +32,13 @@ class MockComicRepositoryImpl(private val dispatcherProvider: CoroutinesDispatch
             Chapter(
               chapterName = "Chapter 1",
               chapterLink = "",
-              time = null
+              time = null,
+              view = null,
+              images = null
             )
           ),
-          link = ""
+          link = "",
+          moreDetail = null
         )
       }.right()
     }
@@ -59,10 +62,13 @@ class MockComicRepositoryImpl(private val dispatcherProvider: CoroutinesDispatch
             Chapter(
               chapterName = "Chapter 1",
               chapterLink = "",
-              time = "$it giờ trước"
+              time = "$it giờ trước",
+              view = null,
+              images = null
             )
           ),
-          link = ""
+          link = "",
+          moreDetail = null
         )
       }.right()
     }
