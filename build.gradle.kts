@@ -4,9 +4,17 @@ buildscript {
   val kotlinVersion by extra("1.3.21")
   val navVersion by extra("2.0.0-rc02")
   extra.run {
-    set("coroutinesVersion", "1.1.1")
-    set("lifecycleVersion", "2.0.0")
+    set("coroutinesVersion", "1.2.1")
+    set("lifecycleVersion", "2.2.0-alpha01")
     set("pagingVersion", "2.1.0")
+    set("koinVersion", "2.0.0")
+    set("materialVersion", "1.1.0-alpha06")
+    set("glideVersion", "4.9.0")
+    set("rxBindingVersion", "3.0.0-alpha2")
+    set("timberVersion", "4.7.1")
+    set("rxRelayVersion", "2.1.0")
+    set("threetenabpVersion", "1.1.2")
+    set("retrofit2Version", "2.5.0-SNAPSHOT")
   }
 
 
@@ -26,6 +34,7 @@ allprojects {
     google()
     jcenter()
     mavenCentral()
+    maven(url = "https://oss.sonatype.org/content/repositories/snapshots")
   }
 }
 

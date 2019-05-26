@@ -1,5 +1,6 @@
 package com.hoc.comicapp.ui.home
 
+import androidx.lifecycle.viewModelScope
 import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.data.models.getMessageFromError
 import com.hoc.comicapp.utils.Event
@@ -37,7 +38,7 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
         .flatMap {
           Observable.mergeArray(
             homeInteractor
-              .suggestComicsPartialChanges(coroutineScope = scope)
+              .suggestComicsPartialChanges(coroutineScope = viewModelScope)
               .doOnNext {
                 val messageFromError = (it as? HomePartialChange.SuggestHomePartialChange.Error)
                   ?.error
@@ -46,7 +47,7 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
                 sendMessageEvent("Get suggest list error: $messageFromError")
               },
             homeInteractor
-              .topMonthComicsPartialChanges(coroutineScope = scope)
+              .topMonthComicsPartialChanges(coroutineScope = viewModelScope)
               .doOnNext {
                 val messageFromError = (it as? HomePartialChange.TopMonthHomePartialChange.Error)
                   ?.error
@@ -55,7 +56,7 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
                 sendMessageEvent("Get top month list error: $messageFromError")
               },
             homeInteractor
-              .updatedComicsPartialChanges(page = 1, coroutineScope = scope)
+              .updatedComicsPartialChanges(page = 1, coroutineScope = viewModelScope)
               .doOnNext {
                 val messageFromError = (it as? HomePartialChange.UpdatedPartialChange.Error)
                   ?.error
@@ -75,7 +76,7 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
       intent
         .exhaustMap {
           homeInteractor
-            .refreshAllPartialChanges(coroutineScope = scope)
+            .refreshAllPartialChanges(coroutineScope = viewModelScope)
             .doOnNext {
               sendMessageEvent(
                 when (it) {
@@ -105,7 +106,7 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
         .exhaustMap {
           homeInteractor.updatedComicsPartialChanges(
             page = it,
-            coroutineScope = scope
+            coroutineScope = viewModelScope
           )
         }
     }
@@ -121,7 +122,7 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
         .doOnNext { Timber.d("[~~~] refresh_page=$it") }
         .exhaustMap {
           homeInteractor
-            .updatedComicsPartialChanges(page = it, coroutineScope = scope)
+            .updatedComicsPartialChanges(page = it, coroutineScope = viewModelScope)
             .doOnNext {
               val messageFromError = (it as? HomePartialChange.UpdatedPartialChange.Error)
                 ?.error
@@ -139,7 +140,7 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
     ObservableTransformer<HomeViewIntent.RetrySuggest, HomePartialChange> {
       it.exhaustMap {
         homeInteractor
-          .suggestComicsPartialChanges(coroutineScope = scope)
+          .suggestComicsPartialChanges(coroutineScope = viewModelScope)
           .doOnNext {
             val messageFromError = (it as? HomePartialChange.SuggestHomePartialChange.Error)
               ?.error
@@ -157,7 +158,7 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
     ObservableTransformer<HomeViewIntent.RetryTopMonth, HomePartialChange> {
       it.exhaustMap {
         homeInteractor
-          .topMonthComicsPartialChanges(coroutineScope = scope)
+          .topMonthComicsPartialChanges(coroutineScope = viewModelScope)
           .doOnNext {
             val messageFromError = (it as? HomePartialChange.TopMonthHomePartialChange.Error)
               ?.error
@@ -238,7 +239,7 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
           shared
             .ofType<HomeViewIntent.Initial>()
             .take(1),
-          shared.notOfType<HomeViewIntent.Initial,HomeViewIntent >()
+          shared.notOfType<HomeViewIntent.Initial, HomeViewIntent>()
         )
       }
     }

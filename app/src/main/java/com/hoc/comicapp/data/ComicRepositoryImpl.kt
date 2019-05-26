@@ -23,7 +23,6 @@ class ComicRepositoryImpl(
       withContext(dispatcherProvider.io) {
         comicApiService
           .topMonthAsync()
-          .await()
           .map { Mapper.comicResponseToComicModel(it) }
           .right()
       }
@@ -38,7 +37,6 @@ class ComicRepositoryImpl(
       withContext(dispatcherProvider.io) {
         comicApiService
           .updateAsync(page = page)
-          .await()
           .map(::comicResponseToComicModel)
           .right()
       }
@@ -53,7 +51,6 @@ class ComicRepositoryImpl(
       withContext(dispatcherProvider.io) {
         comicApiService
           .suggestAsync()
-          .await()
           .map(::comicResponseToComicModel)
           .right()
       }
@@ -68,7 +65,6 @@ class ComicRepositoryImpl(
       withContext(dispatcherProvider.io) {
         comicApiService
           .comicDetailAsync(link = comicLink)
-          .await()
           .let(::comicResponseToComicModel)
           .right()
       }

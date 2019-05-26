@@ -5,6 +5,14 @@ val navVersion: String by rootProject.extra
 val coroutinesVersion: String by rootProject.extra
 val lifecycleVersion: String by rootProject.extra
 val pagingVersion: String by rootProject.extra
+val koinVersion: String by rootProject.extra
+val materialVersion: String by rootProject.extra
+val glideVersion: String by rootProject.extra
+val rxBindingVersion: String by rootProject.extra
+val timberVersion: String by rootProject.extra
+val rxRelayVersion: String by rootProject.extra
+val threetenabpVersion: String by rootProject.extra
+val retrofit2Version: String by rootProject.extra
 
 plugins {
   id("com.android.application")
@@ -54,9 +62,11 @@ dependencies {
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-rx2:$coroutinesVersion")
 
-  implementation("androidx.appcompat:appcompat:1.1.0-alpha02")
-  implementation("androidx.core:core-ktx:1.1.0-alpha04")
-  implementation("androidx.constraintlayout:constraintlayout:1.1.3")
+  implementation("androidx.appcompat:appcompat:1.1.0-alpha05")
+  implementation("androidx.core:core-ktx:1.2.0-alpha01")
+  implementation("androidx.activity:activity-ktx:1.0.0-alpha08")
+  implementation("androidx.fragment:fragment-ktx:1.1.0-alpha09")
+  implementation("androidx.constraintlayout:constraintlayout:2.0.0-beta1")
 
   implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
   implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
@@ -64,34 +74,33 @@ dependencies {
   implementation("androidx.paging:paging-runtime-ktx:$pagingVersion")
 
   implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
-  implementation("androidx.lifecycle:lifecycle-livedata:$lifecycleVersion")
+  implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
   implementation("androidx.lifecycle:lifecycle-reactivestreams-ktx:$lifecycleVersion")
   implementation("com.shopify:livedata-ktx:3.0.0")
 
-  implementation("com.google.android.material:material:1.1.0-alpha03")
+  implementation("com.google.android.material:material:$materialVersion")
 
-  implementation("org.koin:koin-androidx-viewmodel:1.0.2")
+  implementation("org.koin:koin-androidx-viewmodel:$koinVersion")
 
   implementation("com.squareup.moshi:moshi-kotlin:1.8.0")
-  implementation("com.squareup.retrofit2:retrofit:2.5.0")
-  implementation("com.squareup.retrofit2:converter-moshi:2.5.0")
+  implementation("com.squareup.retrofit2:retrofit:$retrofit2Version")
+  implementation("com.squareup.retrofit2:converter-moshi:$retrofit2Version")
   implementation("com.squareup.okhttp3:logging-interceptor:3.13.1")
 
-  implementation("com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:0.9.2")
-  implementation("com.jakewharton.rxrelay2:rxrelay:2.1.0")
-  implementation("com.jakewharton.threetenabp:threetenabp:1.1.2")
-  implementation("com.jakewharton.rxbinding3:rxbinding:3.0.0-alpha2")
-  implementation("com.jakewharton.rxbinding3:rxbinding-core:3.0.0-alpha2")
-  implementation("com.jakewharton.rxbinding3:rxbinding-material:3.0.0-alpha2")
-  implementation("com.jakewharton.rxbinding3:rxbinding-swiperefreshlayout:3.0.0-alpha2")
-  implementation("com.jakewharton.rxbinding3:rxbinding-recyclerview:3.0.0-alpha2")
-  implementation("com.jakewharton.timber:timber:4.7.1")
+  implementation("com.jakewharton.rxrelay2:rxrelay:$rxRelayVersion")
+  implementation("com.jakewharton.threetenabp:threetenabp:$threetenabpVersion")
+  implementation("com.jakewharton.rxbinding3:rxbinding:$rxBindingVersion")
+  implementation("com.jakewharton.rxbinding3:rxbinding-core:$rxBindingVersion")
+  implementation("com.jakewharton.rxbinding3:rxbinding-material:$rxBindingVersion")
+  implementation("com.jakewharton.rxbinding3:rxbinding-swiperefreshlayout:$rxBindingVersion")
+  implementation("com.jakewharton.rxbinding3:rxbinding-recyclerview:$rxBindingVersion")
+  implementation("com.jakewharton.timber:timber:$timberVersion")
 
   implementation("io.reactivex.rxjava2:rxkotlin:2.3.0")
   implementation("io.reactivex.rxjava2:rxandroid:2.1.1")
 
-  implementation("com.github.bumptech.glide:glide:4.9.0")
-  kapt("com.github.bumptech.glide:compiler:4.9.0")
+  implementation("com.github.bumptech.glide:glide:$glideVersion")
+  kapt("com.github.bumptech.glide:compiler:$glideVersion")
 
   testImplementation("junit:junit:4.12")
   androidTestImplementation("androidx.test:runner:1.1.2-alpha01")

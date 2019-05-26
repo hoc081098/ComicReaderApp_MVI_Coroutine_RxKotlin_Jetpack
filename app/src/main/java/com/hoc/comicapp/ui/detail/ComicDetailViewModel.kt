@@ -1,5 +1,6 @@
 package com.hoc.comicapp.ui.detail
 
+import androidx.lifecycle.viewModelScope
 import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.utils.notOfType
 import com.hoc.comicapp.utils.setValueIfNew
@@ -29,7 +30,7 @@ class ComicDetailViewModel(private val comicDetailInteractor: ComicDetailInterac
 
   private val initialProcessor =
     ObservableTransformer<ComicDetailIntent.Initial, ComicDetailPartialChange> { intent ->
-      intent.flatMap { comicDetailInteractor.getComicDetail(scope, it.link, it.name, it.thumbnail) }
+      intent.flatMap { comicDetailInteractor.getComicDetail(viewModelScope, it.link, it.name, it.thumbnail) }
     }
 
   private val refreshProcessor =

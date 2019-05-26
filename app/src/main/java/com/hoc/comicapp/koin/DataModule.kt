@@ -2,7 +2,8 @@ package com.hoc.comicapp.koin
 
 import com.hoc.comicapp.data.ComicRepository
 import com.hoc.comicapp.data.ComicRepositoryImpl
-import org.koin.dsl.module.module
+import org.koin.dsl.bind
+import org.koin.dsl.module
 
 val dataModule = module {
   single { ComicRepositoryImpl(get(), get(), get()) } bind ComicRepository::class
