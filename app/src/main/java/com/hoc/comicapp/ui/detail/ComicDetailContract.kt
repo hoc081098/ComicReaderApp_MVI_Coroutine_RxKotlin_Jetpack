@@ -30,21 +30,37 @@ sealed class ComicDetailIntent : Intent {
 
 data class Category(val name: String, val link: String)
 
+data class Chapter(
+  val name: String,
+  val link: String,
+  val time: String?,
+  val view: String?
+)
+
 sealed class ComicDetail {
+  abstract val link: String
+  abstract val thumbnail: String
+  abstract val title: String
+
   data class Comic(
-    val link: String,
-    val thumbnail: String,
-    val title: String,
+    override val link: String,
+    override val thumbnail: String,
+    override val title: String,
     val view: String,
     val lastUpdated: String,
     val author: String,
     val status: String,
     val categories: List<Category>,
     val otherName: String?,
-    val shortenedContent: String
+    val shortenedContent: String,
+    val chapters: List<Chapter>
   ) : ComicDetail()
 
-  data class InitialComic(val title: String, val thumbnail: String) : ComicDetail()
+  data class InitialComic(
+    override val title: String,
+    override val thumbnail: String,
+    override val link: String
+  ) : ComicDetail()
 }
 
 

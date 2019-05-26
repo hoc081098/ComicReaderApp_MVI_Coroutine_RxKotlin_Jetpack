@@ -21,7 +21,8 @@ class ComicDetailInteractorImpl(private val comicRepository: ComicRepository) :
         ComicDetailPartialChange.InitialPartialChange.InitialData(
           initialComic = ComicDetail.InitialComic(
             title = name,
-            thumbnail = thumbnail
+            thumbnail = thumbnail,
+            link = link
           )
         )
       )
@@ -46,7 +47,15 @@ class ComicDetailInteractorImpl(private val comicRepository: ComicRepository) :
               },
               author = comic.moreDetail.author,
               lastUpdated = comic.moreDetail.lastUpdated,
-              thumbnail = comic.thumbnail
+              thumbnail = comic.thumbnail,
+              chapters = comic.chapters.map {
+                Chapter(
+                  name = it.chapterName,
+                  link = it.chapterLink,
+                  time = it.time,
+                  view = it.view
+                )
+              }
             ).let { ComicDetailPartialChange.InitialPartialChange.Data(it) }
           })
         .let { send(it) }

@@ -32,7 +32,10 @@ fun Throwable.toError(retrofit: Retrofit): ComicAppError {
       )
     }
     is HttpException -> ErrorResponseParser
-      .getError(response(), retrofit)
+      .getError(
+        response() ?: return ServerError("Response is null", -1),
+        retrofit
+      )
       ?.let {
         ServerError(
           message = it.message,

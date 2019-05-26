@@ -14,7 +14,7 @@ buildscript {
     set("timberVersion", "4.7.1")
     set("rxRelayVersion", "2.1.0")
     set("threetenabpVersion", "1.1.2")
-    set("retrofit2Version", "2.5.0-SNAPSHOT")
+    set("retrofit2Version", "2.5.1-SNAPSHOT")
   }
 
 
