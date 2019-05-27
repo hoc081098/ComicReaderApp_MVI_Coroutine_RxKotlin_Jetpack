@@ -66,6 +66,7 @@ class ComicDetailFragment : Fragment() {
 
       if (comicDetail is ComicDetail.Comic) {
         chapterAdapter.submitList(comicDetail.chapters)
+        progress_bar.visibility = View.INVISIBLE
       }
     }
   }

@@ -5,16 +5,20 @@
     <Transition
         app:constraintSetEnd="@id/end"
         app:constraintSetStart="@id/start"
-        app:duration="1000">
+        app:duration="1000"
+        app:visibilityMode="ignore">
 
         <OnSwipe
             app:dragDirection="dragUp"
+            app:onTouchUp="decelerateAndComplete"
             app:touchAnchorId="@id/recycler_chapters"
             app:touchAnchorSide="top" />
 
     </Transition>
 
-    <ConstraintSet android:id="@+id/start">
+    <ConstraintSet
+
+        android:id="@+id/start">
 
         <Constraint android:id="@id/background">
             <CustomAttribute
@@ -31,7 +35,6 @@
                 app:attributeName="backgroundColor"
                 app:customColorValue="@color/colorPrimary" />
         </Constraint>
-
 
         <Constraint
             android:id="@id/image_thumbnail"

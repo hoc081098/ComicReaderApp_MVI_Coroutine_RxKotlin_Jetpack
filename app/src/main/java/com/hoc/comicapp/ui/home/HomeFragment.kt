@@ -14,6 +14,7 @@ import com.hoc.comicapp.R
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.snack
+import com.jakewharton.rxbinding3.recyclerview.scrollEvents
 import com.jakewharton.rxbinding3.recyclerview.scrollStateChanges
 import com.jakewharton.rxbinding3.swiperefreshlayout.refreshes
 import io.reactivex.Observable
@@ -29,6 +30,8 @@ import timber.log.Timber
 class HomeFragment : Fragment() {
   private val homeViewModel by viewModel<HomeViewModel>()
   private val homeAdapter = HomeAdapter(this)
+
+  private val compositeDisposableDisposeOnDestroyView = CompositeDisposable()
   private val compositeDisposableDisposeOnPause = CompositeDisposable()
 
   override fun onCreateView(
@@ -67,8 +70,9 @@ class HomeFragment : Fragment() {
     }
   }
 
+
   private fun initView() {
-    swipe_refresh_layout.setColorSchemeColors(*resources.getIntArray(R.array.swipe_refresh_colors))
+    swipe_refresh_layout.setColorSchemeColors(*resources.getIntArray(com.hoc.comicapp.R.array.swipe_refresh_colors))
 
     recycler_home.run {
       setHasFixedSize(true)
@@ -105,6 +109,17 @@ class HomeFragment : Fragment() {
         override fun getVerticalSnapPreference() = LinearSmoothScroller.SNAP_TO_START
       }.apply { targetPosition = 0 }.let { recycler_home.layoutManager!!.startSmoothScroll(it) }
     }
+
+    recycler_home
+      .scrollEvents()
+      .subscribeBy {
+        if (it.dy < 0) {
+          fab.show()
+        } else {
+          fab.hide()
+        }
+      }
+      .addTo(compositeDisposable = compositeDisposableDisposeOnDestroyView)
   }
 
   override fun onResume() {
@@ -138,7 +153,7 @@ class HomeFragment : Fragment() {
       .filter { it == RecyclerView.SCROLL_STATE_IDLE }
       .filter {
         (recycler_home.layoutManager as GridLayoutManager).findLastCompletelyVisibleItemPosition() +
-          VISIBLE_THRESHOLD >= homeAdapter.itemCount
+            VISIBLE_THRESHOLD >= homeAdapter.itemCount
       }
       .map { HomeViewIntent.LoadNextPageUpdatedComic }
   }
@@ -148,6 +163,11 @@ class HomeFragment : Fragment() {
     Timber.d("HomeFragment::onPause")
 
     compositeDisposableDisposeOnPause.clear()
+  }
+
+  override fun onDestroyView() {
+    super.onDestroyView()
+    compositeDisposableDisposeOnDestroyView.clear()
   }
 
   private companion object {
