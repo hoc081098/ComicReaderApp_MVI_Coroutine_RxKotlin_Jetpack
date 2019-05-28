@@ -50,10 +50,10 @@ fun Throwable.toError(retrofit: Retrofit): ComicAppError {
 }
 
 
-fun getMessageFromError(error: ComicAppError): String {
-  return when (error) {
+fun ComicAppError.getMessageFromError(): String {
+  return when (this) {
     NetworkError -> "Network error"
-    is ServerError -> "Server error: ${error.message}"
+    is ServerError -> "Server error: $message"
     is UnexpectedError -> "An unexpected error occurred"
   }
 }

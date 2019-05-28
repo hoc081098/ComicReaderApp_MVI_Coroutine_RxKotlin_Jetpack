@@ -2,8 +2,10 @@ package com.hoc.comicapp.ui.detail
 
 import androidx.lifecycle.viewModelScope
 import com.hoc.comicapp.base.BaseViewModel
+import com.hoc.comicapp.data.models.getMessageFromError
+import com.hoc.comicapp.utils.Event
+import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.notOfType
-import com.hoc.comicapp.utils.setValueIfNew
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
@@ -30,12 +32,40 @@ class ComicDetailViewModel(private val comicDetailInteractor: ComicDetailInterac
 
   private val initialProcessor =
     ObservableTransformer<ComicDetailIntent.Initial, ComicDetailPartialChange> { intent ->
-      intent.flatMap { comicDetailInteractor.getComicDetail(viewModelScope, it.link, it.name, it.thumbnail) }
+      intent.flatMap {
+        comicDetailInteractor.getComicDetail(
+          viewModelScope,
+          it.link,
+          it.name,
+          it.thumbnail
+        ).doOnNext {
+          val messageFromError = (it as? ComicDetailPartialChange.InitialPartialChange.Error ?: return@doOnNext)
+            .error
+            .getMessageFromError()
+          sendMessageEvent("Get detail comic error: $messageFromError")
+        }
+      }
     }
 
   private val refreshProcessor =
-    ObservableTransformer<ComicDetailIntent.Refresh, ComicDetailPartialChange> {
-      Observable.empty()
+    ObservableTransformer<ComicDetailIntent.Refresh, ComicDetailPartialChange> { intentObservable ->
+      intentObservable
+        .exhaustMap { intent ->
+          comicDetailInteractor
+            .refreshPartialChanges(
+              coroutineScope = viewModelScope,
+              link = intent.link
+            )
+            .doOnNext {
+              sendMessageEvent(
+                when (it) {
+                  is ComicDetailPartialChange.RefreshPartialChange.Success -> "Refresh successfully"
+                  is ComicDetailPartialChange.RefreshPartialChange.Error -> "Refresh not successfully, error: ${it.error.getMessageFromError()}"
+                  else -> return@doOnNext
+                }
+              )
+            }
+        }
     }
 
   private val intentToViewState = ObservableTransformer<ComicDetailIntent, ComicDetailViewState> {
@@ -60,10 +90,13 @@ class ComicDetailViewModel(private val comicDetailInteractor: ComicDetailInterac
       .addTo(compositeDisposable)
 
     stateS
-      .subscribeBy(onNext = stateD::setValueIfNew)
+      .subscribeBy(onNext = ::setNewState)
       .addTo(compositeDisposable)
   }
 
+  private fun sendMessageEvent(message: String) {
+    sendEvent(Event(ComicDetailSingleEvent.MessageEvent(message)))
+  }
 
   private companion object {
     private val intentFilter = ObservableTransformer<ComicDetailIntent, ComicDetailIntent> {

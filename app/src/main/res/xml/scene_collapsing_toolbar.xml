@@ -11,7 +11,7 @@
         <OnSwipe
             app:dragDirection="dragUp"
             app:onTouchUp="decelerateAndComplete"
-            app:touchAnchorId="@id/recycler_chapters"
+            app:touchAnchorId="@id/swipe_refresh_layout"
             app:touchAnchorSide="top" />
 
     </Transition>

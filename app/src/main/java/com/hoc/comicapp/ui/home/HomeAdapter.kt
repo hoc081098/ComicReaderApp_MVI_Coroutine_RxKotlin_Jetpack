@@ -15,9 +15,7 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.data.models.Comic
-import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.SUGGEST
-import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.TOP_MONTH
-import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.UPDATED
+import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.*
 import com.hoc.comicapp.utils.asObservable
 import com.hoc.comicapp.utils.inflate
 import com.jakewharton.rxbinding3.recyclerview.scrollStateChanges

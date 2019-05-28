@@ -6,7 +6,6 @@ import com.hoc.comicapp.data.models.getMessageFromError
 import com.hoc.comicapp.utils.Event
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.notOfType
-import com.hoc.comicapp.utils.setValueIfNew
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
@@ -40,28 +39,22 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
             homeInteractor
               .suggestComicsPartialChanges(coroutineScope = viewModelScope)
               .doOnNext {
-                val messageFromError = (it as? HomePartialChange.SuggestHomePartialChange.Error)
-                  ?.error
-                  ?.let(::getMessageFromError)
-                  ?: return@doOnNext
+                val messageFromError = (it as? HomePartialChange.SuggestHomePartialChange.Error
+                  ?: return@doOnNext).error.getMessageFromError()
                 sendMessageEvent("Get suggest list error: $messageFromError")
               },
             homeInteractor
               .topMonthComicsPartialChanges(coroutineScope = viewModelScope)
               .doOnNext {
-                val messageFromError = (it as? HomePartialChange.TopMonthHomePartialChange.Error)
-                  ?.error
-                  ?.let(::getMessageFromError)
-                  ?: return@doOnNext
+                val messageFromError = (it as? HomePartialChange.TopMonthHomePartialChange.Error
+                  ?: return@doOnNext).error.getMessageFromError()
                 sendMessageEvent("Get top month list error: $messageFromError")
               },
             homeInteractor
               .updatedComicsPartialChanges(page = 1, coroutineScope = viewModelScope)
               .doOnNext {
-                val messageFromError = (it as? HomePartialChange.UpdatedPartialChange.Error)
-                  ?.error
-                  ?.let(::getMessageFromError)
-                  ?: return@doOnNext
+                val messageFromError =
+                  (it as? HomePartialChange.UpdatedPartialChange.Error ?: return@doOnNext).error.getMessageFromError()
                 sendMessageEvent("Get updated list error: $messageFromError")
               }
           )
@@ -124,10 +117,8 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
           homeInteractor
             .updatedComicsPartialChanges(page = it, coroutineScope = viewModelScope)
             .doOnNext {
-              val messageFromError = (it as? HomePartialChange.UpdatedPartialChange.Error)
-                ?.error
-                ?.let(::getMessageFromError)
-                ?: return@doOnNext
+              val messageFromError =
+                (it as? HomePartialChange.UpdatedPartialChange.Error ?: return@doOnNext).error.getMessageFromError()
               sendMessageEvent("Error when retry get updated list: $messageFromError")
             }
         }
@@ -142,10 +133,8 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
         homeInteractor
           .suggestComicsPartialChanges(coroutineScope = viewModelScope)
           .doOnNext {
-            val messageFromError = (it as? HomePartialChange.SuggestHomePartialChange.Error)
-              ?.error
-              ?.let(::getMessageFromError)
-              ?: return@doOnNext
+            val messageFromError =
+              (it as? HomePartialChange.SuggestHomePartialChange.Error ?: return@doOnNext).error.getMessageFromError()
             sendMessageEvent("Error when retry get suggest list: $messageFromError")
           }
       }
@@ -160,10 +149,8 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
         homeInteractor
           .topMonthComicsPartialChanges(coroutineScope = viewModelScope)
           .doOnNext {
-            val messageFromError = (it as? HomePartialChange.TopMonthHomePartialChange.Error)
-              ?.error
-              ?.let(::getMessageFromError)
-              ?: return@doOnNext
+            val messageFromError =
+              (it as? HomePartialChange.TopMonthHomePartialChange.Error ?: return@doOnNext).error.getMessageFromError()
             sendMessageEvent("Error when retry get top month list: $messageFromError")
           }
       }
@@ -214,7 +201,7 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
       .addTo(compositeDisposable)
 
     stateS
-      .subscribeBy(onNext = stateD::setValueIfNew)
+      .subscribeBy(onNext = ::setNewState)
       .addTo(compositeDisposable)
   }
 
@@ -225,7 +212,7 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
   }
 
   private fun sendMessageEvent(message: String) {
-    singleEventD.value = Event(HomeSingleEvent.MessageEvent(message))
+    sendEvent(Event(HomeSingleEvent.MessageEvent(message)))
   }
 
   private companion object {

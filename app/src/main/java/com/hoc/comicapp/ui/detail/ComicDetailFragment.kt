@@ -11,7 +11,10 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.utils.observe
+import com.hoc.comicapp.utils.observeEvent
+import com.hoc.comicapp.utils.snack
 import com.hoc.comicapp.utils.toast
+import com.jakewharton.rxbinding3.swiperefreshlayout.refreshes
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
@@ -69,12 +72,20 @@ class ComicDetailFragment : Fragment() {
         progress_bar.visibility = View.INVISIBLE
       }
     }
+    viewModel.singleEvent.observeEvent(this) {
+      when (it) {
+        is ComicDetailSingleEvent.MessageEvent -> {
+          view?.snack(it.message)
+        }
+      }
+    }
   }
 
   override fun onResume() {
     super.onResume()
 
     val comic = args.comic
+
     viewModel.processIntents(
       Observable.mergeArray(
         Observable.just(
@@ -83,7 +94,8 @@ class ComicDetailFragment : Fragment() {
             thumbnail = comic.thumbnail,
             name = comic.title
           )
-        )
+        ),
+        swipe_refresh_layout.refreshes().map { ComicDetailIntent.Refresh(comic.link) }
       )
     ).addTo(compositeDisposable)
   }

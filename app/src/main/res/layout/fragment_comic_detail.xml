@@ -55,16 +55,23 @@
         app:layout_constraintTop_toTopOf="@id/image_thumbnail"
         tools:text="TODO" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_chapters"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:clipToPadding="false"
-        android:padding="8dp"
-        android:scrollbars="vertical"
+        android:id="@+id/swipe_refresh_layout"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/space"
-        tools:listitem="@layout/item_recycler_chapter" />
+        app:layout_constraintTop_toBottomOf="@id/space">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_chapters"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:padding="8dp"
+            android:scrollbars="vertical"
+            tools:listitem="@layout/item_recycler_chapter" />
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <ProgressBar
         android:id="@+id/progress_bar"

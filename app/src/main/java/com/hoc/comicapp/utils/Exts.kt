@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.annotation.MainThread
 import androidx.annotation.StringRes
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
@@ -13,7 +12,6 @@ import androidx.lifecycle.Observer
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxrelay2.Relay
 import com.shopify.livedataktx.LiveDataKtx
-import com.shopify.livedataktx.MutableLiveDataKtx
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
 import io.reactivex.annotations.CheckReturnValue
@@ -98,13 +96,6 @@ fun Snackbar.action(
 ) = apply {
   setAction(action, listener)
   color?.let { setActionTextColor(color) }
-}
-
-@MainThread
-fun <T> MutableLiveDataKtx<T>.setValueIfNew(newValue: T) {
-  if (value != newValue) {
-    value = newValue
-  }
 }
 
 inline fun <T> LiveDataKtx<T>.observe(

@@ -126,7 +126,7 @@ sealed class HomePartialChange {
               if (it is HomeListItem.SuggestListState) {
                 it.copy(
                   isLoading = false,
-                  errorMessage = getMessageFromError(this.error)
+                  errorMessage = this.error.getMessageFromError()
                 )
               } else {
                 it
@@ -181,7 +181,7 @@ sealed class HomePartialChange {
               if (it is HomeListItem.TopMonthListState) {
                 it.copy(
                   isLoading = false,
-                  errorMessage = getMessageFromError(this.error)
+                  errorMessage = this.error.getMessageFromError()
                 )
               } else {
                 it
@@ -226,7 +226,7 @@ sealed class HomePartialChange {
         is HomePartialChange.UpdatedPartialChange.Error -> {
           state.copy(
             items = state.items.filterNot(HomeListItem::isLoadingOrError) +
-                HomeListItem.UpdatedItem.Error(getMessageFromError(this.error))
+                HomeListItem.UpdatedItem.Error(this.error.getMessageFromError())
           )
         }
       }

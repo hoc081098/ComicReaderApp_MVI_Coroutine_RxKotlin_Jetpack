@@ -16,6 +16,10 @@ interface ComicDetailInteractor {
     thumbnail: String
   ): Observable<ComicDetailPartialChange>
 
+  fun refreshPartialChanges(
+    coroutineScope: CoroutineScope,
+    link: String
+  ): Observable<ComicDetailPartialChange>
 }
 
 sealed class ComicDetailIntent : Intent {
@@ -25,7 +29,7 @@ sealed class ComicDetailIntent : Intent {
     val thumbnail: String
   ) : ComicDetailIntent()
 
-  object Refresh : ComicDetailIntent()
+  data class Refresh(val link: String) : ComicDetailIntent()
 }
 
 data class Category(val name: String, val link: String)
@@ -63,7 +67,6 @@ sealed class ComicDetail {
   ) : ComicDetail()
 }
 
-
 data class ComicDetailViewState(
   val comicDetail: ComicDetail?,
   val errorMessage: String?,
@@ -98,7 +101,7 @@ sealed class ComicDetailPartialChange {
         is Error -> {
           state.copy(
             isLoading = false,
-            errorMessage = getMessageFromError(this.error)
+            errorMessage = this.error.getMessageFromError()
           )
         }
         Loading -> {
@@ -112,8 +115,32 @@ sealed class ComicDetailPartialChange {
     data class Error(val error: ComicAppError) : InitialPartialChange()
     object Loading : InitialPartialChange()
   }
+
+  sealed class RefreshPartialChange : ComicDetailPartialChange() {
+    override fun reducer(state: ComicDetailViewState): ComicDetailViewState {
+      return when (this) {
+        is Success -> {
+          state.copy(
+            isLoading = false,
+            errorMessage = null,
+            comicDetail = this.comicDetail
+          )
+        }
+        is Error -> {
+          state.copy(isLoading = false)
+        }
+        Loading -> {
+          state.copy(isLoading = true)
+        }
+      }
+    }
+
+    data class Success(val comicDetail: ComicDetail.Comic) : RefreshPartialChange()
+    data class Error(val error: ComicAppError) : RefreshPartialChange()
+    object Loading : RefreshPartialChange()
+  }
 }
 
 sealed class ComicDetailSingleEvent : SingleEvent {
-
+  data class MessageEvent(val message: String) : ComicDetailSingleEvent()
 }
