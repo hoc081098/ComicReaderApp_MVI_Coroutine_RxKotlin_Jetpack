@@ -110,7 +110,10 @@ sealed class HomePartialChange {
           state.copy(
             items = state.items.map {
               if (it is HomeListItem.SuggestListState) {
-                it.copy(isLoading = true)
+                it.copy(
+                  isLoading = true,
+                  errorMessage = null
+                )
               } else {
                 it
               }
@@ -162,7 +165,10 @@ sealed class HomePartialChange {
           state.copy(
             items = state.items.map {
               if (it is HomeListItem.TopMonthListState) {
-                it.copy(isLoading = true)
+                it.copy(
+                  isLoading = true,
+                  errorMessage = null
+                )
               } else {
                 it
               }
@@ -214,13 +220,13 @@ sealed class HomePartialChange {
         HomePartialChange.UpdatedPartialChange.Loading -> {
           state.copy(
             items = state.items.filterNot(HomeListItem::isLoadingOrError) +
-              HomeListItem.UpdatedItem.Loading
+                HomeListItem.UpdatedItem.Loading
           )
         }
         is HomePartialChange.UpdatedPartialChange.Error -> {
           state.copy(
             items = state.items.filterNot(HomeListItem::isLoadingOrError) +
-              HomeListItem.UpdatedItem.Error(getMessageFromError(this.error))
+                HomeListItem.UpdatedItem.Error(getMessageFromError(this.error))
           )
         }
       }
@@ -258,6 +264,7 @@ sealed class HomePartialChange {
       val topMonthComics: List<Comic>,
       val updatedComics: List<Comic>
     ) : RefreshPartialChange()
+
     object Loading : RefreshPartialChange()
     data class RefreshFailure(val error: ComicAppError) : RefreshPartialChange()
   }
