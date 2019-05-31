@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
-import com.hoc.comicapp.GlideApp
+import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
 import com.hoc.comicapp.data.models.Comic
 import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.*
@@ -24,7 +24,6 @@ import com.jakewharton.rxbinding3.view.detaches
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.ofType
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.item_recycler_home_header.view.*
@@ -34,10 +33,14 @@ import kotlinx.android.synthetic.main.item_recyclerview_updated_error.view.*
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
-class HomeAdapter(private val lifecycleOwner: LifecycleOwner) :
+class HomeAdapter(
+  private val lifecycleOwner: LifecycleOwner,
+  private val glide: GlideRequests,
+  private val viewPool: RecyclerView.RecycledViewPool
+) :
   ListAdapter<HomeListItem, HomeAdapter.VH>(HomeListItemDiffUtilItemCallback) {
-  private val suggestAdapter = SuggestAdapter().apply { submitList(emptyList()) }
-  private val topMonthAdapter = TopMonthAdapter().apply { submitList(emptyList()) }
+  private val suggestAdapter = SuggestAdapter(glide).apply { submitList(emptyList()) }
+  private val topMonthAdapter = TopMonthAdapter(glide).apply { submitList(emptyList()) }
 
   private val suggestRetryS = PublishRelay.create<Unit>()
   private val topMonthRetryS = PublishRelay.create<Unit>()
@@ -48,19 +51,16 @@ class HomeAdapter(private val lifecycleOwner: LifecycleOwner) :
   val topMonthRetryObservable = topMonthRetryS.throttleFirst(500, TimeUnit.MILLISECONDS)!!
   val updatedRetryObservable = updatedRetryS.throttleFirst(500, TimeUnit.MILLISECONDS)!!
   val clickComicObservable = Observable.mergeArray(
-    suggestAdapter.clickComicObservable,
-    topMonthAdapter.clickComicObservable,
-    clickComicS.asObservable()
-  )!!
+    suggestAdapter.clickComicObservable.doOnNext { Timber.d("[1] Click suggest comic $it") },
+    topMonthAdapter.clickComicObservable.doOnNext { Timber.d("[2] Click top month comic $it") },
+    clickComicS.asObservable().doOnNext { Timber.d("[3] Click updated comic $it") }
+  ).doOnNext { Timber.d("[*] Click comic $it") }!!
 
   override fun onCreateViewHolder(parent: ViewGroup, @ViewType viewType: Int): VH {
     return when (viewType) {
       SUGGEST_LIST_VIEW_TYPE -> SuggestListVH(parent inflate R.layout.item_recycler_home_recycler)
       TOP_MONTH_LIST_VIEW_TYPE -> TopMonthListVH(parent inflate R.layout.item_recycler_home_recycler)
-      COMIC_ITEM_VIEW_TYPE -> ComicItemVH(
-        parent inflate R.layout.item_recyclerview_updated_comic,
-        parent
-      )
+      COMIC_ITEM_VIEW_TYPE -> ComicItemVH(parent inflate R.layout.item_recyclerview_updated_comic, parent)
       ERROR_ITEM_VIEW_TYPE -> ErrorVH(parent inflate R.layout.item_recyclerview_updated_error)
       LOADING_ITEM_VIEW_TYPE -> LoadingVH(parent inflate R.layout.item_recyclerview_updated_loading)
       HEADER_VIEW_TYPE -> HeaderVH(parent inflate R.layout.item_recycler_home_header)
@@ -86,27 +86,25 @@ class HomeAdapter(private val lifecycleOwner: LifecycleOwner) :
     abstract fun bind(item: HomeListItem)
   }
 
-  private abstract class HorizontalRecyclerVH(itemView: View) : VH(itemView) {
-    protected val recycler = itemView.home_recycler_horizontal!!
+  private abstract inner class HorizontalRecyclerVH(itemView: View) : VH(itemView) {
+    protected val recycler = itemView.home_recycler_horizontal!!.apply { setRecycledViewPool(viewPool) }
     protected val progressBar = itemView.home_progress_bar!!
     protected val textErrorMessage = itemView.home_error_message!!
     protected val buttonRetry = itemView.button_home_horizontal_retry!!
     protected val errorGroup = itemView.error_group!!
   }
 
-  private inner class SuggestListVH(itemView: View) : HorizontalRecyclerVH(itemView),
-    LifecycleObserver {
+  private inner class SuggestListVH(itemView: View) : HorizontalRecyclerVH(itemView) {
     private var currentList = emptyList<Comic>()
 
     private val startStopAutoScrollS = PublishRelay.create<Boolean>()
     private val intervalInMillis = 1_200L
     private val delayAfterTouchInMillis = 3_000L
-    private var disposable: Disposable? = null
 
     init {
       buttonRetry.setOnClickListener { suggestRetryS.accept(Unit) }
 
-      recycler.run {
+      val disposable = recycler.run {
         setHasFixedSize(true)
         val linearLayoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
         layoutManager = linearLayoutManager
@@ -114,7 +112,7 @@ class HomeAdapter(private val lifecycleOwner: LifecycleOwner) :
 
         PagerSnapHelper().attachToRecyclerView(this)
 
-        disposable = startStopAutoScrollS
+        startStopAutoScrollS
           .mergeWith(
             scrollStateChanges()
               .filter { it == RecyclerView.SCROLL_STATE_DRAGGING }
@@ -142,10 +140,11 @@ class HomeAdapter(private val lifecycleOwner: LifecycleOwner) :
           .observeOn(AndroidSchedulers.mainThread())
           .subscribeBy(
             onNext = {
-              Timber.d(
-                """[HORZ] scroll_to_position=$it, itemCount=${suggestAdapter.itemCount},
-              | range=0..${suggestAdapter.itemCount - 1}""".trimMargin()
-              )
+              Timber.tag("???")
+                .d(
+                  """[HORZ] scroll_to_position=$it, itemCount=${suggestAdapter.itemCount},
+                    | range=0..${suggestAdapter.itemCount - 1}""".trimMargin()
+                )
               if (it >= 0) {
                 smoothScrollToPosition(it.toInt())
               }
@@ -154,18 +153,27 @@ class HomeAdapter(private val lifecycleOwner: LifecycleOwner) :
           )
       }
 
-      lifecycleOwner.lifecycle.addObserver(this)
+      lifecycleOwner.lifecycle.addObserver(object : LifecycleObserver {
+        @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+        private fun onResume() = startStopAutoScrollS.accept(true).also {
+          Timber.d("[###] ON_RESUME -> start")
+        }
+
+        @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+        private fun onPause() = startStopAutoScrollS.accept(false).also {
+          Timber.d("[###] ON_PAUSE -> stop")
+        }
+
+        @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        private fun onDestroy() {
+          Timber.d("[###] ON_DESTROY -> dispose")
+          if (!disposable.isDisposed) {
+            disposable.dispose()
+            Timber.d("[###] ON_DESTROY -> disposed")
+          }
+        }
+      })
     }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
-    private fun onResume() = startStopAutoScrollS.accept(true).also { Timber.d("[HORZ] start") }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-    private fun onPause() = startStopAutoScrollS.accept(false).also { Timber.d("[HORZ] stop") }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-    private fun onDestroy() =
-      disposable?.takeUnless { it.isDisposed }?.dispose().also { Timber.d("[HORZ] dipose") }
 
     override fun bind(item: HomeListItem) =
       onlyBind<HomeListItem.SuggestListState>(item) { (comics, errorMessage, isLoading) ->
@@ -232,7 +240,7 @@ class HomeAdapter(private val lifecycleOwner: LifecycleOwner) :
       }
   }
 
-  private inner class ComicItemVH(itemView: View, parent: ViewGroup) : VH(itemView) {
+  private inner class ComicItemVH(itemView: View, parent: View) : VH(itemView) {
     internal val imageComic = itemView.image_comic!!
     private val textView = itemView.text_view!!
     private val textComicName = itemView.text_comic_name!!
@@ -258,13 +266,12 @@ class HomeAdapter(private val lifecycleOwner: LifecycleOwner) :
         .map { getItem(it) }
         .ofType<HomeListItem.UpdatedItem.ComicItem>()
         .map { it.comic }
-        .subscribe(clickComicS::accept)
+        .subscribe(clickComicS)
     }
 
     override fun bind(item: HomeListItem) =
       onlyBind<HomeListItem.UpdatedItem.ComicItem>(item) { (comic) ->
-        GlideApp
-          .with(itemView.context)
+        glide
           .load(comic.thumbnail)
           .thumbnail(0.5f)
           .fitCenter()
@@ -313,15 +320,13 @@ class HomeAdapter(private val lifecycleOwner: LifecycleOwner) :
     }
   }
 
-  override fun onViewRecycled(holder: VH) {
+  /*override fun onViewRecycled(holder: VH) {
     super.onViewRecycled(holder)
     if (holder is ComicItemVH) {
-      GlideApp
-        .with(holder.itemView.context)
-        .clear(holder.imageComic)
+      glide.clear(holder.imageComic)
       Timber.d("onViewRecycled")
     }
-  }
+  }*/
 
   companion object {
     const val SUGGEST_LIST_VIEW_TYPE = 1
@@ -330,6 +335,8 @@ class HomeAdapter(private val lifecycleOwner: LifecycleOwner) :
     const val ERROR_ITEM_VIEW_TYPE = 4
     const val LOADING_ITEM_VIEW_TYPE = 5
     const val HEADER_VIEW_TYPE = 6
+    const val SUGGEST_COMIC_ITEM_VIEW_TYPE = 7
+    const val TOP_MONTH_COMIC_ITEM_VIEW_TYPE = 8
 
     @IntDef(
       value = [

@@ -28,7 +28,7 @@ class ComicDetailFragment : Fragment() {
   private val viewModel by viewModel<ComicDetailViewModel>()
   private val args by navArgs<ComicDetailFragmentArgs>()
 
-  private val compositeDisposable = CompositeDisposable()
+  private val compositeDisposableClearOnPause = CompositeDisposable()
   private val chapterAdapter = ChapterAdapter(::onClickChapter)
 
   override fun onCreateView(
@@ -53,7 +53,7 @@ class ComicDetailFragment : Fragment() {
   }
 
   private fun subscribeVM() {
-    viewModel.state.observe(this) {
+    viewModel.state.observe(viewLifecycleOwner) {
       Timber.d("state = $it")
 
       val comicDetail = it.comicDetail ?: return@observe
@@ -72,7 +72,7 @@ class ComicDetailFragment : Fragment() {
         progress_bar.visibility = View.INVISIBLE
       }
     }
-    viewModel.singleEvent.observeEvent(this) {
+    viewModel.singleEvent.observeEvent(viewLifecycleOwner) {
       when (it) {
         is ComicDetailSingleEvent.MessageEvent -> {
           view?.snack(it.message)
@@ -97,12 +97,13 @@ class ComicDetailFragment : Fragment() {
         ),
         swipe_refresh_layout.refreshes().map { ComicDetailIntent.Refresh(comic.link) }
       )
-    ).addTo(compositeDisposable)
+    ).addTo(compositeDisposableClearOnPause)
   }
 
   override fun onPause() {
     super.onPause()
-    compositeDisposable.clear()
+
+    compositeDisposableClearOnPause.clear()
   }
 
   private fun onClickChapter(chapter: Chapter) {

@@ -46,11 +46,16 @@
     <fragment
         android:id="@+id/comicDetailFragment"
         android:name="com.hoc.comicapp.ui.detail.ComicDetailFragment"
-        android:label="ComicDetailFragment">
+        android:label="{title}">
 
         <argument
             android:name="comic"
             app:argType="com.hoc.comicapp.data.models.Comic"
+            app:nullable="false" />
+
+        <argument
+            android:name="title"
+            app:argType="string"
             app:nullable="false" />
 
     </fragment>

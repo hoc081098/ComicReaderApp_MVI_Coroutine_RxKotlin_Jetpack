@@ -6,29 +6,38 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
-import com.hoc.comicapp.GlideApp
+import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
 import com.hoc.comicapp.data.models.Comic
+import com.hoc.comicapp.ui.home.HomeAdapter.Companion.SUGGEST_COMIC_ITEM_VIEW_TYPE
 import com.hoc.comicapp.utils.asObservable
 import com.jakewharton.rxbinding3.view.clicks
-import com.jakewharton.rxbinding3.view.detaches
 import com.jakewharton.rxrelay2.PublishRelay
 import kotlinx.android.synthetic.main.item_recyclerview_top_month_comic_or_recommened.view.*
 
-class SuggestAdapter : ListAdapter<Comic, SuggestAdapter.VH>(ComicDiffUtilItemCallback) {
+class SuggestAdapter(private val glide: GlideRequests) : ListAdapter<Comic, SuggestAdapter.VH>(ComicDiffUtilItemCallback) {
   private val clickComicS = PublishRelay.create<Comic>()
   val clickComicObservable get() = clickComicS.asObservable()
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-    return LayoutInflater.from(parent.context)
-      .inflate(R.layout.item_recyclerview_top_month_comic_or_recommened, parent, false)
-      .let { VH(it, parent) }
+    return when (viewType) {
+      SUGGEST_COMIC_ITEM_VIEW_TYPE -> LayoutInflater.from(parent.context)
+        .inflate(
+          R.layout.item_recyclerview_top_month_comic_or_recommened,
+          parent,
+          false
+        )
+        .let(::VH)
+      else -> throw IllegalStateException("viewType must be $SUGGEST_COMIC_ITEM_VIEW_TYPE, but viewType=$viewType")
+    }
   }
 
   override fun onBindViewHolder(holder: VH, position: Int) =
     holder.bind(getItem(position % itemCount))
 
-  inner class VH(itemView: View, parent: ViewGroup) : RecyclerView.ViewHolder(itemView) {
+  override fun getItemViewType(position: Int) = SUGGEST_COMIC_ITEM_VIEW_TYPE
+
+  inner class VH(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private val imageComic = itemView.image_comic!!
     private val textComicName = itemView.text_comic_name!!
     private val textChapter = itemView.text_chapter!!
@@ -38,11 +47,10 @@ class SuggestAdapter : ListAdapter<Comic, SuggestAdapter.VH>(ComicDiffUtilItemCa
     init {
       itemView
         .clicks()
-        .takeUntil(parent.detaches())
         .map { adapterPosition }
         .filter { it != RecyclerView.NO_POSITION }
         .map { getItem(it) }
-        .subscribe(clickComicS::accept)
+        .subscribe(clickComicS)
     }
 
     fun bind(item: Comic) {
@@ -51,7 +59,7 @@ class SuggestAdapter : ListAdapter<Comic, SuggestAdapter.VH>(ComicDiffUtilItemCa
       textLastUpdatedTime.text = item.chapters.first().time
       imageIconClock.setImageResource(R.drawable.ic_access_time_white_24dp)
 
-      GlideApp.with(itemView.context)
+      glide
         .load(item.thumbnail)
         .thumbnail(0.5f)
         .fitCenter()

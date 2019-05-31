@@ -16,6 +16,7 @@ import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
 import io.reactivex.annotations.CheckReturnValue
 import io.reactivex.annotations.SchedulerSupport
+import io.reactivex.subjects.Subject
 
 
 @CheckReturnValue
@@ -24,6 +25,9 @@ inline fun <reified U : Any, T : Any> Observable<T>.notOfType() = filter { it !i
 
 @Suppress("nothing_to_inline")
 inline fun <T> Relay<T>.asObservable(): Observable<T> = this
+
+@Suppress("nothing_to_inline")
+inline fun <T> Subject<T>.asObservable(): Observable<T> = this
 
 inline fun <T, R> Observable<T>.exhaustMap(crossinline transform: (T) -> Observable<R>): Observable<R> {
   return this

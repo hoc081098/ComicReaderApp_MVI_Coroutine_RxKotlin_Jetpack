@@ -10,6 +10,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
+import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
@@ -25,14 +26,21 @@ import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
+import kotlin.LazyThreadSafetyMode.NONE
 
 @ExperimentalCoroutinesApi
 class HomeFragment : Fragment() {
   private val homeViewModel by viewModel<HomeViewModel>()
-  private val homeAdapter = HomeAdapter(this)
+  private val homeAdapter by lazy(NONE) {
+    HomeAdapter(
+      this,
+      GlideApp.with(this),
+      recycler_home.recycledViewPool
+    )
+  }
 
-  private val compositeDisposableDisposeOnDestroyView = CompositeDisposable()
-  private val compositeDisposableDisposeOnPause = CompositeDisposable()
+  private val compositeDisposableClearOnDestroyView = CompositeDisposable()
+  private val compositeDisposableClearOnPause = CompositeDisposable()
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -51,7 +59,7 @@ class HomeFragment : Fragment() {
   }
 
   private fun observeViewModel() {
-    homeViewModel.state.observe(this) { (items, refreshLoading) ->
+    homeViewModel.state.observe(viewLifecycleOwner) { (items, refreshLoading) ->
       Timber.d("state=${items.size} $refreshLoading")
 
       homeAdapter.submitList(items)
@@ -61,7 +69,7 @@ class HomeFragment : Fragment() {
         swipe_refresh_layout.isRefreshing = false
       }
     }
-    homeViewModel.singleEvent.observeEvent(this) {
+    homeViewModel.singleEvent.observeEvent(viewLifecycleOwner) {
       when (it) {
         is HomeSingleEvent.MessageEvent -> {
           view?.snack(it.message)
@@ -119,7 +127,7 @@ class HomeFragment : Fragment() {
           fab.hide()
         }
       }
-      .addTo(compositeDisposable = compositeDisposableDisposeOnDestroyView)
+      .addTo(compositeDisposable = compositeDisposableClearOnDestroyView)
   }
 
   override fun onResume() {
@@ -135,16 +143,19 @@ class HomeFragment : Fragment() {
         homeAdapter.topMonthRetryObservable.map { HomeViewIntent.RetryTopMonth },
         homeAdapter.updatedRetryObservable.map { HomeViewIntent.RetryUpdate }
       )
-    ).addTo(compositeDisposableDisposeOnPause)
+    ).addTo(compositeDisposableClearOnPause)
 
     homeAdapter
       .clickComicObservable
       .subscribeBy {
         val toComicDetailFragment =
-          HomeFragmentDirections.actionHomeFragmentDestToComicDetailFragment(it)
+          HomeFragmentDirections.actionHomeFragmentDestToComicDetailFragment(
+            comic = it,
+            title = it.title
+          )
         findNavController().navigate(toComicDetailFragment)
       }
-      .addTo(compositeDisposableDisposeOnPause)
+      .addTo(compositeDisposableClearOnPause)
   }
 
   private fun loadNextPageIntent(): Observable<HomeViewIntent.LoadNextPageUpdatedComic> {
@@ -162,12 +173,14 @@ class HomeFragment : Fragment() {
     super.onPause()
     Timber.d("HomeFragment::onPause")
 
-    compositeDisposableDisposeOnPause.clear()
+    compositeDisposableClearOnPause.clear()
   }
 
   override fun onDestroyView() {
     super.onDestroyView()
-    compositeDisposableDisposeOnDestroyView.clear()
+    Timber.d("HomeFragment::onDestroyView")
+
+    compositeDisposableClearOnDestroyView.clear()
   }
 
   private companion object {
