@@ -2,16 +2,17 @@
 <androidx.constraintlayout.motion.widget.MotionLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root_detail"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    app:layoutDescription="@xml/scene_collapsing_toolbar"
     app:showPaths="false">
 
     <View
         android:id="@+id/background"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:background="@color/colorBackground"
         app:layout_constraintBottom_toBottomOf="@id/space"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -21,57 +22,70 @@
         android:id="@+id/space"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/image_thumbnail" />
 
     <ImageView
         android:id="@+id/image_thumbnail"
-        android:layout_width="150dp"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:scaleType="centerCrop"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:scaleType="fitXY"
         android:src="@drawable/splash_background"
-        app:layout_constraintDimensionRatio="h,1:1"
+        app:layout_constraintDimensionRatio="H,2:3"
+        app:layout_constraintEnd_toEndOf="@id/guideline"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/text_title"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="0dp"
+        android:ellipsize="end"
+        android:fontFamily="@font/google_sans"
+        android:gravity="center|start"
+        android:maxLines="4"
+        android:textAllCaps="true"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/image_thumbnail"
+        app:layout_constraintTop_toTopOf="@id/image_thumbnail"
+        tools:text="PHÁP SƯ KHÔNG PHÉP THUẬT VERY LONG VERY LONG VERY LONG TITLE" />
+
+    <TextView
+        android:id="@+id/text_last_updated"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:ellipsize="end"
         android:fontFamily="@font/google_sans"
         android:gravity="center|start"
         android:maxLines="2"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-        app:layout_constraintBottom_toBottomOf="@id/image_thumbnail"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/image_thumbnail"
-        app:layout_constraintTop_toTopOf="@id/image_thumbnail"
-        tools:text="TODO" />
+        app:layout_constraintTop_toBottomOf="@id/text_title"
+        tools:text="Last updated: 20:46 31/05/2019" />
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_chapters"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:id="@+id/swipe_refresh_layout"
+        android:clipToPadding="false"
+        android:padding="8dp"
+        android:scrollbars="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/space">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_chapters"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:padding="8dp"
-            android:scrollbars="vertical"
-            tools:listitem="@layout/item_recycler_chapter" />
-
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        app:layout_constraintTop_toBottomOf="@id/space"
+        tools:listitem="@layout/item_recycler_chapter" />
 
     <ProgressBar
         android:id="@+id/progress_bar"
@@ -85,5 +99,12 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/space" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.4" />
 
 </androidx.constraintlayout.motion.widget.MotionLayout>

@@ -16,7 +16,6 @@ import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.snack
 import com.jakewharton.rxbinding3.recyclerview.scrollEvents
-import com.jakewharton.rxbinding3.recyclerview.scrollStateChanges
 import com.jakewharton.rxbinding3.swiperefreshlayout.refreshes
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
@@ -26,41 +25,35 @@ import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
-import kotlin.LazyThreadSafetyMode.NONE
 
 @ExperimentalCoroutinesApi
 class HomeFragment : Fragment() {
   private val homeViewModel by viewModel<HomeViewModel>()
-  private val homeAdapter by lazy(NONE) {
-    HomeAdapter(
-      this,
-      GlideApp.with(this),
-      recycler_home.recycledViewPool
-    )
-  }
-
-  private val compositeDisposableClearOnDestroyView = CompositeDisposable()
-  private val compositeDisposableClearOnPause = CompositeDisposable()
+  private val compositeDisposable = CompositeDisposable()
 
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): View = inflater.inflate(R.layout.fragment_home, container, false).also {
-    Timber.d("HomeFragment::onCreateView")
-  }
+  ): View = inflater.inflate(R.layout.fragment_home, container, false)
+    .also { Timber.d("HomeFragment::onCreateView") }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
     Timber.d("HomeFragment::onViewCreated")
 
-    initView()
-    observeViewModel()
+    val homeAdapter = HomeAdapter(
+      viewLifecycleOwner,
+      GlideApp.with(this),
+      recycler_home.recycledViewPool
+    )
+    initView(homeAdapter)
+    bind(homeAdapter)
   }
 
-  private fun observeViewModel() {
+  private fun bind(homeAdapter: HomeAdapter) {
     homeViewModel.state.observe(viewLifecycleOwner) { (items, refreshLoading) ->
-      Timber.d("state=${items.size} $refreshLoading")
+      Timber.d("state=${items.size} refreshLoading=$refreshLoading")
 
       homeAdapter.submitList(items)
       if (refreshLoading) {
@@ -76,10 +69,19 @@ class HomeFragment : Fragment() {
         }
       }
     }
+    homeViewModel.processIntents(
+      Observable.mergeArray(
+        Observable.just(HomeViewIntent.Initial),
+        swipe_refresh_layout.refreshes().map { HomeViewIntent.Refresh },
+        loadNextPageIntent(),
+        homeAdapter.suggestRetryObservable.map { HomeViewIntent.RetrySuggest },
+        homeAdapter.topMonthRetryObservable.map { HomeViewIntent.RetryTopMonth },
+        homeAdapter.updatedRetryObservable.map { HomeViewIntent.RetryUpdate }
+      )
+    ).addTo(compositeDisposable)
   }
 
-
-  private fun initView() {
+  private fun initView(homeAdapter: HomeAdapter) {
     swipe_refresh_layout.setColorSchemeColors(*resources.getIntArray(com.hoc.comicapp.R.array.swipe_refresh_colors))
 
     recycler_home.run {
@@ -97,20 +99,18 @@ class HomeFragment : Fragment() {
       }
       adapter = homeAdapter
 
-      recycler_home.addOnItemTouchListener(object : RecyclerView.OnItemTouchListener {
-        override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) = Unit
-
+      recycler_home.addOnItemTouchListener(object : RecyclerView.SimpleOnItemTouchListener() {
         override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
-          if (e.action == MotionEvent.ACTION_DOWN && rv.scrollState == RecyclerView.SCROLL_STATE_SETTLING) {
+          if (e.action == MotionEvent.ACTION_DOWN &&
+            rv.scrollState == RecyclerView.SCROLL_STATE_SETTLING
+          ) {
+            Timber.d("Stop scroll")
             rv.stopScroll()
           }
           return false
         }
-
-        override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) = Unit
       })
     }
-
 
     fab.setOnClickListener {
       object : LinearSmoothScroller(it.context) {
@@ -127,23 +127,7 @@ class HomeFragment : Fragment() {
           fab.hide()
         }
       }
-      .addTo(compositeDisposable = compositeDisposableClearOnDestroyView)
-  }
-
-  override fun onResume() {
-    super.onResume()
-    Timber.d("HomeFragment::onResume")
-
-    homeViewModel.processIntents(
-      Observable.mergeArray(
-        Observable.just(HomeViewIntent.Initial),
-        swipe_refresh_layout.refreshes().map { HomeViewIntent.Refresh },
-        loadNextPageIntent(),
-        homeAdapter.suggestRetryObservable.map { HomeViewIntent.RetrySuggest },
-        homeAdapter.topMonthRetryObservable.map { HomeViewIntent.RetryTopMonth },
-        homeAdapter.updatedRetryObservable.map { HomeViewIntent.RetryUpdate }
-      )
-    ).addTo(compositeDisposableClearOnPause)
+      .addTo(compositeDisposable)
 
     homeAdapter
       .clickComicObservable
@@ -155,32 +139,23 @@ class HomeFragment : Fragment() {
           )
         findNavController().navigate(toComicDetailFragment)
       }
-      .addTo(compositeDisposableClearOnPause)
+      .addTo(compositeDisposable)
   }
 
   private fun loadNextPageIntent(): Observable<HomeViewIntent.LoadNextPageUpdatedComic> {
     return recycler_home
-      .scrollStateChanges()
-      .filter { it == RecyclerView.SCROLL_STATE_IDLE }
-      .filter {
-        (recycler_home.layoutManager as GridLayoutManager).findLastCompletelyVisibleItemPosition() +
-            VISIBLE_THRESHOLD >= homeAdapter.itemCount
+      .scrollEvents()
+      .filter { (_, _, dy) ->
+        val gridLayoutManager = recycler_home.layoutManager as GridLayoutManager
+        dy > 0 && gridLayoutManager.findLastVisibleItemPosition() + VISIBLE_THRESHOLD >= gridLayoutManager.itemCount
       }
       .map { HomeViewIntent.LoadNextPageUpdatedComic }
-  }
-
-  override fun onPause() {
-    super.onPause()
-    Timber.d("HomeFragment::onPause")
-
-    compositeDisposableClearOnPause.clear()
   }
 
   override fun onDestroyView() {
     super.onDestroyView()
     Timber.d("HomeFragment::onDestroyView")
-
-    compositeDisposableClearOnDestroyView.clear()
+    compositeDisposable.clear()
   }
 
   private companion object {

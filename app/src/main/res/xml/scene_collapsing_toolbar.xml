@@ -3,48 +3,31 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <Transition
-        app:constraintSetEnd="@id/end"
-        app:constraintSetStart="@id/start"
-        app:duration="1000"
-        app:visibilityMode="ignore">
+        app:constraintSetEnd="@id/start"
+        app:constraintSetStart="@id/end"
+        app:duration="1000">
 
         <OnSwipe
             app:dragDirection="dragUp"
-            app:onTouchUp="decelerateAndComplete"
-            app:touchAnchorId="@id/swipe_refresh_layout"
+            app:touchAnchorId="@id/recycler_chapters"
             app:touchAnchorSide="top" />
-
     </Transition>
 
-    <ConstraintSet
-
-        android:id="@+id/start">
-
-        <Constraint android:id="@id/background">
-            <CustomAttribute
-                app:attributeName="backgroundColor"
-                app:customColorValue="@color/colorBackground" />
-
-        </Constraint>
-
+    <ConstraintSet android:id="@+id/start">
     </ConstraintSet>
 
     <ConstraintSet android:id="@+id/end">
-        <Constraint android:id="@id/background">
-            <CustomAttribute
-                app:attributeName="backgroundColor"
-                app:customColorValue="@color/colorPrimary" />
-        </Constraint>
 
         <Constraint
             android:id="@id/image_thumbnail"
-            android:layout_width="40dp"
+            android:layout_width="46dp"
             android:layout_height="0dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintDimensionRatio="h,1:1"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="12dp"
+            app:layout_constraintDimensionRatio="H,2:3"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
     </ConstraintSet>
 
 </MotionScene>

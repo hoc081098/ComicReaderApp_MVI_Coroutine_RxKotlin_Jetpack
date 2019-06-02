@@ -1,5 +1,6 @@
 package com.hoc.comicapp.ui.home
 
+import android.util.DisplayMetrics
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.IntDef
@@ -7,10 +8,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.PagerSnapHelper
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.*
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
@@ -24,6 +22,7 @@ import com.jakewharton.rxbinding3.view.detaches
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.ofType
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.item_recycler_home_header.view.*
@@ -32,6 +31,7 @@ import kotlinx.android.synthetic.main.item_recyclerview_updated_comic.view.*
 import kotlinx.android.synthetic.main.item_recyclerview_updated_error.view.*
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
+
 
 class HomeAdapter(
   private val lifecycleOwner: LifecycleOwner,
@@ -98,80 +98,89 @@ class HomeAdapter(
     private var currentList = emptyList<Comic>()
 
     private val startStopAutoScrollS = PublishRelay.create<Boolean>()
-    private val intervalInMillis = 1_200L
+    private val intervalInMillis = 1_500L
     private val delayAfterTouchInMillis = 3_000L
 
     init {
+      Timber.d("[###] SuggestListVH::init")
       buttonRetry.setOnClickListener { suggestRetryS.accept(Unit) }
 
-      val disposable = recycler.run {
+      recycler.run {
         setHasFixedSize(true)
         val linearLayoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
         layoutManager = linearLayoutManager
         adapter = suggestAdapter
 
-        PagerSnapHelper().attachToRecyclerView(this)
+        LinearSnapHelper().attachToRecyclerView(this)
+      }
 
-        startStopAutoScrollS
-          .mergeWith(
-            scrollStateChanges()
-              .filter { it == RecyclerView.SCROLL_STATE_DRAGGING }
-              .switchMap {
-                Observable.just(false)
-                  .concatWith(
-                    Observable.timer(
-                      delayAfterTouchInMillis,
-                      TimeUnit.MILLISECONDS
-                    ).map { true }
-                  )
-              }
-          )
-          .map { it to suggestAdapter.itemCount }
-          .doOnNext { Timber.d("[HORZ] auto_scroll=$it") }
-          .switchMap { (startAutoScroll, itemCount) ->
-            if (!startAutoScroll || itemCount == 0) {
-              Observable.just(-1L)
-            } else {
-              Observable
-                .interval(intervalInMillis, TimeUnit.MILLISECONDS)
-                .map { it % itemCount }
-            }
-          }
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribeBy(
-            onNext = {
-              Timber.tag("???")
-                .d(
-                  """[HORZ] scroll_to_position=$it, itemCount=${suggestAdapter.itemCount},
-                    | range=0..${suggestAdapter.itemCount - 1}""".trimMargin()
-                )
-              if (it >= 0) {
-                smoothScrollToPosition(it.toInt())
-              }
-            },
-            onError = {}
-          )
+      val smoothScroller = object : LinearSmoothScroller(itemView.context) {
+        override fun getVerticalSnapPreference(): Int {
+          return LinearSmoothScroller.SNAP_TO_ANY
+        }
+
+        override fun calculateSpeedPerPixel(displayMetrics: DisplayMetrics): Float {
+          return 120f / displayMetrics.densityDpi
+        }
       }
 
       lifecycleOwner.lifecycle.addObserver(object : LifecycleObserver {
-        @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
-        private fun onResume() = startStopAutoScrollS.accept(true).also {
-          Timber.d("[###] ON_RESUME -> start")
+        lateinit var disposable: Disposable
+
+        @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+        private fun onCreate() {
+          disposable = startStopAutoScrollS
+            .mergeWith(
+              recycler
+                .scrollStateChanges()
+                .filter { it == RecyclerView.SCROLL_STATE_DRAGGING }
+                .switchMap {
+                  Observable.just(false)
+                    .concatWith(
+                      Observable.timer(
+                        delayAfterTouchInMillis,
+                        TimeUnit.MILLISECONDS
+                      ).map { true }
+                    )
+                }
+            )
+            .map { it to suggestAdapter.itemCount }
+            .doOnNext { Timber.d("[HORZ] auto_scroll=$it") }
+            .switchMap { (startAutoScroll, itemCount) ->
+              if (!startAutoScroll || itemCount == 0) {
+                Observable.just(-1L)
+              } else {
+                Observable
+                  .interval(intervalInMillis, TimeUnit.MILLISECONDS)
+                  .map { it % itemCount }
+              }
+            }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
+              onNext = {
+                Timber.tag("???").d("[HORZ] scroll_to_position=$it")
+                if (it >= 0 && it != 2L) {
+                  recycler
+                    .layoutManager
+                    ?.startSmoothScroll(smoothScroller.apply { targetPosition = it.toInt() })
+                }
+              },
+              onError = {}
+            )
+          Timber.d("[###] ON_CREATE")
         }
+
+        @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+        private fun onResume() = startStopAutoScrollS.accept(true)
+          .also { Timber.d("[###] ON_RESUME -> start") }
 
         @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-        private fun onPause() = startStopAutoScrollS.accept(false).also {
-          Timber.d("[###] ON_PAUSE -> stop")
-        }
+        private fun onPause() = startStopAutoScrollS.accept(false)
+          .also { Timber.d("[###] ON_PAUSE -> stop") }
 
         @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        private fun onDestroy() {
-          Timber.d("[###] ON_DESTROY -> dispose")
-          if (!disposable.isDisposed) {
-            disposable.dispose()
-            Timber.d("[###] ON_DESTROY -> disposed")
-          }
-        }
+        private fun onDestroy() = disposable.dispose()
+          .also { Timber.d("[###] ON_DESTROY -> disposed") }
       })
     }
 
@@ -208,6 +217,7 @@ class HomeAdapter(
     private var currentList = emptyList<Comic>()
 
     init {
+      Timber.d("[###] TopMonthListVH::init")
       buttonRetry.setOnClickListener { topMonthRetryS.accept(Unit) }
 
       recycler.run {
