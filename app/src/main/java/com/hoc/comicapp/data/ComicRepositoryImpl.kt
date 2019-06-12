@@ -2,6 +2,7 @@ package com.hoc.comicapp.data
 
 import com.hoc.comicapp.CoroutinesDispatcherProvider
 import com.hoc.comicapp.data.Mapper.comicResponseToComicModel
+import com.hoc.comicapp.data.models.Category
 import com.hoc.comicapp.data.models.Comic
 import com.hoc.comicapp.data.models.ComicAppError
 import com.hoc.comicapp.data.models.toError
@@ -70,6 +71,34 @@ class ComicRepositoryImpl(
       }
     } catch (throwable: Throwable) {
       Timber.d(throwable, "getSuggest $throwable")
+      throwable.toError(retrofit).left()
+    }
+  }
+
+  override suspend fun categories(): Either<ComicAppError, List<Category>> {
+    return try {
+      withContext(dispatcherProvider.io) {
+        comicApiService
+          .categories()
+          .map { Mapper.categoryResponseToCategoryModel(it) }
+          .right()
+      }
+    } catch (throwable: Throwable) {
+      Timber.d(throwable, "categories $throwable")
+      throwable.toError(retrofit).left()
+    }
+  }
+
+  override suspend fun searchComic(query: String): Either<ComicAppError, List<Comic>> {
+    return try {
+      withContext(dispatcherProvider.io) {
+        comicApiService
+          .searchComic(query)
+          .map { Mapper.comicResponseToComicModel(it) }
+          .right()
+      }
+    } catch (throwable: Throwable) {
+      Timber.d(throwable, "searchComic $throwable")
       throwable.toError(retrofit).left()
     }
   }

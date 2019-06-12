@@ -9,5 +9,6 @@ data class Chapter(
   val chapterName: String,
   val time: String?,
   val images: List<String>?,
+  val htmlContent: String?,
   val view: String?
 ) : Parcelable

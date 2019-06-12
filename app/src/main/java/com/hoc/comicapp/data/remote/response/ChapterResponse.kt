@@ -7,5 +7,6 @@ data class ChapterResponse(
   @Json(name = "chapter_name") val chapterName: String,
   @Json(name = "time") val time: String? = null,
   @Json(name = "images") val images: List<String>? = null,
+  @Json(name = "htmlContent") val htmlContent: String? = null,
   @Json(name = "view") val view: String? = null
 )

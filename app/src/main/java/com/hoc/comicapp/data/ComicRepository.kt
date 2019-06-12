@@ -1,5 +1,6 @@
 package com.hoc.comicapp.data
 
+import com.hoc.comicapp.data.models.Category
 import com.hoc.comicapp.data.models.Comic
 import com.hoc.comicapp.data.models.ComicAppError
 import com.hoc.comicapp.utils.Either
@@ -25,4 +26,15 @@ interface ComicRepository {
    * @param comicLink comic url
    */
   suspend fun getComicDetail(comicLink: String): Either<ComicAppError, Comic>
+
+  /**
+   * Get all categories (name, link, description)
+   */
+  suspend fun categories(): Either<ComicAppError, List<Category>>
+
+  /**
+   * Search comic by [query] (only partial information)
+   * @param query term to search
+   */
+  suspend fun searchComic(query: String): Either<ComicAppError, List<Comic>>
 }

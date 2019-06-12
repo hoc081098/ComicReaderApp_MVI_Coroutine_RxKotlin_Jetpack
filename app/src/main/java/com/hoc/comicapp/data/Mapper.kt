@@ -40,7 +40,8 @@ object Mapper {
   fun categoryResponseToCategoryModel(categoryResponse: CategoryResponse): Category {
     return Category(
       name = categoryResponse.name,
-      link = categoryResponse.link
+      link = categoryResponse.link,
+      description = categoryResponse.description
     )
   }
 
@@ -51,7 +52,8 @@ object Mapper {
       chapterName = chapterResponse.chapterName,
       time = chapterResponse.time,
       view = chapterResponse.view,
-      images = chapterResponse.images
+      images = chapterResponse.images,
+      htmlContent = chapterResponse.htmlContent
     )
   }
 }

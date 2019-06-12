@@ -1,5 +1,6 @@
 package com.hoc.comicapp.data.remote
 
+import com.hoc.comicapp.data.remote.response.CategoryResponse
 import com.hoc.comicapp.data.remote.response.ComicResponse
 import retrofit2.Retrofit
 import retrofit2.create
@@ -21,6 +22,12 @@ interface ComicApiService {
 
   @GET("comic_detail")
   suspend fun comicDetail(@Query("link") link: String): ComicResponse
+
+  @GET("categories")
+  suspend fun categories(): List<CategoryResponse>
+
+  @GET("search_comic")
+  suspend fun searchComic(@Query("query") query: String): List<ComicResponse>
 
   companion object {
     operator fun invoke(retrofit: Retrofit) = retrofit.create<ComicApiService>()
