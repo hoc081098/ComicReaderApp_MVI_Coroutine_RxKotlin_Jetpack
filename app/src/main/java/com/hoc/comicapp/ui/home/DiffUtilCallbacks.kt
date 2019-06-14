@@ -1,7 +1,8 @@
 package com.hoc.comicapp.ui.home
 
 import androidx.recyclerview.widget.DiffUtil
-import com.hoc.comicapp.data.models.Comic
+import com.hoc.domain.models.SuggestComic
+import com.hoc.domain.models.TopMonthComic
 
 object HomeListItemDiffUtilItemCallback : DiffUtil.ItemCallback<HomeListItem>() {
   override fun areItemsTheSame(oldItem: HomeListItem, newItem: HomeListItem) = when {
@@ -17,7 +18,12 @@ object HomeListItemDiffUtilItemCallback : DiffUtil.ItemCallback<HomeListItem>() 
   override fun areContentsTheSame(oldItem: HomeListItem, newItem: HomeListItem) = oldItem == newItem
 }
 
-object ComicDiffUtilItemCallback : DiffUtil.ItemCallback<Comic>() {
-  override fun areItemsTheSame(oldItem: Comic, newItem: Comic) = oldItem.link == newItem.link
-  override fun areContentsTheSame(oldItem: Comic, newItem: Comic) = oldItem == newItem
+object SuggestComicDiffUtilItemCallback : DiffUtil.ItemCallback<SuggestComic>() {
+  override fun areItemsTheSame(oldItem: SuggestComic, newItem: SuggestComic) = oldItem.link == newItem.link
+  override fun areContentsTheSame(oldItem: SuggestComic, newItem: SuggestComic) = oldItem == newItem
+}
+
+object TopMonthComicDiffUtilItemCallback : DiffUtil.ItemCallback<TopMonthComic>() {
+  override fun areItemsTheSame(oldItem: TopMonthComic, newItem: TopMonthComic) = oldItem.link == newItem.link
+  override fun areContentsTheSame(oldItem: TopMonthComic, newItem: TopMonthComic) = oldItem == newItem
 }

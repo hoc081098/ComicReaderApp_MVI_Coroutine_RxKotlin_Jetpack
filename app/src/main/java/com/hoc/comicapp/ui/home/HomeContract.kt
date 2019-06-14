@@ -1,13 +1,23 @@
 package com.hoc.comicapp.ui.home
 
+import android.os.Parcelable
 import com.hoc.comicapp.base.Intent
 import com.hoc.comicapp.base.SingleEvent
 import com.hoc.comicapp.base.ViewState
-import com.hoc.comicapp.data.models.Comic
-import com.hoc.comicapp.data.models.ComicAppError
-import com.hoc.comicapp.data.models.getMessageFromError
+import com.hoc.domain.models.*
 import io.reactivex.Observable
+import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.CoroutineScope
+
+/**
+ * Argument to pass to [com.hoc.comicapp.ui.detail.ComicDetailFragment]
+ */
+@Parcelize
+data class ComicArg(
+  val link: String,
+  val thumbnail: String,
+  val title: String
+): Parcelable
 
 interface HomeInteractor {
   fun suggestComicsPartialChanges(coroutineScope: CoroutineScope): Observable<HomePartialChange>
@@ -24,19 +34,19 @@ interface HomeInteractor {
 
 sealed class HomeListItem {
   data class SuggestListState(
-    val comics: List<Comic>,
+    val comics: List<SuggestComic>,
     val errorMessage: String?,
     val isLoading: Boolean
   ) : HomeListItem()
 
   data class TopMonthListState(
-    val comics: List<Comic>,
+    val comics: List<TopMonthComic>,
     val errorMessage: String?,
     val isLoading: Boolean
   ) : HomeListItem()
 
   sealed class UpdatedItem : HomeListItem() {
-    data class ComicItem(val comic: Comic) : UpdatedItem()
+    data class ComicItem(val comic: UpdatedComic) : UpdatedItem()
     data class Error(val errorMessage: String?) : UpdatedItem()
     object Loading : UpdatedItem()
   }
@@ -126,7 +136,7 @@ sealed class HomePartialChange {
               if (it is HomeListItem.SuggestListState) {
                 it.copy(
                   isLoading = false,
-                  errorMessage = this.error.getMessageFromError()
+                  errorMessage = this.error.getMessage()
                 )
               } else {
                 it
@@ -137,9 +147,9 @@ sealed class HomePartialChange {
       }
     }
 
-    data class Data(val comics: List<Comic>) : SuggestHomePartialChange()
+    data class Data(val comics: List<SuggestComic>) : SuggestHomePartialChange()
     object Loading : SuggestHomePartialChange()
-    data class Error(val error: com.hoc.comicapp.data.models.ComicAppError) :
+    data class Error(val error: ComicAppError) :
       SuggestHomePartialChange()
   }
 
@@ -181,7 +191,7 @@ sealed class HomePartialChange {
               if (it is HomeListItem.TopMonthListState) {
                 it.copy(
                   isLoading = false,
-                  errorMessage = this.error.getMessageFromError()
+                  errorMessage = this.error.getMessage()
                 )
               } else {
                 it
@@ -192,9 +202,9 @@ sealed class HomePartialChange {
       }
     }
 
-    data class Data(val comics: List<Comic>) : TopMonthHomePartialChange()
+    data class Data(val comics: List<TopMonthComic>) : TopMonthHomePartialChange()
     object Loading : TopMonthHomePartialChange()
-    data class Error(val error: com.hoc.comicapp.data.models.ComicAppError) :
+    data class Error(val error: ComicAppError) :
       TopMonthHomePartialChange()
   }
 
@@ -226,15 +236,15 @@ sealed class HomePartialChange {
         is HomePartialChange.UpdatedPartialChange.Error -> {
           state.copy(
             items = state.items.filterNot(HomeListItem::isLoadingOrError) +
-                HomeListItem.UpdatedItem.Error(this.error.getMessageFromError())
+                HomeListItem.UpdatedItem.Error(this.error.getMessage())
           )
         }
       }
     }
 
-    data class Data(val comics: List<Comic>, val append: Boolean = true) : UpdatedPartialChange()
+    data class Data(val comics: List<UpdatedComic>, val append: Boolean = true) : UpdatedPartialChange()
     object Loading : UpdatedPartialChange()
-    data class Error(val error: com.hoc.comicapp.data.models.ComicAppError) : UpdatedPartialChange()
+    data class Error(val error: ComicAppError) : UpdatedPartialChange()
   }
 
   sealed class RefreshPartialChange : HomePartialChange() {
@@ -260,9 +270,9 @@ sealed class HomePartialChange {
     }
 
     data class RefreshSuccess(
-      val suggestComics: List<Comic>,
-      val topMonthComics: List<Comic>,
-      val updatedComics: List<Comic>
+      val suggestComics: List<SuggestComic>,
+      val topMonthComics: List<TopMonthComic>,
+      val updatedComics: List<UpdatedComic>
     ) : RefreshPartialChange()
 
     object Loading : RefreshPartialChange()

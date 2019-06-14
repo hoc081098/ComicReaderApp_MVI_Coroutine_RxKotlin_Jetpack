@@ -1,59 +1,105 @@
 package com.hoc.comicapp.data
 
-import com.hoc.comicapp.data.models.Category
-import com.hoc.comicapp.data.models.Chapter
-import com.hoc.comicapp.data.models.Comic
-import com.hoc.comicapp.data.models.MoreDetail
-import com.hoc.comicapp.data.remote.response.CategoryResponse
-import com.hoc.comicapp.data.remote.response.ChapterResponse
-import com.hoc.comicapp.data.remote.response.ComicResponse
-import com.hoc.comicapp.data.remote.response.MoreDetailResponse
+import com.hoc.comicapp.data.remote.response.*
+import com.hoc.domain.models.*
 
 object Mapper {
-  @JvmStatic
-  fun comicResponseToComicModel(comicResponse: ComicResponse): Comic {
-    return Comic(
-      link = comicResponse.link,
-      chapters = comicResponse.chapters.map(::chapterResponseToChapterModel),
-      thumbnail = comicResponse.thumbnail,
-      title = comicResponse.title,
-      view = comicResponse.view,
-      moreDetail = moreDetailResponseToMoreDetailModel(comicResponse.moreDetail)
+  fun responseToDomainModel(response: TopMonthComicResponse): TopMonthComic {
+    return TopMonthComic(
+      title = response.title,
+      link = response.link,
+      view = response.view,
+      lastChapter = TopMonthComic.Chapter(
+        chapterLink = response.lastChapter.chapterLink,
+        chapterName = response.lastChapter.chapterName
+      ),
+      thumbnail = response.thumbnail
     )
   }
 
-  @JvmStatic
-  fun moreDetailResponseToMoreDetailModel(moreDetailResponse: MoreDetailResponse?): MoreDetail? {
-    return moreDetailResponse?.let {
-      MoreDetail(
-        lastUpdated = it.lastUpdated,
-        author = it.author,
-        categories = it.categories.map(Mapper::categoryResponseToCategoryModel),
-        otherName = it.otherName,
-        shortenedContent = it.shortenedContent,
-        status = it.status
+  fun responseToDomainModel(response: UpdatedComicResponse): UpdatedComic {
+    return UpdatedComic(
+      title = response.title,
+      link = response.link,
+      view = response.view,
+      thumbnail = response.thumbnail,
+      lastChapters = response.lastChapters.map {
+        UpdatedComic.Chapter(
+          chapterName = it.chapterName,
+          chapterLink = it.chapterLink,
+          time = it.time
+        )
+      }
+    )
+  }
+
+  fun responseToDomainModel(response: SuggestComicResponse): SuggestComic {
+    val lastChapter = response.lastChapter
+    return SuggestComic(
+      title = response.title,
+      link = response.link,
+      thumbnail = response.thumbnail,
+      lastChapter = SuggestComic.Chapter(
+        chapterName = lastChapter.chapterName,
+        chapterLink = lastChapter.chapterLink,
+        time = lastChapter.time
       )
-    }
-  }
-
-  @JvmStatic
-  fun categoryResponseToCategoryModel(categoryResponse: CategoryResponse): Category {
-    return Category(
-      name = categoryResponse.name,
-      link = categoryResponse.link,
-      description = categoryResponse.description
     )
   }
 
-  @JvmStatic
-  fun chapterResponseToChapterModel(chapterResponse: ChapterResponse): Chapter {
-    return Chapter(
-      chapterLink = chapterResponse.chapterLink,
-      chapterName = chapterResponse.chapterName,
-      time = chapterResponse.time,
-      view = chapterResponse.view,
-      images = chapterResponse.images,
-      htmlContent = chapterResponse.htmlContent
+  fun responseToDomainModel(response: ComicDetailResponse): ComicDetail {
+    return ComicDetail(
+      link = response.link,
+      thumbnail = response.thumbnail,
+      view = response.view,
+      title = response.title,
+      chapters = response.chapters.map {
+        ComicDetail.Chapter(
+          chapterLink = it.chapterLink,
+          view = it.view,
+          time = it.time,
+          chapterName = it.chapterName
+        )
+      },
+      author = response.author,
+      categories = response.categories.map {
+        ComicDetail.Category(
+          link = it.link,
+          name = it.name
+        )
+      },
+      lastUpdated = response.lastUpdated,
+      otherName = response.otherName,
+      shortenedContent = response.shortenedContent,
+      status = response.status
+    )
+  }
+
+  fun responseToDomainModel(response: ChapterDetailResponse): ChapterDetail {
+    return ChapterDetail(
+      chapterName = response.chapterName,
+      time = response.time,
+      chapterLink = response.chapterLink,
+      htmlContent = response.htmlContent,
+      images = response.images
+    )
+  }
+
+  fun responseToDomainModel(response: CategoryResponse): Category {
+    return Category(
+      link = response.link,
+      name = response.name,
+      description = response.description
+    )
+  }
+
+  fun responseToDomainModel(response: SearchComicResponse): SearchComic {
+    return SearchComic(
+      link = response.link,
+      title = response.title,
+      thumbnail = response.thumbnail,
+      categoryNames = response.categoryNames,
+      lastChapterName = response.lastChapterName
     )
   }
 }

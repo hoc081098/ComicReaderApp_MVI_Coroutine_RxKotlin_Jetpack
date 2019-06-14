@@ -12,10 +12,11 @@ import androidx.recyclerview.widget.*
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
-import com.hoc.comicapp.data.models.Comic
 import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.*
-import com.hoc.comicapp.utils.asObservable
 import com.hoc.comicapp.utils.inflate
+import com.hoc.domain.models.SuggestComic
+import com.hoc.domain.models.TopMonthComic
+import com.hoc.domain.models.UpdatedComic
 import com.jakewharton.rxbinding3.recyclerview.scrollStateChanges
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxbinding3.view.detaches
@@ -45,15 +46,33 @@ class HomeAdapter(
   private val suggestRetryS = PublishRelay.create<Unit>()
   private val topMonthRetryS = PublishRelay.create<Unit>()
   private val updatedRetryS = PublishRelay.create<Unit>()
-  private val clickComicS = PublishRelay.create<Comic>()
+  private val clickComicS = PublishRelay.create<UpdatedComic>()
 
   val suggestRetryObservable = suggestRetryS.throttleFirst(500, TimeUnit.MILLISECONDS)!!
   val topMonthRetryObservable = topMonthRetryS.throttleFirst(500, TimeUnit.MILLISECONDS)!!
   val updatedRetryObservable = updatedRetryS.throttleFirst(500, TimeUnit.MILLISECONDS)!!
   val clickComicObservable = Observable.mergeArray(
-    suggestAdapter.clickComicObservable.doOnNext { Timber.d("[1] Click suggest comic $it") },
-    topMonthAdapter.clickComicObservable.doOnNext { Timber.d("[2] Click top month comic $it") },
-    clickComicS.asObservable().doOnNext { Timber.d("[3] Click updated comic $it") }
+    suggestAdapter.clickComicObservable.map {
+      ComicArg(
+        link = it.link,
+        thumbnail = it.thumbnail,
+        title = it.title
+      )
+    },
+    topMonthAdapter.clickComicObservable.map {
+      ComicArg(
+        link = it.link,
+        thumbnail = it.thumbnail,
+        title = it.title
+      )
+    },
+    clickComicS.map {
+      ComicArg(
+        link = it.link,
+        thumbnail = it.thumbnail,
+        title = it.title
+      )
+    }
   ).doOnNext { Timber.d("[*] Click comic $it") }!!
 
   override fun onCreateViewHolder(parent: ViewGroup, @ViewType viewType: Int): VH {
@@ -95,7 +114,7 @@ class HomeAdapter(
   }
 
   private inner class SuggestListVH(itemView: View) : HorizontalRecyclerVH(itemView) {
-    private var currentList = emptyList<Comic>()
+    private var currentList = emptyList<SuggestComic>()
 
     private val startStopAutoScrollS = PublishRelay.create<Boolean>()
     private val intervalInMillis = 1_500L
@@ -214,7 +233,7 @@ class HomeAdapter(
   }
 
   private inner class TopMonthListVH(itemView: View) : HorizontalRecyclerVH(itemView) {
-    private var currentList = emptyList<Comic>()
+    private var currentList = emptyList<TopMonthComic>()
 
     init {
       Timber.d("[###] TopMonthListVH::init")
@@ -292,10 +311,10 @@ class HomeAdapter(
         textView.text = comic.view
 
         textChapters
-          .zip(comic.chapters)
+          .zip(comic.lastChapters)
           .forEach { (textViews, chapter) ->
             textViews.first.text = chapter.chapterName
-            textViews.second.text = chapter.time ?: "..."
+            textViews.second.text = chapter.time
           }
       }
   }

@@ -102,6 +102,8 @@ dependencies {
   implementation("com.github.bumptech.glide:glide:$glideVersion")
   kapt("com.github.bumptech.glide:compiler:$glideVersion")
 
+  implementation("com.miguelcatalan:materialsearchview:1.4.0")
+
   testImplementation("junit:junit:4.12")
   androidTestImplementation("androidx.test:runner:1.1.2-alpha01")
   androidTestImplementation("androidx.test.espresso:espresso-core:3.1.2-alpha01")

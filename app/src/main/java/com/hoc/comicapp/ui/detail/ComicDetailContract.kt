@@ -3,10 +3,11 @@ package com.hoc.comicapp.ui.detail
 import com.hoc.comicapp.base.Intent
 import com.hoc.comicapp.base.SingleEvent
 import com.hoc.comicapp.base.ViewState
-import com.hoc.comicapp.data.models.ComicAppError
-import com.hoc.comicapp.data.models.getMessageFromError
+import com.hoc.domain.models.ComicAppError
+import com.hoc.domain.models.getMessage
 import io.reactivex.Observable
 import kotlinx.coroutines.CoroutineScope
+import com.hoc.domain.models.ComicDetail as ComicDetailDomain
 
 interface ComicDetailInteractor {
   fun getComicDetail(
@@ -24,47 +25,12 @@ interface ComicDetailInteractor {
 
 sealed class ComicDetailIntent : Intent {
   data class Initial(
-    val name: String,
     val link: String,
-    val thumbnail: String
+    val thumbnail: String,
+    val title: String
   ) : ComicDetailIntent()
 
   data class Refresh(val link: String) : ComicDetailIntent()
-}
-
-data class Category(val name: String, val link: String)
-
-data class Chapter(
-  val name: String,
-  val link: String,
-  val time: String?,
-  val view: String?
-)
-
-sealed class ComicDetail {
-  abstract val link: String
-  abstract val thumbnail: String
-  abstract val title: String
-
-  data class Comic(
-    override val link: String,
-    override val thumbnail: String,
-    override val title: String,
-    val view: String,
-    val lastUpdated: String,
-    val author: String,
-    val status: String,
-    val categories: List<Category>,
-    val otherName: String?,
-    val shortenedContent: String,
-    val chapters: List<Chapter>
-  ) : ComicDetail()
-
-  data class InitialComic(
-    override val title: String,
-    override val thumbnail: String,
-    override val link: String
-  ) : ComicDetail()
 }
 
 data class ComicDetailViewState(
@@ -79,6 +45,16 @@ data class ComicDetailViewState(
       errorMessage = null,
       isLoading = true
     )
+  }
+
+  sealed class ComicDetail {
+    data class Comic(val comicDetail: ComicDetailDomain) : ComicDetail()
+
+    data class InitialComic(
+      val link: String,
+      val thumbnail: String,
+      val title: String
+    ) : ComicDetail()
   }
 }
 
@@ -101,7 +77,7 @@ sealed class ComicDetailPartialChange {
         is Error -> {
           state.copy(
             isLoading = false,
-            errorMessage = this.error.getMessageFromError()
+            errorMessage = this.error.getMessage()
           )
         }
         Loading -> {
@@ -110,8 +86,8 @@ sealed class ComicDetailPartialChange {
       }
     }
 
-    data class InitialData(val initialComic: ComicDetail.InitialComic) : InitialPartialChange()
-    data class Data(val comicDetail: ComicDetail.Comic) : InitialPartialChange()
+    data class InitialData(val initialComic: ComicDetailViewState.ComicDetail.InitialComic) : InitialPartialChange()
+    data class Data(val comicDetail: ComicDetailViewState.ComicDetail.Comic) : InitialPartialChange()
     data class Error(val error: ComicAppError) : InitialPartialChange()
     object Loading : InitialPartialChange()
   }
@@ -135,7 +111,7 @@ sealed class ComicDetailPartialChange {
       }
     }
 
-    data class Success(val comicDetail: ComicDetail.Comic) : RefreshPartialChange()
+    data class Success(val comicDetail: ComicDetailViewState.ComicDetail.Comic) : RefreshPartialChange()
     data class Error(val error: ComicAppError) : RefreshPartialChange()
     object Loading : RefreshPartialChange()
   }

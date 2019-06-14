@@ -1,9 +1,9 @@
 package com.hoc.comicapp.ui.home
 
-import com.hoc.comicapp.data.ComicRepository
 import com.hoc.comicapp.utils.flatMap
 import com.hoc.comicapp.utils.fold
 import com.hoc.comicapp.utils.map
+import com.hoc.domain.ComicRepository
 import io.reactivex.Observable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -19,9 +19,9 @@ class HomeInteractorImpl1(
     return coroutineScope.rxObservable<HomePartialChange> {
       send(HomePartialChange.RefreshPartialChange.Loading)
 
-      val suggestAsync = async { comicRepository.getSuggest() }
-      val topMonthAsync = async { comicRepository.getTopMonth() }
-      val updatedAsync = async { comicRepository.getUpdate() }
+      val suggestAsync = async { comicRepository.getSuggestComics() }
+      val topMonthAsync = async { comicRepository.getTopMonthComics() }
+      val updatedAsync = async { comicRepository.getUpdatedComics() }
 
       val suggest = suggestAsync.await()
       val topMonth = topMonthAsync.await()

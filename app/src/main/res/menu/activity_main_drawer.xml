@@ -10,9 +10,9 @@
             android:title="Home" />
 
         <item
-            android:id="@+id/action_home_fragment_dest_to_placeholder_fragment_dest"
+            android:id="@+id/categoryFragment"
             android:icon="@drawable/ic_home_white_24dp"
-            android:title="Placeholder" />
+            android:title="All categories" />
 
     </group>
 

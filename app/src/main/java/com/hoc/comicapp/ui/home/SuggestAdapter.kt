@@ -8,15 +8,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
-import com.hoc.comicapp.data.models.Comic
 import com.hoc.comicapp.ui.home.HomeAdapter.Companion.SUGGEST_COMIC_ITEM_VIEW_TYPE
 import com.hoc.comicapp.utils.asObservable
+import com.hoc.domain.models.SuggestComic
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxrelay2.PublishRelay
 import kotlinx.android.synthetic.main.item_recyclerview_top_month_comic_or_recommened.view.*
 
-class SuggestAdapter(private val glide: GlideRequests) : ListAdapter<Comic, SuggestAdapter.VH>(ComicDiffUtilItemCallback) {
-  private val clickComicS = PublishRelay.create<Comic>()
+class SuggestAdapter(private val glide: GlideRequests) : ListAdapter<SuggestComic, SuggestAdapter.VH>(SuggestComicDiffUtilItemCallback) {
+  private val clickComicS = PublishRelay.create<SuggestComic>()
   val clickComicObservable get() = clickComicS.asObservable()
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
@@ -53,10 +53,10 @@ class SuggestAdapter(private val glide: GlideRequests) : ListAdapter<Comic, Sugg
         .subscribe(clickComicS)
     }
 
-    fun bind(item: Comic) {
+    fun bind(item: SuggestComic) {
       textComicName.text = item.title
-      textChapter.text = item.chapters.first().chapterName
-      textLastUpdatedTime.text = item.chapters.first().time
+      textChapter.text = item.lastChapter.chapterName
+      textLastUpdatedTime.text = item.lastChapter.time
       imageIconClock.setImageResource(R.drawable.ic_access_time_white_24dp)
 
       glide

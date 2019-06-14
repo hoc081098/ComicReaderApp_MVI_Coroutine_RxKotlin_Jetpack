@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <item
-        android:id="@+id/action_home_fragment_dest_to_settings_fragment_dest"
+        android:id="@+id/searchComicFragment"
+        android:icon="@drawable/ic_search_while_24dp"
+        android:title="@string/search_comic"
+        android:menuCategory="secondary"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/settings_fragment_dest"
         android:orderInCategory="100"
         android:menuCategory="secondary"
         android:title="@string/action_settings"
         app:showAsAction="never" />
+
 </menu>

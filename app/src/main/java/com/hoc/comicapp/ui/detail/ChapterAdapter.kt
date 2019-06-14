@@ -8,10 +8,11 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.NO_POSITION
 import com.hoc.comicapp.R
+import com.hoc.domain.models.ComicDetail.Chapter
 import kotlinx.android.synthetic.main.item_recycler_chapter.view.*
 
 object ChapterDiffUtilItemCallback : DiffUtil.ItemCallback<Chapter>() {
-  override fun areItemsTheSame(oldItem: Chapter, newItem: Chapter) = oldItem.link == newItem.link
+  override fun areItemsTheSame(oldItem: Chapter, newItem: Chapter) = oldItem.chapterLink == newItem.chapterLink
   override fun areContentsTheSame(oldItem: Chapter, newItem: Chapter) = oldItem == newItem
 }
 
@@ -40,7 +41,7 @@ class ChapterAdapter(private val onClickChapter: (Chapter) -> Unit) :
     }
 
     fun bind(item: Chapter) {
-      textChapterTitle.text = item.name
+      textChapterTitle.text = item.chapterName
       textChapterTime.text = item.time
       textChapterView.text = item.view
     }

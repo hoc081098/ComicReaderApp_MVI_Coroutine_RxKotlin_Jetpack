@@ -17,32 +17,8 @@
             app:popExitAnim="@anim/slide_out_right" />
 
         <action
-            android:id="@+id/action_home_fragment_dest_to_placeholder_fragment_dest"
-            app:destination="@id/placeholder_fragment_dest"
-            app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left"
-            app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right" />
-
-        <action
             android:id="@+id/action_home_fragment_dest_to_comicDetailFragment"
             app:destination="@id/comicDetailFragment"
-            app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left"
-            app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right" />
-
-        <action
-            android:id="@+id/action_home_fragment_dest_to_searchComicFragment"
-            app:destination="@id/searchComicFragment"
-            app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left"
-            app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right" />
-
-        <action
-            android:id="@+id/action_home_fragment_dest_to_categoryFragment"
-            app:destination="@id/categoryFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
@@ -56,18 +32,13 @@
         android:label="SettingsFragment" />
 
     <fragment
-        android:id="@+id/placeholder_fragment_dest"
-        android:name="com.hoc.comicapp.ui.PlaceholderFragment"
-        android:label="PlaceholderFragment" />
-
-    <fragment
         android:id="@+id/comicDetailFragment"
         android:name="com.hoc.comicapp.ui.detail.ComicDetailFragment"
         android:label="{title}">
 
         <argument
             android:name="comic"
-            app:argType="com.hoc.comicapp.data.models.Comic"
+            app:argType="com.hoc.comicapp.ui.home.ComicArg"
             app:nullable="false" />
 
         <argument

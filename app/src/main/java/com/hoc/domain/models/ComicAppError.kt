@@ -1,4 +1,4 @@
-package com.hoc.comicapp.data.models
+package com.hoc.domain.models
 
 import com.hoc.comicapp.data.remote.ErrorResponseParser
 import retrofit2.HttpException
@@ -50,7 +50,7 @@ fun Throwable.toError(retrofit: Retrofit): ComicAppError {
 }
 
 
-fun ComicAppError.getMessageFromError(): String {
+fun ComicAppError.getMessage(): String {
   return when (this) {
     NetworkError -> "Network error"
     is ServerError -> "Server error: $message"

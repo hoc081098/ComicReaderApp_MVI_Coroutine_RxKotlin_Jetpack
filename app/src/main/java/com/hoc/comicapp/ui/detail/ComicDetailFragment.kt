@@ -10,10 +10,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
+import com.hoc.comicapp.ui.detail.ComicDetailViewState.ComicDetail
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.snack
 import com.hoc.comicapp.utils.toast
+import com.hoc.domain.models.ComicDetail.Chapter
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
@@ -66,14 +68,14 @@ class ComicDetailFragment : Fragment() {
       }
     }
 
-    val comic = args.comic
+    val argComic = args.comic
     viewModel.processIntents(
       Observable.mergeArray(
         Observable.just(
           ComicDetailIntent.Initial(
-            link = comic.link,
-            thumbnail = comic.thumbnail,
-            name = comic.title
+            link = argComic.link,
+            title = argComic.title,
+            thumbnail = argComic.thumbnail
           )
         )
       )
@@ -85,20 +87,31 @@ class ComicDetailFragment : Fragment() {
     chapterAdapter: ChapterAdapter
   ) {
     Timber.d("state=$viewState")
-    val comicDetail = viewState.comicDetail ?: return
+    when (val detail = viewState.comicDetail) {
+      null -> return
+      is ComicDetail.Comic -> {
+        // actual comic detail state
+        val comicDetail = detail.comicDetail
 
-    text_title.text = comicDetail.title
-    text_last_updated.text = "Loading..."
-    glide
-      .load(comicDetail.thumbnail)
-      .fitCenter()
-      .transition(DrawableTransitionOptions.withCrossFade())
-      .into(image_thumbnail)
-
-    if (comicDetail is ComicDetail.Comic) {
-      text_last_updated.text = "Last updated: ${comicDetail.lastUpdated}"
-      chapterAdapter.submitList(comicDetail.chapters)
-      progress_bar.visibility = View.INVISIBLE
+        text_title.text = comicDetail.title
+        glide
+          .load(comicDetail.thumbnail)
+          .fitCenter()
+          .transition(DrawableTransitionOptions.withCrossFade())
+          .into(image_thumbnail)
+        text_last_updated.text = "Last updated: ${comicDetail.lastUpdated}"
+        chapterAdapter.submitList(comicDetail.chapters)
+        progress_bar.visibility = View.INVISIBLE
+      }
+      is ComicDetail.InitialComic -> {
+        text_title.text = detail.title
+        glide
+          .load(detail.thumbnail)
+          .fitCenter()
+          .transition(DrawableTransitionOptions.withCrossFade())
+          .into(image_thumbnail)
+        text_last_updated.text = "Loading..."
+      }
     }
   }
 

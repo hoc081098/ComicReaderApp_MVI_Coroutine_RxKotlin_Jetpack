@@ -2,10 +2,10 @@ package com.hoc.comicapp.ui.detail
 
 import androidx.lifecycle.viewModelScope
 import com.hoc.comicapp.base.BaseViewModel
-import com.hoc.comicapp.data.models.getMessageFromError
 import com.hoc.comicapp.utils.Event
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.notOfType
+import com.hoc.domain.models.getMessage
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
@@ -36,12 +36,12 @@ class ComicDetailViewModel(private val comicDetailInteractor: ComicDetailInterac
         comicDetailInteractor.getComicDetail(
           viewModelScope,
           it.link,
-          it.name,
+          it.title,
           it.thumbnail
         ).doOnNext {
           val messageFromError = (it as? ComicDetailPartialChange.InitialPartialChange.Error ?: return@doOnNext)
             .error
-            .getMessageFromError()
+            .getMessage()
           sendMessageEvent("Get detail comic error: $messageFromError")
         }
       }
@@ -60,7 +60,7 @@ class ComicDetailViewModel(private val comicDetailInteractor: ComicDetailInterac
               sendMessageEvent(
                 when (it) {
                   is ComicDetailPartialChange.RefreshPartialChange.Success -> "Refresh successfully"
-                  is ComicDetailPartialChange.RefreshPartialChange.Error -> "Refresh not successfully, error: ${it.error.getMessageFromError()}"
+                  is ComicDetailPartialChange.RefreshPartialChange.Error -> "Refresh not successfully, error: ${it.error.getMessage()}"
                   else -> return@doOnNext
                 }
               )

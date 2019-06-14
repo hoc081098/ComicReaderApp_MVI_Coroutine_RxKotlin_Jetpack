@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.hoc.comicapp.MainActivity
 import com.hoc.comicapp.R
 
 class SearchComicFragment : Fragment() {
@@ -13,5 +14,6 @@ class SearchComicFragment : Fragment() {
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
+    (requireActivity() as MainActivity).showSearch()
   }
 }

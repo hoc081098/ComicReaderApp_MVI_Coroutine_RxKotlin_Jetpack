@@ -1,7 +1,7 @@
 package com.hoc.comicapp.ui.home
 
-import com.hoc.comicapp.data.ComicRepository
 import com.hoc.comicapp.utils.*
+import com.hoc.domain.ComicRepository
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.cast
@@ -22,9 +22,9 @@ class HomeInteractorImpl(private val comicRepository: ComicRepository) : HomeInt
       this.send(HomePartialChange.SuggestHomePartialChange.Loading)
 
       /**
-       * Get suggest list
+       * Get getSuggestComics list
        */
-      val suggestResult = comicRepository.getSuggest()
+      val suggestResult = comicRepository.getSuggestComics()
 
       /**
        * Send success change
@@ -60,7 +60,7 @@ class HomeInteractorImpl(private val comicRepository: ComicRepository) : HomeInt
       /**
        * Get top month list
        */
-      val topMonthResult = comicRepository.getTopMonth()
+      val topMonthResult = comicRepository.getTopMonthComics()
 
       /**
        * Send success change
@@ -99,7 +99,7 @@ class HomeInteractorImpl(private val comicRepository: ComicRepository) : HomeInt
       /**
        * Get updated comics list
        */
-      val updatedResult = comicRepository.getUpdate(page = page)
+      val updatedResult = comicRepository.getUpdatedComics(page = page)
 
 
       /**
@@ -114,9 +114,9 @@ class HomeInteractorImpl(private val comicRepository: ComicRepository) : HomeInt
 
   override fun refreshAllPartialChanges(coroutineScope: CoroutineScope): Observable<HomePartialChange> {
     return Observables.zip(
-      coroutineScope.rxObservable { send(comicRepository.getSuggest()) },
-      coroutineScope.rxObservable { send(comicRepository.getTopMonth()) },
-      coroutineScope.rxObservable { send(comicRepository.getUpdate()) }
+      coroutineScope.rxObservable { send(comicRepository.getSuggestComics()) },
+      coroutineScope.rxObservable { send(comicRepository.getTopMonthComics()) },
+      coroutineScope.rxObservable { send(comicRepository.getUpdatedComics()) }
     ).map<HomePartialChange> { (suggest, topMonth, updated) ->
       suggest.flatMap { suggestList ->
         topMonth.flatMap { topMonthList ->

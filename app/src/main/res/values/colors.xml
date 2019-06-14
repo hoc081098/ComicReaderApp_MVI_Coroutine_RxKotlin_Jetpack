@@ -5,6 +5,12 @@
     <color name="colorAccent">#FFAB00</color>
     <color name="colorRedAccent">#F71A08</color>
 
-    <color name="colorBackground">#222222</color>
+    <color name="colorBackground">#121212</color>
     <color name="colorCardBackground">#585858</color>
+
+    <color name="colorTextOnPrimaryDark">#ffffff</color>
+    <color name="colorTextOnPrimary">#ffffff</color>
+    <color name="colorTextOnBackground">#ffffff</color>
+    <color name="colorIcons">#FFFFFF</color>
+    <color name="colorDivider">#BDBDBD</color>
 </resources>
