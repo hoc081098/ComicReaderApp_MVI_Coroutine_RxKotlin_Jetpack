@@ -5,7 +5,7 @@ import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.utils.Event
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.notOfType
-import com.hoc.domain.models.getMessage
+import com.hoc.comicapp.domain.models.getMessage
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable

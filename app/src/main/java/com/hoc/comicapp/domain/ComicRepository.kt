@@ -1,7 +1,7 @@
-package com.hoc.domain
+package com.hoc.comicapp.domain
 
 import com.hoc.comicapp.utils.Either
-import com.hoc.domain.models.*
+import com.hoc.comicapp.domain.models.*
 
 interface ComicRepository {
   /**

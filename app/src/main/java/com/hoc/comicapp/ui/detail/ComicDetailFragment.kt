@@ -15,7 +15,7 @@ import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.snack
 import com.hoc.comicapp.utils.toast
-import com.hoc.domain.models.ComicDetail.Chapter
+import com.hoc.comicapp.domain.models.ComicDetail.Chapter
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo

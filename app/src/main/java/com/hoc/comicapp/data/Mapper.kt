@@ -1,7 +1,7 @@
 package com.hoc.comicapp.data
 
 import com.hoc.comicapp.data.remote.response.*
-import com.hoc.domain.models.*
+import com.hoc.comicapp.domain.models.*
 
 object Mapper {
   fun responseToDomainModel(response: TopMonthComicResponse): TopMonthComic {

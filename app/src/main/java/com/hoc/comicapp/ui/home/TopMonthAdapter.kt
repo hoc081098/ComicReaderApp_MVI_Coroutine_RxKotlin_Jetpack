@@ -10,7 +10,7 @@ import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
 import com.hoc.comicapp.ui.home.HomeAdapter.Companion.TOP_MONTH_COMIC_ITEM_VIEW_TYPE
 import com.hoc.comicapp.utils.asObservable
-import com.hoc.domain.models.TopMonthComic
+import com.hoc.comicapp.domain.models.TopMonthComic
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxrelay2.PublishRelay
 import kotlinx.android.synthetic.main.item_recyclerview_top_month_comic_or_recommened.view.*

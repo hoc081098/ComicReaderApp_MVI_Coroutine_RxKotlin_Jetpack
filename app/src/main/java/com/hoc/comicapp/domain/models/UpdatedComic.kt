@@ -1,4 +1,4 @@
-package com.hoc.domain.models
+package com.hoc.comicapp.domain.models
 
 data class UpdatedComic(
   val lastChapters: List<Chapter>,

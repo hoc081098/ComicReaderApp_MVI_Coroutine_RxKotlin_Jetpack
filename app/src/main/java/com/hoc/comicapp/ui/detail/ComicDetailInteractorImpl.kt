@@ -1,7 +1,7 @@
 package com.hoc.comicapp.ui.detail
 
 import com.hoc.comicapp.utils.fold
-import com.hoc.domain.ComicRepository
+import com.hoc.comicapp.domain.ComicRepository
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.cast
 import kotlinx.coroutines.CoroutineScope

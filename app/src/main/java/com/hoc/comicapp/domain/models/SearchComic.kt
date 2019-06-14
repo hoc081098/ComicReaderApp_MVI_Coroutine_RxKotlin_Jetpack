@@ -1,4 +1,4 @@
-package com.hoc.domain.models
+package com.hoc.comicapp.domain.models
 
 data class SearchComic(
   val categoryNames: List<String>,

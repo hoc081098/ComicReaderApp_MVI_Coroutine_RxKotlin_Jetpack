@@ -1,4 +1,4 @@
-package com.hoc.domain.models
+package com.hoc.comicapp.domain.models
 
 data class ComicDetail(
   val author: String, // ONE - Murata Yuusuke

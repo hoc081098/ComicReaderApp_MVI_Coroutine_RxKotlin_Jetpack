@@ -4,7 +4,7 @@ import android.os.Parcelable
 import com.hoc.comicapp.base.Intent
 import com.hoc.comicapp.base.SingleEvent
 import com.hoc.comicapp.base.ViewState
-import com.hoc.domain.models.*
+import com.hoc.comicapp.domain.models.*
 import io.reactivex.Observable
 import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.CoroutineScope

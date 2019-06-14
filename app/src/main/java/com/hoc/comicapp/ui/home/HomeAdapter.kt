@@ -14,9 +14,9 @@ import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
 import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.*
 import com.hoc.comicapp.utils.inflate
-import com.hoc.domain.models.SuggestComic
-import com.hoc.domain.models.TopMonthComic
-import com.hoc.domain.models.UpdatedComic
+import com.hoc.comicapp.domain.models.SuggestComic
+import com.hoc.comicapp.domain.models.TopMonthComic
+import com.hoc.comicapp.domain.models.UpdatedComic
 import com.jakewharton.rxbinding3.recyclerview.scrollStateChanges
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxbinding3.view.detaches

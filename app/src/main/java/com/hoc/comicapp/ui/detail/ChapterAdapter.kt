@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.NO_POSITION
 import com.hoc.comicapp.R
-import com.hoc.domain.models.ComicDetail.Chapter
+import com.hoc.comicapp.domain.models.ComicDetail.Chapter
 import kotlinx.android.synthetic.main.item_recycler_chapter.view.*
 
 object ChapterDiffUtilItemCallback : DiffUtil.ItemCallback<Chapter>() {

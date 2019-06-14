@@ -3,11 +3,11 @@ package com.hoc.comicapp.ui.detail
 import com.hoc.comicapp.base.Intent
 import com.hoc.comicapp.base.SingleEvent
 import com.hoc.comicapp.base.ViewState
-import com.hoc.domain.models.ComicAppError
-import com.hoc.domain.models.getMessage
+import com.hoc.comicapp.domain.models.ComicAppError
+import com.hoc.comicapp.domain.models.getMessage
 import io.reactivex.Observable
 import kotlinx.coroutines.CoroutineScope
-import com.hoc.domain.models.ComicDetail as ComicDetailDomain
+import com.hoc.comicapp.domain.models.ComicDetail as ComicDetailDomain
 
 interface ComicDetailInteractor {
   fun getComicDetail(

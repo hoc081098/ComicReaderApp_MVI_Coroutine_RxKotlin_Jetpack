@@ -1,4 +1,4 @@
-package com.hoc.domain.models
+package com.hoc.comicapp.domain.models
 
 import com.hoc.comicapp.data.remote.ErrorResponseParser
 import retrofit2.HttpException

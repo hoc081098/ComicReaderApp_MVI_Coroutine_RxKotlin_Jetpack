@@ -1,8 +1,8 @@
 package com.hoc.comicapp.ui.home
 
 import androidx.recyclerview.widget.DiffUtil
-import com.hoc.domain.models.SuggestComic
-import com.hoc.domain.models.TopMonthComic
+import com.hoc.comicapp.domain.models.SuggestComic
+import com.hoc.comicapp.domain.models.TopMonthComic
 
 object HomeListItemDiffUtilItemCallback : DiffUtil.ItemCallback<HomeListItem>() {
   override fun areItemsTheSame(oldItem: HomeListItem, newItem: HomeListItem) = when {
