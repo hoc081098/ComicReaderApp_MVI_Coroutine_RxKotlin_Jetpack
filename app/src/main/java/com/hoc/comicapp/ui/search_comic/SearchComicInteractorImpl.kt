@@ -18,7 +18,7 @@ class SearchComicInteractorImpl(private val comicRepository: ComicRepository) : 
       comicRepository
         .searchComic(query = term)
         .fold(
-          left = { SearchComicPartialChange.Error(error = it) },
+          left = { SearchComicPartialChange.Error(error = it, term = term) },
           right = { SearchComicPartialChange.Data(comics = it) }
         )
         .let { send(it) }

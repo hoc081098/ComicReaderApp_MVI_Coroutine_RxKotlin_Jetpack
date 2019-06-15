@@ -28,15 +28,17 @@ class SearchComicViewModel(private val interactor: SearchComicInteractor) :
     val searchTerm = intentS
       .ofType<SearchComicViewIntent.SearchIntent>()
       .map { it.term }
-      .doOnNext { Timber.d("[1] $it") }
+      .doOnNext { Timber.d("[SEARCH-1] $it") }
       .debounce(600, TimeUnit.MILLISECONDS)
+      .filter { it.isNotBlank() }
       .distinctUntilChanged()
-      .doOnNext { Timber.d("[2] $it") }
+      .doOnNext { Timber.d("[SEARCH-2] $it") }
 
     val retryPartialChange = intentS
       .ofType<SearchComicViewIntent.RetryIntent>()
       .withLatestFrom(searchTerm)
       .map { it.second }
+      .doOnNext { Timber.d("[RETRY] $it") }
       .switchMap { term ->
         interactor.searchComic(
           coroutineScope = viewModelScope,

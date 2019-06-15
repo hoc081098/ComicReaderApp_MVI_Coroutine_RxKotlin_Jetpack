@@ -50,7 +50,8 @@ sealed class SearchComicPartialChange {
       is Error -> {
         state.copy(
           isLoading = false,
-          errorMessage = error.getMessage()
+          errorMessage = "Search for '$term', error occurred: ${error.getMessage()}",
+          comics = emptyList()
         )
       }
     }
@@ -58,7 +59,7 @@ sealed class SearchComicPartialChange {
 
   data class Data(val comics: List<SearchComic>) : SearchComicPartialChange()
   object Loading : SearchComicPartialChange()
-  data class Error(val error: ComicAppError) : SearchComicPartialChange()
+  data class Error(val error: ComicAppError, val term: String) : SearchComicPartialChange()
 }
 
 sealed class SearchComicViewIntent : Intent {
