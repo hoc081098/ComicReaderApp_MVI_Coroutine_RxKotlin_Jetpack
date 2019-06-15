@@ -3,36 +3,67 @@ package com.hoc.comicapp.ui.search_comic
 import com.hoc.comicapp.base.Intent
 import com.hoc.comicapp.base.SingleEvent
 import com.hoc.comicapp.base.ViewState
+import com.hoc.comicapp.domain.models.ComicAppError
+import com.hoc.comicapp.domain.models.SearchComic
+import com.hoc.comicapp.domain.models.getMessage
+import io.reactivex.Observable
+import kotlinx.coroutines.CoroutineScope
 
-data class SearchComic(
-  val latestChapterName: String,
-  val categoriesName: List<String>,
-  val link: String,
-  val thumbnail: String,
-  val title: String
-)
+interface SearchComicInteractor {
+  fun searchComic(
+    coroutineScope: CoroutineScope,
+    term: String
+  ): Observable<SearchComicPartialChange>
+}
 
 data class SearchComicViewState(
   val isLoading: Boolean,
   val comics: List<SearchComic>,
-  val error: Throwable?
+  val errorMessage: String?
 ) : ViewState {
   companion object {
     @JvmStatic
     fun initialState() = SearchComicViewState(
       isLoading = true,
       comics = emptyList(),
-      error = null
+      errorMessage = null
     )
   }
 }
 
 sealed class SearchComicPartialChange {
-  abstract fun reducer(state: SearchComicViewState): SearchComicViewState
+  fun reducer(state: SearchComicViewState): SearchComicViewState {
+    return when (this) {
+      is Data -> {
+        state.copy(
+          isLoading = false,
+          errorMessage = null,
+          comics = comics
+        )
+      }
+      Loading -> {
+        state.copy(
+          isLoading = true,
+          errorMessage = null
+        )
+      }
+      is Error -> {
+        state.copy(
+          isLoading = false,
+          errorMessage = error.getMessage()
+        )
+      }
+    }
+  }
+
+  data class Data(val comics: List<SearchComic>) : SearchComicPartialChange()
+  object Loading : SearchComicPartialChange()
+  data class Error(val error: ComicAppError) : SearchComicPartialChange()
 }
 
 sealed class SearchComicViewIntent : Intent {
-
+  data class SearchIntent(val term: String) : SearchComicViewIntent()
+  object RetryIntent : SearchComicViewIntent()
 }
 
 sealed class SearchComicSingleEvent : SingleEvent {

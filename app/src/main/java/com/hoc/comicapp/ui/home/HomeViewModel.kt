@@ -2,10 +2,10 @@ package com.hoc.comicapp.ui.home
 
 import androidx.lifecycle.viewModelScope
 import com.hoc.comicapp.base.BaseViewModel
+import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.utils.Event
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.notOfType
-import com.hoc.comicapp.domain.models.getMessage
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
@@ -183,13 +183,13 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
           .compose(retryTopMonthProcessor)
       )
     }.doOnNext { Timber.d("partial_change=$it") }
-      .scan(HomeViewState.initialState()) { state, change -> change.reducer(state) }
+      .scan(initialState) { state, change -> change.reducer(state) }
       .distinctUntilChanged()
       .observeOn(AndroidSchedulers.mainThread())
   }
 
   override fun processIntents(intents: Observable<HomeViewIntent>) =
-    intents.subscribe(intentS::accept)!!
+    intents.subscribe(intentS)!!
 
   init {
     intentS

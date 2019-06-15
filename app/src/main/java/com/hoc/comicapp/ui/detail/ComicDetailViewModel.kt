@@ -2,10 +2,10 @@ package com.hoc.comicapp.ui.detail
 
 import androidx.lifecycle.viewModelScope
 import com.hoc.comicapp.base.BaseViewModel
+import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.utils.Event
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.notOfType
-import com.hoc.comicapp.domain.models.getMessage
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
@@ -28,7 +28,7 @@ class ComicDetailViewModel(private val comicDetailInteractor: ComicDetailInterac
   private val stateS = BehaviorRelay.createDefault<ComicDetailViewState>(initialState)
 
   override fun processIntents(intents: Observable<ComicDetailIntent>) =
-    intents.subscribe(intentS::accept)!!
+    intents.subscribe(intentS)!!
 
   private val initialProcessor =
     ObservableTransformer<ComicDetailIntent.Initial, ComicDetailPartialChange> { intent ->
@@ -75,7 +75,7 @@ class ComicDetailViewModel(private val comicDetailInteractor: ComicDetailInterac
         shared.ofType<ComicDetailIntent.Refresh>().compose(refreshProcessor)
       )
     }.doOnNext { Timber.d("partial_change=$it") }
-      .scan(ComicDetailViewState.initialState()) { state, change -> change.reducer(state) }
+      .scan(initialState) { state, change -> change.reducer(state) }
       .distinctUntilChanged()
       .observeOn(AndroidSchedulers.mainThread())
   }
