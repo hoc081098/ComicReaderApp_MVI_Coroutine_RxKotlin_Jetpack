@@ -13,6 +13,7 @@ import io.reactivex.rxkotlin.ofType
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.rxkotlin.withLatestFrom
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 
 class SearchComicViewModel(private val interactor: SearchComicInteractor) :
   BaseViewModel<SearchComicViewIntent, SearchComicViewState, SearchComicSingleEvent>() {
@@ -24,7 +25,13 @@ class SearchComicViewModel(private val interactor: SearchComicInteractor) :
   override fun processIntents(intents: Observable<SearchComicViewIntent>) = intents.subscribe(intentS)!!
 
   init {
-    val searchTerm = intentS.ofType<SearchComicViewIntent.SearchIntent>().map { it.term }
+    val searchTerm = intentS
+      .ofType<SearchComicViewIntent.SearchIntent>()
+      .map { it.term }
+      .doOnNext { Timber.d("[1] $it") }
+      .debounce(600, TimeUnit.MILLISECONDS)
+      .distinctUntilChanged()
+      .doOnNext { Timber.d("[2] $it") }
 
     val retryPartialChange = intentS
       .ofType<SearchComicViewIntent.RetryIntent>()

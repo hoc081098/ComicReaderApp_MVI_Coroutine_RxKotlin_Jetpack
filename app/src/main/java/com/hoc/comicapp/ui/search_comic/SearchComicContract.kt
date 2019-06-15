@@ -24,7 +24,7 @@ data class SearchComicViewState(
   companion object {
     @JvmStatic
     fun initialState() = SearchComicViewState(
-      isLoading = true,
+      isLoading = false,
       comics = emptyList(),
       errorMessage = null
     )
