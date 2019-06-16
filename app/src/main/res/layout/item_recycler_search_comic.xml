@@ -5,6 +5,9 @@
     android:id="@+id/cardView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?android:attr/selectableItemBackground"
     app:cardBackgroundColor="@color/colorBackground"
     app:cardCornerRadius="4dp"
     app:cardElevation="4dp"
@@ -20,13 +23,15 @@
             android:id="@+id/image_comic"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:scaleType="fitXY"
+            android:background="@color/colorCardBackground"
+            android:scaleType="fitCenter"
             app:layout_constraintDimensionRatio="H,2:3"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:srcCompat="@tools:sample/backgrounds/scenic[6]" />
+            tools:scaleType="fitCenter"
+            tools:srcCompat="@drawable/logo_nettruyen" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/overlay"

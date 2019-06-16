@@ -63,7 +63,8 @@ class SearchComicAdapter(
       glide
         .load(item.thumbnail)
         .thumbnail(0.5f)
-        .fitCenter()
+        .error(R.drawable.logo_nettruyen)
+        .placeholder(R.drawable.logo_nettruyen)
         .transition(DrawableTransitionOptions.withCrossFade())
         .into(imageComic)
 

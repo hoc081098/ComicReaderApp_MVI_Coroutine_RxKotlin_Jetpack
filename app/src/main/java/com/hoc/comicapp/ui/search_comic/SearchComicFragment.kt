@@ -67,20 +67,20 @@ class SearchComicFragment : Fragment() {
     viewModel.state.observe(owner = viewLifecycleOwner) { (isLoading, comics, errorMessage) ->
       Timber.d("[STATE] comics.length=${comics.size} isLoading=$isLoading errorMessage=$errorMessage")
 
-      adapter.submitList(comics)
-
       if (isLoading) {
         progress_bar.visibility = View.VISIBLE
       } else {
         progress_bar.visibility = View.INVISIBLE
       }
 
-      text_error_message.text = errorMessage
       if (errorMessage == null) {
-        group_error.visibility = View.INVISIBLE
+        group_error.visibility = View.GONE
       } else {
         group_error.visibility = View.VISIBLE
+        text_error_message.text = errorMessage
       }
+
+      adapter.submitList(comics)
     }
     viewModel.processIntents(
       Observable.mergeArray(

@@ -44,7 +44,8 @@ sealed class SearchComicPartialChange {
       Loading -> {
         state.copy(
           isLoading = true,
-          errorMessage = null
+          errorMessage = null,
+          comics = emptyList()
         )
       }
       is Error -> {
