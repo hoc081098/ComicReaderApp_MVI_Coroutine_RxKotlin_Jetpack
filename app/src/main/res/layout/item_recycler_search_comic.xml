@@ -8,7 +8,7 @@
     android:clickable="true"
     android:focusable="true"
     android:foreground="?android:attr/selectableItemBackground"
-    app:cardBackgroundColor="@color/colorBackground"
+    app:cardBackgroundColor="@color/colorCardBackground"
     app:cardCornerRadius="4dp"
     app:cardElevation="4dp"
     app:cardPreventCornerOverlap="false"
@@ -23,15 +23,12 @@
             android:id="@+id/image_comic"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:background="@color/colorCardBackground"
-            android:scaleType="fitCenter"
+            android:scaleType="fitXY"
             app:layout_constraintDimensionRatio="H,2:3"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:scaleType="fitCenter"
-            tools:srcCompat="@drawable/logo_nettruyen" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/overlay"

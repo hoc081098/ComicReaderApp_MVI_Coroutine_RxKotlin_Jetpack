@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.MainActivity
@@ -12,13 +13,11 @@ import com.hoc.comicapp.R
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.snack
-import com.hoc.comicapp.utils.textChanges
 import com.jakewharton.rxbinding3.view.clicks
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.subscribeBy
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_search_comic.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
@@ -51,7 +50,12 @@ class SearchComicFragment : Fragment() {
     searchComicAdapter
       .clickComicObservable
       .subscribeBy {
-        //TODO: to detail
+        val toComicDetailFragment =
+          SearchComicFragmentDirections.actionSearchComicFragmentToComicDetailFragment(
+            comic = it,
+            title = it.title
+          )
+        findNavController().navigate(toComicDetailFragment)
       }
       .addTo(compositeDisposable)
   }
@@ -85,8 +89,7 @@ class SearchComicFragment : Fragment() {
     viewModel.processIntents(
       Observable.mergeArray(
         mainActivity
-          .search_view
-          .textChanges()
+          .textSearchChanges()
           .map { SearchComicViewIntent.SearchIntent(it) },
         button_retry
           .clicks()
@@ -97,6 +100,8 @@ class SearchComicFragment : Fragment() {
 
   override fun onDestroyView() {
     super.onDestroyView()
+
+    mainActivity.hideSearchIfNeeded()
     compositeDisposable.clear()
   }
 }

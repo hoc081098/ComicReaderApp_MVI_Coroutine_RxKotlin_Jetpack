@@ -8,6 +8,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.*
+import com.hoc.comicapp.utils.textChanges
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlin.LazyThreadSafetyMode.NONE
 
@@ -95,4 +96,8 @@ class MainActivity : AppCompatActivity() {
   }
 
   fun showSearch() = search_view.showSearch()
+
+  fun hideSearchIfNeeded() = if (search_view.isSearchOpen) search_view.closeSearch() else Unit
+
+  fun textSearchChanges() = search_view.textChanges()
 }

@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.hoc.comicapp.GlideRequests
-import com.hoc.comicapp.R
 import com.hoc.comicapp.domain.models.SearchComic
 import com.hoc.comicapp.ui.home.ComicArg
 import com.hoc.comicapp.utils.asObservable
@@ -22,15 +21,13 @@ object SearchComicDiffUtilItemCallback : DiffUtil.ItemCallback<SearchComic>() {
   override fun areContentsTheSame(oldItem: SearchComic, newItem: SearchComic) = oldItem == newItem
 }
 
-class SearchComicAdapter(
-  private val glide: GlideRequests
-) : ListAdapter<SearchComic, SearchComicAdapter.VH>(SearchComicDiffUtilItemCallback) {
+class SearchComicAdapter(private val glide: GlideRequests) : ListAdapter<SearchComic, SearchComicAdapter.VH>(SearchComicDiffUtilItemCallback) {
   private val clickComicS = PublishRelay.create<ComicArg>()
   val clickComicObservable get() = clickComicS.asObservable()
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
     return LayoutInflater.from(parent.context)
-      .inflate(R.layout.item_recycler_search_comic, parent, false)
+      .inflate(com.hoc.comicapp.R.layout.item_recycler_search_comic, parent, false)
       .let { VH(it, parent) }
   }
 
@@ -63,8 +60,7 @@ class SearchComicAdapter(
       glide
         .load(item.thumbnail)
         .thumbnail(0.5f)
-        .error(R.drawable.logo_nettruyen)
-        .placeholder(R.drawable.logo_nettruyen)
+        .fitCenter()
         .transition(DrawableTransitionOptions.withCrossFade())
         .into(imageComic)
 

@@ -56,6 +56,14 @@
     <fragment
         android:id="@+id/searchComicFragment"
         android:name="com.hoc.comicapp.ui.search_comic.SearchComicFragment"
-        android:label="Search comic" />
+        android:label="Search comic">
+        <action
+            android:id="@+id/action_searchComicFragment_to_comicDetailFragment"
+            app:destination="@id/comicDetailFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
 
 </navigation>
