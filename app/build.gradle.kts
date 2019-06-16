@@ -62,10 +62,10 @@ dependencies {
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-rx2:$coroutinesVersion")
 
-  implementation("androidx.appcompat:appcompat:1.1.0-alpha05")
+  implementation("androidx.appcompat:appcompat:1.1.0-beta01")
   implementation("androidx.core:core-ktx:1.2.0-alpha01")
-  implementation("androidx.activity:activity-ktx:1.0.0-alpha08")
-  implementation("androidx.fragment:fragment-ktx:1.1.0-alpha09")
+  implementation("androidx.activity:activity-ktx:1.0.0-beta01")
+  implementation("androidx.fragment:fragment-ktx:1.1.0-beta01")
   implementation("androidx.constraintlayout:constraintlayout:2.0.0-beta1")
 
   implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
@@ -103,6 +103,7 @@ dependencies {
   kapt("com.github.bumptech.glide:compiler:$glideVersion")
 
   implementation("com.miguelcatalan:materialsearchview:1.4.0")
+  implementation("com.ms-square:expandableTextView:0.1.4")
 
   testImplementation("junit:junit:4.12")
   androidTestImplementation("androidx.test:runner:1.1.2-alpha01")

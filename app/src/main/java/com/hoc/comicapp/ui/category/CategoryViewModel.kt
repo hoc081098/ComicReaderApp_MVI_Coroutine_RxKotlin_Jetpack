@@ -12,6 +12,7 @@ import io.reactivex.ObservableTransformer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.cast
 import io.reactivex.rxkotlin.ofType
 import io.reactivex.rxkotlin.subscribeBy
 
@@ -51,10 +52,11 @@ class CategoryViewModel(private val categoryInteractor: CategoryInteractor) :
       intentObservable.flatMap {
         categoryInteractor.getAllCategories(viewModelScope)
           .doOnNext {
-            if (it is CategoryPartialChange.Error) {
+            if (it is CategoryPartialChange.InitialRetryPartialChange.Error) {
               sendMessageEvent(message = "Error occurred: ${it.error.getMessage()}")
             }
           }
+          .cast<CategoryPartialChange>()
       }
     }
 
@@ -64,13 +66,14 @@ class CategoryViewModel(private val categoryInteractor: CategoryInteractor) :
   private val refreshProcessor =
     ObservableTransformer<CategoryViewIntent.Refresh, CategoryPartialChange> { intentObservable ->
       intentObservable.exhaustMap {
-        categoryInteractor.getAllCategories(viewModelScope)
+        categoryInteractor.refresh(viewModelScope)
           .doOnNext {
-            if (it is CategoryPartialChange.Error) {
-              sendMessageEvent(message = "Refresh error occurred: ${it.error.getMessage()}")
+            when (it) {
+              is CategoryPartialChange.RefreshPartialChange.Error -> sendMessageEvent(message = "Refresh error occurred: ${it.error.getMessage()}")
+              is CategoryPartialChange.RefreshPartialChange.Data -> sendMessageEvent(message = "Refresh success")
             }
           }
-          .notOfType<CategoryPartialChange.Error, CategoryPartialChange>() // if refresh not successfully, not emit error change
+          .cast<CategoryPartialChange>()
       }
     }
 
@@ -82,10 +85,11 @@ class CategoryViewModel(private val categoryInteractor: CategoryInteractor) :
       intentObservable.exhaustMap {
         categoryInteractor.getAllCategories(viewModelScope)
           .doOnNext {
-            if (it is CategoryPartialChange.Error) {
+            if (it is CategoryPartialChange.InitialRetryPartialChange.Error) {
               sendMessageEvent(message = "Retry error occurred: ${it.error.getMessage()}")
             }
           }
+          .cast<CategoryPartialChange>()
       }
     }
 

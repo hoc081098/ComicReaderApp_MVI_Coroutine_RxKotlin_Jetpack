@@ -10,52 +10,78 @@ import io.reactivex.Observable
 import kotlinx.coroutines.CoroutineScope
 
 interface CategoryInteractor {
-  fun getAllCategories(coroutineScope: CoroutineScope): Observable<CategoryPartialChange>
+  fun getAllCategories(coroutineScope: CoroutineScope): Observable<CategoryPartialChange.InitialRetryPartialChange>
+
+  fun refresh(coroutineScope: CoroutineScope): Observable<CategoryPartialChange.RefreshPartialChange>
 }
 
 data class CategoryViewState(
   val isLoading: Boolean,
   val categories: List<Category>,
-  val errorMessage: String?
+  val errorMessage: String?,
+  val refreshLoading: Boolean
 ) : ViewState {
   companion object {
     @JvmStatic
     fun initialState() = CategoryViewState(
       isLoading = false,
       categories = emptyList(),
-      errorMessage = null
+      errorMessage = null,
+      refreshLoading = false
     )
   }
 }
 
 sealed class CategoryPartialChange {
-  fun reducer(state: CategoryViewState): CategoryViewState {
-    return when (this) {
-      is Data -> {
-        state.copy(
-          isLoading = false,
+  abstract fun reducer(state: CategoryViewState): CategoryViewState
+
+  sealed class InitialRetryPartialChange : CategoryPartialChange() {
+    override fun reducer(state: CategoryViewState): CategoryViewState {
+      return when (this) {
+        is Data -> {
+          state.copy(
+            isLoading = false,
+            errorMessage = null,
+            categories = categories
+          )
+        }
+        Loading -> {
+          state.copy(
+            isLoading = true,
+            errorMessage = null
+          )
+        }
+        is Error -> {
+          state.copy(
+            isLoading = false,
+            errorMessage = "Error occurred: ${error.getMessage()}"
+          )
+        }
+      }
+    }
+
+    data class Data(val categories: List<Category>) : InitialRetryPartialChange()
+    object Loading : InitialRetryPartialChange()
+    data class Error(val error: ComicAppError) : InitialRetryPartialChange()
+  }
+
+  sealed class RefreshPartialChange : CategoryPartialChange() {
+    override fun reducer(state: CategoryViewState): CategoryViewState {
+      return when (this) {
+        Loading -> state.copy(refreshLoading = true)
+        is Data -> state.copy(
+          refreshLoading = false,
           errorMessage = null,
           categories = categories
         )
-      }
-      Loading -> {
-        state.copy(
-          isLoading = true,
-          errorMessage = null
-        )
-      }
-      is Error -> {
-        state.copy(
-          isLoading = false,
-          errorMessage = "Error occurred: ${error.getMessage()}"
-        )
+        is Error -> state.copy(refreshLoading = false)
       }
     }
-  }
 
-  data class Data(val categories: List<Category>) : CategoryPartialChange()
-  object Loading : CategoryPartialChange()
-  data class Error(val error: ComicAppError) : CategoryPartialChange()
+    data class Data(val categories: List<Category>) : RefreshPartialChange()
+    object Loading : RefreshPartialChange()
+    data class Error(val error: ComicAppError) : RefreshPartialChange()
+  }
 }
 
 sealed class CategoryViewIntent : Intent {

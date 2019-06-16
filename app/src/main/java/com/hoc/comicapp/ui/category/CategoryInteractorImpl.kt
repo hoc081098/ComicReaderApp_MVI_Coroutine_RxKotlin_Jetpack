@@ -9,14 +9,27 @@ import kotlinx.coroutines.rx2.rxObservable
 
 @ExperimentalCoroutinesApi
 class CategoryInteractorImpl(private val comicRepository: ComicRepository) : CategoryInteractor {
-  override fun getAllCategories(coroutineScope: CoroutineScope): Observable<CategoryPartialChange> {
+  override fun refresh(coroutineScope: CoroutineScope): Observable<CategoryPartialChange.RefreshPartialChange> {
     return coroutineScope.rxObservable {
-      send(CategoryPartialChange.Loading)
+      send(CategoryPartialChange.RefreshPartialChange.Loading)
       comicRepository
         .getAllCategories()
         .fold(
-          left = { CategoryPartialChange.Error(it) },
-          right = { CategoryPartialChange.Data(it) }
+          left = { CategoryPartialChange.RefreshPartialChange.Error(it) },
+          right = { CategoryPartialChange.RefreshPartialChange.Data(it) }
+        )
+        .let { send(it) }
+    }
+  }
+
+  override fun getAllCategories(coroutineScope: CoroutineScope): Observable<CategoryPartialChange.InitialRetryPartialChange> {
+    return coroutineScope.rxObservable {
+      send(CategoryPartialChange.InitialRetryPartialChange.Loading)
+      comicRepository
+        .getAllCategories()
+        .fold(
+          left = { CategoryPartialChange.InitialRetryPartialChange.Error(it) },
+          right = { CategoryPartialChange.InitialRetryPartialChange.Data(it) }
         )
         .let { send(it) }
     }
