@@ -41,7 +41,7 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
               .doOnNext {
                 val messageFromError = (it as? HomePartialChange.SuggestHomePartialChange.Error
                   ?: return@doOnNext).error.getMessage()
-                sendMessageEvent("Get getSuggestComics list error: $messageFromError")
+                sendMessageEvent("Get suggest list error: $messageFromError")
               },
             homeInteractor
               .topMonthComicsPartialChanges(coroutineScope = viewModelScope)
@@ -74,7 +74,7 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
               sendMessageEvent(
                 when (it) {
                   is HomePartialChange.RefreshPartialChange.RefreshSuccess -> "Refresh successfully"
-                  is HomePartialChange.RefreshPartialChange.RefreshFailure -> "Refresh not successfully"
+                  is HomePartialChange.RefreshPartialChange.RefreshFailure -> "Refresh not successfully: ${it.error.getMessage()}"
                   else -> return@doOnNext
                 }
               )
@@ -135,7 +135,7 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
           .doOnNext {
             val messageFromError =
               (it as? HomePartialChange.SuggestHomePartialChange.Error ?: return@doOnNext).error.getMessage()
-            sendMessageEvent("Error when retry get getSuggestComics list: $messageFromError")
+            sendMessageEvent("Error when retry get suggest list: $messageFromError")
           }
       }
     }

@@ -1,6 +1,10 @@
 package com.hoc.comicapp.ui.category
 
+import androidx.lifecycle.viewModelScope
 import com.hoc.comicapp.base.BaseViewModel
+import com.hoc.comicapp.domain.models.getMessage
+import com.hoc.comicapp.utils.Event
+import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.notOfType
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
@@ -11,7 +15,8 @@ import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.ofType
 import io.reactivex.rxkotlin.subscribeBy
 
-class CategoryViewModel : BaseViewModel<CategoryViewIntent, CategoryViewState, CategorySingleEvent>() {
+class CategoryViewModel(private val categoryInteractor: CategoryInteractor) :
+  BaseViewModel<CategoryViewIntent, CategoryViewState, CategorySingleEvent>() {
   override val initialState = CategoryViewState.initialState()
   private val intentS = PublishRelay.create<CategoryViewIntent>()
   private val compositeDisposable = CompositeDisposable()
@@ -41,23 +46,48 @@ class CategoryViewModel : BaseViewModel<CategoryViewIntent, CategoryViewState, C
   /**
    * Transform [CategoryViewIntent.Initial]s to [CategoryPartialChange]s
    */
-  private val initialProcessor = ObservableTransformer<CategoryViewIntent.Initial, CategoryPartialChange> {
-    TODO()
-  }
+  private val initialProcessor =
+    ObservableTransformer<CategoryViewIntent.Initial, CategoryPartialChange> { intentObservable ->
+      intentObservable.flatMap {
+        categoryInteractor.getAllCategories(viewModelScope)
+          .doOnNext {
+            if (it is CategoryPartialChange.Error) {
+              sendMessageEvent(message = "Error occurred: ${it.error.getMessage()}")
+            }
+          }
+      }
+    }
 
   /**
    * Transform [CategoryViewIntent.Refresh]s to [CategoryPartialChange]s
    */
-  private val refreshProcessor = ObservableTransformer<CategoryViewIntent.Refresh, CategoryPartialChange> {
-    TODO()
-  }
+  private val refreshProcessor =
+    ObservableTransformer<CategoryViewIntent.Refresh, CategoryPartialChange> { intentObservable ->
+      intentObservable.exhaustMap {
+        categoryInteractor.getAllCategories(viewModelScope)
+          .doOnNext {
+            if (it is CategoryPartialChange.Error) {
+              sendMessageEvent(message = "Refresh error occurred: ${it.error.getMessage()}")
+            }
+          }
+          .notOfType<CategoryPartialChange.Error, CategoryPartialChange>() // if refresh not successfully, not emit error change
+      }
+    }
 
   /**
    * Transform [CategoryViewIntent.Retry]s to [CategoryPartialChange]s
    */
-  private val retryProcessor = ObservableTransformer<CategoryViewIntent.Retry, CategoryPartialChange> {
-    TODO()
-  }
+  private val retryProcessor =
+    ObservableTransformer<CategoryViewIntent.Retry, CategoryPartialChange> { intentObservable ->
+      intentObservable.exhaustMap {
+        categoryInteractor.getAllCategories(viewModelScope)
+          .doOnNext {
+            if (it is CategoryPartialChange.Error) {
+              sendMessageEvent(message = "Retry error occurred: ${it.error.getMessage()}")
+            }
+          }
+      }
+    }
 
   override fun processIntents(intents: Observable<CategoryViewIntent>) = intents.subscribe(intentS)!!
 
@@ -68,6 +98,11 @@ class CategoryViewModel : BaseViewModel<CategoryViewIntent, CategoryViewState, C
       .subscribeBy(onNext = ::setNewState)
       .addTo(compositeDisposable)
   }
+
+  /**
+   * Send [message]
+   */
+  private fun sendMessageEvent(message: String) = sendEvent(Event(CategorySingleEvent.MessageEvent(message)))
 
   override fun onCleared() {
     super.onCleared()

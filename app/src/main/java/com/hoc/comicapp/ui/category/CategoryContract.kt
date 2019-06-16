@@ -10,10 +10,7 @@ import io.reactivex.Observable
 import kotlinx.coroutines.CoroutineScope
 
 interface CategoryInteractor {
-  fun getAllCategories(
-    coroutineScope: CoroutineScope,
-    term: String
-  ): Observable<CategoryPartialChange>
+  fun getAllCategories(coroutineScope: CoroutineScope): Observable<CategoryPartialChange>
 }
 
 data class CategoryViewState(
@@ -50,7 +47,7 @@ sealed class CategoryPartialChange {
       is Error -> {
         state.copy(
           isLoading = false,
-          errorMessage = "Get category error occurred: ${error.getMessage()}"
+          errorMessage = "Error occurred: ${error.getMessage()}"
         )
       }
     }
@@ -58,7 +55,7 @@ sealed class CategoryPartialChange {
 
   data class Data(val categories: List<Category>) : CategoryPartialChange()
   object Loading : CategoryPartialChange()
-  data class Error(val error: ComicAppError, val term: String) : CategoryPartialChange()
+  data class Error(val error: ComicAppError) : CategoryPartialChange()
 }
 
 sealed class CategoryViewIntent : Intent {
