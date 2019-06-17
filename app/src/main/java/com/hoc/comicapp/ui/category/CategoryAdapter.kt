@@ -7,8 +7,13 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
 import com.hoc.comicapp.domain.models.Category
+import com.hoc.comicapp.utils.asObservable
+import com.jakewharton.rxbinding3.view.clicks
+import com.jakewharton.rxbinding3.view.detaches
+import com.jakewharton.rxrelay2.PublishRelay
 import kotlinx.android.synthetic.main.item_recycler_category.view.*
 
 object CategoryDiffUtilItemCallback : DiffUtil.ItemCallback<Category>() {
@@ -16,22 +21,41 @@ object CategoryDiffUtilItemCallback : DiffUtil.ItemCallback<Category>() {
   override fun areContentsTheSame(oldItem: Category, newItem: Category) = oldItem == newItem
 }
 
-class CategoryAdapter : ListAdapter<Category, CategoryAdapter.VH>(CategoryDiffUtilItemCallback) {
+class CategoryAdapter(private val glide: GlideRequests) : ListAdapter<Category, CategoryAdapter.VH>(CategoryDiffUtilItemCallback) {
   private val collapsedStatus = SparseBooleanArray()
+  private val clickCategoryS = PublishRelay.create<Category>()
+  val clickCategoryObservable get() = clickCategoryS.asObservable()
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
     return LayoutInflater.from(parent.context)
       .inflate(R.layout.item_recycler_category, parent, false)
-      .let { VH(it) }
+      .let { VH(it, parent) }
   }
 
   override fun onBindViewHolder(holder: VH, position: Int) = holder.bind(getItem(position), position)
 
-  inner class VH(itemView: View) : RecyclerView.ViewHolder(itemView) {
+  inner class VH(itemView: View, parent: ViewGroup) : RecyclerView.ViewHolder(itemView) {
     private val textCategoryName = itemView.text_category_name!!
     private val textCategoryDescription = itemView.text_category_description!!
+    private val imageCategoryThumbnail = itemView.image_category_thumbnail!!
+
+    init {
+      itemView
+        .clicks()
+        .takeUntil(parent.detaches())
+        .map { adapterPosition }
+        .filter { it != RecyclerView.NO_POSITION }
+        .map { getItem(it) }
+        .subscribe(clickCategoryS)
+    }
 
     fun bind(item: Category, position: Int) {
+      glide
+        .load(item.thumbnail)
+        .thumbnail(0.5f)
+        .fitCenter()
+        .into(imageCategoryThumbnail)
+
       textCategoryName.text = item.name
       textCategoryDescription.setText(
         item.description,

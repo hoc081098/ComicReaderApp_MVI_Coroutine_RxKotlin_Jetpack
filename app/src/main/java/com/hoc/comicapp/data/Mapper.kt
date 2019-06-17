@@ -89,7 +89,8 @@ object Mapper {
     return Category(
       link = response.link,
       name = response.name,
-      description = response.description
+      description = response.description,
+      thumbnail = response.thumbnail
     )
   }
 

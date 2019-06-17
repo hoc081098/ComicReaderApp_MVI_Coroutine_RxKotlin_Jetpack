@@ -8,5 +8,7 @@ data class CategoryResponse(
   @Json(name = "link")
   val link: String, // http://www.nettruyen.com/tim-truyen/xuyen-khong
   @Json(name = "name")
-  val name: String // Xuyên Không
+  val name: String, // Xuyên Không
+  @Json(name = "thumbnail")
+  val thumbnail: String // http://st.nettruyen.com/data/comics/166/ngao-thi-thien-dia.jpg
 )

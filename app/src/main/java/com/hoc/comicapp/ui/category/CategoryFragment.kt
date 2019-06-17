@@ -5,17 +5,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import androidx.recyclerview.widget.StaggeredGridLayoutManager.VERTICAL
+import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.snack
+import com.hoc.comicapp.utils.toast
 import com.jakewharton.rxbinding3.swiperefreshlayout.refreshes
 import com.jakewharton.rxbinding3.view.clicks
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.fragment_category.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
@@ -30,7 +33,7 @@ class CategoryFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    val adapter = CategoryAdapter()
+    val adapter = CategoryAdapter(GlideApp.with(this))
     initView(adapter)
     bind(adapter)
   }
@@ -41,6 +44,12 @@ class CategoryFragment : Fragment() {
       layoutManager = StaggeredGridLayoutManager(2, VERTICAL)
       adapter = categoryAdapter
     }
+
+    categoryAdapter.clickCategoryObservable
+      .subscribeBy {
+        context?.toast("Click $it")
+      }
+      .addTo(compositeDisposable)
   }
 
   private fun bind(adapter: CategoryAdapter) {

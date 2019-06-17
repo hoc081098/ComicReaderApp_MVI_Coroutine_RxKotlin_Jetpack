@@ -86,6 +86,7 @@ dependencies {
   implementation("com.squareup.retrofit2:retrofit:$retrofit2Version")
   implementation("com.squareup.retrofit2:converter-moshi:$retrofit2Version")
   implementation("com.squareup.okhttp3:logging-interceptor:3.13.1")
+  debugImplementation("com.squareup.leakcanary:leakcanary-android:2.0-alpha-2")
 
   implementation("com.jakewharton.rxrelay2:rxrelay:$rxRelayVersion")
   implementation("com.jakewharton.threetenabp:threetenabp:$threetenabpVersion")
@@ -104,6 +105,7 @@ dependencies {
 
   implementation("com.miguelcatalan:materialsearchview:1.4.0")
   implementation("com.ms-square:expandableTextView:0.1.4")
+  implementation("com.jaredrummler:material-spinner:1.3.1")
 
   testImplementation("junit:junit:4.12")
   androidTestImplementation("androidx.test:runner:1.1.2-alpha01")
