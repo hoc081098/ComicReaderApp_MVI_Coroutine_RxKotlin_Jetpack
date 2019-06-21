@@ -1,5 +1,6 @@
 package com.hoc.comicapp.ui.category
 
+import androidx.annotation.StringDef
 import com.hoc.comicapp.base.Intent
 import com.hoc.comicapp.base.SingleEvent
 import com.hoc.comicapp.base.ViewState
@@ -31,6 +32,13 @@ data class CategoryViewState(
     )
   }
 }
+
+@StringDef(value = [CATEGORY_NAME_ASC, CATEGORY_NAME_DESC])
+@Retention(value = AnnotationRetention.SOURCE)
+private annotation class SortOrder
+
+const val CATEGORY_NAME_ASC = "Name ascending"
+const val CATEGORY_NAME_DESC = "Name descending"
 
 sealed class CategoryPartialChange {
   abstract fun reducer(state: CategoryViewState): CategoryViewState
@@ -88,6 +96,7 @@ sealed class CategoryViewIntent : Intent {
   object Initial : CategoryViewIntent()
   object Refresh : CategoryViewIntent()
   object Retry : CategoryViewIntent()
+  data class ChangeSortOrder(@SortOrder val sortOrder: String) : CategoryViewIntent()
 }
 
 sealed class CategorySingleEvent : SingleEvent {

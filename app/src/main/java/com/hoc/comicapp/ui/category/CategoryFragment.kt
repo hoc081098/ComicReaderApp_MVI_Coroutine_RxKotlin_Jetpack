@@ -9,10 +9,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager.VERTICAL
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
-import com.hoc.comicapp.utils.observe
-import com.hoc.comicapp.utils.observeEvent
-import com.hoc.comicapp.utils.snack
-import com.hoc.comicapp.utils.toast
+import com.hoc.comicapp.utils.*
 import com.jakewharton.rxbinding3.swiperefreshlayout.refreshes
 import com.jakewharton.rxbinding3.view.clicks
 import io.reactivex.Observable
@@ -50,6 +47,8 @@ class CategoryFragment : Fragment() {
         context?.toast("Click $it")
       }
       .addTo(compositeDisposable)
+
+    spinner_sort_title.setItems(listOf(CATEGORY_NAME_ASC, CATEGORY_NAME_DESC))
   }
 
   private fun bind(adapter: CategoryAdapter) {
@@ -90,7 +89,10 @@ class CategoryFragment : Fragment() {
           .map { CategoryViewIntent.Retry },
         swipe_refresh_layout
           .refreshes()
-          .map { CategoryViewIntent.Refresh }
+          .map { CategoryViewIntent.Refresh },
+        spinner_sort_title
+          .itemSelections<String>()
+          .map { CategoryViewIntent.ChangeSortOrder(it) }
       )
     ).addTo(compositeDisposable)
   }

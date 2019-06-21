@@ -11,10 +11,7 @@ import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.cast
-import io.reactivex.rxkotlin.ofType
-import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.rxkotlin.*
 
 class CategoryViewModel(private val categoryInteractor: CategoryInteractor) :
   BaseViewModel<CategoryViewIntent, CategoryViewState, CategorySingleEvent>() {
@@ -26,22 +23,34 @@ class CategoryViewModel(private val categoryInteractor: CategoryInteractor) :
    * Filters intent by type, then compose with [ObservableTransformer] to transform [CategoryViewIntent] to [CategoryPartialChange].
    * Then using [Observable.scan] operator with reducer to transform [CategoryPartialChange]s to [CategoryViewState]
    */
-  private val intentToViewState = ObservableTransformer<CategoryViewIntent, CategoryViewState> {
-    it.publish { shared ->
-      Observable.mergeArray(
-        shared
-          .ofType<CategoryViewIntent.Initial>()
-          .compose(initialProcessor),
-        shared
-          .ofType<CategoryViewIntent.Refresh>()
-          .compose(refreshProcessor),
-        shared
-          .ofType<CategoryViewIntent.Retry>()
-          .compose(retryProcessor)
-      )
-    }.scan(initialState) { state, change -> change.reducer(state) }
-      .distinctUntilChanged()
-      .observeOn(AndroidSchedulers.mainThread())
+  private val intentToViewState = ObservableTransformer<CategoryViewIntent, CategoryViewState> { intents ->
+    Observables.combineLatest(
+      source1 = intents.publish { shared ->
+        Observable.mergeArray(
+          shared
+            .ofType<CategoryViewIntent.Initial>()
+            .compose(initialProcessor),
+          shared
+            .ofType<CategoryViewIntent.Refresh>()
+            .compose(refreshProcessor),
+          shared
+            .ofType<CategoryViewIntent.Retry>()
+            .compose(retryProcessor)
+        )
+      }.scan(initialState) { state, change -> change.reducer(state) },
+      source2 = intents.ofType<CategoryViewIntent.ChangeSortOrder>().map { it.sortOrder },
+      combineFunction = { viewState, sortOrder ->
+        viewState.copy(
+          categories = viewState.categories.sortedWith(
+            when (sortOrder) {
+              CATEGORY_NAME_ASC -> compareBy { it.name }
+              CATEGORY_NAME_DESC -> compareByDescending { it.name }
+              else -> return@combineLatest viewState
+            }
+          )
+        )
+      }
+    ).distinctUntilChanged().observeOn(AndroidSchedulers.mainThread())
   }
 
   /**
