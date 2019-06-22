@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.internal.AndroidExtensionsExtension
-
 val kotlinVersion: String by rootProject.extra
 val navVersion: String by rootProject.extra
 val coroutinesVersion: String by rootProject.extra
@@ -22,11 +20,7 @@ plugins {
   id("androidx.navigation.safeargs.kotlin")
 }
 
-androidExtensions {
-  configure(delegateClosureOf<AndroidExtensionsExtension> {
-    isExperimental = true
-  })
-}
+androidExtensions { isExperimental = true }
 
 android {
   compileSdkVersion(28)

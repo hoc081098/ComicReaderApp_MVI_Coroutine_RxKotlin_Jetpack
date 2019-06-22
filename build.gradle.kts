@@ -1,7 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-  val kotlinVersion by extra("1.3.21")
+  val kotlinVersion by extra("1.3.40")
   val navVersion by extra("2.0.0-rc02")
   extra.run {
     set("coroutinesVersion", "1.2.1")
@@ -38,7 +38,5 @@ allprojects {
   }
 }
 
-tasks.register("clean", Delete::class) {
-  delete(rootProject.buildDir)
-}
+tasks.register("clean", Delete::class) { delete(rootProject.buildDir) }
 

@@ -33,7 +33,6 @@
                 android:layout_height="0dp"
                 android:layout_marginTop="8dp"
                 android:clipToPadding="false"
-                android:padding="4dp"
                 android:scrollbars="vertical"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/spinner_sort_title"
