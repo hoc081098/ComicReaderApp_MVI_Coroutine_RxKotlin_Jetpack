@@ -4,8 +4,8 @@
     android:id="@+id/motionLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
-    app:layoutDescription="@xml/motion_scene_settings">
+    android:background="@android:color/white">
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
@@ -20,13 +20,14 @@
         android:id="@+id/toolbar_image"
         android:layout_width="0dp"
         android:layout_height="150dp"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="0dp"
         android:adjustViewBounds="true"
+        android:alpha="0"
         android:contentDescription="@null"
+        android:scaleType="center"
+        app:layout_constraintBottom_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/comic" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView
         android:id="@+id/backButton"
@@ -42,36 +43,30 @@
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_arrow_back_while_24dp" />
 
+
     <TextView
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="11dp"
         android:layout_marginBottom="24dp"
-        android:text="Kotlin"
-        android:textAllCaps="true"
-        android:textColor="#f48930"
-        android:textSize="24sp"
-        android:textStyle="bold"
+        android:scaleX="0.82"
+        android:scaleY="0.82"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar_image" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/desc"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="50dp"
-        android:layout_marginTop="10dp"
         android:layout_marginEnd="50dp"
+        android:alpha="0"
         android:gravity="center"
-        android:lineSpacingExtra="2.2dp"
-        android:paddingBottom="10dp"
-        android:text="Kotlin is expressive, concise, and powerful. Best of all, it's interoperable with the Java"
-        android:textColor="#000000"
-        android:textSize="17sp"
+        android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/title" />
@@ -79,10 +74,10 @@
     <View
         android:id="@+id/toolbarDivider"
         android:layout_width="0dp"
-        android:layout_height="20dp"
+        android:layout_height="1dp"
         android:background="@android:color/darker_gray"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/desc" />
+        app:layout_constraintTop_toBottomOf="@id/backButton" />
 
 </androidx.constraintlayout.motion.widget.MotionLayout>

@@ -39,11 +39,24 @@ class ComicDetailViewModel(private val comicDetailInteractor: ComicDetailInterac
           it.title,
           it.thumbnail
         ).doOnNext {
-          val messageFromError = (it as? ComicDetailPartialChange.InitialPartialChange.Error ?: return@doOnNext)
+          val message = (it as? ComicDetailPartialChange.InitialRetryPartialChange.Error ?: return@doOnNext)
             .error
             .getMessage()
-          sendMessageEvent("Get detail comic error: $messageFromError")
+          sendMessageEvent("Get detail comic error: $message")
         }
+      }
+    }
+
+  private val retryProcessor =
+    ObservableTransformer<ComicDetailIntent.Retry, ComicDetailPartialChange> { intent ->
+      intent.flatMap {
+        comicDetailInteractor.getComicDetail(viewModelScope, it.link)
+          .doOnNext {
+            val message = (it as? ComicDetailPartialChange.InitialRetryPartialChange.Error ?: return@doOnNext)
+              .error
+              .getMessage()
+            sendMessageEvent("Retry get detail comic error: $message")
+          }
       }
     }
 
@@ -72,7 +85,8 @@ class ComicDetailViewModel(private val comicDetailInteractor: ComicDetailInterac
     it.publish { shared ->
       Observable.mergeArray(
         shared.ofType<ComicDetailIntent.Initial>().compose(initialProcessor),
-        shared.ofType<ComicDetailIntent.Refresh>().compose(refreshProcessor)
+        shared.ofType<ComicDetailIntent.Refresh>().compose(refreshProcessor),
+        shared.ofType<ComicDetailIntent.Retry>().compose(retryProcessor)
       )
     }.doOnNext { Timber.d("partial_change=$it") }
       .scan(initialState) { state, change -> change.reducer(state) }

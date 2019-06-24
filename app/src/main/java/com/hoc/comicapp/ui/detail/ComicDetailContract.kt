@@ -13,8 +13,8 @@ interface ComicDetailInteractor {
   fun getComicDetail(
     coroutineScope: CoroutineScope,
     link: String,
-    name: String,
-    thumbnail: String
+    name: String? = null,
+    thumbnail: String? = null
   ): Observable<ComicDetailPartialChange>
 
   fun refreshPartialChanges(
@@ -31,19 +31,22 @@ sealed class ComicDetailIntent : Intent {
   ) : ComicDetailIntent()
 
   data class Refresh(val link: String) : ComicDetailIntent()
+  data class Retry(val link: String) : ComicDetailIntent()
 }
 
 data class ComicDetailViewState(
   val comicDetail: ComicDetail?,
   val errorMessage: String?,
-  val isLoading: Boolean
+  val isLoading: Boolean,
+  val isRefreshing: Boolean
 ) : ViewState {
   companion object {
     @JvmStatic
     fun initialState(): ComicDetailViewState = ComicDetailViewState(
       comicDetail = null,
       errorMessage = null,
-      isLoading = true
+      isLoading = true,
+      isRefreshing = false
     )
   }
 
@@ -61,7 +64,7 @@ data class ComicDetailViewState(
 sealed class ComicDetailPartialChange {
   abstract fun reducer(state: ComicDetailViewState): ComicDetailViewState
 
-  sealed class InitialPartialChange : ComicDetailPartialChange() {
+  sealed class InitialRetryPartialChange : ComicDetailPartialChange() {
     override fun reducer(state: ComicDetailViewState): ComicDetailViewState {
       return when (this) {
         is InitialData -> {
@@ -81,15 +84,20 @@ sealed class ComicDetailPartialChange {
           )
         }
         Loading -> {
-          state.copy(isLoading = true)
+          state.copy(
+            isLoading = true,
+            errorMessage = null
+          )
         }
       }
     }
 
-    data class InitialData(val initialComic: ComicDetailViewState.ComicDetail.InitialComic) : InitialPartialChange()
-    data class Data(val comicDetail: ComicDetailViewState.ComicDetail.Comic) : InitialPartialChange()
-    data class Error(val error: ComicAppError) : InitialPartialChange()
-    object Loading : InitialPartialChange()
+    data class InitialData(val initialComic: ComicDetailViewState.ComicDetail.InitialComic) :
+      InitialRetryPartialChange()
+
+    data class Data(val comicDetail: ComicDetailViewState.ComicDetail.Comic) : InitialRetryPartialChange()
+    data class Error(val error: ComicAppError) : InitialRetryPartialChange()
+    object Loading : InitialRetryPartialChange()
   }
 
   sealed class RefreshPartialChange : ComicDetailPartialChange() {
@@ -97,16 +105,16 @@ sealed class ComicDetailPartialChange {
       return when (this) {
         is Success -> {
           state.copy(
-            isLoading = false,
+            isRefreshing = false,
             errorMessage = null,
             comicDetail = this.comicDetail
           )
         }
         is Error -> {
-          state.copy(isLoading = false)
+          state.copy(isRefreshing = false)
         }
         Loading -> {
-          state.copy(isLoading = true)
+          state.copy(isRefreshing = true)
         }
       }
     }

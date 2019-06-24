@@ -1,9 +1,8 @@
 package com.hoc.comicapp.ui.detail
 
-import com.hoc.comicapp.utils.fold
 import com.hoc.comicapp.domain.ComicRepository
+import com.hoc.comicapp.utils.fold
 import io.reactivex.Observable
-import io.reactivex.rxkotlin.cast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.rx2.rxObservable
@@ -15,7 +14,7 @@ class ComicDetailInteractorImpl(private val comicRepository: ComicRepository) :
     coroutineScope: CoroutineScope,
     link: String
   ): Observable<ComicDetailPartialChange> {
-    return coroutineScope.rxObservable {
+    return coroutineScope.rxObservable<ComicDetailPartialChange> {
       send(ComicDetailPartialChange.RefreshPartialChange.Loading)
 
       comicRepository
@@ -25,32 +24,35 @@ class ComicDetailInteractorImpl(private val comicRepository: ComicRepository) :
           { ComicDetailPartialChange.RefreshPartialChange.Success(ComicDetailViewState.ComicDetail.Comic(it)) }
         )
         .let { send(it) }
-    }.cast()
+    }
   }
 
   override fun getComicDetail(
     coroutineScope: CoroutineScope,
     link: String,
-    name: String,
-    thumbnail: String
+    name: String?,
+    thumbnail: String?
   ): Observable<ComicDetailPartialChange> {
     return coroutineScope.rxObservable<ComicDetailPartialChange> {
-      send(
-        ComicDetailPartialChange.InitialPartialChange.InitialData(
-          initialComic = ComicDetailViewState.ComicDetail.InitialComic(
-            link = link,
-            thumbnail = thumbnail,
-            title = name
+
+      if (thumbnail != null && name != null) {
+        send(
+          ComicDetailPartialChange.InitialRetryPartialChange.InitialData(
+            initialComic = ComicDetailViewState.ComicDetail.InitialComic(
+              link = link,
+              thumbnail = thumbnail,
+              title = name
+            )
           )
         )
-      )
-      send(ComicDetailPartialChange.InitialPartialChange.Loading)
+      }
+      send(ComicDetailPartialChange.InitialRetryPartialChange.Loading)
 
       comicRepository
         .getComicDetail(link)
         .fold(
-          { ComicDetailPartialChange.InitialPartialChange.Error(it) },
-          { ComicDetailPartialChange.InitialPartialChange.Data(ComicDetailViewState.ComicDetail.Comic(it)) }
+          { ComicDetailPartialChange.InitialRetryPartialChange.Error(it) },
+          { ComicDetailPartialChange.InitialRetryPartialChange.Data(ComicDetailViewState.ComicDetail.Comic(it)) }
         )
         .let { send(it) }
     }
