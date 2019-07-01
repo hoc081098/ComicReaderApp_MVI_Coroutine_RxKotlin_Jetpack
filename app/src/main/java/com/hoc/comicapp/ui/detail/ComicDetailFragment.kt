@@ -4,6 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.constraintlayout.motion.widget.MotionLayout
+import androidx.constraintlayout.motion.widget.TransitionAdapter
+import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,17 +21,18 @@ import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.snack
 import com.hoc.comicapp.utils.toast
 import com.jakewharton.rxbinding3.recyclerview.scrollEvents
-import com.jakewharton.rxbinding3.swiperefreshlayout.refreshes
 import com.jakewharton.rxbinding3.view.clicks
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.rxkotlin.withLatestFrom
 import kotlinx.android.synthetic.main.fragment_comic_detail.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
 import kotlin.LazyThreadSafetyMode.NONE
+import kotlin.math.absoluteValue
 
 @ExperimentalCoroutinesApi
 class ComicDetailFragment : Fragment() {
@@ -55,7 +59,8 @@ class ComicDetailFragment : Fragment() {
   }
 
   private fun initView(chapterAdapter: ChapterAdapter) {
-    swipe_refresh_layout.setColorSchemeColors(*resources.getIntArray(com.hoc.comicapp.R.array.swipe_refresh_colors))
+//    TODO: Refresh detail page
+//    swipe_refresh_layout.setColorSchemeColors(*resources.getIntArray(com.hoc.comicapp.R.array.swipe_refresh_colors))
 
     recycler_chapters.run {
       setHasFixedSize(true)
@@ -63,20 +68,66 @@ class ComicDetailFragment : Fragment() {
       adapter = chapterAdapter
     }
 
-    fab.setOnClickListener {
-      object : LinearSmoothScroller(it.context) {
-        override fun getVerticalSnapPreference() = LinearSmoothScroller.SNAP_TO_START
-      }.apply { targetPosition = 0 }.let { recycler_chapters.layoutManager!!.startSmoothScroll(it) }
-    }
+    setupFab(chapterAdapter)
 
-    recycler_chapters
-      .scrollEvents()
-      .subscribeBy {
-        if (it.dy < 0) {
-          fab.show()
+    var lastProgress = 0f
+    root_detail.setTransitionListener(object : TransitionAdapter() {
+      override fun onTransitionChange(motionLayout: MotionLayout?, startId: Int, endId: Int, progress: Float) {
+        if (progress - lastProgress > 0) {
+          // from start to end
+          if ((progress - 1f).absoluteValue < 0.5f) {
+            text_title.maxLines = 1
+            text_last_updated_status_view.maxLines = 2
+            Timber.d("END")
+          }
         } else {
-          fab.hide()
+          // from end to start
+          if (progress < 0.3f) {
+            text_title.maxLines = 6
+            text_last_updated_status_view.maxLines = Int.MAX_VALUE
+            Timber.d("START")
+          }
         }
+        lastProgress = progress
+      }
+    })
+  }
+
+  private fun setupFab(chapterAdapter: ChapterAdapter) {
+    val scrollEvents = recycler_chapters.scrollEvents().share()
+    scrollEvents
+      .subscribeBy {
+        when {
+          it.dy > 0 -> {
+            fab.show()
+            fab.setImageResource(R.drawable.ic_arrow_downward_white_24dp)
+          }
+          it.dy < 0 -> {
+            fab.show()
+            fab.setImageResource(R.drawable.ic_arrow_upward_white_24dp)
+          }
+          else -> fab.hide()
+        }
+      }
+      .addTo(compositeDisposable)
+
+    val smoothScroller = object : LinearSmoothScroller(requireContext()) {
+      override fun getVerticalSnapPreference() = SNAP_TO_START
+    }
+    fab
+      .clicks()
+      .withLatestFrom(scrollEvents)
+      .subscribeBy {
+        smoothScroller
+          .apply {
+            val dy = it.second.dy
+            targetPosition = when {
+              dy == 0 -> return@subscribeBy
+              dy > 0 -> chapterAdapter.itemCount - 1
+              else -> 0
+            }
+          }
+          .let { recycler_chapters.layoutManager!!.startSmoothScroll(it) }
       }
       .addTo(compositeDisposable)
   }
@@ -104,10 +155,11 @@ class ComicDetailFragment : Fragment() {
         ),
         button_retry
           .clicks()
-          .map { ComicDetailIntent.Retry(argComic.link) },
-        swipe_refresh_layout
-          .refreshes()
-          .map { ComicDetailIntent.Refresh(argComic.link) }
+          .map { ComicDetailIntent.Retry(argComic.link) }
+//        TODO: Refresh detail page
+//        swipe_refresh_layout
+//          .refreshes()
+//          .map { ComicDetailIntent.Refresh(argComic.link) }
       )
     ).addTo(compositeDisposable)
   }
@@ -120,7 +172,7 @@ class ComicDetailFragment : Fragment() {
 
     if (viewState.isLoading) {
       progress_bar.visibility = View.VISIBLE
-      text_last_updated.text = "Loading..."
+      text_last_updated_status_view.text = "Loading..."
     } else {
       progress_bar.visibility = View.INVISIBLE
     }
@@ -130,12 +182,13 @@ class ComicDetailFragment : Fragment() {
     } else {
       group_error.visibility = View.VISIBLE
       text_error_message.text = viewState.errorMessage
-      text_last_updated.text = "Error occurred"
+      text_last_updated_status_view.text = "Error occurred"
     }
 
-    if (!viewState.isRefreshing) {
-      swipe_refresh_layout.isRefreshing = false
-    }
+//    TODO: Refresh detail page
+//    if (!viewState.isRefreshing) {
+//      swipe_refresh_layout.isRefreshing = false
+//    }
 
     when (val detail = viewState.comicDetail) {
       null -> return
@@ -144,7 +197,18 @@ class ComicDetailFragment : Fragment() {
         val comicDetail = detail.comicDetail
 
         text_title.text = comicDetail.title
-        text_last_updated.text = "Last updated: ${comicDetail.lastUpdated}"
+
+        val list = mutableListOf(
+          "Last updated" to comicDetail.lastUpdated,
+          "Status" to comicDetail.status,
+          "View" to comicDetail.view
+        )
+        comicDetail.otherName?.let { "Other name" to it }?.let(list::add)
+
+        text_last_updated_status_view.text = HtmlCompat.fromHtml(
+          list.joinToString("\n") { "\u2022 <b>${it.first}:</b> ${it.second} <br>" },
+          HtmlCompat.FROM_HTML_MODE_LEGACY
+        )
 
         glide
           .load(comicDetail.thumbnail)

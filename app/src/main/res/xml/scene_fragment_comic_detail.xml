@@ -9,7 +9,9 @@
 
         <OnSwipe
             app:dragDirection="dragUp"
-            app:touchAnchorId="@id/swipe_refresh_layout"
+            app:touchAnchorId="@id/recycler_chapters"
+            app:onTouchUp="autoComplete"
+            app:moveWhenScrollAtTop="true"
             app:touchAnchorSide="top" />
     </Transition>
 

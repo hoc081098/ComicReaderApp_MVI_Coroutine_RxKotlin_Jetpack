@@ -61,7 +61,7 @@
         tools:text="PHÁP SƯ KHÔNG PHÉP THUẬT VERY LONG VERY LONG VERY LONG TITLE" />
 
     <TextView
-        android:id="@+id/text_last_updated"
+        android:id="@+id/text_last_updated_status_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -70,34 +70,26 @@
         android:ellipsize="end"
         android:fontFamily="@font/google_sans"
         android:gravity="center|start"
-        android:maxLines="2"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/image_thumbnail"
         app:layout_constraintTop_toBottomOf="@id/text_title"
         tools:text="Last updated: 20:46 31/05/2019" />
 
-
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipe_refresh_layout"
+    <!--TODO: Refresh detail page-->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_chapters"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:padding="4dp"
+        android:scrollbars="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/space">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_chapters"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:padding="4dp"
-            android:scrollbars="vertical"
-
-            tools:listitem="@layout/item_recycler_chapter"
-            tools:visibility="invisible" />
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        app:layout_constraintTop_toBottomOf="@id/space"
+        tools:listitem="@layout/item_recycler_chapter"
+        tools:visibility="invisible" />
 
     <ProgressBar
         android:id="@+id/progress_bar"
@@ -131,7 +123,8 @@
         app:fabSize="normal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@drawable/ic_arrow_upward_white_24dp" />
+        app:srcCompat="@drawable/ic_arrow_upward_white_24dp"
+        app:visibilityMode="ignore" />
 
     <TextView
         android:id="@+id/text_error_message"
@@ -147,7 +140,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/swipe_refresh_layout"
+        app:layout_constraintTop_toTopOf="@id/recycler_chapters"
         app:layout_constraintVertical_chainStyle="packed"
         app:visibilityMode="ignore"
         tools:text="ERROR" />
@@ -169,7 +162,7 @@
         android:textSize="18sp"
         app:backgroundTint="@color/colorBackground"
         app:cornerRadius="4dp"
-        app:layout_constraintBottom_toBottomOf="@id/swipe_refresh_layout"
+        app:layout_constraintBottom_toBottomOf="@id/recycler_chapters"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
