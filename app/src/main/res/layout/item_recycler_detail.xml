@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/categories_and_shortended_content"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardBackgroundColor="@color/colorBackground"
+    app:cardCornerRadius="2dp"
+    app:cardElevation="2dp"
+    app:cardUseCompatPadding="true"
+    app:contentPadding="8dp"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/space">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/barrier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="button_read_latest_chapter,button_read_first_chapter" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_read_latest_chapter"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/google_sans"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:text="Latest chapter"
+            android:textAlignment="center"
+            android:textAllCaps="false"
+            android:textColor="@color/colorAccent"
+            android:textSize="13sp"
+            app:backgroundTint="@color/colorBackground"
+            app:cornerRadius="4dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/button_read_first_chapter"
+            app:layout_constraintTop_toTopOf="parent"
+            app:strokeColor="@color/colorAccent"
+            app:strokeWidth="1dp"
+            app:visibilityMode="ignore" />
+
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_read_first_chapter"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:fontFamily="@font/google_sans"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:text="First chapter"
+            android:textAlignment="center"
+            android:textAllCaps="false"
+            android:textColor="@color/colorAccent"
+            android:textSize="13sp"
+            app:backgroundTint="@color/colorBackground"
+            app:cornerRadius="4dp"
+            app:layout_constraintEnd_toStartOf="@+id/button_read_latest_chapter"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:strokeColor="@color/colorAccent"
+            app:strokeWidth="1dp"
+            app:visibilityMode="ignore" />
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/categories_group"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:chipSpacing="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/barrier"
+            tools:layout_height="100dp" />
+
+        <com.ms.square.android.expandabletextview.ExpandableTextView
+            android:id="@+id/text_shortended_content"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@android:color/transparent"
+            app:animAlphaStart="1"
+            app:animDuration="400"
+            app:collapseDrawable="@drawable/ic_expand_less_white_24dp"
+            app:expandDrawable="@drawable/ic_expand_more_white_24dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/categories_group"
+            app:maxCollapsedLines="4">
+
+            <TextView
+                android:id="@id/expandable_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:fontFamily="@font/google_sans"
+                android:padding="2dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                android:textColor="#E8FFFFFF"
+                android:textSize="15sp"
+                tools:lines="4"
+                tools:text="Xuyên Không, Xuyên Việt là thể loại nhân vật chính vì một lý do nào đó mà bị đưa đến sinh sống ở một không gian hay một khoảng thời gian khác. Nhân vật chính có thể trực tiếp xuyên qua bằng thân xác mình hoặc sống lại bằng thân xác người khác." />
+
+            <ImageButton
+                android:id="@id/expand_collapse"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end|bottom"
+                android:background="@android:color/transparent"
+                android:padding="12dp" />
+
+        </com.ms.square.android.expandabletextview.ExpandableTextView>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>

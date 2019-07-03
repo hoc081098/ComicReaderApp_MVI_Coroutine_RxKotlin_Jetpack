@@ -12,6 +12,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.google.android.material.chip.Chip
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.domain.models.ComicDetail.Chapter
@@ -72,7 +73,12 @@ class ComicDetailFragment : Fragment() {
 
     var lastProgress = 0f
     root_detail.setTransitionListener(object : TransitionAdapter() {
-      override fun onTransitionChange(motionLayout: MotionLayout?, startId: Int, endId: Int, progress: Float) {
+      override fun onTransitionChange(
+        motionLayout: MotionLayout?,
+        startId: Int,
+        endId: Int,
+        progress: Float
+      ) {
         if (progress - lastProgress > 0) {
           // from start to end
           if ((progress - 1f).absoluteValue < 0.5f) {
@@ -190,8 +196,7 @@ class ComicDetailFragment : Fragment() {
 //      swipe_refresh_layout.isRefreshing = false
 //    }
 
-    when (val detail = viewState.comicDetail) {
-      null -> return
+    when (val detail = viewState.comicDetail ?: return) {
       is ComicDetail.Comic -> {
         // actual comic detail state
         val comicDetail = detail.comicDetail
@@ -202,11 +207,14 @@ class ComicDetailFragment : Fragment() {
           "Last updated" to comicDetail.lastUpdated,
           "Status" to comicDetail.status,
           "View" to comicDetail.view
-        )
-        comicDetail.otherName?.let { "Other name" to it }?.let(list::add)
+        ).apply {
+          comicDetail.otherName
+            ?.let { "Other name" to it }
+            ?.let(::add)
+        }
 
         text_last_updated_status_view.text = HtmlCompat.fromHtml(
-          list.joinToString("\n") { "\u2022 <b>${it.first}:</b> ${it.second} <br>" },
+          list.joinToString("") { "\u2022 <b>${it.first}:</b> ${it.second} <br>" },
           HtmlCompat.FROM_HTML_MODE_LEGACY
         )
 
@@ -216,7 +224,12 @@ class ComicDetailFragment : Fragment() {
           .transition(DrawableTransitionOptions.withCrossFade())
           .into(image_thumbnail)
 
-        chapterAdapter.submitList(comicDetail.chapters)
+        chapterAdapter.submitList(listOf(
+          ChapterItem.Header(
+            categories = comicDetail.categories,
+            shortenedContent = comicDetail.shortenedContent
+          )
+        ) + comicDetail.chapters.map { ChapterItem.Chapter(it) })
       }
       is ComicDetail.InitialComic -> {
         text_title.text = detail.title
