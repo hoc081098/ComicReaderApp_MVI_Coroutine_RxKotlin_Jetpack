@@ -46,6 +46,14 @@
             app:argType="string"
             app:nullable="false" />
 
+        <action
+            android:id="@+id/action_comicDetailFragment_to_chapterDetailFragment"
+            app:destination="@id/chapterDetailFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
     </fragment>
 
     <fragment
@@ -64,6 +72,18 @@
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/chapterDetailFragment"
+        android:name="com.hoc.comicapp.ui.chapter_detail.ChapterDetailFragment"
+        android:label="Chapter detail">
+
+        <argument
+            android:name="chapter"
+            app:argType="com.hoc.comicapp.domain.models.ComicDetail$Chapter"
+            app:nullable="false" />
+
     </fragment>
 
 </navigation>

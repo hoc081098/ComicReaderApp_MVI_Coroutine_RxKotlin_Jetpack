@@ -2,9 +2,9 @@
 
 buildscript {
   val kotlinVersion by extra("1.3.40")
-  val navVersion by extra("2.0.0-rc02")
+  val navVersion by extra("2.1.0-alpha06")
   extra.run {
-    set("coroutinesVersion", "1.2.1")
+    set("coroutinesVersion", "1.3.0-M2")
     set("lifecycleVersion", "2.2.0-alpha01")
     set("pagingVersion", "2.1.0")
     set("koinVersion", "2.0.0")
@@ -14,7 +14,7 @@ buildscript {
     set("timberVersion", "4.7.1")
     set("rxRelayVersion", "2.1.0")
     set("threetenabpVersion", "1.1.2")
-    set("retrofit2Version", "2.5.1-SNAPSHOT")
+    set("retrofit2Version", "2.6.0")
   }
 
 

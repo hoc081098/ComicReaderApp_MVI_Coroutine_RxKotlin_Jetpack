@@ -3,6 +3,9 @@ package com.hoc.comicapp.koin
 import com.hoc.comicapp.ui.category.CategoryInteractor
 import com.hoc.comicapp.ui.category.CategoryInteractorImpl
 import com.hoc.comicapp.ui.category.CategoryViewModel
+import com.hoc.comicapp.ui.chapter_detail.ChapterDetailInteractor
+import com.hoc.comicapp.ui.chapter_detail.ChapterDetailInteractorImpl
+import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewModel
 import com.hoc.comicapp.ui.detail.ComicDetailInteractor
 import com.hoc.comicapp.ui.detail.ComicDetailInteractorImpl
 import com.hoc.comicapp.ui.detail.ComicDetailViewModel
@@ -28,6 +31,8 @@ val viewModelModule = module {
 
   single { CategoryInteractorImpl(get()) } bind CategoryInteractor::class
 
+  single { ChapterDetailInteractorImpl(get(), get()) } bind ChapterDetailInteractor::class
+
   viewModel { HomeViewModel(get()) }
 
   viewModel { ComicDetailViewModel(get()) }
@@ -35,5 +40,7 @@ val viewModelModule = module {
   viewModel { SearchComicViewModel(get()) }
 
   viewModel { CategoryViewModel(get()) }
+
+  viewModel { ChapterDetailViewModel(get()) }
 
 }

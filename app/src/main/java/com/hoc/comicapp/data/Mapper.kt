@@ -81,7 +81,15 @@ object Mapper {
       time = response.time,
       chapterLink = response.chapterLink,
       htmlContent = response.htmlContent,
-      images = response.images
+      images = response.images,
+      chapters = response.chapters.map {
+        ChapterDetail.Chapter(
+          chapterLink = it.chapterLink,
+          chapterName = it.chapterName
+        )
+      },
+      nextChapterLink = response.nextChapterLink,
+      prevChapterLink = response.prevChapterLink
     )
   }
 

@@ -34,7 +34,10 @@ object ChapterDiffUtilItemCallback : DiffUtil.ItemCallback<ChapterItem>() {
   override fun areContentsTheSame(oldItem: ChapterItem, newItem: ChapterItem) = oldItem == newItem
 }
 
-class ChapterAdapter(private val onClickChapter: (Chapter) -> Unit) :
+class ChapterAdapter(
+  private val onClickChapter: (Chapter) -> Unit,
+  private val onClickReadButton: (readFirst: Boolean) -> Unit
+) :
   ListAdapter<ChapterItem, ChapterAdapter.VH>(ChapterDiffUtilItemCallback) {
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
     val view = LayoutInflater.from(parent.context).inflate(viewType, parent, false)
@@ -84,9 +87,17 @@ class ChapterAdapter(private val onClickChapter: (Chapter) -> Unit) :
     }
   }
 
-  private class HeaderVH(itemView: View) : VH(itemView) {
+  private inner class HeaderVH(itemView: View) : VH(itemView), View.OnClickListener {
     private val textShortendedContent = itemView.text_shortended_content!!
     private val categoriesGroup = itemView.categories_group!!
+
+    init {
+      itemView.button_read_latest_chapter.setOnClickListener(this)
+      itemView.button_read_first_chapter.setOnClickListener(this)
+    }
+
+    override fun onClick(v: View) = onClickReadButton(v.id == R.id.button_read_first_chapter)
+
 
     override fun bind(item: ChapterItem) {
       if (item !is ChapterItem.Header) return

@@ -8,11 +8,11 @@ import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.constraintlayout.motion.widget.TransitionAdapter
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
-import com.google.android.material.chip.Chip
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.domain.models.ComicDetail.Chapter
@@ -20,7 +20,6 @@ import com.hoc.comicapp.ui.detail.ComicDetailViewState.ComicDetail
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.snack
-import com.hoc.comicapp.utils.toast
 import com.jakewharton.rxbinding3.recyclerview.scrollEvents
 import com.jakewharton.rxbinding3.view.clicks
 import io.reactivex.Observable
@@ -34,6 +33,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
 import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.math.absoluteValue
+import com.hoc.comicapp.ui.detail.ComicDetailFragmentDirections.Companion.actionComicDetailFragmentToChapterDetailFragment as toChapterDetail
 
 @ExperimentalCoroutinesApi
 class ComicDetailFragment : Fragment() {
@@ -54,9 +54,20 @@ class ComicDetailFragment : Fragment() {
     super.onViewCreated(view, savedInstanceState)
     Timber.d("ComicDetailFragment::onViewCreated")
 
-    val chapterAdapter = ChapterAdapter(::onClickChapter)
+    val chapterAdapter = ChapterAdapter(::onClickChapter, ::onClickButtonRead)
     initView(chapterAdapter)
     bind(chapterAdapter)
+  }
+
+  private fun onClickButtonRead(readFirst: @ParameterName(name = "readFirst") Boolean) {
+    val comicDetail = viewModel.state.value.comicDetail as? ComicDetail.Comic ?: return
+    val chapter =
+      comicDetail.comicDetail.chapters.let { if (readFirst) it.lastOrNull() else it.firstOrNull() }
+    if (chapter === null) {
+      view?.snack("Chapters list is empty!")
+    } else {
+      findNavController().navigate(toChapterDetail(chapter))
+    }
   }
 
   private fun initView(chapterAdapter: ChapterAdapter) {
@@ -247,9 +258,9 @@ class ComicDetailFragment : Fragment() {
     super.onDestroyView()
     Timber.d("ComicDetailFragment::onDestroyView")
     compositeDisposable.clear()
+    root_detail.setTransitionListener(null)
   }
 
-  private fun onClickChapter(chapter: Chapter) {
-    requireContext().toast("Clicked $chapter")
-  }
+  private fun onClickChapter(chapter: Chapter) =
+    findNavController().navigate(toChapterDetail(chapter))
 }

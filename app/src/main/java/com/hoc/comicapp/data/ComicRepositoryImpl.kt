@@ -81,7 +81,7 @@ class ComicRepositoryImpl(
           .right()
       }
     } catch (throwable: Throwable) {
-      Timber.d(throwable, "ComicRepositoryImpl::getChapterDetail $throwable")
+      Timber.d(throwable, "ComicRepositoryImpl::getDetail $throwable")
       throwable.toError(retrofit).left()
     }
   }

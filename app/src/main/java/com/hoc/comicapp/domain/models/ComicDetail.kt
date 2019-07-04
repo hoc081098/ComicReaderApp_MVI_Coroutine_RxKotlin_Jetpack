@@ -1,5 +1,8 @@
 package com.hoc.comicapp.domain.models
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
+
 data class ComicDetail(
   val author: String, // ONE - Murata Yuusuke
   val categories: List<Category>,
@@ -18,10 +21,11 @@ data class ComicDetail(
     val name: String // Manga
   )
 
+  @Parcelize
   data class Chapter(
     val chapterLink: String, // http://www.nettruyen.com/truyen-tranh/cu-dam-huy-diet/chap-0/168970
     val chapterName: String, // Chapter 0: Special chap
     val time: String, // 25/03/15
     val view: String // 253.478
-  )
+  ) : Parcelable
 }
