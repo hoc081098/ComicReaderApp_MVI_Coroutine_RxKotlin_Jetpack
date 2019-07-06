@@ -10,13 +10,28 @@ import com.hoc.comicapp.R
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.snack
-import com.hoc.comicapp.utils.toast
 import io.reactivex.Observable
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import kotlin.LazyThreadSafetyMode.NONE
 
 class ChapterDetailFragment : Fragment() {
   private val navArgs by navArgs<ChapterDetailFragmentArgs>()
   private val viewModel by viewModel<ChapterDetailViewModel>()
+  private val initial by lazy(NONE) {
+    val chapter = navArgs.chapter
+    ChapterDetailViewIntent.Initial(
+      initial = ChapterDetailViewState.Detail.Initial(
+        chapterName = chapter.chapterName,
+        time = chapter.time,
+        view = chapter.view,
+        chapterLink = chapter.chapterLink
+      )
+    )
+  }
+
+  private val compositeDisposable = CompositeDisposable()
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -27,7 +42,12 @@ class ChapterDetailFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
+    initView()
     bind()
+  }
+
+  private fun initView() {
+
   }
 
   private fun bind() {
@@ -38,28 +58,41 @@ class ChapterDetailFragment : Fragment() {
         }
       }
     }
-    viewModel.state.observe(owner = viewLifecycleOwner) {
-      context?.toast(it.toString())
+    viewModel.state.observe(owner = viewLifecycleOwner) { (isLoading, isRefreshing, errorMessage, detail) ->
+      if (isLoading) {
+
+      } else {
+
+      }
+      if (isRefreshing) {
+
+      } else {
+
+      }
+      if (errorMessage !== null) {
+
+      } else {
+
+      }
+      when (detail ?: return@observe) {
+        is ChapterDetailViewState.Detail.Initial -> {
+
+        }
+        is ChapterDetailViewState.Detail.Data -> {
+
+        }
+      }
     }
 
-    val chapter = navArgs.chapter
     viewModel.processIntents(
       Observable.mergeArray(
-        Observable.just(
-          ChapterDetailViewIntent.Initial(
-            initial = ChapterDetailViewState.Detail.Initial(
-              chapterName = chapter.chapterName,
-              time = chapter.time,
-              view = chapter.view,
-              chapterLink = chapter.chapterLink
-            )
-          )
-        )
+        Observable.just(initial)
       )
-    )
+    ).addTo(compositeDisposable)
   }
 
   override fun onDestroyView() {
     super.onDestroyView()
+    compositeDisposable.clear()
   }
 }

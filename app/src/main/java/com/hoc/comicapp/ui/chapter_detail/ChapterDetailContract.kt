@@ -1,5 +1,6 @@
 package com.hoc.comicapp.ui.chapter_detail
 
+import androidx.viewpager2.widget.ViewPager2
 import com.hoc.comicapp.base.Intent
 import com.hoc.comicapp.base.SingleEvent
 import com.hoc.comicapp.base.ViewState
@@ -15,7 +16,7 @@ interface ChapterDetailInteractor {
     chapterName: String? = null,
     time: String? = null,
     view: String? = null
-  ): Observable<ChapterDetailPartialChange.InitialRetryPartialChange>
+  ): Observable<ChapterDetailPartialChange.Initial_Retry_LoadChapter_PartialChange>
 
   fun refresh(chapterLink: String): Observable<ChapterDetailPartialChange.RefreshPartialChange>
 }
@@ -24,15 +25,18 @@ sealed class ChapterDetailViewIntent : Intent {
   data class Initial(val initial: Detail.Initial) :
     ChapterDetailViewIntent()
 
-  data class Refresh(val link: String)
-  data class Retry(val link: String)
+  data class Refresh(val link: String) : ChapterDetailViewIntent()
+  data class Retry(val link: String) : ChapterDetailViewIntent()
+  data class LoadChapter(val link: String) : ChapterDetailViewIntent()
+  data class ChangeOrientation(@ViewPager2.Orientation val orientation: Int) : ChapterDetailViewIntent()
 }
 
 data class ChapterDetailViewState(
   val isLoading: Boolean,
   val isRefreshing: Boolean,
   val errorMessage: String?,
-  val detail: Detail?
+  val detail: Detail?,
+  @ViewPager2.Orientation val orientation: Int
 ) : ViewState {
 
   sealed class Detail {
@@ -52,7 +56,8 @@ data class ChapterDetailViewState(
         isLoading = true,
         isRefreshing = false,
         detail = null,
-        errorMessage = null
+        errorMessage = null,
+        orientation = ViewPager2.ORIENTATION_VERTICAL
       )
     }
   }
@@ -61,7 +66,7 @@ data class ChapterDetailViewState(
 sealed class ChapterDetailPartialChange {
   abstract fun reducer(state: ChapterDetailViewState): ChapterDetailViewState
 
-  sealed class InitialRetryPartialChange : ChapterDetailPartialChange() {
+  sealed class Initial_Retry_LoadChapter_PartialChange : ChapterDetailPartialChange() {
     override fun reducer(state: ChapterDetailViewState): ChapterDetailViewState {
       return when (this) {
         is InitialData -> {
@@ -89,10 +94,10 @@ sealed class ChapterDetailPartialChange {
       }
     }
 
-    data class InitialData(val initial: Detail.Initial) : InitialRetryPartialChange()
-    data class Data(val data: ChapterDetailDomain) : InitialRetryPartialChange()
-    data class Error(val error: ComicAppError) : InitialRetryPartialChange()
-    object Loading : InitialRetryPartialChange()
+    data class InitialData(val initial: Detail.Initial) : Initial_Retry_LoadChapter_PartialChange()
+    data class Data(val data: ChapterDetailDomain) : Initial_Retry_LoadChapter_PartialChange()
+    data class Error(val error: ComicAppError) : Initial_Retry_LoadChapter_PartialChange()
+    object Loading : Initial_Retry_LoadChapter_PartialChange()
   }
 
   sealed class RefreshPartialChange : ChapterDetailPartialChange() {

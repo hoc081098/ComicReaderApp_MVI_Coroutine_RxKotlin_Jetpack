@@ -1,7 +1,6 @@
 package com.hoc.comicapp.ui.category
 
 import android.util.SparseBooleanArray
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -11,6 +10,7 @@ import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
 import com.hoc.comicapp.domain.models.Category
 import com.hoc.comicapp.utils.asObservable
+import com.hoc.comicapp.utils.inflate
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxbinding3.view.detaches
 import com.jakewharton.rxrelay2.PublishRelay
@@ -26,11 +26,8 @@ class CategoryAdapter(private val glide: GlideRequests) : ListAdapter<Category, 
   private val clickCategoryS = PublishRelay.create<Category>()
   val clickCategoryObservable get() = clickCategoryS.asObservable()
 
-  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-    return LayoutInflater.from(parent.context)
-      .inflate(R.layout.item_recycler_category, parent, false)
-      .let { VH(it, parent) }
-  }
+  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+    VH(parent inflate R.layout.item_recycler_category, parent)
 
   override fun onBindViewHolder(holder: VH, position: Int) = holder.bind(getItem(position), position)
 

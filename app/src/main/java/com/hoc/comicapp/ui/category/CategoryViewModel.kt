@@ -1,6 +1,7 @@
 package com.hoc.comicapp.ui.category
 
 import androidx.lifecycle.viewModelScope
+import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.utils.Event
@@ -9,11 +10,13 @@ import com.hoc.comicapp.utils.notOfType
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.*
 
-class CategoryViewModel(private val categoryInteractor: CategoryInteractor) :
+class CategoryViewModel(
+  private val categoryInteractor: CategoryInteractor,
+  rxSchedulerProvider: RxSchedulerProvider
+) :
   BaseViewModel<CategoryViewIntent, CategoryViewState, CategorySingleEvent>() {
   override val initialState = CategoryViewState.initialState()
   private val intentS = PublishRelay.create<CategoryViewIntent>()
@@ -23,35 +26,36 @@ class CategoryViewModel(private val categoryInteractor: CategoryInteractor) :
    * Filters intent by type, then compose with [ObservableTransformer] to transform [CategoryViewIntent] to [CategoryPartialChange].
    * Then using [Observable.scan] operator with reducer to transform [CategoryPartialChange]s to [CategoryViewState]
    */
-  private val intentToViewState = ObservableTransformer<CategoryViewIntent, CategoryViewState> { intents ->
-    Observables.combineLatest(
-      source1 = intents.publish { shared ->
-        Observable.mergeArray(
-          shared
-            .ofType<CategoryViewIntent.Initial>()
-            .compose(initialProcessor),
-          shared
-            .ofType<CategoryViewIntent.Refresh>()
-            .compose(refreshProcessor),
-          shared
-            .ofType<CategoryViewIntent.Retry>()
-            .compose(retryProcessor)
-        )
-      }.scan(initialState) { state, change -> change.reducer(state) },
-      source2 = intents.ofType<CategoryViewIntent.ChangeSortOrder>().map { it.sortOrder },
-      combineFunction = { viewState, sortOrder ->
-        viewState.copy(
-          categories = viewState.categories.sortedWith(
-            when (sortOrder) {
-              CATEGORY_NAME_ASC -> compareBy { it.name }
-              CATEGORY_NAME_DESC -> compareByDescending { it.name }
-              else -> return@combineLatest viewState
-            }
+  private val intentToViewState =
+    ObservableTransformer<CategoryViewIntent, CategoryViewState> { intents ->
+      Observables.combineLatest(
+        source1 = intents.publish { shared ->
+          Observable.mergeArray(
+            shared
+              .ofType<CategoryViewIntent.Initial>()
+              .compose(initialProcessor),
+            shared
+              .ofType<CategoryViewIntent.Refresh>()
+              .compose(refreshProcessor),
+            shared
+              .ofType<CategoryViewIntent.Retry>()
+              .compose(retryProcessor)
           )
-        )
-      }
-    ).distinctUntilChanged().observeOn(AndroidSchedulers.mainThread())
-  }
+        }.scan(initialState) { state, change -> change.reducer(state) },
+        source2 = intents.ofType<CategoryViewIntent.ChangeSortOrder>().map { it.sortOrder },
+        combineFunction = { viewState, sortOrder ->
+          viewState.copy(
+            categories = viewState.categories.sortedWith(
+              when (sortOrder) {
+                CATEGORY_NAME_ASC -> compareBy { it.name }
+                CATEGORY_NAME_DESC -> compareByDescending { it.name }
+                else -> return@combineLatest viewState
+              }
+            )
+          )
+        }
+      ).distinctUntilChanged().observeOn(rxSchedulerProvider.main)
+    }
 
   /**
    * Transform [CategoryViewIntent.Initial]s to [CategoryPartialChange]s
@@ -102,7 +106,8 @@ class CategoryViewModel(private val categoryInteractor: CategoryInteractor) :
       }
     }
 
-  override fun processIntents(intents: Observable<CategoryViewIntent>) = intents.subscribe(intentS)!!
+  override fun processIntents(intents: Observable<CategoryViewIntent>) =
+    intents.subscribe(intentS)!!
 
   init {
     intentS
@@ -115,7 +120,8 @@ class CategoryViewModel(private val categoryInteractor: CategoryInteractor) :
   /**
    * Send [message]
    */
-  private fun sendMessageEvent(message: String) = sendEvent(Event(CategorySingleEvent.MessageEvent(message)))
+  private fun sendMessageEvent(message: String) =
+    sendEvent(Event(CategorySingleEvent.MessageEvent(message)))
 
   override fun onCleared() {
     super.onCleared()

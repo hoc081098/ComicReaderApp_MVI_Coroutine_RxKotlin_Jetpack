@@ -1,9 +1,12 @@
 package com.hoc.comicapp
 
+import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
+import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.rx2.asCoroutineDispatcher
 
 class CoroutinesDispatcherProviderImpl(
-  override val ui: CoroutineDispatcher = Dispatchers.Main,
-  override val io: CoroutineDispatcher = Dispatchers.IO
+  private val rxSchedulerProvider: RxSchedulerProvider,
+  override val ui: CoroutineDispatcher = rxSchedulerProvider.main.asCoroutineDispatcher(),
+  override val io: CoroutineDispatcher = rxSchedulerProvider.io.asCoroutineDispatcher()
 ) : CoroutinesDispatcherProvider

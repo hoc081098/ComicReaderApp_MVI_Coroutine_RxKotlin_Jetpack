@@ -1,8 +1,8 @@
 package com.hoc.comicapp.data
 
-import com.hoc.comicapp.CoroutinesDispatcherProvider
+import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
 import com.hoc.comicapp.data.remote.ComicApiService
-import com.hoc.comicapp.domain.ComicRepository
+import com.hoc.comicapp.domain.repository.ComicRepository
 import com.hoc.comicapp.domain.models.*
 import com.hoc.comicapp.utils.Either
 import com.hoc.comicapp.utils.left

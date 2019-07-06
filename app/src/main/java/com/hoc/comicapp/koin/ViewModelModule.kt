@@ -33,14 +33,14 @@ val viewModelModule = module {
 
   single { ChapterDetailInteractorImpl(get(), get()) } bind ChapterDetailInteractor::class
 
-  viewModel { HomeViewModel(get()) }
+  viewModel { HomeViewModel(get(), get()) }
 
-  viewModel { ComicDetailViewModel(get()) }
+  viewModel { ComicDetailViewModel(get(), get()) }
 
-  viewModel { SearchComicViewModel(get()) }
+  viewModel { SearchComicViewModel(get(), get()) }
 
-  viewModel { CategoryViewModel(get()) }
+  viewModel { CategoryViewModel(get(), get()) }
 
-  viewModel { ChapterDetailViewModel(get()) }
+  viewModel { ChapterDetailViewModel(get(), get()) }
 
 }

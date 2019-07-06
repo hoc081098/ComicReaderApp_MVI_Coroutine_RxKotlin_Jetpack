@@ -1,5 +1,6 @@
 package com.hoc.comicapp.ui.chapter_detail
 
+import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.utils.Event
@@ -8,12 +9,14 @@ import com.hoc.comicapp.utils.notOfType
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.cast
 import io.reactivex.rxkotlin.ofType
 import io.reactivex.rxkotlin.subscribeBy
 
-class ChapterDetailViewModel(private val interactor: ChapterDetailInteractor) :
+class ChapterDetailViewModel(
+  private val interactor: ChapterDetailInteractor,
+  rxSchedulerProvider: RxSchedulerProvider
+) :
   BaseViewModel<ChapterDetailViewIntent, ChapterDetailViewState, ChapterDetailSingleEvent>() {
   override val initialState = ChapterDetailViewState.initial()
 
@@ -30,7 +33,7 @@ class ChapterDetailViewModel(private val interactor: ChapterDetailInteractor) :
             view = it.initial.view
           )
           .doOnNext {
-            if (it is ChapterDetailPartialChange.InitialRetryPartialChange.Error) {
+            if (it is ChapterDetailPartialChange.Initial_Retry_LoadChapter_PartialChange.Error) {
               sendMessageEvent(message = "Error occurred: ${it.error.getMessage()}")
             }
           }
@@ -38,7 +41,7 @@ class ChapterDetailViewModel(private val interactor: ChapterDetailInteractor) :
     }
 
   private val refreshProcessor =
-    ObservableTransformer<ChapterDetailViewIntent.Refresh, ChapterDetailPartialChange> {intents->
+    ObservableTransformer<ChapterDetailViewIntent.Refresh, ChapterDetailPartialChange> { intents ->
       intents.exhaustMap {
         interactor
           .refresh(chapterLink = it.link)
@@ -54,12 +57,12 @@ class ChapterDetailViewModel(private val interactor: ChapterDetailInteractor) :
 
 
   private val retryProcessor =
-    ObservableTransformer<ChapterDetailViewIntent.Retry, ChapterDetailPartialChange> {intents->
+    ObservableTransformer<ChapterDetailViewIntent.Retry, ChapterDetailPartialChange> { intents ->
       intents.exhaustMap {
         interactor
           .getChapterDetail(chapterLink = it.link)
           .doOnNext {
-            if (it is ChapterDetailPartialChange.InitialRetryPartialChange.Error) {
+            if (it is ChapterDetailPartialChange.Initial_Retry_LoadChapter_PartialChange.Error) {
               sendMessageEvent(message = "Retry error occurred: ${it.error.getMessage()}")
             }
           }
@@ -81,7 +84,7 @@ class ChapterDetailViewModel(private val interactor: ChapterDetailInteractor) :
     .compose(intentFilter)
     .compose(intentToChanges)
     .scan(initialState) { vs, change -> change.reducer(vs) }
-    .observeOn(AndroidSchedulers.mainThread())
+    .observeOn(rxSchedulerProvider.main)
     .subscribeBy(onNext = ::setNewState)
 
   override fun processIntents(intents: Observable<ChapterDetailViewIntent>) =

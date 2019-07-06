@@ -1,6 +1,5 @@
 package com.hoc.comicapp.ui.search_comic
 
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -8,9 +7,11 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.hoc.comicapp.GlideRequests
+import com.hoc.comicapp.R.layout.item_recycler_search_comic
 import com.hoc.comicapp.domain.models.SearchComic
 import com.hoc.comicapp.ui.home.ComicArg
 import com.hoc.comicapp.utils.asObservable
+import com.hoc.comicapp.utils.inflate
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxbinding3.view.detaches
 import com.jakewharton.rxrelay2.PublishRelay
@@ -25,11 +26,8 @@ class SearchComicAdapter(private val glide: GlideRequests) : ListAdapter<SearchC
   private val clickComicS = PublishRelay.create<ComicArg>()
   val clickComicObservable get() = clickComicS.asObservable()
 
-  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-    return LayoutInflater.from(parent.context)
-      .inflate(com.hoc.comicapp.R.layout.item_recycler_search_comic, parent, false)
-      .let { VH(it, parent) }
-  }
+  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+    VH(parent inflate item_recycler_search_comic, parent)
 
   override fun onBindViewHolder(holder: VH, position: Int) = holder.bind(getItem(position))
 

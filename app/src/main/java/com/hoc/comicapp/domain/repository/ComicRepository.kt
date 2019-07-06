@@ -1,4 +1,4 @@
-package com.hoc.comicapp.domain
+package com.hoc.comicapp.domain.repository
 
 import com.hoc.comicapp.utils.Either
 import com.hoc.comicapp.domain.models.*

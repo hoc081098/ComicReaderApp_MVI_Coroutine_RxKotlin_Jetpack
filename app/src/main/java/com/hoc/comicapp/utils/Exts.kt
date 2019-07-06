@@ -6,8 +6,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.annotation.CheckResult
-import androidx.annotation.StringRes
+import androidx.annotation.*
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
@@ -24,7 +24,6 @@ import io.reactivex.annotations.CheckReturnValue
 import io.reactivex.annotations.SchedulerSupport
 import io.reactivex.disposables.Disposables
 import io.reactivex.subjects.Subject
-
 
 @CheckReturnValue
 @SchedulerSupport(SchedulerSupport.NONE)
@@ -43,16 +42,25 @@ inline fun <T, R> Observable<T>.exhaustMap(crossinline transform: (T) -> Observa
     .toObservable()
 }
 
-
-infix fun ViewGroup.inflate(layoutRes: Int) =
+@Suppress("nothing_to_inline")
+inline infix fun ViewGroup.inflate(layoutRes: Int) =
   LayoutInflater.from(context).inflate(layoutRes, this, false)!!
 
-fun Context.toast(
+@Suppress("nothing_to_inline")
+@ColorInt
+inline fun Context.getColorBy(@ColorRes id: Int) = ContextCompat.getColor(this, id)
+
+@Suppress("nothing_to_inline")
+inline fun Context.getDrawableBy(@DrawableRes id: Int) = ContextCompat.getDrawable(this, id)
+
+@Suppress("nothing_to_inline")
+inline fun Context.toast(
   @StringRes messageRes: Int,
   short: Boolean = true
 ) = this.toast(getString(messageRes), short)
 
-fun Context.toast(
+@Suppress("nothing_to_inline")
+inline fun Context.toast(
   message: String,
   short: Boolean = true
 ) =

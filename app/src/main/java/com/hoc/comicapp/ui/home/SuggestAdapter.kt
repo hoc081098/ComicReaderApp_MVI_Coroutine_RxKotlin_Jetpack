@@ -11,6 +11,7 @@ import com.hoc.comicapp.R
 import com.hoc.comicapp.ui.home.HomeAdapter.Companion.SUGGEST_COMIC_ITEM_VIEW_TYPE
 import com.hoc.comicapp.utils.asObservable
 import com.hoc.comicapp.domain.models.SuggestComic
+import com.hoc.comicapp.utils.inflate
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxrelay2.PublishRelay
 import kotlinx.android.synthetic.main.item_recyclerview_top_month_comic_or_recommened.view.*
@@ -21,13 +22,7 @@ class SuggestAdapter(private val glide: GlideRequests) : ListAdapter<SuggestComi
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
     return when (viewType) {
-      SUGGEST_COMIC_ITEM_VIEW_TYPE -> LayoutInflater.from(parent.context)
-        .inflate(
-          R.layout.item_recyclerview_top_month_comic_or_recommened,
-          parent,
-          false
-        )
-        .let(::VH)
+      SUGGEST_COMIC_ITEM_VIEW_TYPE -> VH(parent inflate R.layout.item_recyclerview_top_month_comic_or_recommened)
       else -> throw IllegalStateException("viewType must be $SUGGEST_COMIC_ITEM_VIEW_TYPE, but viewType=$viewType")
     }
   }

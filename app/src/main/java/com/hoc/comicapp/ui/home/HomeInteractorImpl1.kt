@@ -3,7 +3,7 @@ package com.hoc.comicapp.ui.home
 import com.hoc.comicapp.utils.flatMap
 import com.hoc.comicapp.utils.fold
 import com.hoc.comicapp.utils.map
-import com.hoc.comicapp.domain.ComicRepository
+import com.hoc.comicapp.domain.repository.ComicRepository
 import io.reactivex.Observable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi

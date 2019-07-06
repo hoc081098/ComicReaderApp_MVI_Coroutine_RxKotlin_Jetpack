@@ -1,6 +1,7 @@
 package com.hoc.comicapp.ui.detail
 
 import androidx.lifecycle.viewModelScope
+import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.utils.Event
@@ -10,7 +11,6 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.ofType
@@ -19,7 +19,10 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import timber.log.Timber
 
 @ExperimentalCoroutinesApi
-class ComicDetailViewModel(private val comicDetailInteractor: ComicDetailInteractor) :
+class ComicDetailViewModel(
+  private val comicDetailInteractor: ComicDetailInteractor,
+  rxSchedulerProvider: RxSchedulerProvider
+) :
   BaseViewModel<ComicDetailIntent, ComicDetailViewState, ComicDetailSingleEvent>() {
   override val initialState = ComicDetailViewState.initialState()
 
@@ -39,9 +42,10 @@ class ComicDetailViewModel(private val comicDetailInteractor: ComicDetailInterac
           it.title,
           it.thumbnail
         ).doOnNext {
-          val message = (it as? ComicDetailPartialChange.InitialRetryPartialChange.Error ?: return@doOnNext)
-            .error
-            .getMessage()
+          val message =
+            (it as? ComicDetailPartialChange.InitialRetryPartialChange.Error ?: return@doOnNext)
+              .error
+              .getMessage()
           sendMessageEvent("Get detail comic error: $message")
         }
       }
@@ -52,9 +56,10 @@ class ComicDetailViewModel(private val comicDetailInteractor: ComicDetailInterac
       intent.flatMap {
         comicDetailInteractor.getComicDetail(viewModelScope, it.link)
           .doOnNext {
-            val message = (it as? ComicDetailPartialChange.InitialRetryPartialChange.Error ?: return@doOnNext)
-              .error
-              .getMessage()
+            val message =
+              (it as? ComicDetailPartialChange.InitialRetryPartialChange.Error ?: return@doOnNext)
+                .error
+                .getMessage()
             sendMessageEvent("Retry get detail comic error: $message")
           }
       }
@@ -91,7 +96,7 @@ class ComicDetailViewModel(private val comicDetailInteractor: ComicDetailInterac
     }.doOnNext { Timber.d("partial_change=$it") }
       .scan(initialState) { state, change -> change.reducer(state) }
       .distinctUntilChanged()
-      .observeOn(AndroidSchedulers.mainThread())
+      .observeOn(rxSchedulerProvider.main)
   }
 
   init {

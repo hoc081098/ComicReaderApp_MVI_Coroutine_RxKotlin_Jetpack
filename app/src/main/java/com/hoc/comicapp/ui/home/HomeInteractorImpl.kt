@@ -1,7 +1,7 @@
 package com.hoc.comicapp.ui.home
 
 import com.hoc.comicapp.utils.*
-import com.hoc.comicapp.domain.ComicRepository
+import com.hoc.comicapp.domain.repository.ComicRepository
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.cast

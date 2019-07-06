@@ -1,6 +1,6 @@
 package com.hoc.comicapp.ui.category
 
-import com.hoc.comicapp.domain.ComicRepository
+import com.hoc.comicapp.domain.repository.ComicRepository
 import com.hoc.comicapp.utils.fold
 import io.reactivex.Observable
 import kotlinx.coroutines.CoroutineScope

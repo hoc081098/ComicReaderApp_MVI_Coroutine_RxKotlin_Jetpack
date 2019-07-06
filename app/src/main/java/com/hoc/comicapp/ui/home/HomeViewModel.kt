@@ -1,6 +1,7 @@
 package com.hoc.comicapp.ui.home
 
 import androidx.lifecycle.viewModelScope
+import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.utils.Event
@@ -10,7 +11,6 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.ofType
@@ -20,7 +20,10 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import timber.log.Timber
 
 @ExperimentalCoroutinesApi
-class HomeViewModel(private val homeInteractor: HomeInteractor) :
+class HomeViewModel(
+  private val homeInteractor: HomeInteractor,
+  rxSchedulerProvider: RxSchedulerProvider
+) :
   BaseViewModel<HomeViewIntent, HomeViewState, HomeSingleEvent>() {
   override val initialState = HomeViewState.initialState()
 
@@ -54,7 +57,8 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
               .updatedComicsPartialChanges(page = 1, coroutineScope = viewModelScope)
               .doOnNext {
                 val messageFromError =
-                  (it as? HomePartialChange.UpdatedPartialChange.Error ?: return@doOnNext).error.getMessage()
+                  (it as? HomePartialChange.UpdatedPartialChange.Error
+                    ?: return@doOnNext).error.getMessage()
                 sendMessageEvent("Get updated list error: $messageFromError")
               }
           )
@@ -118,7 +122,8 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
             .updatedComicsPartialChanges(page = it, coroutineScope = viewModelScope)
             .doOnNext {
               val messageFromError =
-                (it as? HomePartialChange.UpdatedPartialChange.Error ?: return@doOnNext).error.getMessage()
+                (it as? HomePartialChange.UpdatedPartialChange.Error
+                  ?: return@doOnNext).error.getMessage()
               sendMessageEvent("Error when retry get updated list: $messageFromError")
             }
         }
@@ -134,7 +139,8 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
           .suggestComicsPartialChanges(coroutineScope = viewModelScope)
           .doOnNext {
             val messageFromError =
-              (it as? HomePartialChange.SuggestHomePartialChange.Error ?: return@doOnNext).error.getMessage()
+              (it as? HomePartialChange.SuggestHomePartialChange.Error
+                ?: return@doOnNext).error.getMessage()
             sendMessageEvent("Error when retry get suggest list: $messageFromError")
           }
       }
@@ -150,7 +156,8 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
           .topMonthComicsPartialChanges(coroutineScope = viewModelScope)
           .doOnNext {
             val messageFromError =
-              (it as? HomePartialChange.TopMonthHomePartialChange.Error ?: return@doOnNext).error.getMessage()
+              (it as? HomePartialChange.TopMonthHomePartialChange.Error
+                ?: return@doOnNext).error.getMessage()
             sendMessageEvent("Error when retry get top month list: $messageFromError")
           }
       }
@@ -185,7 +192,7 @@ class HomeViewModel(private val homeInteractor: HomeInteractor) :
     }.doOnNext { Timber.d("partial_change=$it") }
       .scan(initialState) { state, change -> change.reducer(state) }
       .distinctUntilChanged()
-      .observeOn(AndroidSchedulers.mainThread())
+      .observeOn(rxSchedulerProvider.main)
   }
 
   override fun processIntents(intents: Observable<HomeViewIntent>) =

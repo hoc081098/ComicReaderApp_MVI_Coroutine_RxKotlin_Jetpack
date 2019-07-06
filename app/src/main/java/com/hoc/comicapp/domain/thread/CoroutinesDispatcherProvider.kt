@@ -1,4 +1,4 @@
-package com.hoc.comicapp
+package com.hoc.comicapp.domain.thread
 
 import kotlinx.coroutines.CoroutineDispatcher
 

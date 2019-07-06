@@ -8,7 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.hoc.comicapp.GlideApp
-import com.hoc.comicapp.MainActivity
+import com.hoc.comicapp.activity.MainActivity
 import com.hoc.comicapp.R
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent

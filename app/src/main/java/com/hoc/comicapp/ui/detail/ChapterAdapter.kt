@@ -1,6 +1,5 @@
 package com.hoc.comicapp.ui.detail
 
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -11,6 +10,7 @@ import com.google.android.material.chip.Chip
 import com.hoc.comicapp.R
 import com.hoc.comicapp.domain.models.ComicDetail
 import com.hoc.comicapp.domain.models.ComicDetail.Chapter
+import com.hoc.comicapp.utils.inflate
 import com.hoc.comicapp.utils.toast
 import kotlinx.android.synthetic.main.item_recycler_chapter.view.*
 import kotlinx.android.synthetic.main.item_recycler_detail.view.*
@@ -40,7 +40,7 @@ class ChapterAdapter(
 ) :
   ListAdapter<ChapterItem, ChapterAdapter.VH>(ChapterDiffUtilItemCallback) {
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-    val view = LayoutInflater.from(parent.context).inflate(viewType, parent, false)
+    val view = parent inflate viewType
     return when (viewType) {
       R.layout.item_recycler_detail -> HeaderVH(view)
       R.layout.item_recycler_chapter -> ChapterVH(view)

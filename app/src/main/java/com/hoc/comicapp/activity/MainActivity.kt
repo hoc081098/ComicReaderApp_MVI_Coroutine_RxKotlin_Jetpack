@@ -1,13 +1,15 @@
-package com.hoc.comicapp
+package com.hoc.comicapp.activity
 
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.*
+import com.hoc.comicapp.R
+import com.hoc.comicapp.utils.getColorBy
+import com.hoc.comicapp.utils.getDrawableBy
 import com.hoc.comicapp.utils.textChanges
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlin.LazyThreadSafetyMode.NONE
@@ -37,30 +39,12 @@ class MainActivity : AppCompatActivity() {
 
     search_view.run {
       setHint("Search comic...")
-      setTextColor(
-        ContextCompat.getColor(
-          this@MainActivity,
-          R.color.colorTextOnBackground
-        )
-      )
-      setBackgroundColor(
-        ContextCompat.getColor(
-          this@MainActivity,
-          R.color.colorBackground
-        )
-      )
-      setBackIcon(
-        ContextCompat.getDrawable(
-          this@MainActivity,
-          R.drawable.ic_keyboard_backspace_white_24dp
-        )
-      )
-      setCloseIcon(
-        ContextCompat.getDrawable(
-          this@MainActivity,
-          R.drawable.ic_close_white_24dp
-        )
-      )
+
+      setTextColor(getColorBy(id = R.color.colorTextOnBackground))
+      setBackgroundColor(getColorBy(id = R.color.colorBackground))
+
+      setBackIcon(getDrawableBy(id = R.drawable.ic_keyboard_backspace_white_24dp))
+      setCloseIcon(getDrawableBy(id = R.drawable.ic_close_white_24dp))
     }
   }
 

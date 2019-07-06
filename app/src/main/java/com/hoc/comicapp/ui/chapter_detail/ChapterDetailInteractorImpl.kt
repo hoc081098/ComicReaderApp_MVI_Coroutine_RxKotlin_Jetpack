@@ -1,8 +1,8 @@
 package com.hoc.comicapp.ui.chapter_detail
 
-import com.hoc.comicapp.CoroutinesDispatcherProvider
-import com.hoc.comicapp.domain.ComicRepository
-import com.hoc.comicapp.ui.chapter_detail.ChapterDetailPartialChange.InitialRetryPartialChange
+import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
+import com.hoc.comicapp.domain.repository.ComicRepository
+import com.hoc.comicapp.ui.chapter_detail.ChapterDetailPartialChange.Initial_Retry_LoadChapter_PartialChange
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailPartialChange.RefreshPartialChange
 import com.hoc.comicapp.utils.fold
 import io.reactivex.Observable
@@ -22,7 +22,7 @@ class ChapterDetailInteractorImpl(
     chapterName: String?,
     time: String?,
     view: String?
-  ): Observable<InitialRetryPartialChange> {
+  ): Observable<Initial_Retry_LoadChapter_PartialChange> {
     return flow {
       if (chapterName != null && time != null && view != null) {
         val initial = ChapterDetailViewState.Detail.Initial(
@@ -31,17 +31,17 @@ class ChapterDetailInteractorImpl(
           time = time,
           chapterName = chapterName
         )
-        emit(InitialRetryPartialChange.InitialData(initial))
+        emit(Initial_Retry_LoadChapter_PartialChange.InitialData(initial))
       }
 
-      emit(InitialRetryPartialChange.Loading)
+      emit(Initial_Retry_LoadChapter_PartialChange.Loading)
 
       emit(
         comicRepository
           .getChapterDetail(chapterLink)
           .fold(
-            left = { InitialRetryPartialChange.Error(it) },
-            right = { InitialRetryPartialChange.Data(it) }
+            left = { Initial_Retry_LoadChapter_PartialChange.Error(it) },
+            right = { Initial_Retry_LoadChapter_PartialChange.Data(it) }
           )
       )
     }.flowOn(dispatcherProvider.ui).asObservable()
