@@ -8,8 +8,8 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.hoc.comicapp.GlideApp
-import com.hoc.comicapp.activity.MainActivity
 import com.hoc.comicapp.R
+import com.hoc.comicapp.activity.MainActivity
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.snack
@@ -33,7 +33,10 @@ class SearchComicFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    val searchComicAdapter = SearchComicAdapter(GlideApp.with(this))
+    val searchComicAdapter = SearchComicAdapter(
+      GlideApp.with(this),
+      compositeDisposable
+    )
     initView(searchComicAdapter)
     bind(searchComicAdapter)
   }

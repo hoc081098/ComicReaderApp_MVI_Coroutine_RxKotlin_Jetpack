@@ -14,6 +14,8 @@ import com.hoc.comicapp.utils.inflate
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxbinding3.view.detaches
 import com.jakewharton.rxrelay2.PublishRelay
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.item_recycler_category.view.*
 
 object CategoryDiffUtilItemCallback : DiffUtil.ItemCallback<Category>() {
@@ -21,7 +23,10 @@ object CategoryDiffUtilItemCallback : DiffUtil.ItemCallback<Category>() {
   override fun areContentsTheSame(oldItem: Category, newItem: Category) = oldItem == newItem
 }
 
-class CategoryAdapter(private val glide: GlideRequests) : ListAdapter<Category, CategoryAdapter.VH>(CategoryDiffUtilItemCallback) {
+class CategoryAdapter(
+  private val glide: GlideRequests,
+  private val compositeDisposable: CompositeDisposable
+) : ListAdapter<Category, CategoryAdapter.VH>(CategoryDiffUtilItemCallback) {
   private val collapsedStatus = SparseBooleanArray()
   private val clickCategoryS = PublishRelay.create<Category>()
   val clickCategoryObservable get() = clickCategoryS.asObservable()
@@ -29,7 +34,8 @@ class CategoryAdapter(private val glide: GlideRequests) : ListAdapter<Category, 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
     VH(parent inflate R.layout.item_recycler_category, parent)
 
-  override fun onBindViewHolder(holder: VH, position: Int) = holder.bind(getItem(position), position)
+  override fun onBindViewHolder(holder: VH, position: Int) =
+    holder.bind(getItem(position), position)
 
   inner class VH(itemView: View, parent: ViewGroup) : RecyclerView.ViewHolder(itemView) {
     private val textCategoryName = itemView.text_category_name!!
@@ -44,6 +50,7 @@ class CategoryAdapter(private val glide: GlideRequests) : ListAdapter<Category, 
         .filter { it != RecyclerView.NO_POSITION }
         .map { getItem(it) }
         .subscribe(clickCategoryS)
+        .addTo(compositeDisposable)
     }
 
     fun bind(item: Category, position: Int) {

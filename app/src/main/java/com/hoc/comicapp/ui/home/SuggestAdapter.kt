@@ -1,6 +1,5 @@
 package com.hoc.comicapp.ui.home
 
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
@@ -8,15 +7,20 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
+import com.hoc.comicapp.domain.models.SuggestComic
 import com.hoc.comicapp.ui.home.HomeAdapter.Companion.SUGGEST_COMIC_ITEM_VIEW_TYPE
 import com.hoc.comicapp.utils.asObservable
-import com.hoc.comicapp.domain.models.SuggestComic
 import com.hoc.comicapp.utils.inflate
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxrelay2.PublishRelay
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.item_recyclerview_top_month_comic_or_recommened.view.*
 
-class SuggestAdapter(private val glide: GlideRequests) : ListAdapter<SuggestComic, SuggestAdapter.VH>(SuggestComicDiffUtilItemCallback) {
+class SuggestAdapter(
+  private val glide: GlideRequests,
+  private val compositeDisposable: CompositeDisposable
+) : ListAdapter<SuggestComic, SuggestAdapter.VH>(SuggestComicDiffUtilItemCallback) {
   private val clickComicS = PublishRelay.create<SuggestComic>()
   val clickComicObservable get() = clickComicS.asObservable()
 
@@ -46,6 +50,7 @@ class SuggestAdapter(private val glide: GlideRequests) : ListAdapter<SuggestComi
         .filter { it != RecyclerView.NO_POSITION }
         .map { getItem(it) }
         .subscribe(clickComicS)
+        .addTo(compositeDisposable)
     }
 
     fun bind(item: SuggestComic) {

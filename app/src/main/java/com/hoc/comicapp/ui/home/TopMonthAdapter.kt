@@ -13,9 +13,14 @@ import com.hoc.comicapp.utils.asObservable
 import com.hoc.comicapp.utils.inflate
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxrelay2.PublishRelay
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.item_recyclerview_top_month_comic_or_recommened.view.*
 
-class TopMonthAdapter(private val glide: GlideRequests) :
+class TopMonthAdapter(
+  private val glide: GlideRequests,
+  private val compositeDisposable: CompositeDisposable
+) :
   ListAdapter<TopMonthComic, TopMonthAdapter.VH>(TopMonthComicDiffUtilItemCallback) {
   private val clickComicS = PublishRelay.create<TopMonthComic>()
   val clickComicObservable get() = clickComicS.asObservable()
@@ -44,6 +49,7 @@ class TopMonthAdapter(private val glide: GlideRequests) :
         .filter { it != RecyclerView.NO_POSITION }
         .map { getItem(it) }
         .subscribe(clickComicS)
+        .addTo(compositeDisposable)
     }
 
     fun bind(item: TopMonthComic) {

@@ -1,10 +1,9 @@
 package com.hoc.comicapp.ui.detail
 
 import androidx.lifecycle.viewModelScope
-import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.domain.models.getMessage
-import com.hoc.comicapp.utils.Event
+import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.notOfType
 import com.jakewharton.rxrelay2.BehaviorRelay
@@ -114,7 +113,7 @@ class ComicDetailViewModel(
   }
 
   private fun sendMessageEvent(message: String) {
-    sendEvent(Event(ComicDetailSingleEvent.MessageEvent(message)))
+    sendEvent(ComicDetailSingleEvent.MessageEvent(message))
   }
 
   private companion object {

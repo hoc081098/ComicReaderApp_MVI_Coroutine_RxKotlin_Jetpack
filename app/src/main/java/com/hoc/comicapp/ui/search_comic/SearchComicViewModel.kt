@@ -1,10 +1,9 @@
 package com.hoc.comicapp.ui.search_comic
 
 import androidx.lifecycle.viewModelScope
-import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.domain.models.getMessage
-import com.hoc.comicapp.utils.Event
+import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
@@ -50,7 +49,11 @@ class SearchComicViewModel(
         ).doOnNext {
           val messageFromError =
             (it as? SearchComicPartialChange.Error ?: return@doOnNext).error.getMessage()
-          sendEvent(Event(SearchComicSingleEvent.MessageEvent("Search for '$term', error occurred: $messageFromError")))
+          sendEvent(
+            SearchComicSingleEvent.MessageEvent(
+              "Search for '$term', error occurred: $messageFromError"
+            )
+          )
         }
       }
     val searchPartialChange = searchTerm
@@ -61,7 +64,11 @@ class SearchComicViewModel(
         ).doOnNext {
           val messageFromError =
             (it as? SearchComicPartialChange.Error ?: return@doOnNext).error.getMessage()
-          sendEvent(Event(SearchComicSingleEvent.MessageEvent("Retry search for '$term', error occurred: $messageFromError")))
+          sendEvent(
+            SearchComicSingleEvent.MessageEvent(
+              "Retry search for '$term', error occurred: $messageFromError"
+            )
+          )
         }
       }
     Observable.mergeArray(searchPartialChange, retryPartialChange)

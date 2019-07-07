@@ -1,10 +1,9 @@
 package com.hoc.comicapp.ui.category
 
 import androidx.lifecycle.viewModelScope
-import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.domain.models.getMessage
-import com.hoc.comicapp.utils.Event
+import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.notOfType
 import com.jakewharton.rxrelay2.PublishRelay
@@ -121,7 +120,7 @@ class CategoryViewModel(
    * Send [message]
    */
   private fun sendMessageEvent(message: String) =
-    sendEvent(Event(CategorySingleEvent.MessageEvent(message)))
+    sendEvent(CategorySingleEvent.MessageEvent(message))
 
   override fun onCleared() {
     super.onCleared()

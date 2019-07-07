@@ -84,4 +84,8 @@ class MainActivity : AppCompatActivity() {
   fun hideSearchIfNeeded() = if (search_view.isSearchOpen) search_view.closeSearch() else Unit
 
   fun textSearchChanges() = search_view.textChanges()
+
+  fun setToolbarTitle(title: CharSequence) {
+    supportActionBar?.title = title
+  }
 }

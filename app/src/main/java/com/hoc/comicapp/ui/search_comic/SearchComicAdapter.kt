@@ -15,6 +15,8 @@ import com.hoc.comicapp.utils.inflate
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxbinding3.view.detaches
 import com.jakewharton.rxrelay2.PublishRelay
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.item_recycler_search_comic.view.*
 
 object SearchComicDiffUtilItemCallback : DiffUtil.ItemCallback<SearchComic>() {
@@ -22,7 +24,10 @@ object SearchComicDiffUtilItemCallback : DiffUtil.ItemCallback<SearchComic>() {
   override fun areContentsTheSame(oldItem: SearchComic, newItem: SearchComic) = oldItem == newItem
 }
 
-class SearchComicAdapter(private val glide: GlideRequests) : ListAdapter<SearchComic, SearchComicAdapter.VH>(SearchComicDiffUtilItemCallback) {
+class SearchComicAdapter(
+  private val glide: GlideRequests,
+  private val compositeDisposable: CompositeDisposable
+) : ListAdapter<SearchComic, SearchComicAdapter.VH>(SearchComicDiffUtilItemCallback) {
   private val clickComicS = PublishRelay.create<ComicArg>()
   val clickComicObservable get() = clickComicS.asObservable()
 
@@ -52,6 +57,7 @@ class SearchComicAdapter(private val glide: GlideRequests) : ListAdapter<SearchC
           )
         }
         .subscribe(clickComicS)
+        .addTo(compositeDisposable)
     }
 
     fun bind(item: SearchComic) {

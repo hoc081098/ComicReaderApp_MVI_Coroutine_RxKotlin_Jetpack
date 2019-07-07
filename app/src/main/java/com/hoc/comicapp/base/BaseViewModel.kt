@@ -31,7 +31,7 @@ abstract class BaseViewModel<I : Intent, S : ViewState, E : SingleEvent> : ViewM
     stateD.value = state
   }
 
-  protected fun sendEvent(event: Event<E>) {
-    singleEventD.value = event
+  protected fun sendEvent(event: E) {
+    singleEventD.value = Event(event)
   }
 }

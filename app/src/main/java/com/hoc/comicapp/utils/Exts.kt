@@ -1,6 +1,7 @@
 package com.hoc.comicapp.utils
 
 import android.content.Context
+import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
@@ -45,6 +46,8 @@ inline fun <T, R> Observable<T>.exhaustMap(crossinline transform: (T) -> Observa
 @Suppress("nothing_to_inline")
 inline infix fun ViewGroup.inflate(layoutRes: Int) =
   LayoutInflater.from(context).inflate(layoutRes, this, false)!!
+
+val Context.isOrientationPortrait get() = this.resources.configuration.orientation == ORIENTATION_PORTRAIT
 
 @Suppress("nothing_to_inline")
 @ColorInt

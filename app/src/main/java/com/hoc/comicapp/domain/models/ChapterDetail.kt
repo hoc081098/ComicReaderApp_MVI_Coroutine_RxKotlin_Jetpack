@@ -13,5 +13,7 @@ data class ChapterDetail(
   data class Chapter(
     val chapterName: String,
     val chapterLink: String
-  )
+  ) {
+    override fun toString() = chapterName
+  }
 }

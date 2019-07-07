@@ -12,18 +12,20 @@ import androidx.recyclerview.widget.*
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
-import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.*
-import com.hoc.comicapp.utils.inflate
 import com.hoc.comicapp.domain.models.SuggestComic
 import com.hoc.comicapp.domain.models.TopMonthComic
 import com.hoc.comicapp.domain.models.UpdatedComic
+import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.*
+import com.hoc.comicapp.utils.inflate
 import com.jakewharton.rxbinding3.recyclerview.scrollStateChanges
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxbinding3.view.detaches
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.ofType
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.item_recycler_home_header.view.*
@@ -37,11 +39,12 @@ import java.util.concurrent.TimeUnit
 class HomeAdapter(
   private val lifecycleOwner: LifecycleOwner,
   private val glide: GlideRequests,
-  private val viewPool: RecyclerView.RecycledViewPool
+  private val viewPool: RecyclerView.RecycledViewPool,
+  private val compositeDisposable: CompositeDisposable
 ) :
   ListAdapter<HomeListItem, HomeAdapter.VH>(HomeListItemDiffUtilItemCallback) {
-  private val suggestAdapter = SuggestAdapter(glide).apply { submitList(emptyList()) }
-  private val topMonthAdapter = TopMonthAdapter(glide).apply { submitList(emptyList()) }
+  private val suggestAdapter = SuggestAdapter(glide, compositeDisposable).apply { submitList(emptyList()) }
+  private val topMonthAdapter = TopMonthAdapter(glide, compositeDisposable).apply { submitList(emptyList()) }
 
   private val suggestRetryS = PublishRelay.create<Unit>()
   private val topMonthRetryS = PublishRelay.create<Unit>()
@@ -296,6 +299,7 @@ class HomeAdapter(
         .ofType<HomeListItem.UpdatedItem.ComicItem>()
         .map { it.comic }
         .subscribe(clickComicS)
+        .addTo(compositeDisposable)
     }
 
     override fun bind(item: HomeListItem) =

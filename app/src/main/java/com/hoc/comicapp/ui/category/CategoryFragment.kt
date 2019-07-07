@@ -30,7 +30,7 @@ class CategoryFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    val adapter = CategoryAdapter(GlideApp.with(this))
+    val adapter = CategoryAdapter(GlideApp.with(this), compositeDisposable)
     initView(adapter)
     bind(adapter)
   }

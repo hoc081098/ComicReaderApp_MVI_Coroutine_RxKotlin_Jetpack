@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
+import com.hoc.comicapp.utils.isOrientationPortrait
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.snack
@@ -45,7 +46,8 @@ class HomeFragment : Fragment() {
     val homeAdapter = HomeAdapter(
       viewLifecycleOwner,
       GlideApp.with(this),
-      recycler_home.recycledViewPool
+      recycler_home.recycledViewPool,
+      compositeDisposable
     )
     initView(homeAdapter)
     bind(homeAdapter)
@@ -85,14 +87,15 @@ class HomeFragment : Fragment() {
     swipe_refresh_layout.setColorSchemeColors(*resources.getIntArray(com.hoc.comicapp.R.array.swipe_refresh_colors))
 
     recycler_home.run {
+
       setHasFixedSize(true)
-      layoutManager = GridLayoutManager(context, 2).apply {
+      layoutManager = GridLayoutManager(context, getMaxSpanCount()).apply {
         spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
           override fun getSpanSize(position: Int): Int {
             return if (homeAdapter.getItemViewType(position) == HomeAdapter.COMIC_ITEM_VIEW_TYPE) {
               1
             } else {
-              2
+              getMaxSpanCount()
             }
           }
         }
@@ -147,7 +150,7 @@ class HomeFragment : Fragment() {
       .scrollEvents()
       .filter { (_, _, dy) ->
         val gridLayoutManager = recycler_home.layoutManager as GridLayoutManager
-        dy > 0 && gridLayoutManager.findLastVisibleItemPosition() + VISIBLE_THRESHOLD >= gridLayoutManager.itemCount
+        dy > 0 && gridLayoutManager.findLastVisibleItemPosition() + 2 * getMaxSpanCount() >= gridLayoutManager.itemCount
       }
       .map { HomeViewIntent.LoadNextPageUpdatedComic }
   }
@@ -158,7 +161,5 @@ class HomeFragment : Fragment() {
     compositeDisposable.clear()
   }
 
-  private companion object {
-    const val VISIBLE_THRESHOLD = 4
-  }
+  private fun getMaxSpanCount() = if (requireContext().isOrientationPortrait) 2 else 3
 }

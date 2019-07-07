@@ -25,10 +25,14 @@ sealed class ChapterDetailViewIntent : Intent {
   data class Initial(val initial: Detail.Initial) :
     ChapterDetailViewIntent()
 
-  data class Refresh(val link: String) : ChapterDetailViewIntent()
-  data class Retry(val link: String) : ChapterDetailViewIntent()
-  data class LoadChapter(val link: String) : ChapterDetailViewIntent()
-  data class ChangeOrientation(@ViewPager2.Orientation val orientation: Int) : ChapterDetailViewIntent()
+  object Refresh : ChapterDetailViewIntent()
+  object Retry : ChapterDetailViewIntent()
+  object LoadNextChapter : ChapterDetailViewIntent()
+  object LoadPrevChapter : ChapterDetailViewIntent()
+  data class LoadChapter(val link: String, val name: String) : ChapterDetailViewIntent()
+
+  data class ChangeOrientation(@ViewPager2.Orientation val orientation: Int) :
+    ChapterDetailViewIntent()
 }
 
 data class ChapterDetailViewState(

@@ -17,6 +17,7 @@ import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.domain.models.ComicDetail.Chapter
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.ComicDetail
+import com.hoc.comicapp.utils.isOrientationPortrait
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.snack
@@ -81,6 +82,24 @@ class ComicDetailFragment : Fragment() {
     }
 
     setupFab(chapterAdapter)
+    setupMotionLayout()
+  }
+
+  private fun setupMotionLayout() {
+    root_detail
+      .getConstraintSet(R.layout.fragment_comic_detail)
+      .setGuidelinePercent(
+        R.id.guideline,
+        if (requireContext().isOrientationPortrait) 0.45f else 0.2f
+      )
+
+    root_detail
+      .getConstraintSet(R.layout.fragment_comic_detail_end)
+      .setGuidelinePercent(
+        R.id.guideline,
+        if (requireContext().isOrientationPortrait) 0.175f else 0.05f
+      )
+
 
     var lastProgress = 0f
     root_detail.setTransitionListener(object : TransitionAdapter() {
@@ -225,7 +244,7 @@ class ComicDetailFragment : Fragment() {
         }
 
         text_last_updated_status_view.text = HtmlCompat.fromHtml(
-          list.joinToString("") { "\u2022 <b>${it.first}:</b> ${it.second} <br>" },
+          list.joinToString(if (requireContext().isOrientationPortrait) "<br>" else " ") { "\u2022 <b>${it.first}:</b> ${it.second}" },
           HtmlCompat.FROM_HTML_MODE_LEGACY
         )
 

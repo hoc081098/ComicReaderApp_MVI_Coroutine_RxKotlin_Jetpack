@@ -1,10 +1,9 @@
 package com.hoc.comicapp.ui.home
 
 import androidx.lifecycle.viewModelScope
-import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.domain.models.getMessage
-import com.hoc.comicapp.utils.Event
+import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.notOfType
 import com.jakewharton.rxrelay2.BehaviorRelay
@@ -219,7 +218,7 @@ class HomeViewModel(
   }
 
   private fun sendMessageEvent(message: String) {
-    sendEvent(Event(HomeSingleEvent.MessageEvent(message)))
+    sendEvent(HomeSingleEvent.MessageEvent(message))
   }
 
   private companion object {
