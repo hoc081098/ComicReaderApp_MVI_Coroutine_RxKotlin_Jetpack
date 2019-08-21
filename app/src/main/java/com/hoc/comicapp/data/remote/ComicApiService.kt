@@ -1,6 +1,9 @@
 package com.hoc.comicapp.data.remote
 
-import com.hoc.comicapp.data.remote.response.*
+import com.hoc.comicapp.data.remote.response.CategoryResponse
+import com.hoc.comicapp.data.remote.response.ChapterDetailResponse
+import com.hoc.comicapp.data.remote.response.ComicDetailResponse
+import com.hoc.comicapp.data.remote.response.ComicResponse
 import retrofit2.Retrofit
 import retrofit2.create
 import retrofit2.http.GET
@@ -13,14 +16,14 @@ interface ComicApiService {
    *
    */
 
-  @GET("top_month_comics")
-  suspend fun getTopMonthComics(): List<TopMonthComicResponse>
+  @GET("most_viewed_comics")
+  suspend fun getMostViewedComics(@Query("page") page: Int?): List<ComicResponse>
 
   @GET("updated_comics")
-  suspend fun getUpdatedComics(@Query("page") page: Int? = null): List<UpdatedComicResponse>
+  suspend fun getUpdatedComics(@Query("page") page: Int?): List<ComicResponse>
 
-  @GET("suggest_comics")
-  suspend fun getSuggestComics(): List<SuggestComicResponse>
+  @GET("newest_comics")
+  suspend fun getNewestComics(@Query("page") page: Int?): List<ComicResponse>
 
   /**
    *
@@ -40,7 +43,10 @@ interface ComicApiService {
   suspend fun getAllCategories(): List<CategoryResponse>
 
   @GET("search_comic")
-  suspend fun searchComic(@Query("query") query: String): List<SearchComicResponse>
+  suspend fun searchComic(
+    @Query("query") query: String,
+    @Query("page") page: Int?
+  ): List<ComicResponse>
 
   /**
    *

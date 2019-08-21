@@ -19,8 +19,8 @@ class HomeInteractorImpl1(
     return coroutineScope.rxObservable<HomePartialChange> {
       send(HomePartialChange.RefreshPartialChange.Loading)
 
-      val suggestAsync = async { comicRepository.getSuggestComics() }
-      val topMonthAsync = async { comicRepository.getTopMonthComics() }
+      val suggestAsync = async { comicRepository.getNewestComics(null) }
+      val topMonthAsync = async { comicRepository.getMostViewedComics() }
       val updatedAsync = async { comicRepository.getUpdatedComics() }
 
       val suggest = suggestAsync.await()

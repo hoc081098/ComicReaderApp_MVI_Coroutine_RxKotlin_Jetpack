@@ -90,7 +90,7 @@ class ComicDetailFragment : Fragment() {
       .getConstraintSet(R.layout.fragment_comic_detail)
       .setGuidelinePercent(
         R.id.guideline,
-        if (requireContext().isOrientationPortrait) 0.45f else 0.2f
+        if (requireContext().isOrientationPortrait) 0.45f else 0.175f
       )
 
     root_detail
@@ -244,7 +244,7 @@ class ComicDetailFragment : Fragment() {
         }
 
         text_last_updated_status_view.text = HtmlCompat.fromHtml(
-          list.joinToString(if (requireContext().isOrientationPortrait) "<br>" else " ") { "\u2022 <b>${it.first}:</b> ${it.second}" },
+          list.joinToString("<br>") { "\u2022 <b>${it.first}:</b> ${it.second}" },
           HtmlCompat.FROM_HTML_MODE_LEGACY
         )
 

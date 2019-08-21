@@ -1,19 +1,15 @@
 package com.hoc.comicapp.domain.models
 
 data class ChapterDetail(
-  val chapterLink: String, // http://www.nettruyen.com/truyen-tranh/cu-dam-huy-diet/chap-153/474661
-  val chapterName: String, // Chapter 153
+  val chapterLink: String, // https://ww2.mangafox.online/solo-leveling/chapter-65-159349729567655
+  val chapterName: String, // Chapter 65
+  val chapters: List<Chapter>,
   val images: List<String>,
-  val time: String, // 16:27 04/06/2019
-  val htmlContent: String?,
-  val prevChapterLink: String?,
-  val nextChapterLink: String?,
-  val chapters: List<Chapter>
+  val prevChapterLink: String?, // https://ww2.mangafox.online/solo-leveling/chapter-64-1137969534934196
+  val nextChapterLink: String? // https://ww2.mangafox.online/solo-leveling/chapter-64-1137969534934196
 ) {
   data class Chapter(
-    val chapterName: String,
-    val chapterLink: String
-  ) {
-    override fun toString() = chapterName
-  }
+    val chapterLink: String, // https://ww2.mangafox.online/solo-leveling/chapter-0-275968490470920
+    val chapterName: String // Chapter 0
+  )
 }

@@ -1,23 +1,26 @@
 package com.hoc.comicapp.domain.repository
 
-import com.hoc.comicapp.utils.Either
 import com.hoc.comicapp.domain.models.*
+import com.hoc.comicapp.utils.Either
 
 interface ComicRepository {
   /**
-   * Get top month comics
+   * Get most viewed comics
+   * @param page number
    */
-  suspend fun getTopMonthComics(): Either<ComicAppError, List<TopMonthComic>>
+  suspend fun getMostViewedComics(page: Int? = null): Either<ComicAppError, List<Comic>>
 
   /**
    * Get recent updated comics
+   * @param page number
    */
-  suspend fun getUpdatedComics(page: Int? = null): Either<ComicAppError, List<UpdatedComic>>
+  suspend fun getUpdatedComics(page: Int? = null): Either<ComicAppError, List<Comic>>
 
   /**
    * Get suggest comics
+   * @param page number
    */
-  suspend fun getSuggestComics(): Either<ComicAppError, List<SuggestComic>>
+  suspend fun getNewestComics(page: Int? = null): Either<ComicAppError, List<Comic>>
 
   /**
    * Get comic detail and all chapters
@@ -39,6 +42,7 @@ interface ComicRepository {
   /**
    * Search comic by [query] (only partial information)
    * @param query term to search
+   * @param page page number
    */
-  suspend fun searchComic(query: String): Either<ComicAppError, List<SearchComic>>
+  suspend fun searchComic(query: String, page: Int? = null): Either<ComicAppError, List<Comic>>
 }

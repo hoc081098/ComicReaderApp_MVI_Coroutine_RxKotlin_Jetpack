@@ -59,6 +59,14 @@ class ChapterDetailFragment : Fragment() {
 
   private fun initView(chapterImageAdapter: ChapterImageAdapter) {
     view_pager.adapter = chapterImageAdapter
+
+    spinner_chapters.setItems(
+      ChapterDetail.Chapter(
+        chapterLink = navArgs.chapter.chapterLink,
+        chapterName = navArgs.chapter.chapterName
+      )
+    )
+    spinner_chapters.selectedIndex = 0
   }
 
   private fun bind(adapter: ChapterImageAdapter) {
@@ -76,7 +84,6 @@ class ChapterDetailFragment : Fragment() {
 
       group_error.isVisible = errorMessage !== null
       text_error_message.text = errorMessage
-
       when (detail) {
         is ChapterDetailViewState.Detail.Initial -> {
           mainActivity.setToolbarTitle(detail.chapterName)
@@ -94,11 +101,14 @@ class ChapterDetailFragment : Fragment() {
 
           mainActivity.setToolbarTitle(chapterDetail.chapterName)
 
-          adapter.submitList(chapterDetail.images)
+          adapter.submitList(if (errorMessage !== null) chapterDetail.images else emptyList())
 
           spinner_chapters.setItems(chapterDetail.chapters)
           spinner_chapters.selectedIndex =
             chapterDetail.chapters.indexOfFirst { it.chapterLink == chapterDetail.chapterLink }
+
+          button_prev.isEnabled = chapterDetail.prevChapterLink !== null
+          button_next.isEnabled = chapterDetail.nextChapterLink !== null
         }
       }
     }

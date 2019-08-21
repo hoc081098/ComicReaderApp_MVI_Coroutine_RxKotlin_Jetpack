@@ -3,44 +3,49 @@ package com.hoc.comicapp.data.remote.response
 import com.squareup.moshi.Json
 
 data class ComicDetailResponse(
-  @Json(name = "author")
-  val author: String, // ONE - Murata Yuusuke
+  @Json(name = "authors")
+  val authors: List<Author>,
   @Json(name = "categories")
   val categories: List<Category>,
   @Json(name = "chapters")
   val chapters: List<Chapter>,
   @Json(name = "last_updated")
-  val lastUpdated: String, // 16:27 04/06/2019
+  val lastUpdated: String, // April 2019
   @Json(name = "link")
-  val link: String, // http://www.nettruyen.com/truyen-tranh/cu-dam-huy-diet
-  @Json(name = "other_name")
-  val otherName: String?, // Onepunch-Man; Saitama - Onepunch
+  val link: String, // https://ww2.mangafox.online/solo-leveling
+  @Json(name = "related_comics")
+  val relatedComics: List<ComicResponse>,
   @Json(name = "shortened_content")
-  val shortenedContent: String, // Một Manga thể loại siêu anh hùng với đặc trưng phồng tôm đấm phát chết luôn... và mang đậm tính chất troll của tác giả.Onepunch-man là câu chuyện của 1 chàng thanh niên 23 tuổi, đang là một nhân viên văn phòng điển trai nghiêm túc và tất nhiên là ế. Không hiểu vì biến cố gì mà tự nhiên lông tóc trên người của anh trụi lủi, sau đó anh mang trong mình khả năng siêu đặc biệt "Đấm phát chết luôn" nhằm bảo vệ trái đất và thành phố nơi anh sinh sống khỏi các sinh vật ngoài không gian (nhưng phá hoại cũng không kém).
-  @Json(name = "status")
-  val status: String, // Đang tiến hành
+  val shortenedContent: String, // Solo Leveling summary: 10 years ago, after “the Gate” that connected the real world with the monster world opened, some of the ordinary, everyday people received the power to hunt monsters within the Gate. They are known as "Hunters". However, not all Hunters are powerful. My name is Sung Jin-Woo, an E-rank Hunter. I'm someone who has to risk his life in the lowliest of dungeons, the "World's Weakest". Having no skills whatsoever to display, I barely earned the required money by fighting in low-leveled dungeons… at least until I found a hidden dungeon with the hardest difficulty within the D-rank dungeons! In the end, as I was accepting death, I suddenly received a strange power, a quest log that only I could see, a secret to leveling up that only I know about! If I trained in accordance with my quests and hunted monsters, my level would rise. Changing from the weakest Hunter to the strongest S-rank Hunter!
   @Json(name = "thumbnail")
-  val thumbnail: String, // https://3.bp.blogspot.com/-0RYOSGO6K5Q/Wy2QUUXiyrI/AAAAAAAAVwI/iqc4vmYsCN87Pgn823WpPRa7fZ9t2P6OACHMYCw/cu-dam-huy-diet
+  val thumbnail: String, // https://cdn1.mangafox.online/900/018/013/989/430/solo-leveling.jpg
   @Json(name = "title")
-  val title: String, // Cú Đấm Hủy Diệt
+  val title: String, // Solo Leveling
   @Json(name = "view")
-  val view: String // 31.510.981
+  val view: String // 76228
 ) {
-  data class Category(
-    @Json(name = "link")
-    val link: String, // http://www.nettruyen.com/tim-truyen/manga
-    @Json(name = "name")
-    val name: String // Manga
-  )
-
   data class Chapter(
     @Json(name = "chapter_link")
-    val chapterLink: String, // http://www.nettruyen.com/truyen-tranh/cu-dam-huy-diet/chap-0/168970
+    val chapterLink: String, // https://ww2.mangafox.online/solo-leveling/chapter-0-275968490470920
     @Json(name = "chapter_name")
-    val chapterName: String, // Chapter 0: Special chap
+    val chapterName: String, // Chapter 0
     @Json(name = "time")
-    val time: String, // 25/03/15
+    val time: String, // December 2018
     @Json(name = "view")
-    val view: String // 253.478
+    val view: String // 9592
+  )
+
+  data class Category(
+    @Json(name = "link")
+    val link: String, // https://ww2.mangafox.online/category/webtoons
+    @Json(name = "name")
+    val name: String // Webtoons
+  )
+
+  data class Author(
+    @Json(name = "link")
+    val link: String, // https://ww2.mangafox.online/author/sung-lak-jang
+    @Json(name = "name")
+    val name: String // Sung-Lak Jang
   )
 }

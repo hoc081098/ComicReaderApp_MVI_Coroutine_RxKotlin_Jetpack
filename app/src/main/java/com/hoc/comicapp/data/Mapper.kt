@@ -1,49 +1,28 @@
 package com.hoc.comicapp.data
 
-import com.hoc.comicapp.data.remote.response.*
-import com.hoc.comicapp.domain.models.*
+import com.hoc.comicapp.data.remote.response.CategoryResponse
+import com.hoc.comicapp.data.remote.response.ChapterDetailResponse
+import com.hoc.comicapp.data.remote.response.ComicDetailResponse
+import com.hoc.comicapp.data.remote.response.ComicResponse
+import com.hoc.comicapp.domain.models.Category
+import com.hoc.comicapp.domain.models.ChapterDetail
+import com.hoc.comicapp.domain.models.Comic
+import com.hoc.comicapp.domain.models.ComicDetail
 
 object Mapper {
-  fun responseToDomainModel(response: TopMonthComicResponse): TopMonthComic {
-    return TopMonthComic(
+  fun responseToDomainModel(response: ComicResponse): Comic {
+    return Comic(
       title = response.title,
-      link = response.link,
-      view = response.view,
-      lastChapter = TopMonthComic.Chapter(
-        chapterLink = response.lastChapter.chapterLink,
-        chapterName = response.lastChapter.chapterName
-      ),
-      thumbnail = response.thumbnail
-    )
-  }
-
-  fun responseToDomainModel(response: UpdatedComicResponse): UpdatedComic {
-    return UpdatedComic(
-      title = response.title,
-      link = response.link,
-      view = response.view,
       thumbnail = response.thumbnail,
+      link = response.link,
+      view = response.view,
       lastChapters = response.lastChapters.map {
-        UpdatedComic.Chapter(
-          chapterName = it.chapterName,
+        Comic.LastChapter(
           chapterLink = it.chapterLink,
+          chapterName = it.chapterName,
           time = it.time
         )
       }
-    )
-  }
-
-  fun responseToDomainModel(response: SuggestComicResponse): SuggestComic {
-    val lastChapter = response.lastChapter
-    return SuggestComic(
-      title = response.title,
-      link = response.link,
-      thumbnail = response.thumbnail,
-      lastChapter = SuggestComic.Chapter(
-        chapterName = lastChapter.chapterName,
-        chapterLink = lastChapter.chapterLink,
-        time = lastChapter.time
-      )
     )
   }
 
@@ -61,7 +40,12 @@ object Mapper {
           chapterName = it.chapterName
         )
       },
-      author = response.author,
+      authors = response.authors.map {
+        ComicDetail.Author(
+          link = it.link,
+          name = it.name
+        )
+      },
       categories = response.categories.map {
         ComicDetail.Category(
           link = it.link,
@@ -69,18 +53,15 @@ object Mapper {
         )
       },
       lastUpdated = response.lastUpdated,
-      otherName = response.otherName,
       shortenedContent = response.shortenedContent,
-      status = response.status
+      relatedComics = response.relatedComics.map(::responseToDomainModel)
     )
   }
 
   fun responseToDomainModel(response: ChapterDetailResponse): ChapterDetail {
     return ChapterDetail(
       chapterName = response.chapterName,
-      time = response.time,
       chapterLink = response.chapterLink,
-      htmlContent = response.htmlContent,
       images = response.images,
       chapters = response.chapters.map {
         ChapterDetail.Chapter(
@@ -99,16 +80,6 @@ object Mapper {
       name = response.name,
       description = response.description,
       thumbnail = response.thumbnail
-    )
-  }
-
-  fun responseToDomainModel(response: SearchComicResponse): SearchComic {
-    return SearchComic(
-      link = response.link,
-      title = response.title,
-      thumbnail = response.thumbnail,
-      categoryNames = response.categoryNames,
-      lastChapterName = response.lastChapterName
     )
   }
 }

@@ -4,26 +4,22 @@ import com.squareup.moshi.Json
 
 data class ChapterDetailResponse(
   @Json(name = "chapter_link")
-  val chapterLink: String, // http://www.nettruyen.com/truyen-tranh/cu-dam-huy-diet/chap-153/474661
+  val chapterLink: String, // https://ww2.mangafox.online/solo-leveling/chapter-65-159349729567655
   @Json(name = "chapter_name")
-  val chapterName: String, // Chapter 153
+  val chapterName: String, // Chapter 65
+  @Json(name = "chapters")
+  val chapters: List<Chapter>,
   @Json(name = "images")
   val images: List<String>,
-  @Json(name = "time")
-  val time: String, // 16:27 04/06/2019
-  @Json(name = "html_content")
-  val htmlContent: String?,
   @Json(name = "prev_chapter_link")
-  val prevChapterLink: String?,
+  val prevChapterLink: String, // https://ww2.mangafox.online/solo-leveling/chapter-64-1137969534934196
   @Json(name = "next_chapter_link")
-  val nextChapterLink: String?,
-  @Json(name = "chapters")
-  val chapters: List<Chapter>
+  val nextChapterLink: String?
 ) {
   data class Chapter(
-    @Json(name = "chapter_name")
-    val chapterName: String,
     @Json(name = "chapter_link")
-    val chapterLink: String
+    val chapterLink: String, // https://ww2.mangafox.online/solo-leveling/chapter-0-275968490470920
+    @Json(name = "chapter_name")
+    val chapterName: String // Chapter 0
   )
 }

@@ -24,7 +24,7 @@ class HomeInteractorImpl(private val comicRepository: ComicRepository) : HomeInt
       /**
        * Get getSuggestComics list
        */
-      val suggestResult = comicRepository.getSuggestComics()
+      val suggestResult = comicRepository.getNewestComics(null)
 
       /**
        * Send success change
@@ -60,7 +60,7 @@ class HomeInteractorImpl(private val comicRepository: ComicRepository) : HomeInt
       /**
        * Get top month list
        */
-      val topMonthResult = comicRepository.getTopMonthComics()
+      val topMonthResult = comicRepository.getMostViewedComics()
 
       /**
        * Send success change
@@ -114,8 +114,8 @@ class HomeInteractorImpl(private val comicRepository: ComicRepository) : HomeInt
 
   override fun refreshAllPartialChanges(coroutineScope: CoroutineScope): Observable<HomePartialChange> {
     return Observables.zip(
-      coroutineScope.rxObservable { send(comicRepository.getSuggestComics()) },
-      coroutineScope.rxObservable { send(comicRepository.getTopMonthComics()) },
+      coroutineScope.rxObservable { send(comicRepository.getNewestComics(null)) },
+      coroutineScope.rxObservable { send(comicRepository.getMostViewedComics()) },
       coroutineScope.rxObservable { send(comicRepository.getUpdatedComics()) }
     ).map<HomePartialChange> { (suggest, topMonth, updated) ->
       suggest.flatMap { suggestList ->

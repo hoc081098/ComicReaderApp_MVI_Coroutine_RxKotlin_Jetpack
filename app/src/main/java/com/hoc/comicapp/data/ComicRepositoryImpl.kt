@@ -1,9 +1,9 @@
 package com.hoc.comicapp.data
 
-import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
 import com.hoc.comicapp.data.remote.ComicApiService
-import com.hoc.comicapp.domain.repository.ComicRepository
 import com.hoc.comicapp.domain.models.*
+import com.hoc.comicapp.domain.repository.ComicRepository
+import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
 import com.hoc.comicapp.utils.Either
 import com.hoc.comicapp.utils.left
 import com.hoc.comicapp.utils.right
@@ -16,25 +16,25 @@ class ComicRepositoryImpl(
   private val comicApiService: ComicApiService,
   private val dispatcherProvider: CoroutinesDispatcherProvider
 ) : ComicRepository {
-  override suspend fun getTopMonthComics(): Either<ComicAppError, List<TopMonthComic>> {
+  override suspend fun getMostViewedComics(page: Int?): Either<ComicAppError, List<Comic>> {
     return try {
       withContext(dispatcherProvider.io) {
         comicApiService
-          .getTopMonthComics()
+          .getMostViewedComics(page)
           .map(Mapper::responseToDomainModel)
           .right()
       }
     } catch (throwable: Throwable) {
-      Timber.d(throwable, "ComicRepositoryImpl::getTopMonthComics $throwable")
+      Timber.d(throwable, "ComicRepositoryImpl::getMostViewedComics $throwable")
       throwable.toError(retrofit).left()
     }
   }
 
-  override suspend fun getUpdatedComics(page: Int?): Either<ComicAppError, List<UpdatedComic>> {
+  override suspend fun getUpdatedComics(page: Int?): Either<ComicAppError, List<Comic>> {
     return try {
       withContext(dispatcherProvider.io) {
         comicApiService
-          .getUpdatedComics()
+          .getUpdatedComics(page)
           .map(Mapper::responseToDomainModel)
           .right()
       }
@@ -44,16 +44,16 @@ class ComicRepositoryImpl(
     }
   }
 
-  override suspend fun getSuggestComics(): Either<ComicAppError, List<SuggestComic>> {
+  override suspend fun getNewestComics(page: Int?): Either<ComicAppError, List<Comic>> {
     return try {
       withContext(dispatcherProvider.io) {
         comicApiService
-          .getSuggestComics()
+          .getNewestComics(page)
           .map(Mapper::responseToDomainModel)
           .right()
       }
     } catch (throwable: Throwable) {
-      Timber.d(throwable, "ComicRepositoryImpl::getSuggestComics $throwable")
+      Timber.d(throwable, "ComicRepositoryImpl::getNewestComics $throwable")
       throwable.toError(retrofit).left()
     }
   }
@@ -100,11 +100,11 @@ class ComicRepositoryImpl(
     }
   }
 
-  override suspend fun searchComic(query: String): Either<ComicAppError, List<SearchComic>> {
+  override suspend fun searchComic(query: String, page: Int?): Either<ComicAppError, List<Comic>> {
     return try {
       withContext(dispatcherProvider.io) {
         comicApiService
-          .searchComic(query)
+          .searchComic(query, page)
           .map(Mapper::responseToDomainModel)
           .right()
       }
