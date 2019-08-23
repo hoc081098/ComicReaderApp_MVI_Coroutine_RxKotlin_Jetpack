@@ -12,7 +12,7 @@ data class ChapterDetailResponse(
   @Json(name = "images")
   val images: List<String>,
   @Json(name = "prev_chapter_link")
-  val prevChapterLink: String, // https://ww2.mangafox.online/solo-leveling/chapter-64-1137969534934196
+  val prevChapterLink: String?, // https://ww2.mangafox.online/solo-leveling/chapter-64-1137969534934196
   @Json(name = "next_chapter_link")
   val nextChapterLink: String?
 ) {

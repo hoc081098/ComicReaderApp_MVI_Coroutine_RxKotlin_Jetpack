@@ -4,9 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
+import androidx.transition.AutoTransition
+import androidx.transition.TransitionManager
 import androidx.viewpager2.widget.ViewPager2
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
@@ -22,6 +25,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.fragment_chapter_detail.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import timber.log.Timber
 import kotlin.LazyThreadSafetyMode.NONE
 
 class ChapterDetailFragment : Fragment() {
@@ -78,12 +82,14 @@ class ChapterDetailFragment : Fragment() {
       }
     }
     viewModel.state.observe(owner = viewLifecycleOwner) { (isLoading, isRefreshing, errorMessage, detail, @ViewPager2.Orientation orientation) ->
+      Timber.d("chapter_detail_state=[$isLoading, $isRefreshing, $errorMessage, $detail, $orientation]")
       view_pager.orientation = orientation
 
       progress_bar.isVisible = isLoading
 
       group_error.isVisible = errorMessage !== null
       text_error_message.text = errorMessage
+
       when (detail) {
         is ChapterDetailViewState.Detail.Initial -> {
           mainActivity.setToolbarTitle(detail.chapterName)
@@ -101,14 +107,20 @@ class ChapterDetailFragment : Fragment() {
 
           mainActivity.setToolbarTitle(chapterDetail.chapterName)
 
-          adapter.submitList(if (errorMessage !== null) chapterDetail.images else emptyList())
+          val list = when {
+            errorMessage !== null -> emptyList()
+            else -> chapterDetail.images
+          }
+          Timber.d("chapter_detail_state ${chapterDetail.images.size} ${list.size}")
+          adapter.submitList(list)
 
           spinner_chapters.setItems(chapterDetail.chapters)
           spinner_chapters.selectedIndex =
             chapterDetail.chapters.indexOfFirst { it.chapterLink == chapterDetail.chapterLink }
 
-          button_prev.isEnabled = chapterDetail.prevChapterLink !== null
-          button_next.isEnabled = chapterDetail.nextChapterLink !== null
+          TransitionManager.beginDelayedTransition(bottom_nav, AutoTransition())
+          button_prev.isInvisible = chapterDetail.prevChapterLink === null
+          button_next.isInvisible = chapterDetail.nextChapterLink === null
         }
       }
     }

@@ -115,7 +115,10 @@ sealed class ChapterDetailPartialChange {
           )
         }
         is Error -> {
-          state.copy(isRefreshing = false)
+          state.copy(
+            isRefreshing = false,
+            errorMessage = this.error.getMessage()
+          )
         }
         Loading -> {
           state.copy(isRefreshing = true)
