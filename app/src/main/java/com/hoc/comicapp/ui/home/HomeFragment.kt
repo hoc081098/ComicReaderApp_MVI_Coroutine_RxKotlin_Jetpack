@@ -54,7 +54,7 @@ class HomeFragment : Fragment() {
   }
 
   private fun bind(homeAdapter: HomeAdapter) {
-    homeViewModel.state.observe(viewLifecycleOwner) { (items, refreshLoading) ->
+    homeViewModel.state.observe(owner = viewLifecycleOwner) { (items, refreshLoading) ->
       Timber.d("state=${items.size} refreshLoading=$refreshLoading")
 
       homeAdapter.submitList(items)
@@ -76,8 +76,8 @@ class HomeFragment : Fragment() {
         Observable.just(HomeViewIntent.Initial),
         swipe_refresh_layout.refreshes().map { HomeViewIntent.Refresh },
         loadNextPageIntent(),
-        homeAdapter.suggestRetryObservable.map { HomeViewIntent.RetrySuggest },
-        homeAdapter.topMonthRetryObservable.map { HomeViewIntent.RetryTopMonth },
+        homeAdapter.newestRetryObservable.map { HomeViewIntent.RetryNewest },
+        homeAdapter.mostViewedRetryObservable.map { HomeViewIntent.RetryMostViewed },
         homeAdapter.updatedRetryObservable.map { HomeViewIntent.RetryUpdate }
       )
     ).addTo(compositeDisposable)

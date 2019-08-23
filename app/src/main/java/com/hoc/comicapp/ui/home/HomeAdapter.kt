@@ -12,9 +12,7 @@ import androidx.recyclerview.widget.*
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
-import com.hoc.comicapp.domain.models.SuggestComic
-import com.hoc.comicapp.domain.models.TopMonthComic
-import com.hoc.comicapp.domain.models.UpdatedComic
+import com.hoc.comicapp.domain.models.Comic
 import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.*
 import com.hoc.comicapp.utils.inflate
 import com.jakewharton.rxbinding3.recyclerview.scrollStateChanges
@@ -43,26 +41,26 @@ class HomeAdapter(
   private val compositeDisposable: CompositeDisposable
 ) :
   ListAdapter<HomeListItem, HomeAdapter.VH>(HomeListItemDiffUtilItemCallback) {
-  private val suggestAdapter = SuggestAdapter(glide, compositeDisposable).apply { submitList(emptyList()) }
-  private val topMonthAdapter = TopMonthAdapter(glide, compositeDisposable).apply { submitList(emptyList()) }
+  private val newestAdapter = NewestAdapter(glide, compositeDisposable).apply { submitList(emptyList()) }
+  private val mostViewedAdapter = MostViewedAdapter(glide, compositeDisposable).apply { submitList(emptyList()) }
 
-  private val suggestRetryS = PublishRelay.create<Unit>()
-  private val topMonthRetryS = PublishRelay.create<Unit>()
+  private val newestRetryS = PublishRelay.create<Unit>()
+  private val mostViewedRetryS = PublishRelay.create<Unit>()
   private val updatedRetryS = PublishRelay.create<Unit>()
-  private val clickComicS = PublishRelay.create<UpdatedComic>()
+  private val clickComicS = PublishRelay.create<Comic>()
 
-  val suggestRetryObservable = suggestRetryS.throttleFirst(500, TimeUnit.MILLISECONDS)!!
-  val topMonthRetryObservable = topMonthRetryS.throttleFirst(500, TimeUnit.MILLISECONDS)!!
+  val newestRetryObservable = newestRetryS.throttleFirst(500, TimeUnit.MILLISECONDS)!!
+  val mostViewedRetryObservable = mostViewedRetryS.throttleFirst(500, TimeUnit.MILLISECONDS)!!
   val updatedRetryObservable = updatedRetryS.throttleFirst(500, TimeUnit.MILLISECONDS)!!
   val clickComicObservable = Observable.mergeArray(
-    suggestAdapter.clickComicObservable.map {
+    newestAdapter.clickComicObservable.map {
       ComicArg(
         link = it.link,
         thumbnail = it.thumbnail,
         title = it.title
       )
     },
-    topMonthAdapter.clickComicObservable.map {
+    mostViewedAdapter.clickComicObservable.map {
       ComicArg(
         link = it.link,
         thumbnail = it.thumbnail,
@@ -80,8 +78,8 @@ class HomeAdapter(
 
   override fun onCreateViewHolder(parent: ViewGroup, @ViewType viewType: Int): VH {
     return when (viewType) {
-      SUGGEST_LIST_VIEW_TYPE -> SuggestListVH(parent inflate R.layout.item_recycler_home_recycler)
-      TOP_MONTH_LIST_VIEW_TYPE -> TopMonthListVH(parent inflate R.layout.item_recycler_home_recycler)
+      NEWEST_LIST_VIEW_TYPE -> SuggestListVH(parent inflate R.layout.item_recycler_home_recycler)
+      MOST_VIEWED_LIST_VIEW_TYPE -> TopMonthListVH(parent inflate R.layout.item_recycler_home_recycler)
       COMIC_ITEM_VIEW_TYPE -> ComicItemVH(parent inflate R.layout.item_recyclerview_updated_comic, parent)
       ERROR_ITEM_VIEW_TYPE -> ErrorVH(parent inflate R.layout.item_recyclerview_updated_error)
       LOADING_ITEM_VIEW_TYPE -> LoadingVH(parent inflate R.layout.item_recyclerview_updated_loading)
@@ -95,8 +93,8 @@ class HomeAdapter(
   @ViewType
   override fun getItemViewType(position: Int): Int {
     return when (getItem(position)) {
-      is HomeListItem.SuggestListState -> SUGGEST_LIST_VIEW_TYPE
-      is HomeListItem.TopMonthListState -> TOP_MONTH_LIST_VIEW_TYPE
+      is HomeListItem.NewestListState -> NEWEST_LIST_VIEW_TYPE
+      is HomeListItem.MostViewedListState -> MOST_VIEWED_LIST_VIEW_TYPE
       is HomeListItem.UpdatedItem.ComicItem -> COMIC_ITEM_VIEW_TYPE
       is HomeListItem.UpdatedItem.Error -> ERROR_ITEM_VIEW_TYPE
       HomeListItem.UpdatedItem.Loading -> LOADING_ITEM_VIEW_TYPE
@@ -117,7 +115,7 @@ class HomeAdapter(
   }
 
   private inner class SuggestListVH(itemView: View) : HorizontalRecyclerVH(itemView) {
-    private var currentList = emptyList<SuggestComic>()
+    private var currentList = emptyList<Comic>()
 
     private val startStopAutoScrollS = PublishRelay.create<Boolean>()
     private val intervalInMillis = 1_500L
@@ -125,20 +123,20 @@ class HomeAdapter(
 
     init {
       Timber.d("[###] SuggestListVH::init")
-      buttonRetry.setOnClickListener { suggestRetryS.accept(Unit) }
+      buttonRetry.setOnClickListener { newestRetryS.accept(Unit) }
 
       recycler.run {
         setHasFixedSize(true)
         val linearLayoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
         layoutManager = linearLayoutManager
-        adapter = suggestAdapter
+        adapter = newestAdapter
 
         LinearSnapHelper().attachToRecyclerView(this)
       }
 
       val smoothScroller = object : LinearSmoothScroller(itemView.context) {
         override fun getVerticalSnapPreference(): Int {
-          return LinearSmoothScroller.SNAP_TO_ANY
+          return SNAP_TO_ANY
         }
 
         override fun calculateSpeedPerPixel(displayMetrics: DisplayMetrics): Float {
@@ -166,7 +164,7 @@ class HomeAdapter(
                     )
                 }
             )
-            .map { it to suggestAdapter.itemCount }
+            .map { it to newestAdapter.itemCount }
             .doOnNext { Timber.d("[HORZ] auto_scroll=$it") }
             .switchMap { (startAutoScroll, itemCount) ->
               if (!startAutoScroll || itemCount == 0) {
@@ -207,7 +205,7 @@ class HomeAdapter(
     }
 
     override fun bind(item: HomeListItem) =
-      onlyBind<HomeListItem.SuggestListState>(item) { (comics, errorMessage, isLoading) ->
+      onlyBind<HomeListItem.NewestListState>(item) { (comics, errorMessage, isLoading) ->
         Timber.d("suggest_state=[$isLoading, $errorMessage, $comics]")
 
         if (isLoading) {
@@ -224,7 +222,7 @@ class HomeAdapter(
         }
 
         if (currentList != comics) {
-          suggestAdapter.submitList(comics) {
+          newestAdapter.submitList(comics) {
             currentList = comics
             if (comics.isNotEmpty()) {
               recycler.scrollToPosition(0)
@@ -236,21 +234,21 @@ class HomeAdapter(
   }
 
   private inner class TopMonthListVH(itemView: View) : HorizontalRecyclerVH(itemView) {
-    private var currentList = emptyList<TopMonthComic>()
+    private var currentList = emptyList<Comic>()
 
     init {
       Timber.d("[###] TopMonthListVH::init")
-      buttonRetry.setOnClickListener { topMonthRetryS.accept(Unit) }
+      buttonRetry.setOnClickListener { mostViewedRetryS.accept(Unit) }
 
       recycler.run {
         setHasFixedSize(true)
         layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
-        adapter = topMonthAdapter
+        adapter = mostViewedAdapter
       }
     }
 
     override fun bind(item: HomeListItem) =
-      onlyBind<HomeListItem.TopMonthListState>(item) { (comics, errorMessage, isLoading) ->
+      onlyBind<HomeListItem.MostViewedListState>(item) { (comics, errorMessage, isLoading) ->
         Timber.d("top_month_state=[$isLoading, $errorMessage, $comics]")
 
         if (isLoading) {
@@ -267,7 +265,7 @@ class HomeAdapter(
         }
 
         if (currentList != comics) {
-          topMonthAdapter.submitList(comics) { currentList = comics }
+          mostViewedAdapter.submitList(comics) { currentList = comics }
         }
       }
   }
@@ -346,8 +344,8 @@ class HomeAdapter(
 
     override fun bind(item: HomeListItem) = onlyBind<HomeListItem.Header>(item) { (type) ->
       textHeader.text = when (type) {
-        SUGGEST -> "Recommended"
-        TOP_MONTH -> "Top month"
+        NEWEST -> "Newest"
+        MOST_VIEWED -> "Most viewed"
         UPDATED -> "Updated"
       }
     }
@@ -362,19 +360,19 @@ class HomeAdapter(
   }*/
 
   companion object {
-    const val SUGGEST_LIST_VIEW_TYPE = 1
-    const val TOP_MONTH_LIST_VIEW_TYPE = 2
+    const val NEWEST_LIST_VIEW_TYPE = 1
+    const val MOST_VIEWED_LIST_VIEW_TYPE = 2
     const val COMIC_ITEM_VIEW_TYPE = 3
     const val ERROR_ITEM_VIEW_TYPE = 4
     const val LOADING_ITEM_VIEW_TYPE = 5
     const val HEADER_VIEW_TYPE = 6
-    const val SUGGEST_COMIC_ITEM_VIEW_TYPE = 7
-    const val TOP_MONTH_COMIC_ITEM_VIEW_TYPE = 8
+    const val NEWEST_COMIC_ITEM_VIEW_TYPE = 7
+    const val MOST_VIEW_COMIC_ITEM_VIEW_TYPE = 8
 
     @IntDef(
       value = [
-        SUGGEST_LIST_VIEW_TYPE,
-        TOP_MONTH_LIST_VIEW_TYPE,
+        NEWEST_LIST_VIEW_TYPE,
+        MOST_VIEWED_LIST_VIEW_TYPE,
         COMIC_ITEM_VIEW_TYPE,
         ERROR_ITEM_VIEW_TYPE,
         LOADING_ITEM_VIEW_TYPE,

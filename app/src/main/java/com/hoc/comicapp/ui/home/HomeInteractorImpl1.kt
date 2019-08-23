@@ -1,9 +1,10 @@
 package com.hoc.comicapp.ui.home
 
+import com.hoc.comicapp.domain.repository.ComicRepository
+import com.hoc.comicapp.ui.home.HomePartialChange.RefreshPartialChange.*
 import com.hoc.comicapp.utils.flatMap
 import com.hoc.comicapp.utils.fold
 import com.hoc.comicapp.utils.map
-import com.hoc.comicapp.domain.repository.ComicRepository
 import io.reactivex.Observable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -15,30 +16,31 @@ class HomeInteractorImpl1(
   private val comicRepository: ComicRepository,
   private val homeInteractorImpl: HomeInteractorImpl
 ) : HomeInteractor by homeInteractorImpl {
-  override fun refreshAllPartialChanges(coroutineScope: CoroutineScope): Observable<HomePartialChange> {
+  override fun refreshAll(coroutineScope: CoroutineScope): Observable<HomePartialChange> {
     return coroutineScope.rxObservable<HomePartialChange> {
-      send(HomePartialChange.RefreshPartialChange.Loading)
+      kotlinx.coroutines.coroutineScope {
+        send(Loading)
 
-      val suggestAsync = async { comicRepository.getNewestComics(null) }
-      val topMonthAsync = async { comicRepository.getMostViewedComics() }
-      val updatedAsync = async { comicRepository.getUpdatedComics() }
+        val newestAsync = async { comicRepository.getNewestComics(null) }
+        val mostViewedAsync = async { comicRepository.getMostViewedComics() }
+        val updatedAsync = async { comicRepository.getUpdatedComics() }
 
-      val suggest = suggestAsync.await()
-      val topMonth = topMonthAsync.await()
-      val updated = updatedAsync.await()
+        val newest = newestAsync.await()
+        val mostViewed = mostViewedAsync.await()
+        val updated = updatedAsync.await()
 
-      suggest.flatMap { suggestList ->
-        topMonth.flatMap { topMonthList ->
-          updated.map { updatedList ->
-            HomePartialChange.RefreshPartialChange.RefreshSuccess(
-              suggestComics = suggestList,
-              topMonthComics = topMonthList,
-              updatedComics = updatedList
-            )
+        newest.flatMap { newestComics ->
+          mostViewed.flatMap { mostViewedComics ->
+            updated.map { updatedComics ->
+              RefreshSuccess(
+                newestComics = newestComics,
+                mostViewedComics = mostViewedComics,
+                updatedComics = updatedComics
+              )
+            }
           }
-        }
-      }.fold({ HomePartialChange.RefreshPartialChange.RefreshFailure(it) }, { it })
-        .let { send(it) }
+        }.fold({ RefreshFailure(it) }, { it }).let { send(it) }
+      }
     }
   }
 }

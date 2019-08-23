@@ -4,7 +4,9 @@ import android.os.Parcelable
 import com.hoc.comicapp.base.Intent
 import com.hoc.comicapp.base.SingleEvent
 import com.hoc.comicapp.base.ViewState
-import com.hoc.comicapp.domain.models.*
+import com.hoc.comicapp.domain.models.Comic
+import com.hoc.comicapp.domain.models.ComicAppError
+import com.hoc.comicapp.domain.models.getMessage
 import io.reactivex.Observable
 import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.CoroutineScope
@@ -20,40 +22,40 @@ data class ComicArg(
 ): Parcelable
 
 interface HomeInteractor {
-  fun suggestComicsPartialChanges(coroutineScope: CoroutineScope): Observable<HomePartialChange>
+  fun newestComics(coroutineScope: CoroutineScope): Observable<HomePartialChange>
 
-  fun topMonthComicsPartialChanges(coroutineScope: CoroutineScope): Observable<HomePartialChange>
+  fun mostViewedComics(coroutineScope: CoroutineScope): Observable<HomePartialChange>
 
-  fun updatedComicsPartialChanges(
+  fun updatedComics(
     coroutineScope: CoroutineScope,
     page: Int
   ): Observable<HomePartialChange>
 
-  fun refreshAllPartialChanges(coroutineScope: CoroutineScope): Observable<HomePartialChange>
+  fun refreshAll(coroutineScope: CoroutineScope): Observable<HomePartialChange>
 }
 
 sealed class HomeListItem {
-  data class SuggestListState(
-    val comics: List<SuggestComic>,
+  data class NewestListState(
+    val comics: List<Comic>,
     val errorMessage: String?,
     val isLoading: Boolean
   ) : HomeListItem()
 
-  data class TopMonthListState(
-    val comics: List<TopMonthComic>,
+  data class MostViewedListState(
+    val comics: List<Comic>,
     val errorMessage: String?,
     val isLoading: Boolean
   ) : HomeListItem()
 
   sealed class UpdatedItem : HomeListItem() {
-    data class ComicItem(val comic: UpdatedComic) : UpdatedItem()
+    data class ComicItem(val comic: Comic) : UpdatedItem()
     data class Error(val errorMessage: String?) : UpdatedItem()
     object Loading : UpdatedItem()
   }
 
   data class Header(val type: HeaderType) : HomeListItem()
 
-  enum class HeaderType { SUGGEST, TOP_MONTH, UPDATED }
+  enum class HeaderType { NEWEST, MOST_VIEWED, UPDATED }
 }
 
 data class HomeViewState(
@@ -65,14 +67,14 @@ data class HomeViewState(
     @JvmStatic
     fun initialState() = HomeViewState(
       items = listOf(
-        HomeListItem.Header(HomeListItem.HeaderType.SUGGEST),
-        HomeListItem.SuggestListState(
+        HomeListItem.Header(HomeListItem.HeaderType.NEWEST),
+        HomeListItem.NewestListState(
           comics = emptyList(),
           isLoading = false,
           errorMessage = null
         ),
-        HomeListItem.Header(HomeListItem.HeaderType.TOP_MONTH),
-        HomeListItem.TopMonthListState(
+        HomeListItem.Header(HomeListItem.HeaderType.MOST_VIEWED),
+        HomeListItem.MostViewedListState(
           comics = emptyList(),
           isLoading = false,
           errorMessage = null
@@ -90,21 +92,21 @@ sealed class HomeViewIntent : Intent {
   object Initial : HomeViewIntent()
   object Refresh : HomeViewIntent()
   object LoadNextPageUpdatedComic : HomeViewIntent()
-  object RetrySuggest : HomeViewIntent()
-  object RetryTopMonth : HomeViewIntent()
+  object RetryNewest : HomeViewIntent()
+  object RetryMostViewed : HomeViewIntent()
   object RetryUpdate : HomeViewIntent()
 }
 
 sealed class HomePartialChange {
   abstract fun reducer(state: HomeViewState): HomeViewState
 
-  sealed class SuggestHomePartialChange : HomePartialChange() {
+  sealed class NewestHomePartialChange : HomePartialChange() {
     override fun reducer(state: HomeViewState): HomeViewState {
       return when (this) {
-        is HomePartialChange.SuggestHomePartialChange.Data -> {
+        is Data -> {
           state.copy(
             items = state.items.map {
-              if (it is HomeListItem.SuggestListState) {
+              if (it is HomeListItem.NewestListState) {
                 it.copy(
                   comics = this.comics,
                   isLoading = false,
@@ -116,10 +118,10 @@ sealed class HomePartialChange {
             }
           )
         }
-        HomePartialChange.SuggestHomePartialChange.Loading -> {
+        Loading -> {
           state.copy(
             items = state.items.map {
-              if (it is HomeListItem.SuggestListState) {
+              if (it is HomeListItem.NewestListState) {
                 it.copy(
                   isLoading = true,
                   errorMessage = null
@@ -130,10 +132,10 @@ sealed class HomePartialChange {
             }
           )
         }
-        is HomePartialChange.SuggestHomePartialChange.Error -> {
+        is Error -> {
           state.copy(
             items = state.items.map {
-              if (it is HomeListItem.SuggestListState) {
+              if (it is HomeListItem.NewestListState) {
                 it.copy(
                   isLoading = false,
                   errorMessage = this.error.getMessage()
@@ -147,19 +149,19 @@ sealed class HomePartialChange {
       }
     }
 
-    data class Data(val comics: List<SuggestComic>) : SuggestHomePartialChange()
-    object Loading : SuggestHomePartialChange()
+    data class Data(val comics: List<Comic>) : NewestHomePartialChange()
+    object Loading : NewestHomePartialChange()
     data class Error(val error: ComicAppError) :
-      SuggestHomePartialChange()
+      NewestHomePartialChange()
   }
 
-  sealed class TopMonthHomePartialChange : HomePartialChange() {
+  sealed class MostViewedHomePartialChange : HomePartialChange() {
     override fun reducer(state: HomeViewState): HomeViewState {
       return when (this) {
-        is HomePartialChange.TopMonthHomePartialChange.Data -> {
+        is Data -> {
           state.copy(
             items = state.items.map {
-              if (it is HomeListItem.TopMonthListState) {
+              if (it is HomeListItem.MostViewedListState) {
                 it.copy(
                   comics = this.comics,
                   isLoading = false,
@@ -171,10 +173,10 @@ sealed class HomePartialChange {
             }
           )
         }
-        HomePartialChange.TopMonthHomePartialChange.Loading -> {
+        Loading -> {
           state.copy(
             items = state.items.map {
-              if (it is HomeListItem.TopMonthListState) {
+              if (it is HomeListItem.MostViewedListState) {
                 it.copy(
                   isLoading = true,
                   errorMessage = null
@@ -185,10 +187,10 @@ sealed class HomePartialChange {
             }
           )
         }
-        is HomePartialChange.TopMonthHomePartialChange.Error -> {
+        is Error -> {
           state.copy(
             items = state.items.map {
-              if (it is HomeListItem.TopMonthListState) {
+              if (it is HomeListItem.MostViewedListState) {
                 it.copy(
                   isLoading = false,
                   errorMessage = this.error.getMessage()
@@ -202,16 +204,16 @@ sealed class HomePartialChange {
       }
     }
 
-    data class Data(val comics: List<TopMonthComic>) : TopMonthHomePartialChange()
-    object Loading : TopMonthHomePartialChange()
+    data class Data(val comics: List<Comic>) : MostViewedHomePartialChange()
+    object Loading : MostViewedHomePartialChange()
     data class Error(val error: ComicAppError) :
-      TopMonthHomePartialChange()
+      MostViewedHomePartialChange()
   }
 
   sealed class UpdatedPartialChange : HomePartialChange() {
     override fun reducer(state: HomeViewState): HomeViewState {
       return when (this) {
-        is HomePartialChange.UpdatedPartialChange.Data -> {
+        is Data -> {
           val newData = this.comics.map { HomeListItem.UpdatedItem.ComicItem(it) }
 
           state.copy(
@@ -227,13 +229,13 @@ sealed class HomePartialChange {
             }
           )
         }
-        HomePartialChange.UpdatedPartialChange.Loading -> {
+        Loading -> {
           state.copy(
             items = state.items.filterNot(HomeListItem::isLoadingOrError) +
                 HomeListItem.UpdatedItem.Loading
           )
         }
-        is HomePartialChange.UpdatedPartialChange.Error -> {
+        is Error -> {
           state.copy(
             items = state.items.filterNot(HomeListItem::isLoadingOrError) +
                 HomeListItem.UpdatedItem.Error(this.error.getMessage())
@@ -242,7 +244,7 @@ sealed class HomePartialChange {
       }
     }
 
-    data class Data(val comics: List<UpdatedComic>, val append: Boolean = true) : UpdatedPartialChange()
+    data class Data(val comics: List<Comic>, val append: Boolean = true) : UpdatedPartialChange()
     object Loading : UpdatedPartialChange()
     data class Error(val error: ComicAppError) : UpdatedPartialChange()
   }
@@ -253,8 +255,8 @@ sealed class HomePartialChange {
       return when (this) {
         is RefreshSuccess -> {
           listOf(
-            SuggestHomePartialChange.Data(suggestComics),
-            TopMonthHomePartialChange.Data(topMonthComics),
+            NewestHomePartialChange.Data(newestComics),
+            MostViewedHomePartialChange.Data(mostViewedComics),
             UpdatedPartialChange.Data(updatedComics, append = false)
           ).fold(state) { acc, homePartialChange ->
             homePartialChange.reducer(acc)
@@ -270,9 +272,9 @@ sealed class HomePartialChange {
     }
 
     data class RefreshSuccess(
-      val suggestComics: List<SuggestComic>,
-      val topMonthComics: List<TopMonthComic>,
-      val updatedComics: List<UpdatedComic>
+      val newestComics: List<Comic>,
+      val mostViewedComics: List<Comic>,
+      val updatedComics: List<Comic>
     ) : RefreshPartialChange()
 
     object Loading : RefreshPartialChange()

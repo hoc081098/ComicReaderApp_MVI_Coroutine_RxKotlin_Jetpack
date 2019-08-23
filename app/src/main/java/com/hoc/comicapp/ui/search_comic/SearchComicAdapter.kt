@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R.layout.item_recycler_search_comic
-import com.hoc.comicapp.domain.models.SearchComic
+import com.hoc.comicapp.domain.models.Comic
 import com.hoc.comicapp.ui.home.ComicArg
 import com.hoc.comicapp.utils.asObservable
 import com.hoc.comicapp.utils.inflate
@@ -19,15 +19,15 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.item_recycler_search_comic.view.*
 
-object SearchComicDiffUtilItemCallback : DiffUtil.ItemCallback<SearchComic>() {
-  override fun areItemsTheSame(oldItem: SearchComic, newItem: SearchComic) = oldItem.link == newItem.link
-  override fun areContentsTheSame(oldItem: SearchComic, newItem: SearchComic) = oldItem == newItem
+object SearchComicDiffUtilItemCallback : DiffUtil.ItemCallback<Comic>() {
+  override fun areItemsTheSame(oldItem: Comic, newItem: Comic) = oldItem.link == newItem.link
+  override fun areContentsTheSame(oldItem: Comic, newItem: Comic) = oldItem == newItem
 }
 
 class SearchComicAdapter(
   private val glide: GlideRequests,
   private val compositeDisposable: CompositeDisposable
-) : ListAdapter<SearchComic, SearchComicAdapter.VH>(SearchComicDiffUtilItemCallback) {
+) : ListAdapter<Comic, SearchComicAdapter.VH>(SearchComicDiffUtilItemCallback) {
   private val clickComicS = PublishRelay.create<ComicArg>()
   val clickComicObservable get() = clickComicS.asObservable()
 
@@ -60,7 +60,7 @@ class SearchComicAdapter(
         .addTo(compositeDisposable)
     }
 
-    fun bind(item: SearchComic) {
+    fun bind(item: Comic) {
       glide
         .load(item.thumbnail)
         .thumbnail(0.5f)
@@ -69,8 +69,9 @@ class SearchComicAdapter(
         .into(imageComic)
 
       textComicName.text = item.title
-      textLastChapterName.text = item.lastChapterName
-      textCategoryNames.text = item.categoryNames.joinToString(separator = ", ")
+      val lastChapter = item.lastChapters.lastOrNull()
+      textLastChapterName.text = lastChapter?.chapterName
+      textCategoryNames.text = lastChapter?.time
     }
   }
 }

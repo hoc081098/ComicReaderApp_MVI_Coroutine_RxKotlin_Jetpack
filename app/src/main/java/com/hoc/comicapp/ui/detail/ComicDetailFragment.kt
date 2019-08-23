@@ -235,14 +235,8 @@ class ComicDetailFragment : Fragment() {
 
         val list = mutableListOf(
           "Last updated" to comicDetail.lastUpdated,
-          "Status" to comicDetail.status,
           "View" to comicDetail.view
-        ).apply {
-          comicDetail.otherName
-            ?.let { "Other name" to it }
-            ?.let(::add)
-        }
-
+        )
         text_last_updated_status_view.text = HtmlCompat.fromHtml(
           list.joinToString("<br>") { "\u2022 <b>${it.first}:</b> ${it.second}" },
           HtmlCompat.FROM_HTML_MODE_LEGACY

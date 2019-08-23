@@ -87,8 +87,8 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:fontFamily="@font/google_sans"
-                android:lines="3"
-                android:maxLines="3"
+                android:lines="1"
+                android:maxLines="1"
                 android:textAlignment="center"
                 android:textColor="#E6FFFFFF"
                 android:textSize="12sp"
@@ -97,7 +97,7 @@
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/text_view_last_chapter_name"
-                tools:text="Category 1, Category 2,  Category 3, Category 4" />
+                tools:text="1 day ago" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

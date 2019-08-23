@@ -1,7 +1,7 @@
 package com.hoc.comicapp.ui.home
 
-import com.hoc.comicapp.utils.*
 import com.hoc.comicapp.domain.repository.ComicRepository
+import com.hoc.comicapp.utils.*
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.cast
@@ -12,72 +12,72 @@ import kotlinx.coroutines.rx2.rxObservable
 @ExperimentalCoroutinesApi
 class HomeInteractorImpl(private val comicRepository: ComicRepository) : HomeInteractor {
   /**
-   * Suggest list
+   * Newest list
    */
-  override fun suggestComicsPartialChanges(coroutineScope: CoroutineScope): Observable<HomePartialChange> {
+  override fun newestComics(coroutineScope: CoroutineScope): Observable<HomePartialChange> {
     return coroutineScope.rxObservable {
       /**
        * Send loading
        */
-      this.send(HomePartialChange.SuggestHomePartialChange.Loading)
+      this.send(HomePartialChange.NewestHomePartialChange.Loading)
 
       /**
-       * Get getSuggestComics list
+       * Get newest list
        */
-      val suggestResult = comicRepository.getNewestComics(null)
+      val newestResult = comicRepository.getNewestComics(null)
 
       /**
        * Send success change
        */
-      suggestResult
+      newestResult
         .getOrNull()
         .orEmpty()
-        .let { HomePartialChange.SuggestHomePartialChange.Data(it) }
+        .let { HomePartialChange.NewestHomePartialChange.Data(it) }
         .let { this.send(it) }
 
       /**
        * Send error change
        */
-      if (suggestResult is Left) {
-        suggestResult
+      if (newestResult is Left) {
+        newestResult
           .value
-          .let { HomePartialChange.SuggestHomePartialChange.Error(it) }
+          .let { HomePartialChange.NewestHomePartialChange.Error(it) }
           .let { this.send(it) }
       }
     }.cast()
   }
 
   /**
-   * Top month list
+   * Most viewed list
    */
-  override fun topMonthComicsPartialChanges(coroutineScope: CoroutineScope): Observable<HomePartialChange> {
+  override fun mostViewedComics(coroutineScope: CoroutineScope): Observable<HomePartialChange> {
     return coroutineScope.rxObservable {
       /**
        * Send loading
        */
-      this.send(HomePartialChange.TopMonthHomePartialChange.Loading)
+      this.send(HomePartialChange.MostViewedHomePartialChange.Loading)
 
       /**
-       * Get top month list
+       * Get most viewed list
        */
-      val topMonthResult = comicRepository.getMostViewedComics()
+      val mostViewedResult = comicRepository.getMostViewedComics()
 
       /**
        * Send success change
        */
-      topMonthResult
+      mostViewedResult
         .getOrNull()
         .orEmpty()
-        .let { HomePartialChange.TopMonthHomePartialChange.Data(it) }
+        .let { HomePartialChange.MostViewedHomePartialChange.Data(it) }
         .let { this.send(it) }
 
       /**
        * Send error change
        */
-      if (topMonthResult is Left) {
-        topMonthResult
+      if (mostViewedResult is Left) {
+        mostViewedResult
           .value
-          .let { HomePartialChange.TopMonthHomePartialChange.Error(it) }
+          .let { HomePartialChange.MostViewedHomePartialChange.Error(it) }
           .let { this.send(it) }
       }
     }.cast()
@@ -86,7 +86,7 @@ class HomeInteractorImpl(private val comicRepository: ComicRepository) : HomeInt
   /**
    * Updated list
    */
-  override fun updatedComicsPartialChanges(
+  override fun updatedComics(
     coroutineScope: CoroutineScope,
     page: Int
   ): Observable<HomePartialChange> {
@@ -112,18 +112,18 @@ class HomeInteractorImpl(private val comicRepository: ComicRepository) : HomeInt
     }.cast()
   }
 
-  override fun refreshAllPartialChanges(coroutineScope: CoroutineScope): Observable<HomePartialChange> {
+  override fun refreshAll(coroutineScope: CoroutineScope): Observable<HomePartialChange> {
     return Observables.zip(
       coroutineScope.rxObservable { send(comicRepository.getNewestComics(null)) },
       coroutineScope.rxObservable { send(comicRepository.getMostViewedComics()) },
       coroutineScope.rxObservable { send(comicRepository.getUpdatedComics()) }
-    ).map<HomePartialChange> { (suggest, topMonth, updated) ->
-      suggest.flatMap { suggestList ->
-        topMonth.flatMap { topMonthList ->
+    ).map<HomePartialChange> { (newest, mostViewed, updated) ->
+      newest.flatMap { newestList ->
+        mostViewed.flatMap { mostViewedList ->
           updated.map { updatedList ->
             HomePartialChange.RefreshPartialChange.RefreshSuccess(
-              suggestComics = suggestList,
-              topMonthComics = topMonthList,
+              newestComics = newestList,
+              mostViewedComics = mostViewedList,
               updatedComics = updatedList
             )
           }

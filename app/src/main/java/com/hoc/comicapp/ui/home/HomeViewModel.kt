@@ -39,21 +39,21 @@ class HomeViewModel(
         .flatMap {
           Observable.mergeArray(
             homeInteractor
-              .suggestComicsPartialChanges(coroutineScope = viewModelScope)
+              .newestComics(coroutineScope = viewModelScope)
               .doOnNext {
-                val messageFromError = (it as? HomePartialChange.SuggestHomePartialChange.Error
+                val messageFromError = (it as? HomePartialChange.NewestHomePartialChange.Error
                   ?: return@doOnNext).error.getMessage()
-                sendMessageEvent("Get suggest list error: $messageFromError")
+                sendMessageEvent("Get newest list error: $messageFromError")
               },
             homeInteractor
-              .topMonthComicsPartialChanges(coroutineScope = viewModelScope)
+              .mostViewedComics(coroutineScope = viewModelScope)
               .doOnNext {
-                val messageFromError = (it as? HomePartialChange.TopMonthHomePartialChange.Error
+                val messageFromError = (it as? HomePartialChange.MostViewedHomePartialChange.Error
                   ?: return@doOnNext).error.getMessage()
-                sendMessageEvent("Get top month list error: $messageFromError")
+                sendMessageEvent("Get most viewed list error: $messageFromError")
               },
             homeInteractor
-              .updatedComicsPartialChanges(page = 1, coroutineScope = viewModelScope)
+              .updatedComics(page = 1, coroutineScope = viewModelScope)
               .doOnNext {
                 val messageFromError =
                   (it as? HomePartialChange.UpdatedPartialChange.Error
@@ -72,7 +72,7 @@ class HomeViewModel(
       intent
         .exhaustMap {
           homeInteractor
-            .refreshAllPartialChanges(coroutineScope = viewModelScope)
+            .refreshAll(coroutineScope = viewModelScope)
             .doOnNext {
               sendMessageEvent(
                 when (it) {
@@ -100,7 +100,7 @@ class HomeViewModel(
         .map { it.second.updatedPage + 1 }
         .doOnNext { Timber.d("[~~~] load_next_page = $it") }
         .exhaustMap {
-          homeInteractor.updatedComicsPartialChanges(
+          homeInteractor.updatedComics(
             page = it,
             coroutineScope = viewModelScope
           )
@@ -118,7 +118,7 @@ class HomeViewModel(
         .doOnNext { Timber.d("[~~~] refresh_page=$it") }
         .exhaustMap {
           homeInteractor
-            .updatedComicsPartialChanges(page = it, coroutineScope = viewModelScope)
+            .updatedComics(page = it, coroutineScope = viewModelScope)
             .doOnNext {
               val messageFromError =
                 (it as? HomePartialChange.UpdatedPartialChange.Error
@@ -129,35 +129,35 @@ class HomeViewModel(
     }
 
   /**
-   * Transform [HomeViewIntent.RetrySuggest]s to [HomePartialChange]s
+   * Transform [HomeViewIntent.RetryNewest]s to [HomePartialChange]s
    */
-  private val retrySuggestProcessor =
-    ObservableTransformer<HomeViewIntent.RetrySuggest, HomePartialChange> {
+  private val retryNewestProcessor =
+    ObservableTransformer<HomeViewIntent.RetryNewest, HomePartialChange> {
       it.exhaustMap {
         homeInteractor
-          .suggestComicsPartialChanges(coroutineScope = viewModelScope)
+          .newestComics(coroutineScope = viewModelScope)
           .doOnNext {
             val messageFromError =
-              (it as? HomePartialChange.SuggestHomePartialChange.Error
+              (it as? HomePartialChange.NewestHomePartialChange.Error
                 ?: return@doOnNext).error.getMessage()
-            sendMessageEvent("Error when retry get suggest list: $messageFromError")
+            sendMessageEvent("Error when retry get newest list: $messageFromError")
           }
       }
     }
 
   /**
-   * Transform [HomeViewIntent.RetryTopMonth]s to [HomePartialChange]s
+   * Transform [HomeViewIntent.RetryMostViewed]s to [HomePartialChange]s
    */
-  private val retryTopMonthProcessor =
-    ObservableTransformer<HomeViewIntent.RetryTopMonth, HomePartialChange> {
+  private val retryMostViewedProcessor =
+    ObservableTransformer<HomeViewIntent.RetryMostViewed, HomePartialChange> {
       it.exhaustMap {
         homeInteractor
-          .topMonthComicsPartialChanges(coroutineScope = viewModelScope)
+          .mostViewedComics(coroutineScope = viewModelScope)
           .doOnNext {
             val messageFromError =
-              (it as? HomePartialChange.TopMonthHomePartialChange.Error
+              (it as? HomePartialChange.MostViewedHomePartialChange.Error
                 ?: return@doOnNext).error.getMessage()
-            sendMessageEvent("Error when retry get top month list: $messageFromError")
+            sendMessageEvent("Error when retry get most viewed list: $messageFromError")
           }
       }
     }
@@ -182,11 +182,11 @@ class HomeViewModel(
           .ofType<HomeViewIntent.RetryUpdate>()
           .compose(retryUpdateProcessor),
         shared
-          .ofType<HomeViewIntent.RetrySuggest>()
-          .compose(retrySuggestProcessor),
+          .ofType<HomeViewIntent.RetryNewest>()
+          .compose(retryNewestProcessor),
         shared
-          .ofType<HomeViewIntent.RetryTopMonth>()
-          .compose(retryTopMonthProcessor)
+          .ofType<HomeViewIntent.RetryMostViewed>()
+          .compose(retryMostViewedProcessor)
       )
     }.doOnNext { Timber.d("partial_change=$it") }
       .scan(initialState) { state, change -> change.reducer(state) }

@@ -17,7 +17,7 @@ interface ComicRepository {
   suspend fun getUpdatedComics(page: Int? = null): Either<ComicAppError, List<Comic>>
 
   /**
-   * Get suggest comics
+   * Get newest comics
    * @param page number
    */
   suspend fun getNewestComics(page: Int? = null): Either<ComicAppError, List<Comic>>

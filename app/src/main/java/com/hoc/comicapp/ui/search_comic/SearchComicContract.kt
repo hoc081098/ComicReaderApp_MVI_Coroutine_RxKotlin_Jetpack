@@ -3,8 +3,8 @@ package com.hoc.comicapp.ui.search_comic
 import com.hoc.comicapp.base.Intent
 import com.hoc.comicapp.base.SingleEvent
 import com.hoc.comicapp.base.ViewState
+import com.hoc.comicapp.domain.models.Comic
 import com.hoc.comicapp.domain.models.ComicAppError
-import com.hoc.comicapp.domain.models.SearchComic
 import com.hoc.comicapp.domain.models.getMessage
 import io.reactivex.Observable
 import kotlinx.coroutines.CoroutineScope
@@ -18,7 +18,7 @@ interface SearchComicInteractor {
 
 data class SearchComicViewState(
   val isLoading: Boolean,
-  val comics: List<SearchComic>,
+  val comics: List<Comic>,
   val errorMessage: String?
 ) : ViewState {
   companion object {
@@ -58,7 +58,7 @@ sealed class SearchComicPartialChange {
     }
   }
 
-  data class Data(val comics: List<SearchComic>) : SearchComicPartialChange()
+  data class Data(val comics: List<Comic>) : SearchComicPartialChange()
   object Loading : SearchComicPartialChange()
   data class Error(val error: ComicAppError, val term: String) : SearchComicPartialChange()
 }
