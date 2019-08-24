@@ -1,7 +1,7 @@
 package com.hoc.comicapp.ui.chapter_detail
 
-import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
 import com.hoc.comicapp.domain.repository.ComicRepository
+import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailPartialChange.Initial_Retry_LoadChapter_PartialChange
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailPartialChange.RefreshPartialChange
 import com.hoc.comicapp.utils.fold
@@ -15,20 +15,15 @@ import kotlinx.coroutines.rx2.asObservable
 class ChapterDetailInteractorImpl(
   private val comicRepository: ComicRepository,
   private val dispatcherProvider: CoroutinesDispatcherProvider
-) :
-  ChapterDetailInteractor {
+) : ChapterDetailInteractor {
   override fun getChapterDetail(
     chapterLink: String,
-    chapterName: String?,
-    time: String?,
-    view: String?
+    chapterName: String?
   ): Observable<Initial_Retry_LoadChapter_PartialChange> {
     return flow {
-      if (chapterName != null && time != null && view != null) {
+      if (chapterName != null) {
         val initial = ChapterDetailViewState.Detail.Initial(
           chapterLink = chapterLink,
-          view = view,
-          time = time,
           chapterName = chapterName
         )
         emit(Initial_Retry_LoadChapter_PartialChange.InitialData(initial))

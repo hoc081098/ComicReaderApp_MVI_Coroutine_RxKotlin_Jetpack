@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -14,34 +15,21 @@ import androidx.viewpager2.widget.ViewPager2
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.activity.MainActivity
-import com.hoc.comicapp.domain.models.ChapterDetail
-import com.hoc.comicapp.utils.itemSelections
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.snack
 import com.jakewharton.rxbinding3.view.clicks
+import com.jakewharton.rxbinding3.widget.selectionEvents
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.fragment_chapter_detail.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
-import kotlin.LazyThreadSafetyMode.NONE
 
 class ChapterDetailFragment : Fragment() {
   private val navArgs by navArgs<ChapterDetailFragmentArgs>()
   private val viewModel by viewModel<ChapterDetailViewModel>()
-  private val initial by lazy(NONE) {
-    val chapter = navArgs.chapter
-    ChapterDetailViewIntent.Initial(
-      initial = ChapterDetailViewState.Detail.Initial(
-        chapterName = chapter.chapterName,
-        time = chapter.time,
-        view = chapter.view,
-        chapterLink = chapter.chapterLink
-      )
-    )
-  }
 
   private val compositeDisposable = CompositeDisposable()
 
@@ -57,23 +45,34 @@ class ChapterDetailFragment : Fragment() {
     super.onViewCreated(view, savedInstanceState)
 
     val chapterImageAdapter = ChapterImageAdapter(GlideApp.with(this))
-    initView(chapterImageAdapter)
-    bind(chapterImageAdapter)
-  }
-
-  private fun initView(chapterImageAdapter: ChapterImageAdapter) {
-    view_pager.adapter = chapterImageAdapter
-
-    spinner_chapters.setItems(
-      ChapterDetail.Chapter(
-        chapterLink = navArgs.chapter.chapterLink,
-        chapterName = navArgs.chapter.chapterName
+    val allChaptersAdapter = ArrayAdapter(
+      requireContext(),
+      android.R.layout.simple_spinner_dropdown_item,
+      mutableListOf(
+        ChapterDetailViewState.Chapter(
+          link = navArgs.chapter.chapterLink,
+          name = navArgs.chapter.chapterName
+        )
       )
     )
-    spinner_chapters.selectedIndex = 0
+
+    initView(chapterImageAdapter, allChaptersAdapter)
+    bind(chapterImageAdapter, allChaptersAdapter)
   }
 
-  private fun bind(adapter: ChapterImageAdapter) {
+  private fun initView(
+    chapterImageAdapter: ChapterImageAdapter,
+    allChaptersAdapter: ArrayAdapter<ChapterDetailViewState.Chapter>
+  ) {
+    view_pager.adapter = chapterImageAdapter
+    spinner_chapters.adapter = allChaptersAdapter
+    spinner_chapters.setSelection(0)
+  }
+
+  private fun bind(
+    adapter: ChapterImageAdapter,
+    allChaptersAdapter: ArrayAdapter<ChapterDetailViewState.Chapter>
+  ) {
     viewModel.singleEvent.observeEvent(owner = viewLifecycleOwner) {
       when (it) {
         is ChapterDetailSingleEvent.MessageEvent -> {
@@ -90,44 +89,37 @@ class ChapterDetailFragment : Fragment() {
       group_error.isVisible = errorMessage !== null
       text_error_message.text = errorMessage
 
+      detail ?: return@observe
+      mainActivity.setToolbarTitle(detail.chapterName)
+
       when (detail) {
-        is ChapterDetailViewState.Detail.Initial -> {
-          mainActivity.setToolbarTitle(detail.chapterName)
-
-          spinner_chapters.setItems(
-            ChapterDetail.Chapter(
-              chapterLink = detail.chapterLink,
-              chapterName = detail.chapterName
-            )
-          )
-          spinner_chapters.selectedIndex = 0
-        }
         is ChapterDetailViewState.Detail.Data -> {
-          val chapterDetail = detail.chapterDetail
-
-          mainActivity.setToolbarTitle(chapterDetail.chapterName)
-
           val list = when {
-            errorMessage !== null -> emptyList()
-            else -> chapterDetail.images
+            errorMessage !== null || isLoading -> emptyList()
+            else -> detail.images
           }
-          Timber.d("chapter_detail_state ${chapterDetail.images.size} ${list.size}")
+          Timber.d("chapter_detail_state ${detail.images.size} ${list.size}")
           adapter.submitList(list)
 
-          spinner_chapters.setItems(chapterDetail.chapters)
-          spinner_chapters.selectedIndex =
-            chapterDetail.chapters.indexOfFirst { it.chapterLink == chapterDetail.chapterLink }
+          allChaptersAdapter.clear()
+          allChaptersAdapter.addAll(detail.chapters)
 
           TransitionManager.beginDelayedTransition(bottom_nav, AutoTransition())
-          button_prev.isInvisible = chapterDetail.prevChapterLink === null
-          button_next.isInvisible = chapterDetail.nextChapterLink === null
+          button_prev.isInvisible = detail.prevChapterLink === null
+          button_next.isInvisible = detail.nextChapterLink === null
         }
+        is ChapterDetailViewState.Detail.Initial -> Unit
       }
     }
 
     viewModel.processIntents(
       Observable.mergeArray(
-        Observable.just(initial),
+        Observable.just(
+          ChapterDetailViewIntent.Initial(
+            name = navArgs.chapter.chapterName,
+            link = navArgs.chapter.chapterLink
+          )
+        ),
         button_next
           .clicks()
           .map { ChapterDetailViewIntent.LoadNextChapter },
@@ -138,10 +130,12 @@ class ChapterDetailFragment : Fragment() {
           .clicks()
           .map { ChapterDetailViewIntent.Retry },
         spinner_chapters
-          .itemSelections<ChapterDetail.Chapter>()
+          .selectionEvents()
           .skipInitialValue()
-          .map { ChapterDetailViewIntent.LoadChapter(it.chapterLink, it.chapterName) }
-      )
+          .doOnNext { Timber.d("[*][pos] ${it.view.selectedItem}") }
+          .map { it.view.selectedItem as ChapterDetailViewState.Chapter }
+          .map { ChapterDetailViewIntent.LoadChapter(it.link, it.name) }
+      ).doOnNext { Timber.d("[1][##intent] $it") }
     ).addTo(compositeDisposable)
   }
 

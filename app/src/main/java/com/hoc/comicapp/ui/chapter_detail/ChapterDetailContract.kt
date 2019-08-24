@@ -6,6 +6,7 @@ import com.hoc.comicapp.base.SingleEvent
 import com.hoc.comicapp.base.ViewState
 import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.getMessage
+import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewState.Companion.fromDomain
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewState.Detail
 import io.reactivex.Observable
 import com.hoc.comicapp.domain.models.ChapterDetail as ChapterDetailDomain
@@ -13,17 +14,14 @@ import com.hoc.comicapp.domain.models.ChapterDetail as ChapterDetailDomain
 interface ChapterDetailInteractor {
   fun getChapterDetail(
     chapterLink: String,
-    chapterName: String? = null,
-    time: String? = null,
-    view: String? = null
+    chapterName: String? = null
   ): Observable<ChapterDetailPartialChange.Initial_Retry_LoadChapter_PartialChange>
 
   fun refresh(chapterLink: String): Observable<ChapterDetailPartialChange.RefreshPartialChange>
 }
 
 sealed class ChapterDetailViewIntent : Intent {
-  data class Initial(val initial: Detail.Initial) :
-    ChapterDetailViewIntent()
+  data class Initial(val link: String, val name: String) : ChapterDetailViewIntent()
 
   object Refresh : ChapterDetailViewIntent()
   object Retry : ChapterDetailViewIntent()
@@ -43,15 +41,27 @@ data class ChapterDetailViewState(
   @ViewPager2.Orientation val orientation: Int
 ) : ViewState {
 
+  data class Chapter(val name: String, val link: String) {
+    override fun toString() = name
+  }
+
   sealed class Detail {
+    abstract val chapterLink: String
+    abstract val chapterName: String
+
     data class Initial(
-      val chapterLink: String,
-      val chapterName: String,
-      val time: String,
-      val view: String
+      override val chapterLink: String,
+      override val chapterName: String
     ) : Detail()
 
-    data class Data(val chapterDetail: ChapterDetailDomain) : Detail()
+    data class Data(
+      override val chapterLink: String,
+      override val chapterName: String,
+      val images: List<String>,
+      val chapters: List<Chapter>,
+      val prevChapterLink: String?,
+      val nextChapterLink: String?
+    ) : Detail()
   }
 
   companion object {
@@ -64,8 +74,25 @@ data class ChapterDetailViewState(
         orientation = ViewPager2.ORIENTATION_VERTICAL
       )
     }
+
+    fun fromDomain(domain: ChapterDetailDomain): Detail.Data {
+      return Detail.Data(
+        chapterLink = domain.chapterLink,
+        chapterName = domain.chapterName,
+        images = domain.images,
+        chapters = domain.chapters.map {
+          ChapterDetailViewState.Chapter(
+            name = it.chapterName,
+            link = it.chapterLink
+          )
+        },
+        nextChapterLink = domain.nextChapterLink,
+        prevChapterLink = domain.prevChapterLink
+      )
+    }
   }
 }
+
 
 sealed class ChapterDetailPartialChange {
   abstract fun reducer(state: ChapterDetailViewState): ChapterDetailViewState
@@ -80,7 +107,7 @@ sealed class ChapterDetailPartialChange {
           state.copy(
             isLoading = false,
             errorMessage = null,
-            detail = Detail.Data(this.data)
+            detail = fromDomain(this.data)
           )
         }
         is Error -> {
@@ -111,7 +138,7 @@ sealed class ChapterDetailPartialChange {
           state.copy(
             isRefreshing = false,
             errorMessage = null,
-            detail = Detail.Data(this.data)
+            detail = fromDomain(this.data)
           )
         }
         is Error -> {

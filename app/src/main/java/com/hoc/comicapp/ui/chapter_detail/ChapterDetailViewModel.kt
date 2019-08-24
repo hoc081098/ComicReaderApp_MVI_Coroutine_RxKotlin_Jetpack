@@ -13,6 +13,7 @@ import io.reactivex.ObservableTransformer
 import io.reactivex.rxkotlin.cast
 import io.reactivex.rxkotlin.ofType
 import io.reactivex.rxkotlin.subscribeBy
+import timber.log.Timber
 
 class ChapterDetailViewModel(
   private val interactor: ChapterDetailInteractor,
@@ -22,23 +23,20 @@ class ChapterDetailViewModel(
   override val initialState = ChapterDetailViewState.initial()
 
   private val intentS = PublishRelay.create<ChapterDetailViewIntent>()
+    .apply { subscribeBy { Timber.d("[2][##intent] $it") } }
 
   private val currentChapterLink
-    get() = when (val detail = state.value.detail) {
-      is ChapterDetailViewState.Detail.Initial -> detail.chapterLink
-      is ChapterDetailViewState.Detail.Data -> detail.chapterDetail.chapterLink
-      null -> error("State is null")
-    }
+    get() = state.value.detail?.chapterLink ?: error("State is null")
 
   private val nextChapterLink
     get() = when (val detail = state.value.detail) {
-      is ChapterDetailViewState.Detail.Data -> detail.chapterDetail.nextChapterLink
+      is ChapterDetailViewState.Detail.Data -> detail.nextChapterLink
       else -> null
     }
 
   private val prevChapterLink
     get() = when (val detail = state.value.detail) {
-      is ChapterDetailViewState.Detail.Data -> detail.chapterDetail.prevChapterLink
+      is ChapterDetailViewState.Detail.Data -> detail.prevChapterLink
       else -> null
     }
 
@@ -47,10 +45,8 @@ class ChapterDetailViewModel(
       intents.flatMap {
         interactor
           .getChapterDetail(
-            chapterName = it.initial.chapterName,
-            chapterLink = it.initial.chapterLink,
-            time = it.initial.time,
-            view = it.initial.view
+            chapterName = it.name,
+            chapterLink = it.link
           )
           .doOnNext {
             if (it is ChapterDetailPartialChange.Initial_Retry_LoadChapter_PartialChange.Error) {
@@ -151,7 +147,6 @@ class ChapterDetailViewModel(
     }
 
   private val disposable = intentS
-    .compose(intentFilter)
     .compose(intentToChanges)
     .scan(initialState) { vs, change -> change.reducer(vs) }
     .observeOn(rxSchedulerProvider.main)
@@ -170,9 +165,11 @@ class ChapterDetailViewModel(
   override fun onCleared() {
     super.onCleared()
     disposable.dispose()
+    Timber.d("[cleared]")
   }
 
   private companion object {
+    //fucking
     val intentFilter = ObservableTransformer<ChapterDetailViewIntent, ChapterDetailViewIntent> {
       it.publish { shared ->
         Observable.mergeArray(

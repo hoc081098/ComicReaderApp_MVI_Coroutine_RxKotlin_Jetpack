@@ -67,16 +67,18 @@
                 app:layout_constraintEnd_toStartOf="@+id/button_next"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <com.jaredrummler.materialspinner.MaterialSpinner
+            <androidx.appcompat.widget.AppCompatSpinner
                 android:id="@+id/spinner_chapters"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/switch_orientation"
                 app:layout_constraintStart_toEndOf="@+id/button_prev"
-                app:layout_constraintTop_toTopOf="parent"
-                app:ms_background_color="@color/colorCardBackground"
-                app:ms_text_color="@color/colorTextOnBackground" />
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!--app:ms_background_color="@color/colorCardBackground"-->
+            <!--app:ms_text_color="@color/colorTextOnBackground"-->
+            <!--/>-->
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
