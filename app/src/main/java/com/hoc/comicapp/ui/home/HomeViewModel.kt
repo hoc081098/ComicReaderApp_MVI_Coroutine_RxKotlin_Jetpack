@@ -10,7 +10,6 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
-import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.ofType
 import io.reactivex.rxkotlin.subscribeBy
@@ -28,7 +27,6 @@ class HomeViewModel(
 
   private val intentS = PublishRelay.create<HomeViewIntent>()
   private val stateS = BehaviorRelay.createDefault<HomeViewState>(initialState)
-  private val compositeDisposable = CompositeDisposable()
 
   /**
    * Transform [HomeViewIntent.Initial]s to [HomePartialChange]s
@@ -209,12 +207,6 @@ class HomeViewModel(
     stateS
       .subscribeBy(onNext = ::setNewState)
       .addTo(compositeDisposable)
-  }
-
-  override fun onCleared() {
-    super.onCleared()
-    compositeDisposable.clear()
-    Timber.d("onCleared")
   }
 
   private fun sendMessageEvent(message: String) {

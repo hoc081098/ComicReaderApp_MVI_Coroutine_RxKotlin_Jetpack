@@ -6,7 +6,6 @@ import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
-import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.ofType
 import io.reactivex.rxkotlin.subscribeBy
@@ -20,7 +19,6 @@ class SearchComicViewModel(
 ) :
   BaseViewModel<SearchComicViewIntent, SearchComicViewState, SearchComicSingleEvent>() {
   private val intentS = PublishRelay.create<SearchComicViewIntent>()
-  private val compositeDisposable = CompositeDisposable()
 
   override val initialState = SearchComicViewState.initialState()
 
@@ -76,12 +74,6 @@ class SearchComicViewModel(
       .distinctUntilChanged()
       .observeOn(rxSchedulerProvider.main)
       .subscribeBy(onNext = ::setNewState)
-      .addTo(compositeDisposable = compositeDisposable)
-  }
-
-  override fun onCleared() {
-    super.onCleared()
-    compositeDisposable.dispose()
-    Timber.d("SearchComicViewModel::onCleared")
+      .addTo(compositeDisposable)
   }
 }

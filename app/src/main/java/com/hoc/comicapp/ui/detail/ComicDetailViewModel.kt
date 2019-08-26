@@ -25,7 +25,6 @@ class ComicDetailViewModel(
   BaseViewModel<ComicDetailIntent, ComicDetailViewState, ComicDetailSingleEvent>() {
   override val initialState = ComicDetailViewState.initialState()
 
-  private val compositeDisposable = CompositeDisposable()
   private val intentS = PublishRelay.create<ComicDetailIntent>()
   private val stateS = BehaviorRelay.createDefault<ComicDetailViewState>(initialState)
 

@@ -10,10 +10,10 @@ import com.hoc.comicapp.utils.toOptional
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
+import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.cast
 import io.reactivex.rxkotlin.ofType
 import io.reactivex.rxkotlin.subscribeBy
-import timber.log.Timber
 
 class ChapterDetailViewModel(
   private val interactor: ChapterDetailInteractor,
@@ -23,7 +23,6 @@ class ChapterDetailViewModel(
   override val initialState = ChapterDetailViewState.initial()
 
   private val intentS = PublishRelay.create<ChapterDetailViewIntent>()
-    .apply { subscribeBy { Timber.d("[2][##intent] $it") } }
 
   private val currentChapterLink
     get() = state.value.detail?.chapterLink ?: error("State is null")
@@ -146,15 +145,18 @@ class ChapterDetailViewModel(
       )
     }
 
-  private val disposable = intentS
-    .compose(intentToChanges)
-    .scan(initialState) { vs, change -> change.reducer(vs) }
-    .observeOn(rxSchedulerProvider.main)
-    .subscribeBy(onNext = ::setNewState)
-
   override fun processIntents(intents: Observable<ChapterDetailViewIntent>) =
     intents.subscribe(intentS)!!
 
+  init {
+    intentS
+      .compose(intentFilter)
+      .compose(intentToChanges)
+      .scan(initialState) { vs, change -> change.reducer(vs) }
+      .observeOn(rxSchedulerProvider.main)
+      .subscribeBy(onNext = ::setNewState)
+      .addTo(compositeDisposable)
+  }
 
   /**
    * Send [message]
@@ -162,14 +164,7 @@ class ChapterDetailViewModel(
   private fun sendMessageEvent(message: String) =
     sendEvent(ChapterDetailSingleEvent.MessageEvent(message))
 
-  override fun onCleared() {
-    super.onCleared()
-    disposable.dispose()
-    Timber.d("[cleared]")
-  }
-
   private companion object {
-    //fucking
     val intentFilter = ObservableTransformer<ChapterDetailViewIntent, ChapterDetailViewIntent> {
       it.publish { shared ->
         Observable.mergeArray(

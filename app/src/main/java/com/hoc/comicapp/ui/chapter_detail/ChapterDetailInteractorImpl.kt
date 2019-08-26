@@ -10,6 +10,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.rx2.asObservable
+import timber.log.Timber
 
 @ExperimentalCoroutinesApi
 class ChapterDetailInteractorImpl(
@@ -20,6 +21,7 @@ class ChapterDetailInteractorImpl(
     chapterLink: String,
     chapterName: String?
   ): Observable<Initial_Retry_LoadChapter_PartialChange> {
+    Timber.d("getChapterDetail $chapterLink")
     return flow {
       if (chapterName != null) {
         val initial = ChapterDetailViewState.Detail.Initial(
@@ -43,6 +45,7 @@ class ChapterDetailInteractorImpl(
   }
 
   override fun refresh(chapterLink: String): Observable<RefreshPartialChange> {
+    Timber.d("refresh $chapterLink")
     return flow {
       emit(RefreshPartialChange.Loading)
 

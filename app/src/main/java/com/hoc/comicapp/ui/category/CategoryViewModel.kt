@@ -9,7 +9,6 @@ import com.hoc.comicapp.utils.notOfType
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
-import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.*
 
 class CategoryViewModel(
@@ -19,7 +18,6 @@ class CategoryViewModel(
   BaseViewModel<CategoryViewIntent, CategoryViewState, CategorySingleEvent>() {
   override val initialState = CategoryViewState.initialState()
   private val intentS = PublishRelay.create<CategoryViewIntent>()
-  private val compositeDisposable = CompositeDisposable()
 
   /**
    * Filters intent by type, then compose with [ObservableTransformer] to transform [CategoryViewIntent] to [CategoryPartialChange].
@@ -121,11 +119,6 @@ class CategoryViewModel(
    */
   private fun sendMessageEvent(message: String) =
     sendEvent(CategorySingleEvent.MessageEvent(message))
-
-  override fun onCleared() {
-    super.onCleared()
-    compositeDisposable.dispose()
-  }
 
   private companion object {
     /**
