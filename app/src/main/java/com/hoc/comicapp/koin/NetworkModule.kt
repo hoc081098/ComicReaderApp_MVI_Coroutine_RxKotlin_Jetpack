@@ -15,27 +15,29 @@ import java.util.concurrent.TimeUnit
 val networkModule = module {
   single { getOkHttpClient() }
 
-  single { getRetrofit(get()) }
+  single { getRetrofit(get(), get()) }
 
   single { getComicApiService(get()) }
+
+  single { getMoshi() }
 }
 
-fun getComicApiService(retrofit: Retrofit): ComicApiService {
+private fun getMoshi(): Moshi {
+  return Moshi
+    .Builder()
+    .add(KotlinJsonAdapterFactory())
+    .build()
+}
+
+private fun getComicApiService(retrofit: Retrofit): ComicApiService {
   return ComicApiService(retrofit)
 }
 
-private fun getRetrofit(client: OkHttpClient): Retrofit {
+private fun getRetrofit(client: OkHttpClient, moshi: Moshi): Retrofit {
   return Retrofit.Builder()
     .baseUrl(COMIC_BASE_URL)
     .client(client)
-    .addConverterFactory(
-      MoshiConverterFactory.create(
-        Moshi
-          .Builder()
-          .add(KotlinJsonAdapterFactory())
-          .build()
-      )
-    )
+    .addConverterFactory(MoshiConverterFactory.create(moshi))
     .build()
 }
 

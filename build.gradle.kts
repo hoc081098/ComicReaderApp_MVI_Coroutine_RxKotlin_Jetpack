@@ -15,6 +15,7 @@ buildscript {
     set("rxRelayVersion", "2.1.0")
     set("threetenabpVersion", "1.1.2")
     set("retrofit2Version", "2.6.0")
+    set("roomVersion", "2.1.0-alpha06")
   }
 
 

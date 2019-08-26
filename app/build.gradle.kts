@@ -11,6 +11,7 @@ val timberVersion: String by rootProject.extra
 val rxRelayVersion: String by rootProject.extra
 val threetenabpVersion: String by rootProject.extra
 val retrofit2Version: String by rootProject.extra
+val roomVersion: String by rootProject.extra
 
 plugins {
   id("com.android.application")
@@ -73,6 +74,11 @@ dependencies {
   implementation("com.shopify:livedata-ktx:3.0.0")
 
   implementation("com.google.android.material:material:$materialVersion")
+
+  implementation("androidx.room:room-runtime:$roomVersion")
+  kapt("androidx.room:room-compiler:$roomVersion") // For Kotlin use kapt instead of annotationProcessor
+  implementation("androidx.room:room-ktx:$roomVersion") // optional - Kotlin Extensions and Coroutines support for Room
+  implementation("androidx.room:room-rxjava2:$roomVersion") // optional - RxJava support for Room
 
   implementation("org.koin:koin-androidx-viewmodel:$koinVersion")
 
