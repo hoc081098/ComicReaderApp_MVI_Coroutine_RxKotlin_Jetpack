@@ -6,6 +6,8 @@ import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.Spinner
 import android.widget.Toast
 import androidx.annotation.*
 import androidx.core.content.ContextCompat
@@ -25,6 +27,7 @@ import io.reactivex.annotations.CheckReturnValue
 import io.reactivex.annotations.SchedulerSupport
 import io.reactivex.disposables.Disposables
 import io.reactivex.subjects.Subject
+import timber.log.Timber
 
 @CheckReturnValue
 @SchedulerSupport(SchedulerSupport.NONE)

@@ -39,22 +39,6 @@ class ChapterDetailViewModel(
       else -> null
     }
 
-  private val initialProcessor =
-    ObservableTransformer<ChapterDetailViewIntent.Initial, ChapterDetailPartialChange> { intents ->
-      intents.flatMap {
-        interactor
-          .getChapterDetail(
-            chapterName = it.name,
-            chapterLink = it.link
-          )
-          .doOnNext {
-            if (it is ChapterDetailPartialChange.Initial_Retry_LoadChapter_PartialChange.Error) {
-              sendMessageEvent(message = "Error occurred: ${it.error.getMessage()}")
-            }
-          }
-      }
-    }
-
   private val refreshProcessor =
     ObservableTransformer<ChapterDetailViewIntent.Refresh, ChapterDetailPartialChange> { intents ->
       intents.exhaustMap {
@@ -69,7 +53,6 @@ class ChapterDetailViewModel(
           .cast<ChapterDetailPartialChange>()
       }
     }
-
 
   private val retryProcessor =
     ObservableTransformer<ChapterDetailViewIntent.Retry, ChapterDetailPartialChange> { intents ->
@@ -115,7 +98,6 @@ class ChapterDetailViewModel(
         }
     }
 
-
   private val loadPrevChapterProcessor =
     ObservableTransformer<ChapterDetailViewIntent.LoadPrevChapter, ChapterDetailPartialChange> { intents ->
       intents
@@ -136,10 +118,20 @@ class ChapterDetailViewModel(
   private val intentToChanges =
     ObservableTransformer<ChapterDetailViewIntent, ChapterDetailPartialChange> { intents ->
       Observable.mergeArray(
-        intents.ofType<ChapterDetailViewIntent.Initial>().compose(initialProcessor),
+        Observable.mergeArray(
+          intents.ofType<ChapterDetailViewIntent.LoadChapter>(),
+          intents.ofType<ChapterDetailViewIntent.Initial>()
+            .singleOrError()
+            .toObservable()
+            .map {
+              ChapterDetailViewIntent.LoadChapter(
+                link = it.link,
+                name = it.name
+              )
+            }
+        ).distinctUntilChanged().compose(loadChapterProcessor),
         intents.ofType<ChapterDetailViewIntent.Refresh>().compose(refreshProcessor),
         intents.ofType<ChapterDetailViewIntent.Retry>().compose(retryProcessor),
-        intents.ofType<ChapterDetailViewIntent.LoadChapter>().compose(loadChapterProcessor),
         intents.ofType<ChapterDetailViewIntent.LoadNextChapter>().compose(loadNextChapterProcessor),
         intents.ofType<ChapterDetailViewIntent.LoadPrevChapter>().compose(loadPrevChapterProcessor)
       )
@@ -165,10 +157,16 @@ class ChapterDetailViewModel(
     sendEvent(ChapterDetailSingleEvent.MessageEvent(message))
 
   private companion object {
-    val intentFilter = ObservableTransformer<ChapterDetailViewIntent, ChapterDetailViewIntent> {
+    /**
+     * Only take 1 [ChapterDetailViewIntent.Initial]
+     */
+    @JvmStatic
+    private val intentFilter = ObservableTransformer<ChapterDetailViewIntent, ChapterDetailViewIntent> {
       it.publish { shared ->
         Observable.mergeArray(
-          shared.ofType<ChapterDetailViewIntent.Initial>().take(1),
+          shared
+            .ofType<ChapterDetailViewIntent.Initial>()
+            .take(1),
           shared.notOfType<ChapterDetailViewIntent.Initial, ChapterDetailViewIntent>()
         )
       }

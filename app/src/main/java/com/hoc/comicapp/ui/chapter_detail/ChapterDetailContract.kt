@@ -81,7 +81,7 @@ data class ChapterDetailViewState(
         chapterName = domain.chapterName,
         images = domain.images,
         chapters = domain.chapters.map {
-          ChapterDetailViewState.Chapter(
+          Chapter(
             name = it.chapterName,
             link = it.chapterLink
           )
