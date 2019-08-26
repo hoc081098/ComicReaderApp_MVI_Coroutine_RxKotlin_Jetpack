@@ -11,16 +11,16 @@ abstract class ComicDao {
   abstract fun getByComicLink(comicLink: String): Observable<ComicEntity>
 
   @Insert(onConflict = IGNORE)
-  abstract fun insert(comic: ComicEntity): Long
+  abstract suspend fun insert(comic: ComicEntity): Long
 
   @Update
-  abstract fun update(comic: ComicEntity)
+  abstract suspend fun update(comic: ComicEntity)
 
   @Delete
-  abstract fun delete(comic: ComicEntity)
+  abstract suspend fun delete(comic: ComicEntity)
 
   @Transaction
-  open fun upsert(comic: ComicEntity) {
+  open suspend fun upsert(comic: ComicEntity) {
     insert(comic)
       .takeIf { it == -1L }
       ?.let { update(comic) }

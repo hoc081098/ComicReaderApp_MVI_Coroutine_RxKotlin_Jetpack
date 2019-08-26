@@ -22,12 +22,12 @@ abstract class ChapterDao {
   abstract fun getComicAndChapters(): Observable<List<ComicAndChapters>>
 
   @Insert(onConflict = OnConflictStrategy.REPLACE)
-  abstract fun insert(chapters: List<ChapterEntity>)
+  abstract suspend fun insert(chapters: List<ChapterEntity>)
 
   @Delete
-  abstract fun delete(chapter: ChapterEntity)
+  abstract suspend fun delete(chapter: ChapterEntity)
 
   @Query("DELETE FROM downloaded_chapters WHERE comic_link = :comicLink")
-  abstract fun deleteAllByComicLink(comicLink: Long)
+  abstract suspend fun deleteAllByComicLink(comicLink: Long)
 
 }

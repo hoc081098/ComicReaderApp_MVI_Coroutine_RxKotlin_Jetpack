@@ -5,6 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.hoc.comicapp.data.local.dao.ChapterDao
 import com.hoc.comicapp.data.local.dao.ComicDao
 import com.hoc.comicapp.data.local.entities.ChapterEntity
 import com.hoc.comicapp.data.local.entities.ComicEntity
@@ -13,6 +14,7 @@ import com.hoc.comicapp.data.local.entities.ComicEntity
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
   abstract fun comicDao(): ComicDao
+  abstract fun chapterDao(): ChapterDao
 
   companion object {
     private const val DATABASE_NAME = "com.hoc.comicapp.db"
