@@ -46,6 +46,35 @@ class MainActivity : AppCompatActivity() {
       setBackIcon(getDrawableBy(id = R.drawable.ic_keyboard_backspace_white_24dp))
       setCloseIcon(getDrawableBy(id = R.drawable.ic_close_white_24dp))
     }
+
+    /*val workRequest = OneTimeWorkRequestBuilder<DownloadComicWorker>()
+      .setInputData(
+        workDataOf(
+          DownloadComicWorker.CHAPTER_LINK
+              to "https://ww2.mangafox.online/beloved-wife-is-not-well-behaved/episode-69-1071370787200123"
+        )
+      )
+      .setConstraints(
+        Constraints.Builder()
+          .setRequiredNetworkType(NetworkType.CONNECTED)
+          .setRequiresStorageNotLow(true)
+          .build()
+      )
+      .build()
+    WorkManager
+      .getInstance(this)
+      .enqueue(workRequest)
+
+    WorkManager
+      .getInstance(this)
+      .getWorkInfoByIdLiveData(workRequest.id)
+      .observe(this, Observer { workInfo ->
+        Timber.d("workInfo = $workInfo")
+
+        if (workInfo?.state == WorkInfo.State.SUCCEEDED) {
+          toast("Work finished!")
+        }
+      })*/
   }
 
   override fun onSupportNavigateUp() =

@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 val kotlinVersion: String by rootProject.extra
 val navVersion: String by rootProject.extra
 val coroutinesVersion: String by rootProject.extra
@@ -12,6 +14,7 @@ val rxRelayVersion: String by rootProject.extra
 val threetenabpVersion: String by rootProject.extra
 val retrofit2Version: String by rootProject.extra
 val roomVersion: String by rootProject.extra
+val workVersion: String by rootProject.extra
 
 plugins {
   id("com.android.application")
@@ -49,6 +52,12 @@ android {
   }
 }
 
+tasks.withType<KotlinCompile> {
+  kotlinOptions {
+    jvmTarget = "1.8"
+  }
+}
+
 dependencies {
   implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
@@ -79,6 +88,8 @@ dependencies {
   kapt("androidx.room:room-compiler:$roomVersion") // For Kotlin use kapt instead of annotationProcessor
   implementation("androidx.room:room-ktx:$roomVersion") // optional - Kotlin Extensions and Coroutines support for Room
   implementation("androidx.room:room-rxjava2:$roomVersion") // optional - RxJava support for Room
+
+  implementation("androidx.work:work-runtime-ktx:$workVersion") // Kotlin + coroutines
 
   implementation("org.koin:koin-androidx-viewmodel:$koinVersion")
 

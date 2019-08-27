@@ -25,6 +25,8 @@ import io.reactivex.annotations.CheckReturnValue
 import io.reactivex.annotations.SchedulerSupport
 import io.reactivex.disposables.Disposables
 import io.reactivex.subjects.Subject
+import java.io.File
+import java.io.InputStream
 
 @CheckReturnValue
 @SchedulerSupport(SchedulerSupport.NONE)
@@ -215,4 +217,25 @@ internal class MaterialSearchViewObservable(private val view: MaterialSearchView
 
     override fun onDispose() = view.setOnQueryTextListener(null)
   }
+}
+
+
+fun InputStream.copyTo(target: File, overwrite: Boolean = false, bufferSize: Int = DEFAULT_BUFFER_SIZE): File {
+  if (target.exists()) {
+    val stillExists = if (!overwrite) true else !target.delete()
+
+    if (stillExists) {
+      throw IllegalAccessException("The destination file already exists.")
+    }
+  }
+
+  target.parentFile?.mkdirs()
+
+  this.use { input ->
+    target.outputStream().use { output ->
+      input.copyTo(output, bufferSize)
+    }
+  }
+
+  return target
 }

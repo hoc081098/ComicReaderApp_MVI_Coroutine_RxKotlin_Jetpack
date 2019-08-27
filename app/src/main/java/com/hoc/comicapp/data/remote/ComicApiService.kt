@@ -4,10 +4,13 @@ import com.hoc.comicapp.data.remote.response.CategoryResponse
 import com.hoc.comicapp.data.remote.response.ChapterDetailResponse
 import com.hoc.comicapp.data.remote.response.ComicDetailResponse
 import com.hoc.comicapp.data.remote.response.ComicResponse
+import okhttp3.ResponseBody
 import retrofit2.Retrofit
 import retrofit2.create
 import retrofit2.http.GET
 import retrofit2.http.Query
+import retrofit2.http.Streaming
+import retrofit2.http.Url
 
 const val COMIC_BASE_URL = "https://comic-app-081098.herokuapp.com"
 
@@ -47,6 +50,14 @@ interface ComicApiService {
     @Query("query") query: String,
     @Query("page") page: Int?
   ): List<ComicResponse>
+
+  /**
+   *
+   */
+
+  @GET
+  @Streaming
+  suspend fun downloadFile(@Url fileUrl: String): ResponseBody
 
   /**
    *
