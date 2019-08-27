@@ -1,6 +1,7 @@
 package com.hoc.comicapp.data.local.dao
 
 import androidx.room.*
+import androidx.room.OnConflictStrategy.IGNORE
 import com.hoc.comicapp.data.local.entities.ChapterEntity
 import com.hoc.comicapp.data.local.entities.ComicAndChapters
 import io.reactivex.Observable
@@ -21,13 +22,22 @@ abstract class ChapterDao {
   @Query("SELECT * FROM downloaded_comics")
   abstract fun getComicAndChapters(): Observable<List<ComicAndChapters>>
 
-  @Insert(onConflict = OnConflictStrategy.REPLACE)
-  abstract suspend fun insert(chapters: List<ChapterEntity>)
+  @Insert(onConflict = IGNORE)
+  abstract suspend fun insert(chapter: ChapterEntity): Long
 
   @Delete
   abstract suspend fun delete(chapter: ChapterEntity)
 
+  @Update
+  abstract suspend fun update(chapter: ChapterEntity)
+
   @Query("DELETE FROM downloaded_chapters WHERE comic_link = :comicLink")
   abstract suspend fun deleteAllByComicLink(comicLink: Long)
 
+  @Transaction
+  open suspend fun upsert(chapter: ChapterEntity) {
+    insert(chapter)
+      .takeIf { it == -1L }
+      ?.let { update(chapter) }
+  }
 }
