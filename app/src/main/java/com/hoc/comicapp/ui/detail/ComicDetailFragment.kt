@@ -17,12 +17,10 @@ import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.domain.models.ComicDetail.Chapter
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.ComicDetail
-import com.hoc.comicapp.utils.isOrientationPortrait
-import com.hoc.comicapp.utils.observe
-import com.hoc.comicapp.utils.observeEvent
-import com.hoc.comicapp.utils.snack
+import com.hoc.comicapp.utils.*
 import com.jakewharton.rxbinding3.recyclerview.scrollEvents
 import com.jakewharton.rxbinding3.view.clicks
+import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
@@ -43,6 +41,8 @@ class ComicDetailFragment : Fragment() {
 
   private val compositeDisposable = CompositeDisposable()
   private val glide by lazy(NONE) { GlideApp.with(this) }
+
+  private val downloadChapterS = PublishRelay.create<Chapter>()
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -65,9 +65,19 @@ class ComicDetailFragment : Fragment() {
   }
 
   private fun onClickDownload(chapter: Chapter) {
-//TODO
-  }
+    requireActivity().showAlertDialog {
+      title("Download ${chapter.chapterName}")
+      message("This chapter will download as soon as internet is connected")
+      cancelable(true)
+      iconId(R.drawable.ic_file_download_white_24dp)
 
+      negativeAction("Cancel") { dialog, _ -> dialog.cancel() }
+      positiveAction("OK") { dialog, _ ->
+        downloadChapterS.accept(chapter)
+        dialog.dismiss()
+      }
+    }
+  }
 
   private fun onClickButtonRead(readFirst: @ParameterName(name = "readFirst") Boolean) {
     val comicDetail = viewModel.state.value.comicDetail as? ComicDetail.Comic ?: return
@@ -200,11 +210,13 @@ class ComicDetailFragment : Fragment() {
         ),
         button_retry
           .clicks()
-          .map { ComicDetailIntent.Retry(argComic.link) }
+          .map { ComicDetailIntent.Retry(argComic.link) },
 //        TODO: Refresh detail page
 //        swipe_refresh_layout
 //          .refreshes()
 //          .map { ComicDetailIntent.Refresh(argComic.link) }
+        downloadChapterS
+          .map { ComicDetailIntent.DownloadChapter(it) }
       )
     ).addTo(compositeDisposable)
   }
@@ -279,6 +291,7 @@ class ComicDetailFragment : Fragment() {
   override fun onDestroyView() {
     super.onDestroyView()
     Timber.d("ComicDetailFragment::onDestroyView")
+
     compositeDisposable.clear()
     root_detail.setTransitionListener(null)
   }

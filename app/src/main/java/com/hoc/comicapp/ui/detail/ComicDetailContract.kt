@@ -32,6 +32,7 @@ sealed class ComicDetailIntent : Intent {
 
   data class Refresh(val link: String) : ComicDetailIntent()
   data class Retry(val link: String) : ComicDetailIntent()
+  data class DownloadChapter(val chapter: ComicDetailDomain.Chapter) : ComicDetailIntent()
 }
 
 data class ComicDetailViewState(

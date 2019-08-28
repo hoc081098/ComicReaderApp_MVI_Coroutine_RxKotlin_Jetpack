@@ -8,8 +8,8 @@
         <item name="colorAccent">@color/colorAccent</item>
 
         <item name="android:textColorSecondary">#EEEEEE</item>
+        <item name="alertDialogTheme">@style/AppTheme.AlertDialog</item>
     </style>
-
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.ActionBar" />
 
@@ -20,6 +20,19 @@
         <item name="windowNoTitle">true</item>
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowBackground">@drawable/splash_background</item>
+    </style>
+
+    <style name="AppTheme.AlertDialog" parent="Theme.MaterialComponents.Dialog.Alert">
+        <item name="buttonBarPositiveButtonStyle">@style/Alert.ButtonBar</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Alert.ButtonBar</item>
+        <item name="buttonBarNeutralButtonStyle">@style/Alert.ButtonBar</item>
+    </style>
+
+    <style name="Alert.ButtonBar" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="backgroundTint">@android:color/transparent</item>
+        <item name="rippleColor">@color/colorAccent</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">14sp</item>
     </style>
 
 </resources>

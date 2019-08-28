@@ -1,25 +1,30 @@
 package com.hoc.comicapp.ui.detail
 
 import androidx.lifecycle.viewModelScope
+import androidx.work.*
 import com.hoc.comicapp.base.BaseViewModel
+import com.hoc.comicapp.domain.models.ComicDetail.Chapter
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.notOfType
+import com.hoc.comicapp.worker.DownloadComicWorker
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
-import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.Single
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.ofType
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.rx2.rxSingle
 import timber.log.Timber
 
 @ExperimentalCoroutinesApi
 class ComicDetailViewModel(
   private val comicDetailInteractor: ComicDetailInteractor,
+  private val workManager: WorkManager,
   rxSchedulerProvider: RxSchedulerProvider
 ) :
   BaseViewModel<ComicDetailIntent, ComicDetailViewState, ComicDetailSingleEvent>() {
@@ -98,9 +103,11 @@ class ComicDetailViewModel(
   }
 
   init {
-    intentS
+    val filteredIntent = intentS
       .compose(intentFilter)
       .doOnNext { Timber.d("intent=$it") }
+
+    filteredIntent
       .compose(intentToViewState)
       .doOnNext { Timber.d("view_state=$it") }
       .subscribeBy(onNext = stateS::accept)
@@ -108,6 +115,29 @@ class ComicDetailViewModel(
 
     stateS
       .subscribeBy(onNext = ::setNewState)
+      .addTo(compositeDisposable)
+
+    filteredIntent
+      .ofType<ComicDetailIntent.DownloadChapter>()
+      .map { it.chapter }
+      .flatMap { chapter ->
+        enqueueDownloadComicWorker(chapter)
+          .toObservable()
+          .onErrorReturn { chapter to it }
+      }
+      .observeOn(rxSchedulerProvider.main)
+      .subscribeBy {
+        when {
+          it.second === null -> {
+            Timber.d("Enqueue success $it")
+            sendMessageEvent("Enqueued download ${it.first.chapterName}")
+          }
+          else -> {
+            Timber.d("Enqueue error $it")
+            sendMessageEvent("Enqueued error: ${it.first.chapterName}")
+          }
+        }
+      }
       .addTo(compositeDisposable)
   }
 
@@ -123,6 +153,26 @@ class ComicDetailViewModel(
           shared.notOfType<ComicDetailIntent.Initial, ComicDetailIntent>()
         )
       }
+    }
+  }
+
+  private fun enqueueDownloadComicWorker(chapter: Chapter): Single<Pair<Chapter, Throwable?>> {
+    return rxSingle {
+      val workRequest = OneTimeWorkRequestBuilder<DownloadComicWorker>()
+        .setInputData(
+          workDataOf(
+            DownloadComicWorker.CHAPTER_LINK to chapter.chapterLink
+          )
+        )
+        .setConstraints(
+          Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .setRequiresStorageNotLow(true)
+            .build()
+        )
+        .build()
+      workManager.enqueue(workRequest).await()
+      chapter to null
     }
   }
 }

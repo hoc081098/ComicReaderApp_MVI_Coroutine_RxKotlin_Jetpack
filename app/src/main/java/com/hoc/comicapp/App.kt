@@ -4,7 +4,7 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
-import com.hoc.comicapp.koin.coroutinesDispatcherModule
+import com.hoc.comicapp.koin.appModule
 import com.hoc.comicapp.koin.dataModule
 import com.hoc.comicapp.koin.networkModule
 import com.hoc.comicapp.koin.viewModelModule
@@ -29,7 +29,7 @@ class App : Application() {
       modules(
         networkModule,
         dataModule,
-        coroutinesDispatcherModule,
+        appModule,
         viewModelModule
       )
     }
