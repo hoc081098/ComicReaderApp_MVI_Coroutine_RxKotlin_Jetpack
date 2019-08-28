@@ -1,8 +1,9 @@
 package com.hoc.comicapp.domain.repository
 
-import com.hoc.comicapp.domain.models.ComicAppError
-import com.hoc.comicapp.utils.Either
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 
 interface DownloadComicsRepository {
-  suspend fun downloadChapter(chapterLink: String): Either<ComicAppError, Unit>
+  @ExperimentalCoroutinesApi
+  fun downloadChapter(chapterLink: String): Flow<Int>
 }

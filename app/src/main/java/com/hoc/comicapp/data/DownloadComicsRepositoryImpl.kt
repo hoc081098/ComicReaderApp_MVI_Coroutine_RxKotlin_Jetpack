@@ -8,19 +8,19 @@ import com.hoc.comicapp.data.local.dao.ComicDao
 import com.hoc.comicapp.data.local.entities.ChapterEntity
 import com.hoc.comicapp.data.local.entities.ComicEntity
 import com.hoc.comicapp.data.remote.ComicApiService
-import com.hoc.comicapp.domain.models.ComicAppError
-import com.hoc.comicapp.domain.models.toError
 import com.hoc.comicapp.domain.repository.DownloadComicsRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
-import com.hoc.comicapp.utils.Either
 import com.hoc.comicapp.utils.copyTo
-import com.hoc.comicapp.utils.left
-import com.hoc.comicapp.utils.right
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import retrofit2.Retrofit
 import timber.log.Timber
 import java.io.File
 
+@ExperimentalCoroutinesApi
 class DownloadComicsRepositoryImpl(
   private val comicApiService: ComicApiService,
   private val application: Application,
@@ -30,75 +30,81 @@ class DownloadComicsRepositoryImpl(
   private val chapterDao: ChapterDao,
   private val appDatabase: AppDatabase
 ) : DownloadComicsRepository {
-  override suspend fun downloadChapter(chapterLink: String): Either<ComicAppError, Unit> {
-    return try {
-      withContext(dispatcherProvider.io) {
-        Timber.d("$tag Begin")
+  override fun downloadChapter(chapterLink: String): Flow<Int> {
+    return flow {
+      Timber.d("$tag Begin")
 
-        val chapterDetail = comicApiService.getChapterDetail(chapterLink)
+      emit(0)
 
-        val comicNameEscaped = chapterDetail.comicName.escapeFileName()
-        val chapterNameEscaped = chapterDetail.chapterName.escapeFileName()
-        Timber.d("$tag Images.size = ${chapterDetail.images.size}")
+      val chapterDetail = comicApiService.getChapterDetail(chapterLink)
+      val comicNameEscaped = chapterDetail.comicName.escapeFileName()
+      val chapterNameEscaped = chapterDetail.chapterName.escapeFileName()
+      val totalImageSize = chapterDetail.images.size
+      Timber.d("$tag Images.size = $totalImageSize")
 
-        val imagePaths = downloadAndSaveImages(
-          images = chapterDetail.images,
-          comicName = comicNameEscaped,
-          chapterName = chapterNameEscaped
-        )
+      emit(10)
 
-        val comicDetail = comicApiService.getComicDetail(chapterDetail.comicLink)
-        val thumbnailPath = downloadComicThumbnail(
-          thumbnailUrl = comicDetail.thumbnail,
-          comicName = comicNameEscaped
-        )
-
-        appDatabase.withTransaction {
-          comicDao.upsert(
-            ComicEntity(
-              authors = comicDetail.authors.map {
-                ComicEntity.Author(
-                  link = it.link,
-                  name = it.name
-                )
-              },
-              categories = comicDetail.categories.map {
-                ComicEntity.Category(
-                  link = it.link,
-                  name = it.name
-                )
-              },
-              lastUpdated = comicDetail.lastUpdated,
-              comicLink = comicDetail.link,
-              shortenedContent = comicDetail.shortenedContent,
-              thumbnail = thumbnailPath,
-              title = comicDetail.title,
-              view = comicDetail.view
-            )
-          )
-
-          val currentIndex = comicDetail.chapters.indexOfFirst { it.chapterLink == chapterLink }
-          val currentChapter = comicDetail.chapters[currentIndex]
-
-          chapterDao.upsert(
-            ChapterEntity(
-              chapterLink = chapterLink,
-              view = currentChapter.view,
-              comicLink = comicDetail.link,
-              images = imagePaths,
-              time = currentChapter.time,
-              chapterName = chapterDetail.chapterName,
-              order = comicDetail.chapters.size - currentIndex
-            )
-          )
-        }
-
-        Timber.d("$tag Images = $imagePaths")
-        Unit.right()
+      var imagePaths = emptyList<String>()
+      downloadAndSaveImages(
+        images = chapterDetail.images,
+        comicName = comicNameEscaped,
+        chapterName = chapterNameEscaped
+      ).collect {
+        val progress = (10 + (it.size.toFloat() / totalImageSize) * 80).toInt()
+        emit(progress)
+        imagePaths = it
       }
-    } catch (throwable: Throwable) {
-      throwable.toError(retrofit).left()
-    }
+
+      val comicDetail = comicApiService.getComicDetail(chapterDetail.comicLink)
+      val thumbnailPath = downloadComicThumbnail(
+        thumbnailUrl = comicDetail.thumbnail,
+        comicName = comicNameEscaped
+      )
+
+      appDatabase.withTransaction {
+        comicDao.upsert(
+          ComicEntity(
+            authors = comicDetail.authors.map {
+              ComicEntity.Author(
+                link = it.link,
+                name = it.name
+              )
+            },
+            categories = comicDetail.categories.map {
+              ComicEntity.Category(
+                link = it.link,
+                name = it.name
+              )
+            },
+            lastUpdated = comicDetail.lastUpdated,
+            comicLink = comicDetail.link,
+            shortenedContent = comicDetail.shortenedContent,
+            thumbnail = thumbnailPath,
+            title = comicDetail.title,
+            view = comicDetail.view
+          )
+        )
+
+        val currentIndex = comicDetail.chapters.indexOfFirst { it.chapterLink == chapterLink }
+        val currentChapter = comicDetail.chapters[currentIndex]
+
+        chapterDao.upsert(
+          ChapterEntity(
+            chapterLink = chapterLink,
+            view = currentChapter.view,
+            comicLink = comicDetail.link,
+            images = imagePaths,
+            time = currentChapter.time,
+            chapterName = chapterDetail.chapterName,
+            order = comicDetail.chapters.size - currentIndex
+          )
+        )
+      }
+
+      emit(100)
+
+      Timber.d("$tag Images = $imagePaths")
+    }.flowOn(dispatcherProvider.io)
   }
 
   private suspend fun downloadComicThumbnail(thumbnailUrl: String, comicName: String): String {
@@ -121,40 +127,47 @@ class DownloadComicsRepositoryImpl(
     }
   }
 
-  private suspend fun downloadAndSaveImages(
+  /**
+   * @return a [Flow] emit downloaded image paths
+   */
+  private fun downloadAndSaveImages(
     images: List<String>,
     comicName: String,
     chapterName: String
-  ): List<String> {
-    val imagePaths = mutableListOf<String>()
+  ): Flow<List<String>> {
+    return flow {
+      val imagePaths = mutableListOf<String>()
 
-    for ((index, imageUrl) in images.withIndex()) {
-      Timber.d("$tag Begin $index $imageUrl")
+      for ((index, imageUrl) in images.withIndex()) {
+        Timber.d("$tag Begin $index $imageUrl")
 
-      comicApiService
-        .downloadFile(imageUrl)
-        .use { responseBody ->
-          val imagePath = listOf(
-            "images",
-            comicName,
-            chapterName,
-            "images_$index.png"
-          ).joinToString(File.separator)
+        comicApiService
+          .downloadFile(imageUrl)
+          .use { responseBody ->
+            val imagePath = listOf(
+              "images",
+              comicName,
+              chapterName,
+              "images_$index.png"
+            ).joinToString(File.separator)
 
-          responseBody.byteStream().copyTo(
-            File(
-              application.filesDir.path,
-              imagePath
-            ),
-            overwrite = true
-          )
+            responseBody.byteStream().copyTo(
+              File(
+                application.filesDir.path,
+                imagePath
+              ),
+              overwrite = true
+            )
 
-          imagePaths += imagePath
-          Timber.d("$tag Done $index $imageUrl -> $imagePath")
-        }
+            imagePaths += imagePath
+
+            emit(imagePaths)
+            Timber.d("$tag Done $index $imageUrl -> $imagePath")
+          }
+      }
+
+      emit(imagePaths)
     }
-
-    return imagePaths
   }
 
   private fun String.escapeFileName(): String {

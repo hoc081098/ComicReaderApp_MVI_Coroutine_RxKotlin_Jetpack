@@ -5,13 +5,18 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
+import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import androidx.navigation.ui.*
+import androidx.work.*
 import com.hoc.comicapp.R
 import com.hoc.comicapp.utils.getColorBy
 import com.hoc.comicapp.utils.getDrawableBy
 import com.hoc.comicapp.utils.textChanges
+import com.hoc.comicapp.utils.toast
+import com.hoc.comicapp.worker.DownloadComicWorker
 import kotlinx.android.synthetic.main.activity_main.*
+import timber.log.Timber
 import kotlin.LazyThreadSafetyMode.NONE
 
 class MainActivity : AppCompatActivity() {
@@ -47,7 +52,11 @@ class MainActivity : AppCompatActivity() {
       setCloseIcon(getDrawableBy(id = R.drawable.ic_close_white_24dp))
     }
 
-    /*val workRequest = OneTimeWorkRequestBuilder<DownloadComicWorker>()
+    testWorker()
+  }
+
+  private fun testWorker() {
+    val workRequest = OneTimeWorkRequestBuilder<DownloadComicWorker>()
       .setInputData(
         workDataOf(
           DownloadComicWorker.CHAPTER_LINK
@@ -61,12 +70,12 @@ class MainActivity : AppCompatActivity() {
           .build()
       )
       .build()
-    WorkManager
-      .getInstance(this)
-      .enqueue(workRequest)
 
-    WorkManager
-      .getInstance(this)
+    val workManager = WorkManager.getInstance(this)
+
+    workManager.enqueue(workRequest)
+
+    workManager
       .getWorkInfoByIdLiveData(workRequest.id)
       .observe(this, Observer { workInfo ->
         Timber.d("workInfo = $workInfo")
@@ -74,7 +83,7 @@ class MainActivity : AppCompatActivity() {
         if (workInfo?.state == WorkInfo.State.SUCCEEDED) {
           toast("Work finished!")
         }
-      })*/
+      })
   }
 
   override fun onSupportNavigateUp() =

@@ -1,16 +1,22 @@
 package com.hoc.comicapp.worker
 
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
-import com.hoc.comicapp.domain.models.getMessage
+import com.hoc.comicapp.R
+import com.hoc.comicapp.activity.SplashActivity
 import com.hoc.comicapp.domain.repository.DownloadComicsRepository
-import com.hoc.comicapp.utils.fold
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 
+@ExperimentalCoroutinesApi
 class DownloadComicWorker(
   appContext: Context,
   params: WorkerParameters
@@ -18,23 +24,48 @@ class DownloadComicWorker(
   private val downloadComicsRepo by inject<DownloadComicsRepository>()
 
   override suspend fun doWork(): Result {
-    return coroutineScope {
-      when (val chapterLink = inputData.getString(CHAPTER_LINK)) {
-        null -> Result.failure(workDataOf(ERROR to "chapterUrl is null"))
-        else -> {
-          downloadComicsRepo
-            .downloadChapter(chapterLink)
-            .fold(
-              left = { Result.failure(workDataOf(ERROR to "Error: ${it.getMessage()}")) },
-              right = { Result.success() }
-            )
-        }
+    val chapterLink =
+      inputData.getString(CHAPTER_LINK) ?: return Result.failure(workDataOf(ERROR to "chapterUrl is null"))
+
+    val notificationBuilder =
+      NotificationCompat.Builder(applicationContext, applicationContext.getString(R.string.notification_channel_id))
+        .setSmallIcon(R.mipmap.ic_launcher_round)
+        .setContentTitle("Download chapter")
+        .setContentText("Downloading...")
+        .setProgress(100, 0, false)
+        .setAutoCancel(true)
+        .setOngoing(true)
+        .setDefaults(NotificationCompat.DEFAULT_ALL)
+        .setWhen(System.currentTimeMillis())
+        .setContentIntent(
+          PendingIntent.getActivity(
+            applicationContext,
+            0,
+            Intent(applicationContext, SplashActivity::class.java),
+            PendingIntent.FLAG_UPDATE_CURRENT
+          )
+        )
+    val notificationManagerCompat = NotificationManagerCompat.from(applicationContext)
+    notificationManagerCompat.notify(1, notificationBuilder.build())
+
+    downloadComicsRepo
+      .downloadChapter(chapterLink)
+      .collect {
+        notificationBuilder.setProgress(100, it, false)
+        notificationManagerCompat.notify(1, notificationBuilder.build())
+        setProgress(workDataOf(PROGRESS to it))
       }
-    }
+    notificationBuilder
+      .setContentText("Download complete")
+      .setProgress(0, 0, false)
+    notificationManagerCompat.notify(1, notificationBuilder.build())
+
+    return Result.success()
   }
 
   companion object {
     const val ERROR = "ERROR"
     const val CHAPTER_LINK = "CHAPTER_LINK"
+    const val PROGRESS = "PROGRESS"
   }
 }
