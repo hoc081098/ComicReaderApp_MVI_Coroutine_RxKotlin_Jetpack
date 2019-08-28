@@ -69,13 +69,25 @@
             android:id="@+id/image_eye"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
             android:padding="4dp"
             app:layout_constraintBottom_toBottomOf="@+id/text_chapter_view"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/image_download"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/text_chapter_view"
             app:layout_constraintTop_toTopOf="@+id/text_chapter_view"
             app:srcCompat="@drawable/ic_remove_red_eye_white_24dp" />
+
+        <ImageView
+            android:id="@+id/image_download"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:padding="4dp"
+            app:layout_constraintBottom_toBottomOf="@+id/image_eye"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/image_eye"
+            app:srcCompat="@drawable/ic_file_download_white_24dp" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

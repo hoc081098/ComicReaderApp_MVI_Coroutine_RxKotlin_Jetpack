@@ -36,7 +36,8 @@ object ChapterDiffUtilItemCallback : DiffUtil.ItemCallback<ChapterItem>() {
 
 class ChapterAdapter(
   private val onClickChapter: (Chapter) -> Unit,
-  private val onClickReadButton: (readFirst: Boolean) -> Unit
+  private val onClickReadButton: (readFirst: Boolean) -> Unit,
+  private val onClickDownload: (Chapter) -> Unit
 ) :
   ListAdapter<ChapterItem, ChapterAdapter.VH>(ChapterDiffUtilItemCallback) {
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
@@ -61,22 +62,28 @@ class ChapterAdapter(
     abstract fun bind(item: ChapterItem)
   }
 
-  private inner class ChapterVH(itemView: View) : ChapterAdapter.VH(itemView) {
+  private inner class ChapterVH(itemView: View) : ChapterAdapter.VH(itemView), View.OnClickListener {
     private val textChapterTitle = itemView.text_chapter_title!!
     private val textChapterTime = itemView.text_chapter_time!!
     private val textChapterView = itemView.text_chapter_view!!
+    private val imageDownload = itemView.image_download!!
 
     init {
-      itemView.setOnClickListener {
-        val position = adapterPosition
-        if (position != NO_POSITION) {
-          val item = getItem(position)
-          if (item is ChapterItem.Chapter) {
-            onClickChapter(item.chapter)
-          }
-        }
+      itemView.setOnClickListener(this)
+      imageDownload.setOnClickListener(this)
+    }
+
+    override fun onClick(v: View) {
+      val position = adapterPosition
+      if (position == NO_POSITION) return
+      val item = getItem(position) as? ChapterItem.Chapter ?: return
+
+      when {
+        v.id == R.id.image_download -> onClickDownload(item.chapter)
+        else -> onClickChapter(item.chapter)
       }
     }
+
 
     override fun bind(item: ChapterItem) {
       if (item !is ChapterItem.Chapter) return

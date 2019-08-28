@@ -55,10 +55,19 @@ class ComicDetailFragment : Fragment() {
     super.onViewCreated(view, savedInstanceState)
     Timber.d("ComicDetailFragment::onViewCreated")
 
-    val chapterAdapter = ChapterAdapter(::onClickChapter, ::onClickButtonRead)
+    val chapterAdapter = ChapterAdapter(
+      ::onClickChapter,
+      ::onClickButtonRead,
+      ::onClickDownload
+    )
     initView(chapterAdapter)
     bind(chapterAdapter)
   }
+
+  private fun onClickDownload(chapter: Chapter) {
+//TODO
+  }
+
 
   private fun onClickButtonRead(readFirst: @ParameterName(name = "readFirst") Boolean) {
     val comicDetail = viewModel.state.value.comicDetail as? ComicDetail.Comic ?: return
