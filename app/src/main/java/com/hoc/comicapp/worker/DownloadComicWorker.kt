@@ -35,7 +35,6 @@ class DownloadComicWorker(
         .setProgress(100, 0, false)
         .setAutoCancel(true)
         .setOngoing(true)
-        .setDefaults(NotificationCompat.DEFAULT_ALL)
         .setWhen(System.currentTimeMillis())
         .setContentIntent(
           PendingIntent.getActivity(
@@ -51,14 +50,24 @@ class DownloadComicWorker(
     downloadComicsRepo
       .downloadChapter(chapterLink)
       .collect {
-        notificationBuilder.setProgress(100, it, false)
-        notificationManagerCompat.notify(1, notificationBuilder.build())
+        notificationManagerCompat.notify(
+          1,
+          notificationBuilder
+            .setProgress(100, it, false)
+            .setContentText("$it %")
+            .build()
+        )
+
         setProgress(workDataOf(PROGRESS to it))
       }
-    notificationBuilder
-      .setContentText("Download complete")
-      .setProgress(0, 0, false)
-    notificationManagerCompat.notify(1, notificationBuilder.build())
+
+    notificationManagerCompat.notify(
+      1,
+      notificationBuilder
+        .setContentText("Download complete")
+        .setProgress(0, 0, false)
+        .build()
+    )
 
     return Result.success()
   }

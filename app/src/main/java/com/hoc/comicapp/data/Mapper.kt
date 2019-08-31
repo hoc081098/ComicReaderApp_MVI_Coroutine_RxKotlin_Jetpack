@@ -1,15 +1,50 @@
 package com.hoc.comicapp.data
 
+import com.hoc.comicapp.data.local.entities.ComicAndChapters
 import com.hoc.comicapp.data.remote.response.CategoryResponse
 import com.hoc.comicapp.data.remote.response.ChapterDetailResponse
 import com.hoc.comicapp.data.remote.response.ComicDetailResponse
 import com.hoc.comicapp.data.remote.response.ComicResponse
-import com.hoc.comicapp.domain.models.Category
-import com.hoc.comicapp.domain.models.ChapterDetail
-import com.hoc.comicapp.domain.models.Comic
-import com.hoc.comicapp.domain.models.ComicDetail
+import com.hoc.comicapp.domain.models.*
 
 object Mapper {
+  fun entityToDomain(entity: ComicAndChapters): DownloadedComic {
+    val comic = entity.comic
+    val chapters = entity.chapters
+
+    return DownloadedComic(
+      title = comic.title,
+      view = comic.view,
+      comicLink = comic.comicLink,
+      lastUpdated = comic.lastUpdated,
+      shortenedContent = comic.shortenedContent,
+      thumbnail = comic.thumbnail,
+      authors = comic.authors.map {
+        DownloadedComic.Author(
+          name = it.name,
+          link = it.link
+        )
+      },
+      categories = comic.categories.map {
+        DownloadedComic.Category(
+          name = it.name,
+          link = it.link
+        )
+      },
+      chapters = chapters.map {
+        DownloadedChapter(
+          chapterName = it.chapterName,
+          comicLink = it.comicLink,
+          view = it.view,
+          downloadedAt = it.downloadedAt,
+          chapterLink = it.chapterLink,
+          images = it.images,
+          time = it.time
+        )
+      }
+    )
+  }
+
   fun responseToDomainModel(response: ComicResponse): Comic {
     return Comic(
       title = response.title,

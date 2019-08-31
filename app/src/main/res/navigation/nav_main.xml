@@ -85,5 +85,9 @@
             app:nullable="false" />
 
     </fragment>
+    <fragment
+        android:id="@+id/downloadedComicsFragment"
+        android:name="com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsFragment"
+        android:label="Downloaded comics" />
 
 </navigation>

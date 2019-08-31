@@ -8,10 +8,17 @@ import com.hoc.comicapp.data.local.dao.ComicDao
 import com.hoc.comicapp.data.local.entities.ChapterEntity
 import com.hoc.comicapp.data.local.entities.ComicEntity
 import com.hoc.comicapp.data.remote.ComicApiService
+import com.hoc.comicapp.domain.models.ComicAppError
+import com.hoc.comicapp.domain.models.DownloadedComic
+import com.hoc.comicapp.domain.models.toError
 import com.hoc.comicapp.domain.repository.DownloadComicsRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
+import com.hoc.comicapp.domain.thread.RxSchedulerProvider
+import com.hoc.comicapp.utils.Either
 import com.hoc.comicapp.utils.copyTo
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.hoc.comicapp.utils.left
+import com.hoc.comicapp.utils.right
+import io.reactivex.Observable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
@@ -19,17 +26,28 @@ import kotlinx.coroutines.flow.flowOn
 import retrofit2.Retrofit
 import timber.log.Timber
 import java.io.File
+import java.util.*
 
-@ExperimentalCoroutinesApi
 class DownloadComicsRepositoryImpl(
   private val comicApiService: ComicApiService,
   private val application: Application,
   private val dispatcherProvider: CoroutinesDispatcherProvider,
-  private val retrofit: Retrofit,
   private val comicDao: ComicDao,
   private val chapterDao: ChapterDao,
-  private val appDatabase: AppDatabase
+  private val appDatabase: AppDatabase,
+  private val rxSchedulerProvider: RxSchedulerProvider,
+  private val retrofit: Retrofit
 ) : DownloadComicsRepository {
+  override fun downloadedComics(): Observable<Either<ComicAppError, List<DownloadedComic>>> {
+    return chapterDao
+      .getComicAndChapters()
+      .map<Either<ComicAppError, List<DownloadedComic>>> { list ->
+        list.map { Mapper.entityToDomain(it) }.right()
+      }
+      .onErrorReturn { t: Throwable -> t.toError(retrofit).left() }
+      .subscribeOn(rxSchedulerProvider.io)
+  }
+
   override fun downloadChapter(chapterLink: String): Flow<Int> {
     return flow {
       Timber.d("$tag Begin")
@@ -96,7 +114,8 @@ class DownloadComicsRepositoryImpl(
             images = imagePaths,
             time = currentChapter.time,
             chapterName = chapterDetail.chapterName,
-            order = comicDetail.chapters.size - currentIndex
+            order = comicDetail.chapters.size - currentIndex,
+            downloadedAt = Date()
           )
         )
       }

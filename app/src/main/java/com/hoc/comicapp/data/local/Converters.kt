@@ -6,6 +6,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import org.koin.core.KoinComponent
 import org.koin.core.inject
+import java.util.*
 
 /**
  * Type converters to allow Room to reference complex data types.
@@ -67,4 +68,13 @@ class Converters : KoinComponent {
     return adapterListCategory.fromJson(s) ?: emptyList()
   }
 
+  @TypeConverter
+  fun dateToLong(date: Date): Long {
+    return date.time
+  }
+
+  @TypeConverter
+  fun longToDate(time: Long): Date {
+    return Date(time)
+  }
 }

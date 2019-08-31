@@ -1,6 +1,7 @@
 package com.hoc.comicapp.data.local.entities
 
 import androidx.room.*
+import java.util.*
 
 @Entity(
   tableName = "downloaded_chapters",
@@ -36,5 +37,8 @@ data class ChapterEntity(
   val comicLink: String,
 
   @ColumnInfo(name = "order")
-  val order: Int
+  val order: Int,
+
+  @ColumnInfo(name = "downloaded_at")
+  val downloadedAt: Date
 )
