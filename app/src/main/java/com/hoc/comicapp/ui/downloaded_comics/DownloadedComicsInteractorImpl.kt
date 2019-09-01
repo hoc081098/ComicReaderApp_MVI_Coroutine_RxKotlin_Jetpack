@@ -21,17 +21,16 @@ class DownloadedComicsInteractorImpl(
           left = { PartialChange.Error(it) },
           right = { list ->
             PartialChange.Data(
-              comics = list.map {
+              comics = list.map { comic ->
                 ComicItem(
-                  title = it.title,
-                  comicLink = it.comicLink,
-                  view = it.view,
-                  thumbnail = File(application.filesDir, it.thumbnail),
-                  lastUpdated = it.lastUpdated,
-                  chapters = it.chapters.map {
+                  title = comic.title,
+                  comicLink = comic.comicLink,
+                  view = comic.view,
+                  thumbnail = File(application.filesDir, comic.thumbnail),
+                  chapters = comic.chapters.map {
                     ChapterItem(
                       chapterName = it.chapterName,
-                      time = it.time
+                      downloadedAt = it.downloadedAt
                     )
                   }
                 )

@@ -20,7 +20,7 @@
 
         <ImageView
             android:id="@+id/image_comic"
-            android:layout_width="128dp"
+            android:layout_width="120dp"
             android:layout_height="0dp"
             android:scaleType="fitXY"
             app:layout_constraintDimensionRatio="H,2:3"
@@ -36,7 +36,6 @@
             android:layout_marginStart="8dp"
             android:ellipsize="end"
             android:fontFamily="@font/google_sans"
-            android:lines="2"
             android:maxLines="2"
             android:padding="2dp"
             android:textAlignment="center"

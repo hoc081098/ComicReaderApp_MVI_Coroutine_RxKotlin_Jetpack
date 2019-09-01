@@ -11,6 +11,8 @@ import com.hoc.comicapp.R
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.ViewState.ComicItem
 import com.hoc.comicapp.utils.inflate
 import kotlinx.android.synthetic.main.item_recycler_downloaded_comics.view.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 object DownloadedComicItemDiffUtilItemCallback : DiffUtil.ItemCallback<ComicItem>() {
   override fun areItemsTheSame(oldItem: ComicItem, newItem: ComicItem) = oldItem.comicLink == newItem.comicLink
@@ -21,6 +23,8 @@ class DownloadedComicsAdapter(
   private val glide: GlideRequests
 ) :
   ListAdapter<ComicItem, DownloadedComicsAdapter.VH>(DownloadedComicItemDiffUtilItemCallback) {
+  private val dateFormatter = SimpleDateFormat("hh:mm, dd/MM/yyyy", Locale.getDefault())
+
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
     VH(parent inflate R.layout.item_recycler_downloaded_comics)
 
@@ -41,7 +45,7 @@ class DownloadedComicsAdapter(
     private val textChapterName1 = itemView.text_chapter_name_1!!
     private val textChapterTime1 = itemView.text_chapter_time_1!!
 
-    val textChapters = listOf(
+    private val textChapters = listOf(
       textChapterName1 to textChapterTime1,
       textChapterName2 to textChapterTime2,
       textChapterName3 to textChapterTime3
@@ -62,7 +66,7 @@ class DownloadedComicsAdapter(
         .zip(comic.chapters)
         .forEach { (textViews, chapter) ->
           textViews.first.text = chapter.chapterName
-          textViews.second.text = chapter.time
+          textViews.second.text = dateFormatter.format(chapter.downloadedAt)
         }
     }
   }
