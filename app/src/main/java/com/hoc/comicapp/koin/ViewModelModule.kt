@@ -19,6 +19,7 @@ import com.hoc.comicapp.ui.search_comic.SearchComicInteractor
 import com.hoc.comicapp.ui.search_comic.SearchComicInteractorImpl
 import com.hoc.comicapp.ui.search_comic.SearchComicViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.koin.android.ext.koin.androidApplication
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -36,7 +37,7 @@ val viewModelModule = module {
 
   single { ChapterDetailInteractorImpl(get(), get()) } bind ChapterDetailInteractor::class
 
-  single { DownloadedComicsInteractorImpl(get()) } bind DownloadedComicsContract.Interactor::class
+  single { DownloadedComicsInteractorImpl(get(), androidApplication()) } bind DownloadedComicsContract.Interactor::class
 
   viewModel { HomeViewModel(get(), get()) }
 

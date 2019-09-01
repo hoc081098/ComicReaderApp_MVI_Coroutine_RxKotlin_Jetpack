@@ -3,6 +3,7 @@ package com.hoc.comicapp.ui.downloaded_comics
 import com.hoc.comicapp.base.Intent
 import com.hoc.comicapp.domain.models.ComicAppError
 import io.reactivex.Observable
+import java.io.File
 import com.hoc.comicapp.base.SingleEvent as BaseSingleEvent
 import com.hoc.comicapp.base.ViewState as BaseViewState
 
@@ -17,7 +18,7 @@ interface DownloadedComicsContract {
 
   data class ViewState(
     val isLoading: Boolean,
-    val error: ComicAppError?,
+    val error: String?,
     val comics: List<ComicItem>
   ) : BaseViewState {
 
@@ -32,7 +33,17 @@ interface DownloadedComicsContract {
     }
 
     data class ComicItem(
-      val title: String
+      val title: String,
+      val lastUpdated: String,
+      val comicLink: String,
+      val thumbnail: File,
+      val view: String,
+      val chapters: List<ChapterItem>
+    )
+
+    data class ChapterItem(
+      val chapterName: String,
+      val time: String
     )
   }
 

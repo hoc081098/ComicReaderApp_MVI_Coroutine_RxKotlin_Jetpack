@@ -5,28 +5,65 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.hoc.comicapp.GlideRequests
+import com.hoc.comicapp.R
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.ViewState.ComicItem
+import com.hoc.comicapp.utils.inflate
+import kotlinx.android.synthetic.main.item_recycler_downloaded_comics.view.*
 
 object DownloadedComicItemDiffUtilItemCallback : DiffUtil.ItemCallback<ComicItem>() {
-  override fun areItemsTheSame(oldItem: ComicItem, newItem: ComicItem): Boolean {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-  }
-
-  override fun areContentsTheSame(oldItem: ComicItem, newItem: ComicItem): Boolean {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-  }
-
+  override fun areItemsTheSame(oldItem: ComicItem, newItem: ComicItem) = oldItem.comicLink == newItem.comicLink
+  override fun areContentsTheSame(oldItem: ComicItem, newItem: ComicItem) = oldItem == newItem
 }
 
-class DownloadedComicsAdapter :
+class DownloadedComicsAdapter(
+  private val glide: GlideRequests
+) :
   ListAdapter<ComicItem, DownloadedComicsAdapter.VH>(DownloadedComicItemDiffUtilItemCallback) {
-  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-  }
+  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+    VH(parent inflate R.layout.item_recycler_downloaded_comics)
 
-  override fun onBindViewHolder(holder: VH, position: Int) {
-  }
+  override fun onBindViewHolder(holder: VH, position: Int) = holder.bind(getItem(position))
 
-  class VH(itemView: View) : RecyclerView.ViewHolder(itemView) {
+  inner class VH(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    private val imageComic = itemView.image_comic!!
 
+    private val textComicName = itemView.text_comic_name!!
+    private val textView = itemView.text_view!!
+
+    private val textChapterName3 = itemView.text_chapter_name_3!!
+    private val textChapterTime3 = itemView.text_chapter_time_3!!
+
+    private val textChapterName2 = itemView.text_chapter_name_2!!
+    private val textChapterTime2 = itemView.text_chapter_time_2!!
+
+    private val textChapterName1 = itemView.text_chapter_name_1!!
+    private val textChapterTime1 = itemView.text_chapter_time_1!!
+
+    val textChapters = listOf(
+      textChapterName1 to textChapterTime1,
+      textChapterName2 to textChapterTime2,
+      textChapterName3 to textChapterTime3
+    )
+
+    fun bind(comic: ComicItem) {
+      glide
+        .load(comic.thumbnail)
+        .thumbnail(0.5f)
+        .fitCenter()
+        .transition(DrawableTransitionOptions.withCrossFade())
+        .into(imageComic)
+
+      textComicName.text = comic.title
+      textView.text = comic.view
+
+      textChapters
+        .zip(comic.chapters)
+        .forEach { (textViews, chapter) ->
+          textViews.first.text = chapter.chapterName
+          textViews.second.text = chapter.time
+        }
+    }
   }
 }

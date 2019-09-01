@@ -69,7 +69,7 @@ class DownloadedComicsViewModel(
         is PartialChange.Error -> {
           vs.copy(
             isLoading = false,
-            error = change.error
+            error = change.error.getMessage()
           )
         }
         PartialChange.Loading -> {
