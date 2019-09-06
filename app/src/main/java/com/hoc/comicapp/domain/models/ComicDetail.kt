@@ -1,8 +1,5 @@
 package com.hoc.comicapp.domain.models
 
-import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
-
 data class ComicDetail(
   val authors: List<Author>,
   val categories: List<Category>,
@@ -15,13 +12,12 @@ data class ComicDetail(
   val title: String, // Solo Leveling
   val view: String // 76228
 ) {
-  @Parcelize
   data class Chapter(
     val chapterLink: String, // https://ww2.mangafox.online/solo-leveling/chapter-0-275968490470920
     val chapterName: String, // Chapter 0
     val time: String, // December 2018
     val view: String // 9592
-  ) : Parcelable
+  )
 
   data class Category(
     val link: String, // https://ww2.mangafox.online/category/webtoons

@@ -6,6 +6,7 @@ import com.hoc.comicapp.data.local.AppDatabase
 import com.hoc.comicapp.data.local.dao.ChapterDao
 import com.hoc.comicapp.data.local.dao.ComicDao
 import com.hoc.comicapp.data.local.entities.ChapterEntity
+import com.hoc.comicapp.data.local.entities.ComicAndChapters
 import com.hoc.comicapp.data.local.entities.ComicEntity
 import com.hoc.comicapp.data.remote.ComicApiService
 import com.hoc.comicapp.domain.models.ComicAppError
@@ -42,7 +43,16 @@ class DownloadComicsRepositoryImpl(
     return chapterDao
       .getComicAndChapters()
       .map<Either<ComicAppError, List<DownloadedComic>>> { list ->
-        list.map { Mapper.entityToDomain(it) }.right()
+        list.map { item ->
+          Mapper.entityToDomain(
+            ComicAndChapters().also { copied ->
+              copied.comic = item.comic
+              copied.chapters = item.chapters
+                .sortedByDescending { it.downloadedAt }
+                .take(3)
+            }
+          )
+        }.right()
       }
       .onErrorReturn { t: Throwable -> t.toError(retrofit).left() }
       .subscribeOn(rxSchedulerProvider.io)

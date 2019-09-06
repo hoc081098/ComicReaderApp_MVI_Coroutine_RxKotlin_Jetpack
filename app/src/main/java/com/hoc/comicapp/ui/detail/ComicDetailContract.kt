@@ -1,11 +1,13 @@
 package com.hoc.comicapp.ui.detail
 
+import android.os.Parcelable
 import com.hoc.comicapp.base.Intent
 import com.hoc.comicapp.base.SingleEvent
 import com.hoc.comicapp.base.ViewState
 import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.getMessage
 import io.reactivex.Observable
+import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.CoroutineScope
 import com.hoc.comicapp.domain.models.ComicDetail as ComicDetailDomain
 
@@ -52,13 +54,42 @@ data class ComicDetailViewState(
   }
 
   sealed class ComicDetail {
-    data class Comic(val comicDetail: ComicDetailDomain) : ComicDetail()
+    data class Comic(
+      val authors: List<Author>,
+      val categories: List<Category>,
+      val chapters: List<Chapter>,
+      val lastUpdated: String,
+      val link: String,
+      val relatedComics: List<Comic>,
+      val shortenedContent: String,
+      val thumbnail: String,
+      val title: String,
+      val view: String
+    ) : ComicDetail()
 
     data class InitialComic(
       val link: String,
       val thumbnail: String,
       val title: String
     ) : ComicDetail()
+
+    @Parcelize
+    data class Chapter(
+      val chapterLink: String,
+      val chapterName: String,
+      val time: String,
+      val view: String
+    ) : Parcelable
+
+    data class Category(
+      val link: String,
+      val name: String
+    )
+
+    data class Author(
+      val link: String,
+      val name: String
+    )
   }
 }
 
