@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.LinearSmoothScroller
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
-import com.hoc.comicapp.domain.models.ComicDetail.Chapter
+import com.hoc.comicapp.ui.detail.ComicDetailViewState.Chapter
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.ComicDetail
 import com.hoc.comicapp.utils.*
 import com.jakewharton.rxbinding3.recyclerview.scrollEvents
@@ -80,9 +80,9 @@ class ComicDetailFragment : Fragment() {
   }
 
   private fun onClickButtonRead(readFirst: @ParameterName(name = "readFirst") Boolean) {
-    val comicDetail = viewModel.state.value.comicDetail as? ComicDetail.Comic ?: return
+    val comicDetail = viewModel.state.value.comicDetail as? ComicDetail.Detail ?: return
     val chapter =
-      comicDetail.comicDetail.chapters.let { if (readFirst) it.lastOrNull() else it.firstOrNull() }
+      comicDetail.chapters.let { if (readFirst) it.lastOrNull() else it.firstOrNull() }
     if (chapter === null) {
       view?.snack("Chapters list is empty!")
     } else {
@@ -248,15 +248,12 @@ class ComicDetailFragment : Fragment() {
 //    }
 
     when (val detail = viewState.comicDetail ?: return) {
-      is ComicDetail.Comic -> {
-        // actual comic detail state
-        val comicDetail = detail.comicDetail
-
-        text_title.text = comicDetail.title
+      is ComicDetail.Detail -> {
+        text_title.text = detail.title
 
         val list = mutableListOf(
-          "Last updated" to comicDetail.lastUpdated,
-          "View" to comicDetail.view
+          "Last updated" to detail.lastUpdated,
+          "View" to detail.view
         )
         text_last_updated_status_view.text = HtmlCompat.fromHtml(
           list.joinToString("<br>") { "\u2022 <b>${it.first}:</b> ${it.second}" },
@@ -264,19 +261,19 @@ class ComicDetailFragment : Fragment() {
         )
 
         glide
-          .load(comicDetail.thumbnail)
+          .load(detail.thumbnail)
           .fitCenter()
           .transition(DrawableTransitionOptions.withCrossFade())
           .into(image_thumbnail)
 
         chapterAdapter.submitList(listOf(
-          ChapterItem.Header(
-            categories = comicDetail.categories,
-            shortenedContent = comicDetail.shortenedContent
+          ChapterAdapterItem.Header(
+            categories = detail.categories,
+            shortenedContent = detail.shortenedContent
           )
-        ) + comicDetail.chapters.map { ChapterItem.Chapter(it) })
+        ) + detail.chapters.map { ChapterAdapterItem.Chapter(it) })
       }
-      is ComicDetail.InitialComic -> {
+      is ComicDetail.Initial -> {
         text_title.text = detail.title
 
         glide

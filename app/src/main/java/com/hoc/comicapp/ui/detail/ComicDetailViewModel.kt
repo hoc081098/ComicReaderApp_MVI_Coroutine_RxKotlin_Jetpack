@@ -3,9 +3,9 @@ package com.hoc.comicapp.ui.detail
 import androidx.lifecycle.viewModelScope
 import androidx.work.*
 import com.hoc.comicapp.base.BaseViewModel
-import com.hoc.comicapp.domain.models.ComicDetail.Chapter
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
+import com.hoc.comicapp.ui.detail.ComicDetailViewState.Chapter
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.notOfType
 import com.hoc.comicapp.worker.DownloadComicWorker
@@ -40,7 +40,6 @@ class ComicDetailViewModel(
     ObservableTransformer<ComicDetailIntent.Initial, ComicDetailPartialChange> { intent ->
       intent.flatMap {
         comicDetailInteractor.getComicDetail(
-          viewModelScope,
           it.link,
           it.title,
           it.thumbnail
@@ -57,7 +56,7 @@ class ComicDetailViewModel(
   private val retryProcessor =
     ObservableTransformer<ComicDetailIntent.Retry, ComicDetailPartialChange> { intent ->
       intent.flatMap {
-        comicDetailInteractor.getComicDetail(viewModelScope, it.link)
+        comicDetailInteractor.getComicDetail(it.link)
           .doOnNext {
             val message =
               (it as? ComicDetailPartialChange.InitialRetryPartialChange.Error ?: return@doOnNext)
@@ -73,10 +72,7 @@ class ComicDetailViewModel(
       intentObservable
         .exhaustMap { intent ->
           comicDetailInteractor
-            .refreshPartialChanges(
-              coroutineScope = viewModelScope,
-              link = intent.link
-            )
+            .refreshPartialChanges(intent.link)
             .doOnNext {
               sendMessageEvent(
                 when (it) {

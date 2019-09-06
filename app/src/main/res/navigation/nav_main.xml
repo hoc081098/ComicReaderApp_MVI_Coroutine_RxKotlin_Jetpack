@@ -81,7 +81,7 @@
 
         <argument
             android:name="chapter"
-            app:argType="com.hoc.comicapp.domain.models.ComicDetail$Chapter"
+            app:argType="com.hoc.comicapp.ui.detail.ComicDetailViewState$Chapter"
             app:nullable="false" />
 
     </fragment>

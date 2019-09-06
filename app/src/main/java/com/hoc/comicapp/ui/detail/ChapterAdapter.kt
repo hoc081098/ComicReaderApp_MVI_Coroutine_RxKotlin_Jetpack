@@ -8,38 +8,37 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.NO_POSITION
 import com.google.android.material.chip.Chip
 import com.hoc.comicapp.R
-import com.hoc.comicapp.domain.models.ComicDetail
-import com.hoc.comicapp.domain.models.ComicDetail.Chapter
+import com.hoc.comicapp.ui.detail.ComicDetailViewState.Category
 import com.hoc.comicapp.utils.inflate
 import com.hoc.comicapp.utils.toast
 import kotlinx.android.synthetic.main.item_recycler_chapter.view.*
 import kotlinx.android.synthetic.main.item_recycler_detail.view.*
 
-sealed class ChapterItem {
+sealed class ChapterAdapterItem {
   data class Header(
     val shortenedContent: String,
-    val categories: List<ComicDetail.Category>
-  ) : ChapterItem()
+    val categories: List<Category>
+  ) : ChapterAdapterItem()
 
-  data class Chapter(val chapter: ComicDetail.Chapter) : ChapterItem()
+  data class Chapter(val chapter: ComicDetailViewState.Chapter) : ChapterAdapterItem()
 }
 
-object ChapterDiffUtilItemCallback : DiffUtil.ItemCallback<ChapterItem>() {
-  override fun areItemsTheSame(oldItem: ChapterItem, newItem: ChapterItem) = when {
-    oldItem is ChapterItem.Header && newItem is ChapterItem.Header -> true
-    oldItem is ChapterItem.Chapter && newItem is ChapterItem.Chapter -> oldItem.chapter.chapterLink == newItem.chapter.chapterLink
+object ChapterDiffUtilItemCallback : DiffUtil.ItemCallback<ChapterAdapterItem>() {
+  override fun areItemsTheSame(oldItem: ChapterAdapterItem, newItem: ChapterAdapterItem) = when {
+    oldItem is ChapterAdapterItem.Header && newItem is ChapterAdapterItem.Header -> true
+    oldItem is ChapterAdapterItem.Chapter && newItem is ChapterAdapterItem.Chapter -> oldItem.chapter.chapterLink == newItem.chapter.chapterLink
     else -> oldItem == newItem
   }
 
-  override fun areContentsTheSame(oldItem: ChapterItem, newItem: ChapterItem) = oldItem == newItem
+  override fun areContentsTheSame(oldItem: ChapterAdapterItem, newItem: ChapterAdapterItem) = oldItem == newItem
 }
 
 class ChapterAdapter(
-  private val onClickChapter: (Chapter) -> Unit,
+  private val onClickChapter: (ComicDetailViewState.Chapter) -> Unit,
   private val onClickReadButton: (readFirst: Boolean) -> Unit,
-  private val onClickDownload: (Chapter) -> Unit
+  private val onClickDownload: (ComicDetailViewState.Chapter) -> Unit
 ) :
-  ListAdapter<ChapterItem, ChapterAdapter.VH>(ChapterDiffUtilItemCallback) {
+  ListAdapter<ChapterAdapterItem, ChapterAdapter.VH>(ChapterDiffUtilItemCallback) {
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
     val view = parent inflate viewType
     return when (viewType) {
@@ -51,15 +50,15 @@ class ChapterAdapter(
 
   override fun getItemViewType(position: Int): Int {
     return when (getItem(position)) {
-      is ChapterItem.Header -> R.layout.item_recycler_detail
-      is ChapterItem.Chapter -> R.layout.item_recycler_chapter
+      is ChapterAdapterItem.Header -> R.layout.item_recycler_detail
+      is ChapterAdapterItem.Chapter -> R.layout.item_recycler_chapter
     }
   }
 
   override fun onBindViewHolder(holder: VH, position: Int) = holder.bind(getItem(position))
 
   abstract class VH(itemView: View) : RecyclerView.ViewHolder(itemView) {
-    abstract fun bind(item: ChapterItem)
+    abstract fun bind(item: ChapterAdapterItem)
   }
 
   private inner class ChapterVH(itemView: View) : ChapterAdapter.VH(itemView), View.OnClickListener {
@@ -76,7 +75,7 @@ class ChapterAdapter(
     override fun onClick(v: View) {
       val position = adapterPosition
       if (position == NO_POSITION) return
-      val item = getItem(position) as? ChapterItem.Chapter ?: return
+      val item = getItem(position) as? ChapterAdapterItem.Chapter ?: return
 
       when {
         v.id == R.id.image_download -> onClickDownload(item.chapter)
@@ -85,8 +84,8 @@ class ChapterAdapter(
     }
 
 
-    override fun bind(item: ChapterItem) {
-      if (item !is ChapterItem.Chapter) return
+    override fun bind(item: ChapterAdapterItem) {
+      if (item !is ChapterAdapterItem.Chapter) return
       val chapter = item.chapter
       textChapterTitle.text = chapter.chapterName
       textChapterTime.text = chapter.time
@@ -106,8 +105,8 @@ class ChapterAdapter(
     override fun onClick(v: View) = onClickReadButton(v.id == R.id.button_read_first_chapter)
 
 
-    override fun bind(item: ChapterItem) {
-      if (item !is ChapterItem.Header) return
+    override fun bind(item: ChapterAdapterItem) {
+      if (item !is ChapterAdapterItem.Header) return
 
       textShortendedContent.text = item.shortenedContent
 
