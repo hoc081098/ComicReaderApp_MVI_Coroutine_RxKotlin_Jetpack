@@ -73,6 +73,7 @@ class DownloadComicWorker(
   }
 
   companion object {
+    const val TAG = "DOWNLOAD_CHAPTER_TAG"
     const val ERROR = "ERROR"
     const val CHAPTER_LINK = "CHAPTER_LINK"
     const val PROGRESS = "PROGRESS"

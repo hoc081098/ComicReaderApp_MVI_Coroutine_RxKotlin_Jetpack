@@ -69,13 +69,38 @@ data class ComicDetailViewState(
     ) : ComicDetail()
   }
 
+  sealed class DownloadState : Parcelable {
+    @Parcelize
+    object Downloaded : DownloadState()
+
+    @Parcelize
+    data class Downloading(val progress: Float) : DownloadState()
+
+    @Parcelize
+    object NotYetDownload : DownloadState()
+
+    @Parcelize
+    object Loading : DownloadState()
+  }
+
   @Parcelize
   data class Chapter(
     val chapterLink: String,
     val chapterName: String,
     val time: String,
-    val view: String
-  ) : Parcelable
+    val view: String,
+    val downloadState: DownloadState = DownloadState.Loading
+  ) : Parcelable {
+
+    fun isSameExceptDownloadState(other: Chapter): Boolean {
+      if (this === other) return true
+      if (chapterLink != other.chapterLink) return false
+      if (chapterName != other.chapterName) return false
+      if (time != other.time) return false
+      if (view != other.view) return false
+      return true
+    }
+  }
 
   data class Category(
     val link: String,

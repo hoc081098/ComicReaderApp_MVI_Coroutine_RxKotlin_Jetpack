@@ -1,6 +1,8 @@
 package com.hoc.comicapp.data
 
 import android.app.Application
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.map
 import androidx.room.withTransaction
 import com.hoc.comicapp.data.local.AppDatabase
 import com.hoc.comicapp.data.local.dao.ChapterDao
@@ -10,6 +12,7 @@ import com.hoc.comicapp.data.local.entities.ComicAndChapters
 import com.hoc.comicapp.data.local.entities.ComicEntity
 import com.hoc.comicapp.data.remote.ComicApiService
 import com.hoc.comicapp.domain.models.ComicAppError
+import com.hoc.comicapp.domain.models.DownloadedChapter
 import com.hoc.comicapp.domain.models.DownloadedComic
 import com.hoc.comicapp.domain.models.toError
 import com.hoc.comicapp.domain.repository.DownloadComicsRepository
@@ -39,6 +42,12 @@ class DownloadComicsRepositoryImpl(
   private val rxSchedulerProvider: RxSchedulerProvider,
   private val retrofit: Retrofit
 ) : DownloadComicsRepository {
+  override fun downloadedChapters(): LiveData<List<DownloadedChapter>> {
+    return chapterDao.getAllChapters().map {
+      it.map { Mapper.entityToDomain(it) }
+    }
+  }
+
   override fun downloadedComics(): Observable<Either<ComicAppError, List<DownloadedComic>>> {
     return chapterDao
       .getComicAndChapters()

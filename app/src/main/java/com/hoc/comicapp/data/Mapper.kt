@@ -1,5 +1,6 @@
 package com.hoc.comicapp.data
 
+import com.hoc.comicapp.data.local.entities.ChapterEntity
 import com.hoc.comicapp.data.local.entities.ComicAndChapters
 import com.hoc.comicapp.data.remote.response.CategoryResponse
 import com.hoc.comicapp.data.remote.response.ChapterDetailResponse
@@ -8,6 +9,18 @@ import com.hoc.comicapp.data.remote.response.ComicResponse
 import com.hoc.comicapp.domain.models.*
 
 object Mapper {
+  fun entityToDomain(entity: ChapterEntity): DownloadedChapter {
+    return DownloadedChapter(
+      chapterName = entity.chapterName,
+      view = entity.view,
+      time = entity.time,
+      chapterLink = entity.chapterLink,
+      images = entity.images,
+      downloadedAt = entity.downloadedAt,
+      comicLink = entity.comicLink
+    )
+  }
+
   fun entityToDomain(entity: ComicAndChapters): DownloadedComic {
     val comic = entity.comic
     val chapters = entity.chapters

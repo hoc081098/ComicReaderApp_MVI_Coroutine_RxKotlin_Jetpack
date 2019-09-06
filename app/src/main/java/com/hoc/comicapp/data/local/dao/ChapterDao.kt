@@ -1,5 +1,6 @@
 package com.hoc.comicapp.data.local.dao
 
+import androidx.lifecycle.LiveData
 import androidx.room.*
 import androidx.room.OnConflictStrategy.IGNORE
 import com.hoc.comicapp.data.local.entities.ChapterEntity
@@ -21,6 +22,10 @@ abstract class ChapterDao {
   @Transaction
   @Query("SELECT * FROM downloaded_comics")
   abstract fun getComicAndChapters(): Observable<List<ComicAndChapters>>
+
+  @Transaction
+  @Query("SELECT * FROM downloaded_chapters")
+  abstract fun getAllChapters(): LiveData<List<ChapterEntity>>
 
   @Insert(onConflict = IGNORE)
   abstract suspend fun insert(chapter: ChapterEntity): Long

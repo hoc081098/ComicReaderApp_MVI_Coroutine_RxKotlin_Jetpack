@@ -48,6 +48,23 @@
             tools:text="5 phút trước" />
 
         <TextView
+            android:id="@+id/text_chapter_downloading_progress"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:fontFamily="@font/google_sans"
+            android:lines="1"
+            android:maxLines="1"
+            android:textAlignment="center"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/image_download"
+            app:layout_constraintEnd_toEndOf="@id/image_download"
+            app:layout_constraintStart_toStartOf="@id/image_download"
+            app:layout_constraintTop_toTopOf="@id/image_download"
+            tools:text="20 %"
+            tools:visibility="visible" />
+
+        <TextView
             android:id="@+id/text_chapter_view"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

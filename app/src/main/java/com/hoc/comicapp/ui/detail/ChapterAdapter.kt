@@ -2,6 +2,7 @@ package com.hoc.comicapp.ui.detail
 
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -9,10 +10,14 @@ import androidx.recyclerview.widget.RecyclerView.NO_POSITION
 import com.google.android.material.chip.Chip
 import com.hoc.comicapp.R
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.Category
+import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.*
 import com.hoc.comicapp.utils.inflate
 import com.hoc.comicapp.utils.toast
 import kotlinx.android.synthetic.main.item_recycler_chapter.view.*
 import kotlinx.android.synthetic.main.item_recycler_detail.view.*
+import timber.log.Timber
+import java.math.RoundingMode
+import java.text.DecimalFormat
 
 sealed class ChapterAdapterItem {
   data class Header(
@@ -31,6 +36,15 @@ object ChapterDiffUtilItemCallback : DiffUtil.ItemCallback<ChapterAdapterItem>()
   }
 
   override fun areContentsTheSame(oldItem: ChapterAdapterItem, newItem: ChapterAdapterItem) = oldItem == newItem
+
+  override fun getChangePayload(oldItem: ChapterAdapterItem, newItem: ChapterAdapterItem): Any? {
+    return when {
+      oldItem is ChapterAdapterItem.Chapter &&
+          newItem is ChapterAdapterItem.Chapter &&
+          newItem.chapter.isSameExceptDownloadState(oldItem.chapter) -> newItem.chapter.downloadState
+      else -> null
+    }
+  }
 }
 
 class ChapterAdapter(
@@ -39,6 +53,8 @@ class ChapterAdapter(
   private val onClickDownload: (ComicDetailViewState.Chapter) -> Unit
 ) :
   ListAdapter<ChapterAdapterItem, ChapterAdapter.VH>(ChapterDiffUtilItemCallback) {
+  private val decimalFormat = DecimalFormat("#.##").apply { roundingMode = RoundingMode.CEILING }
+
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
     val view = parent inflate viewType
     return when (viewType) {
@@ -57,6 +73,16 @@ class ChapterAdapter(
 
   override fun onBindViewHolder(holder: VH, position: Int) = holder.bind(getItem(position))
 
+  override fun onBindViewHolder(holder: VH, position: Int, payloads: MutableList<Any>) {
+    val downloadState =
+      payloads.firstOrNull() as? ComicDetailViewState.DownloadState ?: return onBindViewHolder(holder, position)
+
+    if (holder is ChapterVH) {
+      Timber.d("Bind...$downloadState")
+      holder.updateDownloadState(downloadState)
+    }
+  }
+
   abstract class VH(itemView: View) : RecyclerView.ViewHolder(itemView) {
     abstract fun bind(item: ChapterAdapterItem)
   }
@@ -66,6 +92,7 @@ class ChapterAdapter(
     private val textChapterTime = itemView.text_chapter_time!!
     private val textChapterView = itemView.text_chapter_view!!
     private val imageDownload = itemView.image_download!!
+    private val textProgress = itemView.text_chapter_downloading_progress!!
 
     init {
       itemView.setOnClickListener(this)
@@ -78,7 +105,11 @@ class ChapterAdapter(
       val item = getItem(position) as? ChapterAdapterItem.Chapter ?: return
 
       when {
-        v.id == R.id.image_download -> onClickDownload(item.chapter)
+        v.id == R.id.image_download -> {
+          if (item.chapter.downloadState == NotYetDownload) {
+            onClickDownload(item.chapter)
+          }
+        }
         else -> onClickChapter(item.chapter)
       }
     }
@@ -89,7 +120,30 @@ class ChapterAdapter(
       val chapter = item.chapter
       textChapterTitle.text = chapter.chapterName
       textChapterTime.text = chapter.time
-      textChapterView.text = chapter.view
+      textChapterView.text = "${chapter.view}\u00A0"
+      updateDownloadState(chapter.downloadState)
+    }
+
+    fun updateDownloadState(downloadState: ComicDetailViewState.DownloadState) {
+      when (downloadState) {
+        Downloaded -> {
+          imageDownload.setImageResource(R.drawable.ic_file_download_accent_24dp)
+          textProgress.isVisible = false
+        }
+        is Downloading -> {
+          imageDownload.setImageDrawable(null)
+          textProgress.isVisible = true
+          textProgress.text = "${decimalFormat.format(downloadState.progress)}%"
+        }
+        NotYetDownload -> {
+          imageDownload.setImageResource(R.drawable.ic_file_download_white_24dp)
+          textProgress.isVisible = false
+        }
+        Loading -> {
+          imageDownload.setImageDrawable(null)
+          textProgress.isVisible = false
+        }
+      }
     }
   }
 

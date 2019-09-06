@@ -41,7 +41,7 @@ val viewModelModule = module {
 
   viewModel { HomeViewModel(get(), get()) }
 
-  viewModel { ComicDetailViewModel(get(), get(), get()) }
+  viewModel { ComicDetailViewModel(get(), get(), get(), get()) }
 
   viewModel { SearchComicViewModel(get(), get()) }
 

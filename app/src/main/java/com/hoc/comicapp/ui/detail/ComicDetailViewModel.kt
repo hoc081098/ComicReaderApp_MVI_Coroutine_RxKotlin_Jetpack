@@ -1,16 +1,22 @@
 package com.hoc.comicapp.ui.detail
 
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import androidx.work.*
 import com.hoc.comicapp.base.BaseViewModel
+import com.hoc.comicapp.domain.models.DownloadedChapter
 import com.hoc.comicapp.domain.models.getMessage
+import com.hoc.comicapp.domain.repository.DownloadComicsRepository
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.Chapter
+import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState
+import com.hoc.comicapp.utils.combineLatest
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.notOfType
 import com.hoc.comicapp.worker.DownloadComicWorker
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
+import com.shopify.livedataktx.MutableLiveDataKtx
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
 import io.reactivex.Single
@@ -25,9 +31,15 @@ import timber.log.Timber
 class ComicDetailViewModel(
   private val comicDetailInteractor: ComicDetailInteractor,
   private val workManager: WorkManager,
+  downloadComicsRepository: DownloadComicsRepository,
   rxSchedulerProvider: RxSchedulerProvider
 ) :
-  BaseViewModel<ComicDetailIntent, ComicDetailViewState, ComicDetailSingleEvent>() {
+  BaseViewModel<ComicDetailIntent, ComicDetailViewState, ComicDetailSingleEvent>(), Observer<ComicDetailViewState> {
+  override fun onChanged(t: ComicDetailViewState?) {
+    setNewState(t ?: return)
+  }
+
+  private val _stateD: LiveData<ComicDetailViewState>
   override val initialState = ComicDetailViewState.initialState()
 
   private val intentS = PublishRelay.create<ComicDetailIntent>()
@@ -103,16 +115,52 @@ class ComicDetailViewModel(
       .compose(intentFilter)
       .doOnNext { Timber.d("intent=$it") }
 
+    // intent -> behavior subject
     filteredIntent
       .compose(intentToViewState)
       .doOnNext { Timber.d("view_state=$it") }
       .subscribeBy(onNext = stateS::accept)
       .addTo(compositeDisposable)
 
+    // behavior subject -> live data
+    val stateD = MutableLiveDataKtx<ComicDetailViewState>().apply { value = initialState }
     stateS
-      .subscribeBy(onNext = ::setNewState)
+      .subscribeBy(onNext = stateD::setValue)
       .addTo(compositeDisposable)
 
+    // combine live datas -> state live data
+    val workInfosD = workManager.getWorkInfosByTagLiveData(DownloadComicWorker.TAG)
+    val downloadedChaptersD = downloadComicsRepository.downloadedChapters()
+
+    _stateD = stateD.combineLatest(workInfosD, downloadedChaptersD) { state, workInfos, downloadedChapters ->
+      val comicDetail = state.comicDetail as? ComicDetailViewState.ComicDetail.Detail
+        ?: return@combineLatest state
+
+      val newChapters = comicDetail.chapters.map {
+        it.copy(
+          downloadState = getDownloadState(
+            workInfos,
+            it,
+            downloadedChapters
+          )
+        )
+      }
+
+      state.copy(comicDetail = comicDetail.copy(chapters = newChapters))
+    }.apply { observeForever(this@ComicDetailViewModel) }
+
+    processDownloadChapterIntent(filteredIntent, rxSchedulerProvider)
+  }
+
+  override fun onCleared() {
+    super.onCleared()
+    _stateD.removeObserver(this)
+  }
+
+  private fun processDownloadChapterIntent(
+    filteredIntent: Observable<ComicDetailIntent>,
+    rxSchedulerProvider: RxSchedulerProvider
+  ) {
     filteredIntent
       .ofType<ComicDetailIntent.DownloadChapter>()
       .map { it.chapter }
@@ -135,6 +183,25 @@ class ComicDetailViewModel(
         }
       }
       .addTo(compositeDisposable)
+  }
+
+  private fun getDownloadState(
+    workInfos: List<WorkInfo>,
+    chapter: Chapter,
+    downloadedChapters: List<DownloadedChapter>
+  ): DownloadState {
+    return when {
+      downloadedChapters.any { it.chapterLink == chapter.chapterLink } -> DownloadState.Downloaded
+      else -> when (val workInfo = workInfos.find { chapter.chapterLink in it.tags }) {
+        null -> DownloadState.NotYetDownload
+        else -> DownloadState.Downloading(
+          workInfo.progress.getFloat(
+            DownloadComicWorker.PROGRESS,
+            0f
+          )
+        )
+      }
+    }
   }
 
   private fun sendMessageEvent(message: String) {
@@ -166,6 +233,8 @@ class ComicDetailViewModel(
             .setRequiresStorageNotLow(true)
             .build()
         )
+        .addTag(DownloadComicWorker.TAG)
+        .addTag(chapter.chapterLink)
         .build()
       workManager.enqueue(workRequest).await()
       chapter to null

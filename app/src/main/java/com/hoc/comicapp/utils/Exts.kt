@@ -11,6 +11,7 @@ import androidx.annotation.*
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.Observer
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding3.InitialValueObservable
@@ -238,4 +239,45 @@ fun InputStream.copyTo(target: File, overwrite: Boolean = false, bufferSize: Int
   }
 
   return target
+}
+
+fun <A, B, C, R> LiveData<A>.combineLatest(b: LiveData<B>, c: LiveData<C>, combine: (A, B, C) -> R): LiveData<R> {
+  return MediatorLiveData<R>().apply {
+    var lastA: A? = null
+    var lastB: B? = null
+    var lastC: C? = null
+
+    addSource(this@combineLatest) {
+      if (it == null && value != null) value = null
+      lastA = it
+
+      lastA?.let { a ->
+        lastB?.let { b ->
+          lastC?.let { value = combine(a, b, it) }
+        }
+      }
+    }
+
+    addSource(b) {
+      if (it == null && value != null) value = null
+      lastB = it
+
+      lastA?.let { a ->
+        lastB?.let { b ->
+          lastC?.let { value = combine(a, b, it) }
+        }
+      }
+    }
+
+    addSource(c) {
+      if (it == null && value != null) value = null
+      lastC = it
+
+      lastA?.let { a ->
+        lastB?.let { b ->
+          lastC?.let { value = combine(a, b, it) }
+        }
+      }
+    }
+  }
 }
