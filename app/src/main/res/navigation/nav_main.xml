@@ -81,9 +81,13 @@
 
         <argument
             android:name="chapter"
-            app:argType="com.hoc.comicapp.domain.models.ComicDetail$Chapter"
+            app:argType="com.hoc.comicapp.ui.detail.ComicDetailViewState$Chapter"
             app:nullable="false" />
 
     </fragment>
+    <fragment
+        android:id="@+id/downloadedComicsFragment"
+        android:name="com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsFragment"
+        android:label="Downloaded comics" />
 
 </navigation>

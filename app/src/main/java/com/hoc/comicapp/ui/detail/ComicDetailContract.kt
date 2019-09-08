@@ -1,26 +1,23 @@
 package com.hoc.comicapp.ui.detail
 
+import android.os.Parcelable
 import com.hoc.comicapp.base.Intent
 import com.hoc.comicapp.base.SingleEvent
 import com.hoc.comicapp.base.ViewState
 import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.getMessage
+import com.hoc.comicapp.ui.detail.ComicDetailViewState.ComicDetail
 import io.reactivex.Observable
-import kotlinx.coroutines.CoroutineScope
-import com.hoc.comicapp.domain.models.ComicDetail as ComicDetailDomain
+import kotlinx.android.parcel.Parcelize
 
 interface ComicDetailInteractor {
   fun getComicDetail(
-    coroutineScope: CoroutineScope,
     link: String,
     name: String? = null,
     thumbnail: String? = null
   ): Observable<ComicDetailPartialChange>
 
-  fun refreshPartialChanges(
-    coroutineScope: CoroutineScope,
-    link: String
-  ): Observable<ComicDetailPartialChange>
+  fun refreshPartialChanges(link: String): Observable<ComicDetailPartialChange>
 }
 
 sealed class ComicDetailIntent : Intent {
@@ -32,6 +29,8 @@ sealed class ComicDetailIntent : Intent {
 
   data class Refresh(val link: String) : ComicDetailIntent()
   data class Retry(val link: String) : ComicDetailIntent()
+  data class DownloadChapter(val chapter: ComicDetailViewState.Chapter) : ComicDetailIntent()
+  data class DeleteChapter(val chapter: ComicDetailViewState.Chapter) : ComicDetailIntent()
 }
 
 data class ComicDetailViewState(
@@ -51,13 +50,80 @@ data class ComicDetailViewState(
   }
 
   sealed class ComicDetail {
-    data class Comic(val comicDetail: ComicDetailDomain) : ComicDetail()
+    data class Detail(
+      val authors: List<Author>,
+      val categories: List<Category>,
+      val chapters: List<Chapter>,
+      val lastUpdated: String,
+      val link: String,
+      val relatedComics: List<Comic>,
+      val shortenedContent: String,
+      val thumbnail: String,
+      val title: String,
+      val view: String
+    ) : ComicDetail()
 
-    data class InitialComic(
+    data class Initial(
       val link: String,
       val thumbnail: String,
       val title: String
     ) : ComicDetail()
+  }
+
+  sealed class DownloadState : Parcelable {
+    @Parcelize
+    object Downloaded : DownloadState()
+
+    @Parcelize
+    data class Downloading(val progress: Int) : DownloadState()
+
+    @Parcelize
+    object NotYetDownload : DownloadState()
+
+    @Parcelize
+    object Loading : DownloadState()
+  }
+
+  @Parcelize
+  data class Chapter(
+    val chapterLink: String,
+    val chapterName: String,
+    val time: String,
+    val view: String,
+    val downloadState: DownloadState = DownloadState.Loading
+  ) : Parcelable {
+
+    fun isSameExceptDownloadState(other: Chapter): Boolean {
+      if (this === other) return true
+      if (chapterLink != other.chapterLink) return false
+      if (chapterName != other.chapterName) return false
+      if (time != other.time) return false
+      if (view != other.view) return false
+      return true
+    }
+  }
+
+  data class Category(
+    val link: String,
+    val name: String
+  )
+
+  data class Author(
+    val link: String,
+    val name: String
+  )
+
+  data class Comic(
+    val lastChapters: List<LastChapter>,
+    val link: String,
+    val thumbnail: String, val title: String,
+    val view: String
+  ) {
+    data class LastChapter(
+      val chapterLink: String,
+      val chapterName: String,
+      val time: String
+    )
   }
 }
 
@@ -92,10 +158,10 @@ sealed class ComicDetailPartialChange {
       }
     }
 
-    data class InitialData(val initialComic: ComicDetailViewState.ComicDetail.InitialComic) :
+    data class InitialData(val initialComic: ComicDetail.Initial) :
       InitialRetryPartialChange()
 
-    data class Data(val comicDetail: ComicDetailViewState.ComicDetail.Comic) : InitialRetryPartialChange()
+    data class Data(val comicDetail: ComicDetail.Detail) : InitialRetryPartialChange()
     data class Error(val error: ComicAppError) : InitialRetryPartialChange()
     object Loading : InitialRetryPartialChange()
   }
@@ -119,7 +185,7 @@ sealed class ComicDetailPartialChange {
       }
     }
 
-    data class Success(val comicDetail: ComicDetailViewState.ComicDetail.Comic) : RefreshPartialChange()
+    data class Success(val comicDetail: ComicDetail.Detail) : RefreshPartialChange()
     data class Error(val error: ComicAppError) : RefreshPartialChange()
     object Loading : RefreshPartialChange()
   }

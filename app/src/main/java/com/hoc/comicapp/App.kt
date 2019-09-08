@@ -1,7 +1,10 @@
 package com.hoc.comicapp
 
 import android.app.Application
-import com.hoc.comicapp.koin.coroutinesDispatcherModule
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.os.Build
+import com.hoc.comicapp.koin.appModule
 import com.hoc.comicapp.koin.dataModule
 import com.hoc.comicapp.koin.networkModule
 import com.hoc.comicapp.koin.viewModelModule
@@ -26,12 +29,26 @@ class App : Application() {
       modules(
         networkModule,
         dataModule,
-        coroutinesDispatcherModule,
+        appModule,
         viewModelModule
       )
     }
     if (BuildConfig.DEBUG) {
       Timber.plant(Timber.DebugTree())
+    }
+
+    createNotificationChannel()
+  }
+
+  private fun createNotificationChannel() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      val channel = NotificationChannel(
+        getString(R.string.notification_channel_id),
+        getString(R.string.notification_channel_name),
+        NotificationManager.IMPORTANCE_DEFAULT
+      ).apply { description = getString(R.string.notification_channel_description) }
+
+      getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
     }
   }
 }

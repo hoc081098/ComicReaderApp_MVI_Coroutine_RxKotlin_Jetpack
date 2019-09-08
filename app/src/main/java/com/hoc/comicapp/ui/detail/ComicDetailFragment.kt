@@ -15,14 +15,14 @@ import androidx.recyclerview.widget.LinearSmoothScroller
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
-import com.hoc.comicapp.domain.models.ComicDetail.Chapter
+import com.hoc.comicapp.ui.detail.ComicDetailViewState.Chapter
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.ComicDetail
-import com.hoc.comicapp.utils.isOrientationPortrait
-import com.hoc.comicapp.utils.observe
-import com.hoc.comicapp.utils.observeEvent
-import com.hoc.comicapp.utils.snack
+import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.Downloaded
+import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.NotYetDownload
+import com.hoc.comicapp.utils.*
 import com.jakewharton.rxbinding3.recyclerview.scrollEvents
 import com.jakewharton.rxbinding3.view.clicks
+import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
@@ -44,6 +44,9 @@ class ComicDetailFragment : Fragment() {
   private val compositeDisposable = CompositeDisposable()
   private val glide by lazy(NONE) { GlideApp.with(this) }
 
+  private val downloadChapterS = PublishRelay.create<Chapter>()
+  private val deleteChapterS = PublishRelay.create<Chapter>()
+
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
@@ -55,15 +58,52 @@ class ComicDetailFragment : Fragment() {
     super.onViewCreated(view, savedInstanceState)
     Timber.d("ComicDetailFragment::onViewCreated")
 
-    val chapterAdapter = ChapterAdapter(::onClickChapter, ::onClickButtonRead)
+    val chapterAdapter = ChapterAdapter(
+      ::onClickButtonRead,
+      ::onClickChapter
+    )
     initView(chapterAdapter)
     bind(chapterAdapter)
   }
 
+  private fun onClickDownload(chapter: Chapter) {
+    //TODO: cancel worker???
+    when (chapter.downloadState) {
+      Downloaded -> {
+        requireActivity().showAlertDialog {
+          title("Delete from downloads")
+          message("This chapter won't be available to read offline")
+          cancelable(true)
+          iconId(R.drawable.ic_delete_white_24dp)
+
+          negativeAction("Cancel") { dialog, _ -> dialog.cancel() }
+          positiveAction("OK") { dialog, _ ->
+            deleteChapterS.accept(chapter)
+            dialog.dismiss()
+          }
+        }
+      }
+      NotYetDownload -> {
+        requireActivity().showAlertDialog {
+          title("Download ${chapter.chapterName}")
+          message("This chapter will download as soon as internet is connected")
+          cancelable(true)
+          iconId(R.drawable.ic_file_download_white_24dp)
+
+          negativeAction("Cancel") { dialog, _ -> dialog.cancel() }
+          positiveAction("OK") { dialog, _ ->
+            downloadChapterS.accept(chapter)
+            dialog.dismiss()
+          }
+        }
+      }
+    }
+  }
+
   private fun onClickButtonRead(readFirst: @ParameterName(name = "readFirst") Boolean) {
-    val comicDetail = viewModel.state.value.comicDetail as? ComicDetail.Comic ?: return
+    val comicDetail = viewModel.state.value.comicDetail as? ComicDetail.Detail ?: return
     val chapter =
-      comicDetail.comicDetail.chapters.let { if (readFirst) it.lastOrNull() else it.firstOrNull() }
+      comicDetail.chapters.let { if (readFirst) it.lastOrNull() else it.firstOrNull() }
     if (chapter === null) {
       view?.snack("Chapters list is empty!")
     } else {
@@ -191,11 +231,15 @@ class ComicDetailFragment : Fragment() {
         ),
         button_retry
           .clicks()
-          .map { ComicDetailIntent.Retry(argComic.link) }
+          .map { ComicDetailIntent.Retry(argComic.link) },
 //        TODO: Refresh detail page
 //        swipe_refresh_layout
 //          .refreshes()
 //          .map { ComicDetailIntent.Refresh(argComic.link) }
+        downloadChapterS
+          .map { ComicDetailIntent.DownloadChapter(it) },
+        deleteChapterS
+          .map { ComicDetailIntent.DeleteChapter(it) }
       )
     ).addTo(compositeDisposable)
   }
@@ -227,15 +271,12 @@ class ComicDetailFragment : Fragment() {
 //    }
 
     when (val detail = viewState.comicDetail ?: return) {
-      is ComicDetail.Comic -> {
-        // actual comic detail state
-        val comicDetail = detail.comicDetail
-
-        text_title.text = comicDetail.title
+      is ComicDetail.Detail -> {
+        text_title.text = detail.title
 
         val list = mutableListOf(
-          "Last updated" to comicDetail.lastUpdated,
-          "View" to comicDetail.view
+          "Last updated" to detail.lastUpdated,
+          "View" to detail.view
         )
         text_last_updated_status_view.text = HtmlCompat.fromHtml(
           list.joinToString("<br>") { "\u2022 <b>${it.first}:</b> ${it.second}" },
@@ -243,19 +284,19 @@ class ComicDetailFragment : Fragment() {
         )
 
         glide
-          .load(comicDetail.thumbnail)
+          .load(detail.thumbnail)
           .fitCenter()
           .transition(DrawableTransitionOptions.withCrossFade())
           .into(image_thumbnail)
 
         chapterAdapter.submitList(listOf(
-          ChapterItem.Header(
-            categories = comicDetail.categories,
-            shortenedContent = comicDetail.shortenedContent
+          ChapterAdapterItem.Header(
+            categories = detail.categories,
+            shortenedContent = detail.shortenedContent
           )
-        ) + comicDetail.chapters.map { ChapterItem.Chapter(it) })
+        ) + detail.chapters.map { ChapterAdapterItem.Chapter(it) })
       }
-      is ComicDetail.InitialComic -> {
+      is ComicDetail.Initial -> {
         text_title.text = detail.title
 
         glide
@@ -270,10 +311,15 @@ class ComicDetailFragment : Fragment() {
   override fun onDestroyView() {
     super.onDestroyView()
     Timber.d("ComicDetailFragment::onDestroyView")
+
     compositeDisposable.clear()
     root_detail.setTransitionListener(null)
   }
 
-  private fun onClickChapter(chapter: Chapter) =
-    findNavController().navigate(toChapterDetail(chapter))
+  private fun onClickChapter(chapter: Chapter, view: View) {
+    when (view.id) {
+      R.id.image_download -> onClickDownload(chapter)
+      else -> findNavController().navigate(toChapterDetail(chapter))
+    }
+  }
 }

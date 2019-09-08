@@ -1,10 +1,10 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-  val kotlinVersion by extra("1.3.40")
+  val kotlinVersion by extra("1.3.50")
   val navVersion by extra("2.1.0-alpha06")
   extra.run {
-    set("coroutinesVersion", "1.3.0-M2")
+    set("coroutinesVersion", "1.3.0")
     set("lifecycleVersion", "2.2.0-alpha01")
     set("pagingVersion", "2.1.0")
     set("koinVersion", "2.0.0")
@@ -15,6 +15,8 @@ buildscript {
     set("rxRelayVersion", "2.1.0")
     set("threetenabpVersion", "1.1.2")
     set("retrofit2Version", "2.6.0")
+    set("roomVersion", "2.1.0-alpha06")
+    set("workVersion", "2.3.0-alpha01")
   }
 
 
