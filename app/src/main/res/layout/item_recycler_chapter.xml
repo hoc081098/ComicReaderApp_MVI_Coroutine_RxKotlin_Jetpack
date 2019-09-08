@@ -49,19 +49,21 @@
 
         <TextView
             android:id="@+id/text_chapter_downloading_progress"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:fontFamily="@font/google_sans"
             android:lines="1"
             android:maxLines="1"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
             android:textAlignment="center"
+            android:textColor="@color/colorAccent"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@id/image_download"
             app:layout_constraintEnd_toEndOf="@id/image_download"
-            app:layout_constraintStart_toStartOf="@id/image_download"
             app:layout_constraintTop_toTopOf="@id/image_download"
-            tools:text="20 %"
+            tools:text="20%"
             tools:visibility="visible" />
 
         <TextView
@@ -89,8 +91,7 @@
             android:layout_marginEnd="8dp"
             android:padding="4dp"
             app:layout_constraintBottom_toBottomOf="@+id/text_chapter_view"
-            app:layout_constraintEnd_toStartOf="@+id/image_download"
-            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintEnd_toEndOf="@+id/barrier2"
             app:layout_constraintStart_toEndOf="@+id/text_chapter_view"
             app:layout_constraintTop_toTopOf="@+id/text_chapter_view"
             app:srcCompat="@drawable/ic_remove_red_eye_white_24dp" />
@@ -108,6 +109,13 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/image_eye"
             app:srcCompat="@drawable/ic_file_download_white_24dp" />
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/barrier2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="left"
+            app:constraint_referenced_ids="image_download,text_chapter_downloading_progress" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

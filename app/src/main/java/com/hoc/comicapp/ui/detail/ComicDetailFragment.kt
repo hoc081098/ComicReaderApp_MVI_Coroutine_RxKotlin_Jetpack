@@ -17,6 +17,8 @@ import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.Chapter
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.ComicDetail
+import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.Downloaded
+import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.NotYetDownload
 import com.hoc.comicapp.utils.*
 import com.jakewharton.rxbinding3.recyclerview.scrollEvents
 import com.jakewharton.rxbinding3.view.clicks
@@ -43,6 +45,7 @@ class ComicDetailFragment : Fragment() {
   private val glide by lazy(NONE) { GlideApp.with(this) }
 
   private val downloadChapterS = PublishRelay.create<Chapter>()
+  private val deleteChapterS = PublishRelay.create<Chapter>()
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -56,25 +59,43 @@ class ComicDetailFragment : Fragment() {
     Timber.d("ComicDetailFragment::onViewCreated")
 
     val chapterAdapter = ChapterAdapter(
-      ::onClickChapter,
       ::onClickButtonRead,
-      ::onClickDownload
+      ::onClickChapter
     )
     initView(chapterAdapter)
     bind(chapterAdapter)
   }
 
   private fun onClickDownload(chapter: Chapter) {
-    requireActivity().showAlertDialog {
-      title("Download ${chapter.chapterName}")
-      message("This chapter will download as soon as internet is connected")
-      cancelable(true)
-      iconId(R.drawable.ic_file_download_white_24dp)
+    //TODO: cancel worker???
+    when (chapter.downloadState) {
+      Downloaded -> {
+        requireActivity().showAlertDialog {
+          title("Delete from downloads")
+          message("This chapter won't be available to read offline")
+          cancelable(true)
+          iconId(R.drawable.ic_delete_white_24dp)
 
-      negativeAction("Cancel") { dialog, _ -> dialog.cancel() }
-      positiveAction("OK") { dialog, _ ->
-        downloadChapterS.accept(chapter)
-        dialog.dismiss()
+          negativeAction("Cancel") { dialog, _ -> dialog.cancel() }
+          positiveAction("OK") { dialog, _ ->
+            deleteChapterS.accept(chapter)
+            dialog.dismiss()
+          }
+        }
+      }
+      NotYetDownload -> {
+        requireActivity().showAlertDialog {
+          title("Download ${chapter.chapterName}")
+          message("This chapter will download as soon as internet is connected")
+          cancelable(true)
+          iconId(R.drawable.ic_file_download_white_24dp)
+
+          negativeAction("Cancel") { dialog, _ -> dialog.cancel() }
+          positiveAction("OK") { dialog, _ ->
+            downloadChapterS.accept(chapter)
+            dialog.dismiss()
+          }
+        }
       }
     }
   }
@@ -216,7 +237,9 @@ class ComicDetailFragment : Fragment() {
 //          .refreshes()
 //          .map { ComicDetailIntent.Refresh(argComic.link) }
         downloadChapterS
-          .map { ComicDetailIntent.DownloadChapter(it) }
+          .map { ComicDetailIntent.DownloadChapter(it) },
+        deleteChapterS
+          .map { ComicDetailIntent.DeleteChapter(it) }
       )
     ).addTo(compositeDisposable)
   }
@@ -293,6 +316,10 @@ class ComicDetailFragment : Fragment() {
     root_detail.setTransitionListener(null)
   }
 
-  private fun onClickChapter(chapter: Chapter) =
-    findNavController().navigate(toChapterDetail(chapter))
+  private fun onClickChapter(chapter: Chapter, view: View) {
+    when (view.id) {
+      R.id.image_download -> onClickDownload(chapter)
+      else -> findNavController().navigate(toChapterDetail(chapter))
+    }
+  }
 }

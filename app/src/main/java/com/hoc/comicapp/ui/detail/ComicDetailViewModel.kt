@@ -133,14 +133,16 @@ class ComicDetailViewModel(
     val downloadedChaptersD = downloadComicsRepository.downloadedChapters()
 
     _stateD = stateD.combineLatest(workInfosD, downloadedChaptersD) { state, workInfos, downloadedChapters ->
+      Timber.d("[combine] ${workInfos.size} ${downloadedChapters.size}")
+
       val comicDetail = state.comicDetail as? ComicDetailViewState.ComicDetail.Detail
         ?: return@combineLatest state
 
-      val newChapters = comicDetail.chapters.map {
-        it.copy(
+      val newChapters = comicDetail.chapters.map { chapter ->
+        chapter.copy(
           downloadState = getDownloadState(
             workInfos,
-            it,
+            chapter,
             downloadedChapters
           )
         )
@@ -150,6 +152,35 @@ class ComicDetailViewModel(
     }.apply { observeForever(this@ComicDetailViewModel) }
 
     processDownloadChapterIntent(filteredIntent, rxSchedulerProvider)
+    processDeleteChapterIntent(filteredIntent, rxSchedulerProvider)
+  }
+
+  private fun processDeleteChapterIntent(
+    filteredIntent: Observable<ComicDetailIntent>,
+    rxSchedulerProvider: RxSchedulerProvider
+  ) {
+    filteredIntent
+      .ofType<ComicDetailIntent.DeleteChapter>()
+      .map { it.chapter }
+      .flatMap { chapter ->
+        enqueueDeleteChapterWorker(chapter)
+          .toObservable()
+          .onErrorReturn { chapter to it }
+      }
+      .observeOn(rxSchedulerProvider.main)
+      .subscribeBy {
+        when {
+          it.second === null -> {
+            Timber.d("Enqueue success $it")
+            sendMessageEvent("Enqueued download ${it.first.chapterName}")
+          }
+          else -> {
+            Timber.d("Enqueue error $it")
+            sendMessageEvent("Enqueued error: ${it.first.chapterName}")
+          }
+        }
+      }
+      .addTo(compositeDisposable)
   }
 
   override fun onCleared() {
@@ -195,9 +226,9 @@ class ComicDetailViewModel(
       else -> when (val workInfo = workInfos.find { chapter.chapterLink in it.tags }) {
         null -> DownloadState.NotYetDownload
         else -> DownloadState.Downloading(
-          workInfo.progress.getFloat(
+          workInfo.progress.getInt(
             DownloadComicWorker.PROGRESS,
-            0f
+            0
           )
         )
       }
@@ -239,5 +270,9 @@ class ComicDetailViewModel(
       workManager.enqueue(workRequest).await()
       chapter to null
     }
+  }
+
+  private fun enqueueDeleteChapterWorker(chapter: Chapter) : Single<Pair<Chapter, Throwable?>> {
+    TODO("Implement delete chapter")
   }
 }

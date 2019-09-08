@@ -48,12 +48,10 @@ object ChapterDiffUtilItemCallback : DiffUtil.ItemCallback<ChapterAdapterItem>()
 }
 
 class ChapterAdapter(
-  private val onClickChapter: (ComicDetailViewState.Chapter) -> Unit,
   private val onClickReadButton: (readFirst: Boolean) -> Unit,
-  private val onClickDownload: (ComicDetailViewState.Chapter) -> Unit
+  private val onClickChapter: (ComicDetailViewState.Chapter, View) -> Unit
 ) :
   ListAdapter<ChapterAdapterItem, ChapterAdapter.VH>(ChapterDiffUtilItemCallback) {
-  private val decimalFormat = DecimalFormat("#.##").apply { roundingMode = RoundingMode.CEILING }
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
     val view = parent inflate viewType
@@ -102,16 +100,9 @@ class ChapterAdapter(
     override fun onClick(v: View) {
       val position = adapterPosition
       if (position == NO_POSITION) return
-      val item = getItem(position) as? ChapterAdapterItem.Chapter ?: return
 
-      when {
-        v.id == R.id.image_download -> {
-          if (item.chapter.downloadState == NotYetDownload) {
-            onClickDownload(item.chapter)
-          }
-        }
-        else -> onClickChapter(item.chapter)
-      }
+      val item = getItem(position) as? ChapterAdapterItem.Chapter ?: return
+      onClickChapter(item.chapter, v)
     }
 
 
@@ -127,13 +118,13 @@ class ChapterAdapter(
     fun updateDownloadState(downloadState: ComicDetailViewState.DownloadState) {
       when (downloadState) {
         Downloaded -> {
-          imageDownload.setImageResource(R.drawable.ic_file_download_accent_24dp)
+          imageDownload.setImageResource(R.drawable.ic_done_accent_24dp)
           textProgress.isVisible = false
         }
         is Downloading -> {
           imageDownload.setImageDrawable(null)
           textProgress.isVisible = true
-          textProgress.text = "${decimalFormat.format(downloadState.progress)}%"
+          textProgress.text = "${downloadState.progress}%"
         }
         NotYetDownload -> {
           imageDownload.setImageResource(R.drawable.ic_file_download_white_24dp)

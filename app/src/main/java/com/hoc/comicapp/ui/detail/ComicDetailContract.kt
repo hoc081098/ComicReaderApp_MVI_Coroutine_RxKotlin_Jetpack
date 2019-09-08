@@ -30,6 +30,7 @@ sealed class ComicDetailIntent : Intent {
   data class Refresh(val link: String) : ComicDetailIntent()
   data class Retry(val link: String) : ComicDetailIntent()
   data class DownloadChapter(val chapter: ComicDetailViewState.Chapter) : ComicDetailIntent()
+  data class DeleteChapter(val chapter: ComicDetailViewState.Chapter) : ComicDetailIntent()
 }
 
 data class ComicDetailViewState(
@@ -74,7 +75,7 @@ data class ComicDetailViewState(
     object Downloaded : DownloadState()
 
     @Parcelize
-    data class Downloading(val progress: Float) : DownloadState()
+    data class Downloading(val progress: Int) : DownloadState()
 
     @Parcelize
     object NotYetDownload : DownloadState()
