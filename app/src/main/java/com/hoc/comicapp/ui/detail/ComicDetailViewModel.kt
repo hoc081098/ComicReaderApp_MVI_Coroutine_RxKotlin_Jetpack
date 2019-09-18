@@ -31,8 +31,8 @@ import timber.log.Timber
 class ComicDetailViewModel(
   private val comicDetailInteractor: ComicDetailInteractor,
   private val workManager: WorkManager,
-  downloadComicsRepository: DownloadComicsRepository,
-  rxSchedulerProvider: RxSchedulerProvider
+  private val downloadComicsRepository: DownloadComicsRepository,
+  private val rxSchedulerProvider: RxSchedulerProvider
 ) :
   BaseViewModel<ComicDetailIntent, ComicDetailViewState, ComicDetailSingleEvent>(), Observer<ComicDetailViewState> {
   override fun onChanged(t: ComicDetailViewState?) {
@@ -115,6 +115,12 @@ class ComicDetailViewModel(
       .compose(intentFilter)
       .doOnNext { Timber.d("intent=$it") }
 
+    _stateD = initStateD(filteredIntent)
+    processDownloadChapterIntent(filteredIntent)
+    processDeleteChapterIntent(filteredIntent)
+  }
+
+  private fun initStateD(filteredIntent: Observable<ComicDetailIntent>): LiveData<ComicDetailViewState> {
     // intent -> behavior subject
     filteredIntent
       .compose(intentToViewState)
@@ -132,7 +138,7 @@ class ComicDetailViewModel(
     val workInfosD = workManager.getWorkInfosByTagLiveData(DownloadComicWorker.TAG)
     val downloadedChaptersD = downloadComicsRepository.downloadedChapters()
 
-    _stateD = stateD.combineLatest(workInfosD, downloadedChaptersD) { state, workInfos, downloadedChapters ->
+    return stateD.combineLatest(workInfosD, downloadedChaptersD) { state, workInfos, downloadedChapters ->
       Timber.d("[combine] ${workInfos.size} ${downloadedChapters.size}")
 
       val comicDetail = state.comicDetail as? ComicDetailViewState.ComicDetail.Detail
@@ -150,15 +156,9 @@ class ComicDetailViewModel(
 
       state.copy(comicDetail = comicDetail.copy(chapters = newChapters))
     }.apply { observeForever(this@ComicDetailViewModel) }
-
-    processDownloadChapterIntent(filteredIntent, rxSchedulerProvider)
-    processDeleteChapterIntent(filteredIntent, rxSchedulerProvider)
   }
 
-  private fun processDeleteChapterIntent(
-    filteredIntent: Observable<ComicDetailIntent>,
-    rxSchedulerProvider: RxSchedulerProvider
-  ) {
+  private fun processDeleteChapterIntent(filteredIntent: Observable<ComicDetailIntent>) {
     filteredIntent
       .ofType<ComicDetailIntent.DeleteChapter>()
       .map { it.chapter }
@@ -188,10 +188,7 @@ class ComicDetailViewModel(
     _stateD.removeObserver(this)
   }
 
-  private fun processDownloadChapterIntent(
-    filteredIntent: Observable<ComicDetailIntent>,
-    rxSchedulerProvider: RxSchedulerProvider
-  ) {
+  private fun processDownloadChapterIntent(filteredIntent: Observable<ComicDetailIntent>) {
     filteredIntent
       .ofType<ComicDetailIntent.DownloadChapter>()
       .map { it.chapter }
@@ -272,7 +269,7 @@ class ComicDetailViewModel(
     }
   }
 
-  private fun enqueueDeleteChapterWorker(chapter: Chapter) : Single<Pair<Chapter, Throwable?>> {
+  private fun enqueueDeleteChapterWorker(chapter: Chapter): Single<Pair<Chapter, Throwable?>> {
     TODO("Implement delete chapter")
   }
 }
