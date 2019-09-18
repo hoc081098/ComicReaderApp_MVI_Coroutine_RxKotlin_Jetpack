@@ -15,10 +15,10 @@ import androidx.recyclerview.widget.LinearSmoothScroller
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
+import com.hoc.comicapp.ui.detail.ComicDetailIntent.*
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.Chapter
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.ComicDetail
-import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.Downloaded
-import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.NotYetDownload
+import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.*
 import com.hoc.comicapp.utils.*
 import com.jakewharton.rxbinding3.recyclerview.scrollEvents
 import com.jakewharton.rxbinding3.view.clicks
@@ -44,8 +44,7 @@ class ComicDetailFragment : Fragment() {
   private val compositeDisposable = CompositeDisposable()
   private val glide by lazy(NONE) { GlideApp.with(this) }
 
-  private val downloadChapterS = PublishRelay.create<Chapter>()
-  private val deleteChapterS = PublishRelay.create<Chapter>()
+  private val intentS = PublishRelay.create<ComicDetailIntent>()
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -78,7 +77,7 @@ class ComicDetailFragment : Fragment() {
 
           negativeAction("Cancel") { dialog, _ -> dialog.cancel() }
           positiveAction("OK") { dialog, _ ->
-            deleteChapterS.accept(chapter)
+            intentS.accept(DeleteChapter(chapter))
             dialog.dismiss()
           }
         }
@@ -92,7 +91,21 @@ class ComicDetailFragment : Fragment() {
 
           negativeAction("Cancel") { dialog, _ -> dialog.cancel() }
           positiveAction("OK") { dialog, _ ->
-            downloadChapterS.accept(chapter)
+            intentS.accept(DownloadChapter(chapter))
+            dialog.dismiss()
+          }
+        }
+      }
+      is Downloading -> {
+        requireActivity().showAlertDialog {
+          title("Cancel downloading")
+          message("This chapter won't be available to read offline")
+          cancelable(true)
+          iconId(R.drawable.ic_delete_white_24dp)
+
+          negativeAction("Cancel") { dialog, _ -> dialog.cancel() }
+          positiveAction("OK") { dialog, _ ->
+            intentS.accept(CancelDownloadChapter(chapter))
             dialog.dismiss()
           }
         }
@@ -236,10 +249,7 @@ class ComicDetailFragment : Fragment() {
 //        swipe_refresh_layout
 //          .refreshes()
 //          .map { ComicDetailIntent.Refresh(argComic.link) }
-        downloadChapterS
-          .map { ComicDetailIntent.DownloadChapter(it) },
-        deleteChapterS
-          .map { ComicDetailIntent.DeleteChapter(it) }
+        intentS
       )
     ).addTo(compositeDisposable)
   }

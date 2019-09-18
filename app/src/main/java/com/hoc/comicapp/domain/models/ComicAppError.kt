@@ -1,5 +1,6 @@
 package com.hoc.comicapp.domain.models
 
+import android.database.sqlite.SQLiteException
 import com.hoc.comicapp.data.remote.ErrorResponseParser
 import retrofit2.HttpException
 import retrofit2.Retrofit
@@ -10,6 +11,12 @@ import java.net.UnknownHostException
 sealed class ComicAppError : Throwable()
 
 object NetworkError : ComicAppError()
+
+sealed class LocalStorageError : ComicAppError() {
+  object DeleteFileError : LocalStorageError()
+  object SaveFileError : LocalStorageError()
+  data class DatabaseError(override val cause: Throwable? = null) : LocalStorageError()
+}
 
 data class ServerError(
   override val message: String,
@@ -23,6 +30,7 @@ data class UnexpectedError(
 
 fun Throwable.toError(retrofit: Retrofit): ComicAppError {
   return when (this) {
+    is SQLiteException -> LocalStorageError.DatabaseError(this)
     is IOException -> when (this) {
       is UnknownHostException -> NetworkError
       is SocketTimeoutException -> NetworkError
@@ -55,5 +63,8 @@ fun ComicAppError.getMessage(): String {
     NetworkError -> "Network error"
     is ServerError -> "Server error: $message"
     is UnexpectedError -> "An unexpected error occurred"
+    LocalStorageError.DeleteFileError -> "Error when deleting file"
+    LocalStorageError.SaveFileError -> "Error when saving file"
+    is LocalStorageError.DatabaseError -> "Database error"
   }
 }

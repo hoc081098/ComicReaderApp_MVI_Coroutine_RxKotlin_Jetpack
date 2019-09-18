@@ -47,29 +47,34 @@ class DownloadComicWorker(
     val notificationManagerCompat = NotificationManagerCompat.from(applicationContext)
     notificationManagerCompat.notify(1, notificationBuilder.build())
 
-    downloadComicsRepo
-      .downloadChapter(chapterLink)
-      .collect {
-        notificationManagerCompat.notify(
-          1,
-          notificationBuilder
-            .setProgress(100, it, false)
-            .setContentText("$it %")
-            .build()
-        )
+    return try {
+      downloadComicsRepo
+        .downloadChapter(chapterLink)
+        .collect {
+          notificationManagerCompat.notify(
+            1,
+            notificationBuilder
+              .setProgress(100, it, false)
+              .setContentText("$it %")
+              .build()
+          )
 
-        setProgress(workDataOf(PROGRESS to it))
-      }
+          setProgress(workDataOf(PROGRESS to it))
+        }
 
-    notificationManagerCompat.notify(
-      1,
-      notificationBuilder
-        .setContentText("Download complete")
-        .setProgress(0, 0, false)
-        .build()
-    )
+      notificationManagerCompat.notify(
+        1,
+        notificationBuilder
+          .setContentText("Download complete")
+          .setProgress(0, 0, false)
+          .build()
+      )
 
-    return Result.success()
+      Result.success()
+    } catch (e: Exception) {
+      notificationManagerCompat.cancel(1)
+      Result.failure()
+    }
   }
 
   companion object {

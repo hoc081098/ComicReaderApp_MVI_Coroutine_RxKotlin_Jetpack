@@ -3,6 +3,7 @@ package com.hoc.comicapp.ui.detail
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.work.*
+import androidx.work.WorkInfo.State.*
 import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.domain.models.DownloadedChapter
 import com.hoc.comicapp.domain.models.getMessage
@@ -10,6 +11,7 @@ import com.hoc.comicapp.domain.repository.DownloadComicsRepository
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.Chapter
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState
+import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.*
 import com.hoc.comicapp.utils.combineLatest
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.notOfType
@@ -117,7 +119,7 @@ class ComicDetailViewModel(
 
     _stateD = initStateD(filteredIntent)
     processDownloadChapterIntent(filteredIntent)
-    processDeleteChapterIntent(filteredIntent)
+    processDeleteAndCancelDownloadingChapterIntent(filteredIntent)
   }
 
   private fun initStateD(filteredIntent: Observable<ComicDetailIntent>): LiveData<ComicDetailViewState> {
@@ -158,25 +160,33 @@ class ComicDetailViewModel(
     }.apply { observeForever(this@ComicDetailViewModel) }
   }
 
-  private fun processDeleteChapterIntent(filteredIntent: Observable<ComicDetailIntent>) {
-    filteredIntent
-      .ofType<ComicDetailIntent.DeleteChapter>()
-      .map { it.chapter }
-      .flatMap { chapter ->
-        enqueueDeleteChapterWorker(chapter)
+  private fun processDeleteAndCancelDownloadingChapterIntent(filteredIntent: Observable<ComicDetailIntent>) {
+    Observable
+      .merge(
+        filteredIntent
+          .ofType<ComicDetailIntent.DeleteChapter>()
+          .map { it.chapter to true },
+        filteredIntent
+          .ofType<ComicDetailIntent.CancelDownloadChapter>()
+          .map { it.chapter to false }
+      )
+      .flatMap { (chapter, delete) ->
+        deleteDownloadedChapter(chapter)
           .toObservable()
-          .onErrorReturn { chapter to it }
+          .map { Triple(it.first, it.second, delete) }
+          .onErrorReturn { Triple(chapter, null, delete) }
       }
       .observeOn(rxSchedulerProvider.main)
       .subscribeBy {
+        val operation = if (it.third) "Delete download" else "Cancel download"
         when {
           it.second === null -> {
-            Timber.d("Enqueue success $it")
-            sendMessageEvent("Enqueued download ${it.first.chapterName}")
+            Timber.d("$operation success $it")
+            sendMessageEvent("$operation ${it.first.chapterName}")
           }
           else -> {
-            Timber.d("Enqueue error $it")
-            sendMessageEvent("Enqueued error: ${it.first.chapterName}")
+            Timber.d("$operation error $it")
+            sendMessageEvent("$operation error: ${it.first.chapterName}")
           }
         }
       }
@@ -219,15 +229,19 @@ class ComicDetailViewModel(
     downloadedChapters: List<DownloadedChapter>
   ): DownloadState {
     return when {
-      downloadedChapters.any { it.chapterLink == chapter.chapterLink } -> DownloadState.Downloaded
-      else -> when (val workInfo = workInfos.find { chapter.chapterLink in it.tags }) {
-        null -> DownloadState.NotYetDownload
-        else -> DownloadState.Downloading(
+      downloadedChapters.any { it.chapterLink == chapter.chapterLink } -> Downloaded
+      else -> when (
+        val workInfo = workInfos.find { chapter.chapterLink in it.tags && it.state == RUNNING }) {
+        null -> NotYetDownload
+        else -> Downloading(
           workInfo.progress.getInt(
             DownloadComicWorker.PROGRESS,
             0
           )
-        )
+        ).also {
+          Timber.tag("####").d(workInfo.toString())
+          Timber.tag("####").d(it.toString())
+        }
       }
     }
   }
@@ -249,6 +263,7 @@ class ComicDetailViewModel(
 
   private fun enqueueDownloadComicWorker(chapter: Chapter): Single<Pair<Chapter, Throwable?>> {
     return rxSingle {
+      workManager.cancelAllWorkByTag(chapter.chapterLink).await()
       val workRequest = OneTimeWorkRequestBuilder<DownloadComicWorker>()
         .setInputData(
           workDataOf(
@@ -269,7 +284,14 @@ class ComicDetailViewModel(
     }
   }
 
-  private fun enqueueDeleteChapterWorker(chapter: Chapter): Single<Pair<Chapter, Throwable?>> {
-    TODO("Implement delete chapter")
+  private fun deleteDownloadedChapter(chapter: Chapter): Single<Pair<Chapter, Throwable?>> {
+    return rxSingle {
+      Timber.tag("####").d("[1]")
+      workManager.cancelAllWorkByTag(chapter.chapterLink).await()
+      Timber.tag("####").d("[2]")
+      downloadComicsRepository.deleteDownloadedChapter(chapter = chapter.toDomain())
+      Timber.tag("####").d("[3]")
+      chapter to null
+    }
   }
 }
