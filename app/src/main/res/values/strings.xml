@@ -7,4 +7,7 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
     <string name="search_comic">Search comic</string>
+    <string name="notification_channel_id">com.hoc.comicapp</string>
+    <string name="notification_channel_name">Comic app</string>
+    <string name="notification_channel_description">Notification channel of comic app</string>
 </resources>

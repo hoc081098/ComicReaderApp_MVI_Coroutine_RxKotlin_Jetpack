@@ -161,5 +161,5 @@ class HomeFragment : Fragment() {
     compositeDisposable.clear()
   }
 
-  private fun getMaxSpanCount() = if (requireContext().isOrientationPortrait) 2 else 3
+  private fun getMaxSpanCount() = if (requireContext().isOrientationPortrait) 2 else 4
 }

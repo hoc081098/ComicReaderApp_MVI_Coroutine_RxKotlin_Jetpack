@@ -1,13 +1,9 @@
 package com.hoc.comicapp
 
-import io.reactivex.rxkotlin.subscribeBy
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.rx2.asObservable
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.map
 
 suspend fun f(): Int {
   return withContext(Dispatchers.IO) {
@@ -16,7 +12,7 @@ suspend fun f(): Int {
   }
 }
 
-@ExperimentalCoroutinesApi
+/*
 fun main() {
   val dis = flow<Int> {
 
@@ -47,4 +43,35 @@ fun main() {
   println("dispose")
   Thread.sleep(3000)
   println("[333]")
+}*/
+
+suspend fun f1(i: Int): Int {
+  println(">>>$i")
+  delay(2000)
+  return i
+}
+
+@ExperimentalCoroutinesApi
+fun main() {
+  runBlocking {
+    //    measureTimeMillis {
+//      flowOf(1, 2, 3, 4, 5)
+//        .flatMapMerge { i ->
+//          flow {
+//            emit(f1(i))
+//          }
+//        }
+//        .collect { println("## $it") }
+//    }.let { println(it) }
+
+
+    flow {
+      for (i in 0..10) {
+        emit(i)
+        delay(200)
+        if (i == 5) throw IllegalStateException("???")
+      }
+    }.map { it }
+      .collect { println(it) }
+  }
 }

@@ -1,4 +1,4 @@
-package com.hoc.comicapp
+package com.hoc.comicapp.domain.thread
 
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import io.reactivex.Scheduler

@@ -6,13 +6,12 @@ import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.Spinner
 import android.widget.Toast
 import androidx.annotation.*
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.Observer
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding3.InitialValueObservable
@@ -27,7 +26,8 @@ import io.reactivex.annotations.CheckReturnValue
 import io.reactivex.annotations.SchedulerSupport
 import io.reactivex.disposables.Disposables
 import io.reactivex.subjects.Subject
-import timber.log.Timber
+import java.io.File
+import java.io.InputStream
 
 @CheckReturnValue
 @SchedulerSupport(SchedulerSupport.NONE)
@@ -217,5 +217,67 @@ internal class MaterialSearchViewObservable(private val view: MaterialSearchView
     override fun onQueryTextSubmit(query: String?) = true
 
     override fun onDispose() = view.setOnQueryTextListener(null)
+  }
+}
+
+
+fun InputStream.copyTo(target: File, overwrite: Boolean = false, bufferSize: Int = DEFAULT_BUFFER_SIZE): File {
+  if (target.exists()) {
+    val stillExists = if (!overwrite) true else !target.delete()
+
+    if (stillExists) {
+      throw IllegalAccessException("The destination file already exists.")
+    }
+  }
+
+  target.parentFile?.mkdirs()
+
+  this.use { input ->
+    target.outputStream().use { output ->
+      input.copyTo(output, bufferSize)
+    }
+  }
+
+  return target
+}
+
+fun <A, B, C, R> LiveData<A>.combineLatest(b: LiveData<B>, c: LiveData<C>, combine: (A, B, C) -> R): LiveData<R> {
+  return MediatorLiveData<R>().apply {
+    var lastA: A? = null
+    var lastB: B? = null
+    var lastC: C? = null
+
+    addSource(this@combineLatest) {
+      if (it == null && value != null) value = null
+      lastA = it
+
+      lastA?.let { a ->
+        lastB?.let { b ->
+          lastC?.let { value = combine(a, b, it) }
+        }
+      }
+    }
+
+    addSource(b) {
+      if (it == null && value != null) value = null
+      lastB = it
+
+      lastA?.let { a ->
+        lastB?.let { b ->
+          lastC?.let { value = combine(a, b, it) }
+        }
+      }
+    }
+
+    addSource(c) {
+      if (it == null && value != null) value = null
+      lastC = it
+
+      lastA?.let { a ->
+        lastB?.let { b ->
+          lastC?.let { value = combine(a, b, it) }
+        }
+      }
+    }
   }
 }

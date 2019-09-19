@@ -9,6 +9,9 @@ import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewModel
 import com.hoc.comicapp.ui.detail.ComicDetailInteractor
 import com.hoc.comicapp.ui.detail.ComicDetailInteractorImpl
 import com.hoc.comicapp.ui.detail.ComicDetailViewModel
+import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract
+import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsInteractorImpl
+import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsViewModel
 import com.hoc.comicapp.ui.home.HomeInteractor
 import com.hoc.comicapp.ui.home.HomeInteractorImpl
 import com.hoc.comicapp.ui.home.HomeViewModel
@@ -16,6 +19,7 @@ import com.hoc.comicapp.ui.search_comic.SearchComicInteractor
 import com.hoc.comicapp.ui.search_comic.SearchComicInteractorImpl
 import com.hoc.comicapp.ui.search_comic.SearchComicViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.koin.android.ext.koin.androidApplication
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -25,7 +29,7 @@ val viewModelModule = module {
 
   single { HomeInteractorImpl(get()) } bind HomeInteractor::class
 
-  single { ComicDetailInteractorImpl(get()) } bind ComicDetailInteractor::class
+  single { ComicDetailInteractorImpl(get(), get()) } bind ComicDetailInteractor::class
 
   single { SearchComicInteractorImpl(get()) } bind SearchComicInteractor::class
 
@@ -33,14 +37,18 @@ val viewModelModule = module {
 
   single { ChapterDetailInteractorImpl(get(), get()) } bind ChapterDetailInteractor::class
 
+  single { DownloadedComicsInteractorImpl(get(), androidApplication()) } bind DownloadedComicsContract.Interactor::class
+
   viewModel { HomeViewModel(get(), get()) }
 
-  viewModel { ComicDetailViewModel(get(), get()) }
+  viewModel { ComicDetailViewModel(get(), get(), get(), get()) }
 
   viewModel { SearchComicViewModel(get(), get()) }
 
   viewModel { CategoryViewModel(get(), get()) }
 
   viewModel { ChapterDetailViewModel(get(), get()) }
+
+  viewModel { DownloadedComicsViewModel(get(), get()) }
 
 }
