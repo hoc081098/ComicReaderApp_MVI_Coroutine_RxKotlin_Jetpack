@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
@@ -19,7 +20,6 @@ import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.snack
 import com.jakewharton.rxbinding3.view.clicks
-import com.jakewharton.rxbinding3.widget.selectionEvents
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
@@ -34,6 +34,7 @@ class ChapterDetailFragment : Fragment() {
   private val compositeDisposable = CompositeDisposable()
 
   private val mainActivity get() = requireActivity() as MainActivity
+  private var executeOnItemSelected = true
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -66,7 +67,7 @@ class ChapterDetailFragment : Fragment() {
   ) {
     view_pager.adapter = chapterImageAdapter
     spinner_chapters.adapter = allChaptersAdapter
-    spinner_chapters.setSelection(0)
+    spinner_chapters.setSelection(0, false)
   }
 
   private fun bind(
@@ -104,6 +105,12 @@ class ChapterDetailFragment : Fragment() {
           allChaptersAdapter.clear()
           allChaptersAdapter.addAll(detail.chapters)
 
+          executeOnItemSelected = false
+          val index = detail.chapters.indexOfFirst { it.link == detail.chapterLink }
+          Timber.d("index=$index")
+          spinner_chapters.setSelection(index, false)
+          executeOnItemSelected = true
+
           TransitionManager.beginDelayedTransition(bottom_nav, AutoTransition())
           button_prev.isInvisible = detail.prevChapterLink === null
           button_next.isInvisible = detail.nextChapterLink === null
@@ -112,6 +119,19 @@ class ChapterDetailFragment : Fragment() {
       }
     }
 
+    val chapterItemSelections = Observable.create<ChapterDetailViewState.Chapter> { emitter ->
+      spinner_chapters.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        override fun onNothingSelected(parent: AdapterView<*>?) {}
+
+        override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+          if (executeOnItemSelected && !emitter.isDisposed) {
+            emitter.onNext(parent.selectedItem as ChapterDetailViewState.Chapter)
+          }
+        }
+      }
+
+      emitter.setCancellable { spinner_chapters.onItemSelectedListener = null }
+    }
     viewModel.processIntents(
       Observable.mergeArray(
         Observable.just(
@@ -129,13 +149,9 @@ class ChapterDetailFragment : Fragment() {
         button_retry
           .clicks()
           .map { ChapterDetailViewIntent.Retry },
-        spinner_chapters
-          .selectionEvents()
-          .skipInitialValue()
-          .doOnNext { Timber.d("[*][pos] ${it.view.selectedItem}") }
-          .map { it.view.selectedItem as ChapterDetailViewState.Chapter }
+        chapterItemSelections
           .map { ChapterDetailViewIntent.LoadChapter(it.link, it.name) }
-      ).doOnNext { Timber.d("[1][##intent] $it") }
+      )
     ).addTo(compositeDisposable)
   }
 
