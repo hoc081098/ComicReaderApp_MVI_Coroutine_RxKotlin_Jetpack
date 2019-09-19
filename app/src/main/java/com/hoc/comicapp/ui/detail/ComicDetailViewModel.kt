@@ -14,6 +14,7 @@ import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.*
 import com.hoc.comicapp.utils.combineLatest
 import com.hoc.comicapp.utils.exhaustMap
+import com.hoc.comicapp.utils.fold
 import com.hoc.comicapp.utils.notOfType
 import com.hoc.comicapp.worker.DownloadComicWorker
 import com.jakewharton.rxrelay2.BehaviorRelay
@@ -28,6 +29,7 @@ import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.rx2.rxSingle
 import timber.log.Timber
+import java.lang.IllegalStateException
 
 @ExperimentalCoroutinesApi
 class ComicDetailViewModel(
@@ -267,7 +269,13 @@ class ComicDetailViewModel(
       val workRequest = OneTimeWorkRequestBuilder<DownloadComicWorker>()
         .setInputData(
           workDataOf(
-            DownloadComicWorker.CHAPTER_LINK to chapter.chapterLink
+            DownloadComicWorker.CHAPTER_LINK to chapter.chapterLink,
+            DownloadComicWorker.CHAPTER_NAME to chapter.chapterName,
+            DownloadComicWorker.COMIC_NAME to when (val detail = state.value.comicDetail) {
+              is ComicDetailViewState.ComicDetail.Detail -> detail.title
+              is ComicDetailViewState.ComicDetail.Initial -> detail.title
+              null -> return@rxSingle chapter to IllegalStateException("State is null")
+            }
           )
         )
         .setConstraints(
@@ -286,12 +294,13 @@ class ComicDetailViewModel(
 
   private fun deleteDownloadedChapter(chapter: Chapter): Single<Pair<Chapter, Throwable?>> {
     return rxSingle {
-      Timber.tag("####").d("[1]")
       workManager.cancelAllWorkByTag(chapter.chapterLink).await()
-      Timber.tag("####").d("[2]")
-      downloadComicsRepository.deleteDownloadedChapter(chapter = chapter.toDomain())
-      Timber.tag("####").d("[3]")
-      chapter to null
+      downloadComicsRepository
+        .deleteDownloadedChapter(chapter = chapter.toDomain())
+        .fold(
+          { chapter to it },
+          { chapter to null }
+        )
     }
   }
 }
