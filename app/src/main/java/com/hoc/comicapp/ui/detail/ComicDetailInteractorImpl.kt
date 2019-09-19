@@ -88,7 +88,8 @@ private fun ComicDetail.toViewComicDetail(): ComicDetailViewState.ComicDetail.De
         chapterLink = it.chapterLink,
         chapterName = it.chapterName,
         time = it.time,
-        view = it.view
+        view = it.view,
+        comicLink = link
       )
     },
     authors = authors.map {

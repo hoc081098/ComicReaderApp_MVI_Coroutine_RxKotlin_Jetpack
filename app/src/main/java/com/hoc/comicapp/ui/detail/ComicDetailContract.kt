@@ -5,10 +5,12 @@ import com.hoc.comicapp.base.Intent
 import com.hoc.comicapp.base.SingleEvent
 import com.hoc.comicapp.base.ViewState
 import com.hoc.comicapp.domain.models.ComicAppError
+import com.hoc.comicapp.domain.models.DownloadedChapter
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.ComicDetail
 import io.reactivex.Observable
 import kotlinx.android.parcel.Parcelize
+import java.util.*
 
 interface ComicDetailInteractor {
   fun getComicDetail(
@@ -29,6 +31,8 @@ sealed class ComicDetailIntent : Intent {
 
   data class Refresh(val link: String) : ComicDetailIntent()
   data class Retry(val link: String) : ComicDetailIntent()
+
+  data class CancelDownloadChapter(val chapter: ComicDetailViewState.Chapter) : ComicDetailIntent()
   data class DownloadChapter(val chapter: ComicDetailViewState.Chapter) : ComicDetailIntent()
   data class DeleteChapter(val chapter: ComicDetailViewState.Chapter) : ComicDetailIntent()
 }
@@ -90,7 +94,8 @@ data class ComicDetailViewState(
     val chapterName: String,
     val time: String,
     val view: String,
-    val downloadState: DownloadState = DownloadState.Loading
+    val downloadState: DownloadState = DownloadState.Loading,
+    val comicLink: String
   ) : Parcelable {
 
     fun isSameExceptDownloadState(other: Chapter): Boolean {
@@ -99,7 +104,20 @@ data class ComicDetailViewState(
       if (chapterName != other.chapterName) return false
       if (time != other.time) return false
       if (view != other.view) return false
+      if (comicLink != other.comicLink) return false
       return true
+    }
+
+    fun toDomain(): DownloadedChapter {
+      return DownloadedChapter(
+        chapterLink = chapterLink,
+        chapterName = chapterName,
+        view = view,
+        time = time,
+        images = emptyList(),
+        downloadedAt = Date(),
+        comicLink = comicLink
+      )
     }
   }
 

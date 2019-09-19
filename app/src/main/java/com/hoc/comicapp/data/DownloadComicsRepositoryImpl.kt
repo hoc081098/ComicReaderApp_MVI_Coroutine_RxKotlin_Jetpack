@@ -11,10 +11,7 @@ import com.hoc.comicapp.data.local.entities.ChapterEntity
 import com.hoc.comicapp.data.local.entities.ComicAndChapters
 import com.hoc.comicapp.data.local.entities.ComicEntity
 import com.hoc.comicapp.data.remote.ComicApiService
-import com.hoc.comicapp.domain.models.ComicAppError
-import com.hoc.comicapp.domain.models.DownloadedChapter
-import com.hoc.comicapp.domain.models.DownloadedComic
-import com.hoc.comicapp.domain.models.toError
+import com.hoc.comicapp.domain.models.*
 import com.hoc.comicapp.domain.repository.DownloadComicsRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
@@ -23,10 +20,12 @@ import com.hoc.comicapp.utils.copyTo
 import com.hoc.comicapp.utils.left
 import com.hoc.comicapp.utils.right
 import io.reactivex.Observable
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import timber.log.Timber
 import java.io.File
@@ -42,9 +41,47 @@ class DownloadComicsRepositoryImpl(
   private val rxSchedulerProvider: RxSchedulerProvider,
   private val retrofit: Retrofit
 ) : DownloadComicsRepository {
+  override suspend fun deleteDownloadedChapter(chapter: DownloadedChapter): Either<ComicAppError, Unit> {
+    return runCatching {
+      withContext(dispatcherProvider.io) {
+        chapterDao.delete(Mapper.domainToEntity(chapter))
+
+        val chaptersCount = chapterDao.getCountByComicLink(chapter.comicLink).firstOrNull() ?: 0
+        if (chaptersCount == 0) {
+          comicDao.delete(
+            ComicEntity(
+              comicLink = chapter.comicLink,
+              view = "",
+              categories = emptyList(),
+              authors = emptyList(),
+              thumbnail = "",
+              title = "",
+              lastUpdated = "",
+              shortenedContent = ""
+            )
+          )
+        }
+
+        chapter
+          .images
+          .map { File(application.filesDir, it) }
+          .all(File::delete)
+      }
+    }.fold(
+      {
+        if (it) {
+          Unit.right()
+        } else {
+          LocalStorageError.DeleteFileError.left()
+        }
+      },
+      { it.toError(retrofit).left() }
+    )
+  }
+
   override fun downloadedChapters(): LiveData<List<DownloadedChapter>> {
-    return chapterDao.getAllChapters().map {
-      it.map { Mapper.entityToDomain(it) }
+    return chapterDao.getAllChapters().map { chapters ->
+      chapters.map { Mapper.entityToDomainModel(it) }
     }
   }
 
@@ -53,7 +90,7 @@ class DownloadComicsRepositoryImpl(
       .getComicAndChapters()
       .map<Either<ComicAppError, List<DownloadedComic>>> { list ->
         list.map { item ->
-          Mapper.entityToDomain(
+          Mapper.entityToDomainModel(
             ComicAndChapters().also { copied ->
               copied.comic = item.comic
               copied.chapters = item.chapters
@@ -67,6 +104,7 @@ class DownloadComicsRepositoryImpl(
       .subscribeOn(rxSchedulerProvider.io)
   }
 
+  @ExperimentalCoroutinesApi
   override fun downloadChapter(chapterLink: String): Flow<Int> {
     return flow {
       Timber.d("$tag Begin")

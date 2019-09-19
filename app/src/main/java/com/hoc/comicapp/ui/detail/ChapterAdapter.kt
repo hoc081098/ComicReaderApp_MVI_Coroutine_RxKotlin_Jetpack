@@ -2,11 +2,12 @@ package com.hoc.comicapp.ui.detail
 
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
+import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.NO_POSITION
+import antonkozyriatskyi.circularprogressindicator.CircularProgressIndicator
 import com.google.android.material.chip.Chip
 import com.hoc.comicapp.R
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.Category
@@ -16,8 +17,6 @@ import com.hoc.comicapp.utils.toast
 import kotlinx.android.synthetic.main.item_recycler_chapter.view.*
 import kotlinx.android.synthetic.main.item_recycler_detail.view.*
 import timber.log.Timber
-import java.math.RoundingMode
-import java.text.DecimalFormat
 
 sealed class ChapterAdapterItem {
   data class Header(
@@ -90,7 +89,10 @@ class ChapterAdapter(
     private val textChapterTime = itemView.text_chapter_time!!
     private val textChapterView = itemView.text_chapter_view!!
     private val imageDownload = itemView.image_download!!
-    private val textProgress = itemView.text_chapter_downloading_progress!!
+    private val circularProgress = itemView.circular_progress!!.apply {
+      maxProgress = 100.0
+      setProgressTextAdapter(PROGRESS_TEXT_ADAPTER)
+    }
 
     init {
       itemView.setOnClickListener(this)
@@ -119,20 +121,20 @@ class ChapterAdapter(
       when (downloadState) {
         Downloaded -> {
           imageDownload.setImageResource(R.drawable.ic_done_accent_24dp)
-          textProgress.isVisible = false
+          circularProgress.isInvisible = true
         }
         is Downloading -> {
           imageDownload.setImageDrawable(null)
-          textProgress.isVisible = true
-          textProgress.text = "${downloadState.progress}%"
+          circularProgress.isInvisible = false
+          circularProgress.setCurrentProgress(downloadState.progress.toDouble())
         }
         NotYetDownload -> {
           imageDownload.setImageResource(R.drawable.ic_file_download_white_24dp)
-          textProgress.isVisible = false
+          circularProgress.isInvisible = true
         }
         Loading -> {
           imageDownload.setImageDrawable(null)
-          textProgress.isVisible = false
+          circularProgress.isInvisible = true
         }
       }
     }
@@ -167,5 +169,9 @@ class ChapterAdapter(
         }
         .forEach(categoriesGroup::addView)
     }
+  }
+
+  private companion object {
+    val PROGRESS_TEXT_ADAPTER = CircularProgressIndicator.ProgressTextAdapter { "${it.toInt()}%" }
   }
 }

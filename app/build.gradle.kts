@@ -66,11 +66,11 @@ dependencies {
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-rx2:$coroutinesVersion")
 
-  implementation("androidx.appcompat:appcompat:1.1.0-beta01")
-  implementation("androidx.core:core-ktx:1.2.0-alpha01")
-  implementation("androidx.activity:activity-ktx:1.0.0-beta01")
-  implementation("androidx.fragment:fragment-ktx:1.1.0-beta01")
-  implementation("androidx.constraintlayout:constraintlayout:2.0.0-beta1")
+  implementation("androidx.appcompat:appcompat:1.1.0")
+  implementation("androidx.core:core-ktx:1.2.0-alpha04")
+  implementation("androidx.activity:activity-ktx:1.1.0-alpha03")
+  implementation("androidx.fragment:fragment-ktx:1.2.0-alpha03")
+  implementation("androidx.constraintlayout:constraintlayout:2.0.0-beta2")
 
   implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
   implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
@@ -108,7 +108,7 @@ dependencies {
   implementation("com.jakewharton.rxbinding3:rxbinding-recyclerview:$rxBindingVersion")
   implementation("com.jakewharton.timber:timber:$timberVersion")
 
-  implementation("io.reactivex.rxjava2:rxkotlin:2.3.0")
+  implementation("io.reactivex.rxjava2:rxkotlin:2.4.0")
   implementation("io.reactivex.rxjava2:rxandroid:2.1.1")
 
   implementation("com.github.bumptech.glide:glide:$glideVersion")
@@ -117,6 +117,7 @@ dependencies {
   implementation("com.miguelcatalan:materialsearchview:1.4.0")
   implementation("com.ms-square:expandableTextView:0.1.4")
   implementation("com.jaredrummler:material-spinner:1.3.1")
+  implementation("com.github.antonKozyriatskyi:CircularProgressIndicator:1.3.0")
 
   testImplementation("junit:junit:4.12")
   androidTestImplementation("androidx.test:runner:1.1.2-alpha01")
