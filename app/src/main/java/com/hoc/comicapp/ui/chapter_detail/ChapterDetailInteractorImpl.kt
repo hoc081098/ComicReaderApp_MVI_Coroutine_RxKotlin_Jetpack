@@ -2,10 +2,11 @@ package com.hoc.comicapp.ui.chapter_detail
 
 import com.hoc.comicapp.domain.repository.ComicRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
-import com.hoc.comicapp.ui.chapter_detail.ChapterDetailPartialChange.Initial_Retry_LoadChapter_PartialChange
+import com.hoc.comicapp.ui.chapter_detail.ChapterDetailPartialChange.InitialRetryLoadChapterPartialChange
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailPartialChange.RefreshPartialChange
+import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewState.Chapter
+import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewState.Detail.Companion.fromDomain
 import com.hoc.comicapp.utils.fold
-import io.reactivex.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -17,46 +18,41 @@ class ChapterDetailInteractorImpl(
   private val comicRepository: ComicRepository,
   private val dispatcherProvider: CoroutinesDispatcherProvider
 ) : ChapterDetailInteractor {
-  override fun getChapterDetail(
-    chapterLink: String,
-    chapterName: String?
-  ): Observable<Initial_Retry_LoadChapter_PartialChange> {
-    Timber.d("getChapterDetail $chapterLink")
-    return flow {
-      if (chapterName != null) {
-        val initial = ChapterDetailViewState.Detail.Initial(
-          chapterLink = chapterLink,
-          chapterName = chapterName
+  override fun getChapterDetail(chapter: Chapter) = flow {
+    Timber.tag("LoadChapter###").d("getChapterDetail ${chapter.debug}")
+
+    val initial = ChapterDetailViewState.Detail.Initial(chapter)
+    emit(InitialRetryLoadChapterPartialChange.InitialData(initial))
+
+    emit(InitialRetryLoadChapterPartialChange.Loading)
+
+    emit(
+      comicRepository
+        .getChapterDetail(chapter.link)
+        .fold(
+          left = {
+            InitialRetryLoadChapterPartialChange.Error(
+              it,
+              initial
+            )
+          },
+          right = { InitialRetryLoadChapterPartialChange.Data(fromDomain(it)) }
         )
-        emit(Initial_Retry_LoadChapter_PartialChange.InitialData(initial))
-      }
+    )
+  }.flowOn(dispatcherProvider.ui).asObservable()
 
-      emit(Initial_Retry_LoadChapter_PartialChange.Loading)
+  override fun refresh(chapter: Chapter) = flow {
+    Timber.tag("LoadChapter###").d("refresh ${chapter.debug}")
 
-      emit(
-        comicRepository
-          .getChapterDetail(chapterLink)
-          .fold(
-            left = { Initial_Retry_LoadChapter_PartialChange.Error(it) },
-            right = { Initial_Retry_LoadChapter_PartialChange.Data(it) }
-          )
-      )
-    }.flowOn(dispatcherProvider.ui).asObservable()
-  }
+    emit(RefreshPartialChange.Loading)
 
-  override fun refresh(chapterLink: String): Observable<RefreshPartialChange> {
-    Timber.d("refresh $chapterLink")
-    return flow {
-      emit(RefreshPartialChange.Loading)
-
-      emit(
-        comicRepository
-          .getChapterDetail(chapterLink)
-          .fold(
-            left = { RefreshPartialChange.Error(it) },
-            right = { RefreshPartialChange.Success(it) }
-          )
-      )
-    }.flowOn(dispatcherProvider.ui).asObservable()
-  }
+    emit(
+      comicRepository
+        .getChapterDetail(chapter.link)
+        .fold(
+          left = { RefreshPartialChange.Error(it) },
+          right = { RefreshPartialChange.Success(fromDomain(it)) }
+        )
+    )
+  }.flowOn(dispatcherProvider.ui).asObservable()
 }
