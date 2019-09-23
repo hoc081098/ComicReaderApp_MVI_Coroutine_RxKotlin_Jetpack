@@ -15,10 +15,7 @@ import com.hoc.comicapp.utils.toOptional
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.cast
-import io.reactivex.rxkotlin.ofType
-import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.rxkotlin.*
 
 class ChapterDetailViewModel(
   private val interactor: ChapterDetailInteractor,
@@ -127,10 +124,15 @@ class ChapterDetailViewModel(
     intents.subscribe(intentS)!!
 
   init {
-    intentS
-      .compose(intentFilter)
-      .compose(intentToChanges)
-      .scan(initialState) { vs, change -> change.reducer(vs) }
+    val intents = intentS.compose(intentFilter)
+    Observables.combineLatest(
+      intents
+        .compose(intentToChanges)
+        .scan(initialState) { vs, change -> change.reducer(vs) },
+      intents
+        .ofType<ChangeOrientation>()
+        .map { it.orientation }
+    ) { state, orientation -> state.copy(orientation = orientation) }
       .observeOn(rxSchedulerProvider.main)
       .subscribeBy(onNext = ::setNewState)
       .addTo(compositeDisposable)

@@ -10,16 +10,20 @@ import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.AutoTransition
 import androidx.transition.TransitionManager
 import androidx.viewpager2.widget.ViewPager2
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.activity.MainActivity
+import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewIntent.*
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.snack
 import com.jakewharton.rxbinding3.view.clicks
+import com.jakewharton.rxbinding3.widget.checkedChanges
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
@@ -65,7 +69,13 @@ class ChapterDetailFragment : Fragment() {
     chapterImageAdapter: ChapterImageAdapter,
     allChaptersAdapter: ArrayAdapter<ChapterDetailViewState.Chapter>
   ) {
-    view_pager.adapter = chapterImageAdapter
+    recycler_images.run {
+      setHasFixedSize(true)
+      layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
+      adapter = chapterImageAdapter
+    }
+
+
     spinner_chapters.adapter = allChaptersAdapter
     spinner_chapters.setSelection(0, false)
   }
@@ -85,7 +95,7 @@ class ChapterDetailFragment : Fragment() {
       Timber.d("chapter_detail_state=[$isLoading, $isRefreshing, $errorMessage, $detail, $orientation]")
       shouldEmitSelectedItem = false
 
-      view_pager.orientation = orientation
+      (recycler_images.layoutManager as LinearLayoutManager).orientation = orientation
 
       progress_bar.isVisible = isLoading
 
@@ -138,7 +148,7 @@ class ChapterDetailFragment : Fragment() {
     viewModel.processIntents(
       Observable.mergeArray(
         Observable.just(
-          ChapterDetailViewIntent.Initial(
+          Initial(
             ChapterDetailViewState.Chapter(
               name = navArgs.chapter.chapterName,
               link = navArgs.chapter.chapterLink
@@ -147,16 +157,19 @@ class ChapterDetailFragment : Fragment() {
         ),
         button_next
           .clicks()
-          .map { ChapterDetailViewIntent.LoadNextChapter },
+          .map { LoadNextChapter },
         button_prev
           .clicks()
-          .map { ChapterDetailViewIntent.LoadPrevChapter },
+          .map { LoadPrevChapter },
         button_retry
           .clicks()
-          .map { ChapterDetailViewIntent.Retry },
+          .map { Retry },
         chapterItemSelections
-          .map { ChapterDetailViewIntent.LoadChapter(it) }
-          .doOnNext { Timber.tag("LoadChapter###").d("Load intent ${it.chapter.debug}") }
+          .map { LoadChapter(it) }
+          .doOnNext { Timber.tag("LoadChapter###").d("Load intent ${it.chapter.debug}") },
+        switch_orientation
+          .checkedChanges()
+          .map { ChangeOrientation(if (it) RecyclerView.VERTICAL else RecyclerView.HORIZONTAL) }
       )
     ).addTo(compositeDisposable)
   }

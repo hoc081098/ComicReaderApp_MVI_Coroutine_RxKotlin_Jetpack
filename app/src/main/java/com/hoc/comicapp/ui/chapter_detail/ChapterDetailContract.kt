@@ -1,6 +1,7 @@
 package com.hoc.comicapp.ui.chapter_detail
 
-import androidx.viewpager2.widget.ViewPager2
+
+import androidx.recyclerview.widget.RecyclerView
 import com.hoc.comicapp.base.Intent
 import com.hoc.comicapp.base.SingleEvent
 import com.hoc.comicapp.base.ViewState
@@ -26,7 +27,7 @@ sealed class ChapterDetailViewIntent : Intent {
   object LoadNextChapter : ChapterDetailViewIntent()
   object LoadPrevChapter : ChapterDetailViewIntent()
   data class LoadChapter(val chapter: Chapter) : ChapterDetailViewIntent()
-  data class ChangeOrientation(@ViewPager2.Orientation val orientation: Int) :
+  data class ChangeOrientation(@RecyclerView.Orientation val orientation: Int) :
     ChapterDetailViewIntent()
 }
 
@@ -35,7 +36,7 @@ data class ChapterDetailViewState(
   val isRefreshing: Boolean,
   val errorMessage: String?,
   val detail: Detail?,
-  @ViewPager2.Orientation val orientation: Int
+  @RecyclerView.Orientation val orientation: Int
 ) : ViewState {
 
   data class Chapter(val name: String, val link: String) {
@@ -86,7 +87,7 @@ data class ChapterDetailViewState(
         isRefreshing = false,
         detail = null,
         errorMessage = null,
-        orientation = ViewPager2.ORIENTATION_VERTICAL
+        orientation = RecyclerView.VERTICAL
       )
     }
   }
