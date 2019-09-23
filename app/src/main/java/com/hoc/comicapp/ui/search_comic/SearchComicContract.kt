@@ -10,10 +10,7 @@ import io.reactivex.Observable
 import kotlinx.coroutines.CoroutineScope
 
 interface SearchComicInteractor {
-  fun searchComic(
-    coroutineScope: CoroutineScope,
-    term: String
-  ): Observable<SearchComicPartialChange>
+  fun searchComic(term: String): Observable<SearchComicPartialChange>
 }
 
 data class SearchComicViewState(

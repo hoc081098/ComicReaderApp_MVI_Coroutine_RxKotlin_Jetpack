@@ -14,6 +14,7 @@ import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsInteractorImpl
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsViewModel
 import com.hoc.comicapp.ui.home.HomeInteractor
 import com.hoc.comicapp.ui.home.HomeInteractorImpl
+import com.hoc.comicapp.ui.home.HomeInteractorImpl1
 import com.hoc.comicapp.ui.home.HomeViewModel
 import com.hoc.comicapp.ui.search_comic.SearchComicInteractor
 import com.hoc.comicapp.ui.search_comic.SearchComicInteractorImpl
@@ -27,13 +28,15 @@ import org.koin.dsl.module
 @ExperimentalCoroutinesApi
 val viewModelModule = module {
 
-  single { HomeInteractorImpl(get()) } bind HomeInteractor::class
+  single { HomeInteractorImpl(get(), get()) }
+
+  single { HomeInteractorImpl1(get(), get(), get()) } bind HomeInteractor::class
 
   single { ComicDetailInteractorImpl(get(), get()) } bind ComicDetailInteractor::class
 
-  single { SearchComicInteractorImpl(get()) } bind SearchComicInteractor::class
+  single { SearchComicInteractorImpl(get(), get()) } bind SearchComicInteractor::class
 
-  single { CategoryInteractorImpl(get()) } bind CategoryInteractor::class
+  single { CategoryInteractorImpl(get(), get()) } bind CategoryInteractor::class
 
   single { ChapterDetailInteractorImpl(get(), get()) } bind ChapterDetailInteractor::class
 

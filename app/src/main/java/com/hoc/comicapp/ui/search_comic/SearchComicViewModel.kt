@@ -1,6 +1,5 @@
 package com.hoc.comicapp.ui.search_comic
 
-import androidx.lifecycle.viewModelScope
 import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
@@ -41,33 +40,31 @@ class SearchComicViewModel(
       .map { it.second }
       .doOnNext { Timber.d("[RETRY] $it") }
       .switchMap { term ->
-        interactor.searchComic(
-          coroutineScope = viewModelScope,
-          term = term
-        ).doOnNext {
-          val messageFromError =
-            (it as? SearchComicPartialChange.Error ?: return@doOnNext).error.getMessage()
-          sendEvent(
-            SearchComicSingleEvent.MessageEvent(
-              "Search for '$term', error occurred: $messageFromError"
+        interactor
+          .searchComic(term)
+          .doOnNext {
+            val messageFromError =
+              (it as? SearchComicPartialChange.Error ?: return@doOnNext).error.getMessage()
+            sendEvent(
+              SearchComicSingleEvent.MessageEvent(
+                "Search for '$term', error occurred: $messageFromError"
+              )
             )
-          )
-        }
+          }
       }
     val searchPartialChange = searchTerm
       .switchMap { term ->
-        interactor.searchComic(
-          coroutineScope = viewModelScope,
-          term = term
-        ).doOnNext {
-          val messageFromError =
+        interactor
+          .searchComic(term)
+          .doOnNext {
+            val messageFromError =
             (it as? SearchComicPartialChange.Error ?: return@doOnNext).error.getMessage()
-          sendEvent(
-            SearchComicSingleEvent.MessageEvent(
-              "Retry search for '$term', error occurred: $messageFromError"
+            sendEvent(
+              SearchComicSingleEvent.MessageEvent(
+                "Retry search for '$term', error occurred: $messageFromError"
+              )
             )
-          )
-        }
+          }
       }
     Observable.mergeArray(searchPartialChange, retryPartialChange)
       .scan(initialState) { state, change -> change.reducer(state) }

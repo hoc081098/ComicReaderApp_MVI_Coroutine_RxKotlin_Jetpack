@@ -1,6 +1,5 @@
 package com.hoc.comicapp.ui.category
 
-import androidx.lifecycle.viewModelScope
 import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
@@ -60,7 +59,7 @@ class CategoryViewModel(
   private val initialProcessor =
     ObservableTransformer<CategoryViewIntent.Initial, CategoryPartialChange> { intentObservable ->
       intentObservable.flatMap {
-        categoryInteractor.getAllCategories(viewModelScope)
+        categoryInteractor.getAllCategories()
           .doOnNext {
             if (it is CategoryPartialChange.InitialRetryPartialChange.Error) {
               sendMessageEvent(message = "Error occurred: ${it.error.getMessage()}")
@@ -76,7 +75,7 @@ class CategoryViewModel(
   private val refreshProcessor =
     ObservableTransformer<CategoryViewIntent.Refresh, CategoryPartialChange> { intentObservable ->
       intentObservable.exhaustMap {
-        categoryInteractor.refresh(viewModelScope)
+        categoryInteractor.refresh()
           .doOnNext {
             when (it) {
               is CategoryPartialChange.RefreshPartialChange.Error -> sendMessageEvent(message = "Refresh error occurred: ${it.error.getMessage()}")
@@ -93,7 +92,7 @@ class CategoryViewModel(
   private val retryProcessor =
     ObservableTransformer<CategoryViewIntent.Retry, CategoryPartialChange> { intentObservable ->
       intentObservable.exhaustMap {
-        categoryInteractor.getAllCategories(viewModelScope)
+        categoryInteractor.getAllCategories()
           .doOnNext {
             if (it is CategoryPartialChange.InitialRetryPartialChange.Error) {
               sendMessageEvent(message = "Retry error occurred: ${it.error.getMessage()}")

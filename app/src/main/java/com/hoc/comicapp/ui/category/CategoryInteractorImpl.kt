@@ -1,16 +1,19 @@
 package com.hoc.comicapp.ui.category
 
 import com.hoc.comicapp.domain.repository.ComicRepository
+import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
 import com.hoc.comicapp.utils.fold
 import io.reactivex.Observable
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.rx2.rxObservable
 
 @ExperimentalCoroutinesApi
-class CategoryInteractorImpl(private val comicRepository: ComicRepository) : CategoryInteractor {
-  override fun refresh(coroutineScope: CoroutineScope): Observable<CategoryPartialChange.RefreshPartialChange> {
-    return coroutineScope.rxObservable {
+class CategoryInteractorImpl(
+  private val comicRepository: ComicRepository,
+  private val dispatcherProvider: CoroutinesDispatcherProvider
+) : CategoryInteractor {
+  override fun refresh(): Observable<CategoryPartialChange.RefreshPartialChange> {
+    return rxObservable(dispatcherProvider.ui) {
       send(CategoryPartialChange.RefreshPartialChange.Loading)
       comicRepository
         .getAllCategories()
@@ -22,8 +25,8 @@ class CategoryInteractorImpl(private val comicRepository: ComicRepository) : Cat
     }
   }
 
-  override fun getAllCategories(coroutineScope: CoroutineScope): Observable<CategoryPartialChange.InitialRetryPartialChange> {
-    return coroutineScope.rxObservable {
+  override fun getAllCategories(): Observable<CategoryPartialChange.InitialRetryPartialChange> {
+    return rxObservable(dispatcherProvider.ui) {
       send(CategoryPartialChange.InitialRetryPartialChange.Loading)
       comicRepository
         .getAllCategories()

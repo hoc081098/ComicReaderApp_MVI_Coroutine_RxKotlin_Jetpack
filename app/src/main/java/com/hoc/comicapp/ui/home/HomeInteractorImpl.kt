@@ -1,21 +1,24 @@
 package com.hoc.comicapp.ui.home
 
 import com.hoc.comicapp.domain.repository.ComicRepository
+import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
 import com.hoc.comicapp.utils.*
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.cast
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.rx2.rxObservable
 
 @ExperimentalCoroutinesApi
-class HomeInteractorImpl(private val comicRepository: ComicRepository) : HomeInteractor {
+class HomeInteractorImpl(
+  private val comicRepository: ComicRepository,
+  private val dispatcherProvider: CoroutinesDispatcherProvider
+) : HomeInteractor {
   /**
    * Newest list
    */
-  override fun newestComics(coroutineScope: CoroutineScope): Observable<HomePartialChange> {
-    return coroutineScope.rxObservable {
+  override fun newestComics(): Observable<HomePartialChange> {
+    return rxObservable(dispatcherProvider.ui) {
       /**
        * Send loading
        */
@@ -50,8 +53,8 @@ class HomeInteractorImpl(private val comicRepository: ComicRepository) : HomeInt
   /**
    * Most viewed list
    */
-  override fun mostViewedComics(coroutineScope: CoroutineScope): Observable<HomePartialChange> {
-    return coroutineScope.rxObservable {
+  override fun mostViewedComics(): Observable<HomePartialChange> {
+    return rxObservable(dispatcherProvider.ui) {
       /**
        * Send loading
        */
@@ -87,10 +90,9 @@ class HomeInteractorImpl(private val comicRepository: ComicRepository) : HomeInt
    * Updated list
    */
   override fun updatedComics(
-    coroutineScope: CoroutineScope,
     page: Int
   ): Observable<HomePartialChange> {
-    return coroutineScope.rxObservable {
+    return rxObservable(dispatcherProvider.ui) {
       /**
        * Send loading
        */
@@ -112,11 +114,11 @@ class HomeInteractorImpl(private val comicRepository: ComicRepository) : HomeInt
     }.cast()
   }
 
-  override fun refreshAll(coroutineScope: CoroutineScope): Observable<HomePartialChange> {
+  override fun refreshAll(): Observable<HomePartialChange> {
     return Observables.zip(
-      coroutineScope.rxObservable { send(comicRepository.getNewestComics(null)) },
-      coroutineScope.rxObservable { send(comicRepository.getMostViewedComics()) },
-      coroutineScope.rxObservable { send(comicRepository.getUpdatedComics()) }
+      rxObservable(dispatcherProvider.ui) { send(comicRepository.getNewestComics(null)) },
+      rxObservable(dispatcherProvider.ui) { send(comicRepository.getMostViewedComics()) },
+      rxObservable(dispatcherProvider.ui) { send(comicRepository.getUpdatedComics()) }
     ).map<HomePartialChange> { (newest, mostViewed, updated) ->
       newest.flatMap { newestList ->
         mostViewed.flatMap { mostViewedList ->

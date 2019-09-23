@@ -8,12 +8,11 @@ import com.hoc.comicapp.domain.models.Category
 import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.getMessage
 import io.reactivex.Observable
-import kotlinx.coroutines.CoroutineScope
 
 interface CategoryInteractor {
-  fun getAllCategories(coroutineScope: CoroutineScope): Observable<CategoryPartialChange.InitialRetryPartialChange>
+  fun getAllCategories(): Observable<CategoryPartialChange.InitialRetryPartialChange>
 
-  fun refresh(coroutineScope: CoroutineScope): Observable<CategoryPartialChange.RefreshPartialChange>
+  fun refresh(): Observable<CategoryPartialChange.RefreshPartialChange>
 }
 
 data class CategoryViewState(
