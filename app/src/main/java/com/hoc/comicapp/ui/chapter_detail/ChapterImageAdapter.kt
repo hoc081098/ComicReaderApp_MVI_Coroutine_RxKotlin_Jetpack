@@ -64,6 +64,7 @@ class ChapterImageAdapter(
         .load(imageUrl)
         .diskCacheStrategy(DiskCacheStrategy.ALL)
         .fitCenter()
+        .placeholder(R.drawable.logo_nettruyen)
         .listener(object : RequestListener<Drawable?> {
           override fun onLoadFailed(
             e: GlideException?,

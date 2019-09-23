@@ -34,7 +34,6 @@ class ChapterDetailFragment : Fragment() {
   private val compositeDisposable = CompositeDisposable()
 
   private val mainActivity get() = requireActivity() as MainActivity
-  private var executeOnItemSelected = true
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -91,7 +90,7 @@ class ChapterDetailFragment : Fragment() {
       text_error_message.text = errorMessage
 
       detail ?: return@observe
-      mainActivity.setToolbarTitle(detail.chapterName)
+      mainActivity.setToolbarTitle(detail.chapter.name)
 
       when (detail) {
         is ChapterDetailViewState.Detail.Data -> {
@@ -104,12 +103,6 @@ class ChapterDetailFragment : Fragment() {
 
           allChaptersAdapter.clear()
           allChaptersAdapter.addAll(detail.chapters)
-
-          executeOnItemSelected = false
-          val index = detail.chapters.indexOfFirst { it.link == detail.chapterLink }
-          Timber.d("index=$index")
-          spinner_chapters.setSelection(index, false)
-          executeOnItemSelected = true
 
           TransitionManager.beginDelayedTransition(bottom_nav, AutoTransition())
           button_prev.isInvisible = detail.prevChapterLink === null
@@ -124,8 +117,8 @@ class ChapterDetailFragment : Fragment() {
         override fun onNothingSelected(parent: AdapterView<*>?) {}
 
         override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-          if (executeOnItemSelected && !emitter.isDisposed) {
-            emitter.onNext(parent.selectedItem as ChapterDetailViewState.Chapter)
+          if (!emitter.isDisposed) {
+            emitter.onNext(parent.getItemAtPosition(position) as ChapterDetailViewState.Chapter)
           }
         }
       }
@@ -136,8 +129,10 @@ class ChapterDetailFragment : Fragment() {
       Observable.mergeArray(
         Observable.just(
           ChapterDetailViewIntent.Initial(
-            name = navArgs.chapter.chapterName,
-            link = navArgs.chapter.chapterLink
+            ChapterDetailViewState.Chapter(
+              name = navArgs.chapter.chapterName,
+              link = navArgs.chapter.chapterLink
+            )
           )
         ),
         button_next
@@ -150,7 +145,8 @@ class ChapterDetailFragment : Fragment() {
           .clicks()
           .map { ChapterDetailViewIntent.Retry },
         chapterItemSelections
-          .map { ChapterDetailViewIntent.LoadChapter(it.link, it.name) }
+          .map { ChapterDetailViewIntent.LoadChapter(it) }
+          .doOnNext { Timber.tag("LoadChapter###").d(it.toString()) }
       )
     ).addTo(compositeDisposable)
   }
