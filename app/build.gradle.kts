@@ -118,6 +118,7 @@ dependencies {
   implementation("com.ms-square:expandableTextView:0.1.4")
   implementation("com.jaredrummler:material-spinner:1.3.1")
   implementation("com.github.antonKozyriatskyi:CircularProgressIndicator:1.3.0")
+  implementation("com.github.chrisbanes:PhotoView:2.3.0")
 
   testImplementation("junit:junit:4.12")
   androidTestImplementation("androidx.test:runner:1.1.2-alpha01")

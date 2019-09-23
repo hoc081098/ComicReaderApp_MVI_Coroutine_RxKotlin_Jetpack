@@ -95,6 +95,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         tools:listitem="@layout/item_recycler_chapter_detail_image"
         app:layout_constraintStart_toStartOf="parent"
+        android:scrollbars="vertical"
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.constraintlayout.widget.Group
