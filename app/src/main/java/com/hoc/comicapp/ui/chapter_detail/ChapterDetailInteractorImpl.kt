@@ -19,7 +19,7 @@ class ChapterDetailInteractorImpl(
   private val dispatcherProvider: CoroutinesDispatcherProvider
 ) : ChapterDetailInteractor {
   override fun getChapterDetail(chapter: Chapter) = flow {
-    Timber.tag("LoadChapter###").d("getChapterDetail $chapter")
+    Timber.tag("LoadChapter###").d("getChapterDetail ${chapter.debug}")
 
     val initial = ChapterDetailViewState.Detail.Initial(chapter)
     emit(InitialRetryLoadChapterPartialChange.InitialData(initial))
@@ -42,7 +42,7 @@ class ChapterDetailInteractorImpl(
   }.flowOn(dispatcherProvider.ui).asObservable()
 
   override fun refresh(chapter: Chapter) = flow {
-    Timber.tag("LoadChapter###").d("refresh $chapter")
+    Timber.tag("LoadChapter###").d("refresh ${chapter.debug}")
 
     emit(RefreshPartialChange.Loading)
 

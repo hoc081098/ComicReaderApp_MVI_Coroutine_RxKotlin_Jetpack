@@ -32,16 +32,28 @@ class ChapterDetailViewModel(
   private val currentChapter
     get() = state.value.detail?.chapter ?: error("State is null")
 
-  private val nextChapter
-    get() = when (val detail = state.value.detail) {
-      is ChapterDetailViewState.Detail.Data -> detail.nextChapterLink?.let { Chapter(name = "Testing...", link = it) }
-      else -> null
+  private val nextChapter: Chapter?
+    get() {
+      val detail = (state.value.detail as? ChapterDetailViewState.Detail.Data) ?: return null
+      return detail.nextChapterLink?.let { nextChapterLink ->
+        detail
+          .chapters
+          .find { it.link == nextChapterLink }
+          ?.name
+          ?.let { Chapter(name = it, link = nextChapterLink) }
+      }
     }
 
-  private val prevChapter
-    get() = when (val detail = state.value.detail) {
-      is ChapterDetailViewState.Detail.Data -> detail.prevChapterLink?.let { Chapter(name = "Testing...", link = it) }
-      else -> null
+  private val prevChapter: Chapter?
+    get() {
+      val detail = (state.value.detail as? ChapterDetailViewState.Detail.Data) ?: return null
+      return detail.prevChapterLink?.let { prevChapterLink ->
+        detail
+          .chapters
+          .find { it.link == prevChapterLink }
+          ?.name
+          ?.let { Chapter(name = it, link = prevChapterLink) }
+      }
     }
 
   private val refreshProcessor =
@@ -81,43 +93,9 @@ class ChapterDetailViewModel(
             .getChapterDetail(intent.chapter)
             .doOnNext {
               if (it is InitialRetryLoadChapterPartialChange.Error) {
-                sendMessageEvent(message = "Load ${intent.chapter} error occurred: ${it.error.getMessage()}")
+                sendMessageEvent("Load ${intent.chapter.name} error occurred: ${it.error.getMessage()}")
               }
             }
-        }
-    }
-
-  private val loadNextChapterProcessor =
-    ObservableTransformer<LoadNextChapter, ChapterDetailPartialChange> { intents ->
-      intents
-        .map { nextChapter.toOptional() }
-        .ofType<Some<Chapter>>()
-        .exhaustMap { nextChapterOptional ->
-          interactor
-            .getChapterDetail(nextChapterOptional.value)
-            .doOnNext {
-              if (it is InitialRetryLoadChapterPartialChange.Error) {
-                sendMessageEvent(message = "Load next chapter error occurred: ${it.error.getMessage()}")
-              }
-            }
-            .cast<ChapterDetailPartialChange>()
-        }
-    }
-
-  private val loadPrevChapterProcessor =
-    ObservableTransformer<LoadPrevChapter, ChapterDetailPartialChange> { intents ->
-      intents
-        .map { prevChapter.toOptional() }
-        .ofType<Some<Chapter>>()
-        .exhaustMap { prevChapterOptional ->
-          interactor
-            .getChapterDetail(prevChapterOptional.value)
-            .doOnNext {
-              if (it is InitialRetryLoadChapterPartialChange.Error) {
-                sendMessageEvent(message = "Load prev chapter error occurred: ${it.error.getMessage()}")
-              }
-            }
-            .cast<ChapterDetailPartialChange>()
         }
     }
 
@@ -126,14 +104,22 @@ class ChapterDetailViewModel(
       Observable.mergeArray(
         Observable.mergeArray(
           intents.ofType(),
-          intents.ofType<Initial>().map { LoadChapter(it.chapter) }
+          intents.ofType<Initial>().map { LoadChapter(it.chapter) },
+          intents.ofType<LoadNextChapter>()
+            .map { nextChapter.toOptional() }
+            .ofType<Some<Chapter>>()
+            .map { it.value }
+            .map(::LoadChapter),
+          intents.ofType<LoadPrevChapter>()
+            .map { prevChapter.toOptional() }
+            .ofType<Some<Chapter>>()
+            .map { it.value }
+            .map(::LoadChapter)
         )
           .distinctUntilChanged()
           .compose(loadChapterProcessor),
         intents.ofType<Refresh>().compose(refreshProcessor),
-        intents.ofType<Retry>().compose(retryProcessor),
-        intents.ofType<LoadNextChapter>().compose(loadNextChapterProcessor),
-        intents.ofType<LoadPrevChapter>().compose(loadPrevChapterProcessor)
+        intents.ofType<Retry>().compose(retryProcessor)
       )
     }
 

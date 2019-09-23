@@ -40,6 +40,7 @@ data class ChapterDetailViewState(
 
   data class Chapter(val name: String, val link: String) {
     override fun toString() = name
+    val debug get() = "Chapter { name=$name, link=$link }"
   }
 
   sealed class Detail {
