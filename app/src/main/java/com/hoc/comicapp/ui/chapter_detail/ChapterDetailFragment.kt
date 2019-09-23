@@ -107,12 +107,7 @@ class ChapterDetailFragment : Fragment() {
 
       when (detail) {
         is ChapterDetailViewState.Detail.Data -> {
-          val list = when {
-            errorMessage !== null || isLoading -> emptyList()
-            else -> detail.images
-          }
-          Timber.d("chapter_detail_state ${detail.images.size} ${list.size}")
-          imageAdapter.submitList(list)
+          imageAdapter.submitList(detail.images)
 
           allChaptersAdapter.clear()
           allChaptersAdapter.addAll(detail.chapters)
@@ -126,7 +121,9 @@ class ChapterDetailFragment : Fragment() {
           button_prev.isInvisible = detail.prevChapterLink === null
           button_next.isInvisible = detail.nextChapterLink === null
         }
-        is ChapterDetailViewState.Detail.Initial -> Unit
+        is ChapterDetailViewState.Detail.Initial -> {
+          imageAdapter.submitList(emptyList())
+        }
       }
 
       shouldEmitSelectedItem = true
