@@ -63,7 +63,7 @@ class ChapterImageAdapter(
       glide
         .load(imageUrl)
         .diskCacheStrategy(DiskCacheStrategy.ALL)
-        .placeholder(R.drawable.logo_nettruyen)
+        .placeholder(R.drawable.comic)
         .listener(object : RequestListener<Drawable?> {
           override fun onLoadFailed(
             e: GlideException?,
