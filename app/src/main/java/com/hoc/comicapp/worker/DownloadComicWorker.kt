@@ -10,16 +10,15 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.hoc.comicapp.R
 import com.hoc.comicapp.activity.SplashActivity
+import com.hoc.comicapp.domain.models.ComicDetail.Chapter
 import com.hoc.comicapp.domain.repository.DownloadComicsRepository
 import com.hoc.comicapp.koin.appModule
 import com.hoc.comicapp.koin.dataModule
 import com.hoc.comicapp.koin.networkModule
+import com.squareup.moshi.Moshi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import org.koin.android.ext.koin.androidContext
-import org.koin.core.Koin
-import org.koin.core.KoinComponent
-import org.koin.core.inject
 import org.koin.dsl.koinApplication
 import timber.log.Timber
 
@@ -34,12 +33,15 @@ class DownloadComicWorker(
   }.koin
 
   private val downloadComicsRepo by koin.inject<DownloadComicsRepository>()
+  private val moshi by koin.inject<Moshi>()
 
   override suspend fun doWork(): Result {
-    val chapterLink =
-      inputData.getString(CHAPTER_LINK) ?: return Result.failure(workDataOf(ERROR to "chapterUrl is null"))
+    val chapterJson = inputData.getString(CHAPTER)
+      ?: return Result.failure(workDataOf(ERROR to "chapterJson is null"))
 
-    val chapterName = inputData.getString(CHAPTER_NAME)
+    val (chapterLink, chapterName) = moshi.adapter<Chapter>(Chapter::class.java).fromJson(chapterJson)
+      ?: return Result.failure(workDataOf(ERROR to "chapter is null"))
+
     val comicName = inputData.getString(COMIC_NAME)
     val chapterComicName = listOfNotNull(chapterName, comicName).joinToString(" - ")
 
@@ -97,8 +99,7 @@ class DownloadComicWorker(
   companion object {
     const val TAG = "DOWNLOAD_CHAPTER_TAG"
     const val ERROR = "ERROR"
-    const val CHAPTER_LINK = "CHAPTER_LINK"
-    const val CHAPTER_NAME = "CHAPTER_NAME"
+    const val CHAPTER = "CHAPTER"
     const val COMIC_NAME = "COMIC_NAME"
     const val PROGRESS = "PROGRESS"
   }

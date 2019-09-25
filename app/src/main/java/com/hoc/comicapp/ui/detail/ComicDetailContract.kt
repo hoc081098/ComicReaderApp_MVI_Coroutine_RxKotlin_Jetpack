@@ -108,7 +108,7 @@ data class ComicDetailViewState(
       return true
     }
 
-    fun toDomain(): DownloadedChapter {
+    fun toDownloadedChapterDomain(): DownloadedChapter {
       return DownloadedChapter(
         chapterLink = chapterLink,
         chapterName = chapterName,
@@ -117,6 +117,15 @@ data class ComicDetailViewState(
         images = emptyList(),
         downloadedAt = Date(),
         comicLink = comicLink
+      )
+    }
+
+    fun toComicDetailChapterDomain(): com.hoc.comicapp.domain.models.ComicDetail.Chapter{
+      return com.hoc.comicapp.domain.models.ComicDetail.Chapter(
+        chapterLink = chapterLink,
+        chapterName = chapterName,
+        time = time,
+        view = view
       )
     }
   }
