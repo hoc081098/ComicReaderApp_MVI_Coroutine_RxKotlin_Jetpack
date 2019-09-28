@@ -9,7 +9,6 @@ import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.getMessage
 import io.reactivex.Observable
 import kotlinx.android.parcel.Parcelize
-import kotlinx.coroutines.CoroutineScope
 
 /**
  * Argument to pass to [com.hoc.comicapp.ui.detail.ComicDetailFragment]
@@ -22,16 +21,13 @@ data class ComicArg(
 ): Parcelable
 
 interface HomeInteractor {
-  fun newestComics(coroutineScope: CoroutineScope): Observable<HomePartialChange>
+  fun newestComics(): Observable<HomePartialChange>
 
-  fun mostViewedComics(coroutineScope: CoroutineScope): Observable<HomePartialChange>
+  fun mostViewedComics(): Observable<HomePartialChange>
 
-  fun updatedComics(
-    coroutineScope: CoroutineScope,
-    page: Int
-  ): Observable<HomePartialChange>
+  fun updatedComics(page: Int): Observable<HomePartialChange>
 
-  fun refreshAll(coroutineScope: CoroutineScope): Observable<HomePartialChange>
+  fun refreshAll(): Observable<HomePartialChange>
 }
 
 sealed class HomeListItem {

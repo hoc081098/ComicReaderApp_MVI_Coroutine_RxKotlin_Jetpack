@@ -1,6 +1,5 @@
 package com.hoc.comicapp.ui.home
 
-import androidx.lifecycle.viewModelScope
 import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
@@ -37,21 +36,21 @@ class HomeViewModel(
         .flatMap {
           Observable.mergeArray(
             homeInteractor
-              .newestComics(coroutineScope = viewModelScope)
+              .newestComics()
               .doOnNext {
                 val messageFromError = (it as? HomePartialChange.NewestHomePartialChange.Error
                   ?: return@doOnNext).error.getMessage()
                 sendMessageEvent("Get newest list error: $messageFromError")
               },
             homeInteractor
-              .mostViewedComics(coroutineScope = viewModelScope)
+              .mostViewedComics()
               .doOnNext {
                 val messageFromError = (it as? HomePartialChange.MostViewedHomePartialChange.Error
                   ?: return@doOnNext).error.getMessage()
                 sendMessageEvent("Get most viewed list error: $messageFromError")
               },
             homeInteractor
-              .updatedComics(page = 1, coroutineScope = viewModelScope)
+              .updatedComics(page = 1)
               .doOnNext {
                 val messageFromError =
                   (it as? HomePartialChange.UpdatedPartialChange.Error
@@ -70,7 +69,7 @@ class HomeViewModel(
       intent
         .exhaustMap {
           homeInteractor
-            .refreshAll(coroutineScope = viewModelScope)
+            .refreshAll()
             .doOnNext {
               sendMessageEvent(
                 when (it) {
@@ -99,8 +98,7 @@ class HomeViewModel(
         .doOnNext { Timber.d("[~~~] load_next_page = $it") }
         .exhaustMap {
           homeInteractor.updatedComics(
-            page = it,
-            coroutineScope = viewModelScope
+            page = it
           )
         }
     }
@@ -116,7 +114,7 @@ class HomeViewModel(
         .doOnNext { Timber.d("[~~~] refresh_page=$it") }
         .exhaustMap {
           homeInteractor
-            .updatedComics(page = it, coroutineScope = viewModelScope)
+            .updatedComics(page = it)
             .doOnNext {
               val messageFromError =
                 (it as? HomePartialChange.UpdatedPartialChange.Error
@@ -133,7 +131,7 @@ class HomeViewModel(
     ObservableTransformer<HomeViewIntent.RetryNewest, HomePartialChange> {
       it.exhaustMap {
         homeInteractor
-          .newestComics(coroutineScope = viewModelScope)
+          .newestComics()
           .doOnNext {
             val messageFromError =
               (it as? HomePartialChange.NewestHomePartialChange.Error
@@ -150,7 +148,7 @@ class HomeViewModel(
     ObservableTransformer<HomeViewIntent.RetryMostViewed, HomePartialChange> {
       it.exhaustMap {
         homeInteractor
-          .mostViewedComics(coroutineScope = viewModelScope)
+          .mostViewedComics()
           .doOnNext {
             val messageFromError =
               (it as? HomePartialChange.MostViewedHomePartialChange.Error
