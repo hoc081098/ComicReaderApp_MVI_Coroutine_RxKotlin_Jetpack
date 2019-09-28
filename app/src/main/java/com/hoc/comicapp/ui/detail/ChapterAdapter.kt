@@ -113,7 +113,7 @@ class ChapterAdapter(
       val chapter = item.chapter
       textChapterTitle.text = chapter.chapterName
       textChapterTime.text = chapter.time
-      textChapterView.text = "${chapter.view}\u00A0"
+      textChapterView.text = "${chapter.view} "
       updateDownloadState(chapter.downloadState)
     }
 

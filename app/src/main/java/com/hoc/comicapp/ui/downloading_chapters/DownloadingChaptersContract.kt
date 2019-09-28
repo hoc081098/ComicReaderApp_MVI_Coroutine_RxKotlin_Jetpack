@@ -30,6 +30,7 @@ interface DownloadingChaptersContract {
     data class Chapter(
       val title: String,
       val link: String,
+      val comicTitle: String,
       val progress: Int
     )
   }

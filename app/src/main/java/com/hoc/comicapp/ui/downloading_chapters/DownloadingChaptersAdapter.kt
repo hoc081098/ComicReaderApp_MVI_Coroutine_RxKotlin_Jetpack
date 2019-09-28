@@ -9,7 +9,7 @@ import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
 import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersContract.ViewState.Chapter
 import com.hoc.comicapp.utils.inflate
-import kotlinx.android.synthetic.main.item_recycler_chapter.view.*
+import kotlinx.android.synthetic.main.item_recycler_downloading_chapter.view.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -24,13 +24,28 @@ class DownloadingChaptersAdapter(
   private val dateFormatter = SimpleDateFormat("hh:mm, dd/MM/yyyy", Locale.getDefault())
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-    VH(parent inflate R.layout.item_recycler_chapter)
+    VH(parent inflate R.layout.item_recycler_downloading_chapter)
 
   override fun onBindViewHolder(holder: VH, position: Int) = holder.bind(getItem(position))
 
   inner class VH(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    private val textChapterTitle = itemView.text_chapter_title!!
+    private val textComicTitle = itemView.text_comic_title!!
+    private val progress = itemView.progress!!
+    private val textProgress = itemView.text_progress!!
+    private val imageCancelDownload = itemView.image_cancel_download!!
+
+    init {
+      imageCancelDownload.setOnClickListener {
+        //TODO
+      }
+    }
+
     fun bind(chapter: Chapter) {
-      itemView.text_chapter_title.text = "${chapter.progress}%"
+      textChapterTitle.text = chapter.title
+      textComicTitle.text = chapter.comicTitle
+      progress.progress = chapter.progress
+      textProgress.text = "${chapter.progress}% "
     }
   }
 }

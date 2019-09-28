@@ -42,26 +42,31 @@ class DownloadingChaptersViewModel(
   init {
     workInfosByTagLiveData.observeForever(this)
     workInfosS
+      .observeOn(rxSchedulerProvider.io)
       .map { workInfos ->
         workInfos
-          .filter { it.state == WorkInfo.State.RUNNING }
-          .map {
-            val comicName = it.progress.getString(DownloadComicWorker.COMIC_NAME)
-            val chapterJson = it.progress.getString(DownloadComicWorker.CHAPTER)
+          .mapNotNull {
+            if (it.state != WorkInfo.State.RUNNING) return@mapNotNull null
+
+            val comicName = it.progress.getString(DownloadComicWorker.COMIC_NAME) ?: return@mapNotNull null
+            val chapterJson = it.progress.getString(DownloadComicWorker.CHAPTER) ?: return@mapNotNull null
+            val (chapterLink, chapterName) = chapterJsonAdapter.fromJson(chapterJson)
+              ?: return@mapNotNull null
 
             Chapter(
-              title = "Loading...",
-              link = "Loading...",
-              progress = it.progress.getInt(DownloadComicWorker.PROGRESS, 0)
+              title = chapterName,
+              link = chapterLink,
+              progress = it.progress.getInt(DownloadComicWorker.PROGRESS, 0),
+              comicTitle = comicName
             )
           }
       }
       .map<PartialChange> { PartialChange.Data(it) }
       .onErrorReturn { t: Throwable -> PartialChange.Error(UnexpectedError("", t)) }
+      .observeOn(rxSchedulerProvider.main)
       .startWith(PartialChange.Loading)
       .scan(initialState, reducer)
       .distinctUntilChanged()
-      .observeOn(rxSchedulerProvider.main)
       .subscribeBy(onNext = ::setNewState)
       .addTo(compositeDisposable)
   }
