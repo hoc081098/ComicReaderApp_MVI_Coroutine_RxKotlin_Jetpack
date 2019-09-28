@@ -4,7 +4,6 @@ import com.hoc.comicapp.BuildConfig
 import com.hoc.comicapp.data.remote.COMIC_BASE_URL
 import com.hoc.comicapp.data.remote.ComicApiService
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.dsl.module
@@ -18,15 +17,6 @@ val networkModule = module {
   single { getRetrofit(get(), get()) }
 
   single { getComicApiService(get()) }
-
-  single { getMoshi() }
-}
-
-private fun getMoshi(): Moshi {
-  return Moshi
-    .Builder()
-    .add(KotlinJsonAdapterFactory())
-    .build()
 }
 
 private fun getComicApiService(retrofit: Retrofit): ComicApiService {

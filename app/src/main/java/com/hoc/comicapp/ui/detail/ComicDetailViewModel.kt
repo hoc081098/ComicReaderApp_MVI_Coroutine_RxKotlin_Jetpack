@@ -3,8 +3,9 @@ package com.hoc.comicapp.ui.detail
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.work.*
-import androidx.work.WorkInfo.State.*
+import androidx.work.WorkInfo.State.RUNNING
 import com.hoc.comicapp.base.BaseViewModel
+import com.hoc.comicapp.domain.models.ComicDetail
 import com.hoc.comicapp.domain.models.DownloadedChapter
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.domain.repository.DownloadComicsRepository
@@ -20,6 +21,8 @@ import com.hoc.comicapp.worker.DownloadComicWorker
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import com.shopify.livedataktx.MutableLiveDataKtx
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.Moshi
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
 import io.reactivex.Single
@@ -29,14 +32,14 @@ import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.rx2.rxSingle
 import timber.log.Timber
-import java.lang.IllegalStateException
 
 @ExperimentalCoroutinesApi
 class ComicDetailViewModel(
   private val comicDetailInteractor: ComicDetailInteractor,
   private val workManager: WorkManager,
   private val downloadComicsRepository: DownloadComicsRepository,
-  private val rxSchedulerProvider: RxSchedulerProvider
+  private val rxSchedulerProvider: RxSchedulerProvider,
+  private val chapterJsonAdapter: JsonAdapter<ComicDetail.Chapter>
 ) :
   BaseViewModel<ComicDetailIntent, ComicDetailViewState, ComicDetailSingleEvent>(), Observer<ComicDetailViewState> {
   override fun onChanged(t: ComicDetailViewState?) {
@@ -214,7 +217,7 @@ class ComicDetailViewModel(
         when {
           it.second === null -> {
             Timber.d("Enqueue success $it")
-            sendMessageEvent("Enqueued download ${it.first.chapterName}")
+            sendEvent(ComicDetailSingleEvent.EnqueuedDownloadSuccess(it.first))
           }
           else -> {
             Timber.d("Enqueue error $it")
@@ -266,16 +269,19 @@ class ComicDetailViewModel(
   private fun enqueueDownloadComicWorker(chapter: Chapter): Single<Pair<Chapter, Throwable?>> {
     return rxSingle {
       workManager.cancelAllWorkByTag(chapter.chapterLink).await()
+
+      val comicName = when (val detail = state.value.comicDetail) {
+        is ComicDetailViewState.ComicDetail.Detail -> detail.title
+        is ComicDetailViewState.ComicDetail.Initial -> detail.title
+        null -> return@rxSingle chapter to IllegalStateException("State is null")
+      }
+      val chapterJson = chapterJsonAdapter.toJson(chapter.toComicDetailChapterDomain())
+
       val workRequest = OneTimeWorkRequestBuilder<DownloadComicWorker>()
         .setInputData(
           workDataOf(
-            DownloadComicWorker.CHAPTER_LINK to chapter.chapterLink,
-            DownloadComicWorker.CHAPTER_NAME to chapter.chapterName,
-            DownloadComicWorker.COMIC_NAME to when (val detail = state.value.comicDetail) {
-              is ComicDetailViewState.ComicDetail.Detail -> detail.title
-              is ComicDetailViewState.ComicDetail.Initial -> detail.title
-              null -> return@rxSingle chapter to IllegalStateException("State is null")
-            }
+            DownloadComicWorker.CHAPTER to chapterJson,
+            DownloadComicWorker.COMIC_NAME to comicName
           )
         )
         .setConstraints(
@@ -296,7 +302,7 @@ class ComicDetailViewModel(
     return rxSingle {
       workManager.cancelAllWorkByTag(chapter.chapterLink).await()
       downloadComicsRepository
-        .deleteDownloadedChapter(chapter = chapter.toDomain())
+        .deleteDownloadedChapter(chapter = chapter.toDownloadedChapterDomain())
         .fold(
           { chapter to it },
           { chapter to null }

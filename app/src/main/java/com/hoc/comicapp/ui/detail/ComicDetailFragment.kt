@@ -229,6 +229,13 @@ class ComicDetailFragment : Fragment() {
         is ComicDetailSingleEvent.MessageEvent -> {
           view?.snack(it.message)
         }
+        is ComicDetailSingleEvent.EnqueuedDownloadSuccess -> {
+          view?.snack("Enqueued download ${it.chapter.chapterName}") {
+            action("View") {
+              findNavController().navigate(R.id.downloadingChaptersFragment)
+            }
+          }
+        }
       }
     }
 

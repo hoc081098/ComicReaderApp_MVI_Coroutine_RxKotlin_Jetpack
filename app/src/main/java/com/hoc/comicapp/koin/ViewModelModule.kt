@@ -12,6 +12,8 @@ import com.hoc.comicapp.ui.detail.ComicDetailViewModel
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsInteractorImpl
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsViewModel
+import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersContract
+import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersViewModel
 import com.hoc.comicapp.ui.home.HomeInteractor
 import com.hoc.comicapp.ui.home.HomeInteractorImpl
 import com.hoc.comicapp.ui.home.HomeInteractorImpl1
@@ -44,7 +46,7 @@ val viewModelModule = module {
 
   viewModel { HomeViewModel(get(), get()) }
 
-  viewModel { ComicDetailViewModel(get(), get(), get(), get()) }
+  viewModel { ComicDetailViewModel(get(), get(), get(), get(), get()) }
 
   viewModel { SearchComicViewModel(get(), get()) }
 
@@ -54,4 +56,5 @@ val viewModelModule = module {
 
   viewModel { DownloadedComicsViewModel(get(), get()) }
 
+  viewModel { DownloadingChaptersViewModel(get(), get(), get()) }
 }
