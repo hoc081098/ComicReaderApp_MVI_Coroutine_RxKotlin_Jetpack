@@ -7,12 +7,8 @@ import com.hoc.comicapp.base.SingleEvent as BaseSingleEvent
 import com.hoc.comicapp.base.ViewState as BaseViewState
 
 interface DownloadingChaptersContract {
-  interface Interactor {
-    fun getDownloadedComics(): Observable<PartialChange>
-  }
 
   sealed class ViewIntent : Intent {
-    object Initial : ViewIntent()
   }
 
   data class ViewState(
@@ -32,12 +28,14 @@ interface DownloadingChaptersContract {
     }
 
     data class Chapter(
-      val title: String
+      val title: String,
+      val link: String,
+      val progress: Int
     )
   }
 
   sealed class PartialChange {
-    data class Data(val comics: List<ViewState.Chapter>) : PartialChange()
+    data class Data(val chapters: List<ViewState.Chapter>) : PartialChange()
 
     data class Error(val error: ComicAppError) : PartialChange()
 

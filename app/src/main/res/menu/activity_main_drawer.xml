@@ -19,6 +19,11 @@
             android:icon="@drawable/ic_file_download_white_24dp"
             android:title="Downloaded comics" />
 
+        <item
+            android:id="@+id/downloadingChaptersFragment"
+            android:icon="@drawable/ic_file_download_white_24dp"
+            android:title="Downloading" />
+
     </group>
 
     <item android:title="Communicate">

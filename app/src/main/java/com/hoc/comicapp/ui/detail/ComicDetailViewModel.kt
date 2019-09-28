@@ -21,6 +21,7 @@ import com.hoc.comicapp.worker.DownloadComicWorker
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import com.shopify.livedataktx.MutableLiveDataKtx
+import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
@@ -38,7 +39,7 @@ class ComicDetailViewModel(
   private val workManager: WorkManager,
   private val downloadComicsRepository: DownloadComicsRepository,
   private val rxSchedulerProvider: RxSchedulerProvider,
-  private val moshi: Moshi
+  private val chapterJsonAdapter: JsonAdapter<ComicDetail.Chapter>
 ) :
   BaseViewModel<ComicDetailIntent, ComicDetailViewState, ComicDetailSingleEvent>(), Observer<ComicDetailViewState> {
   override fun onChanged(t: ComicDetailViewState?) {
@@ -216,7 +217,7 @@ class ComicDetailViewModel(
         when {
           it.second === null -> {
             Timber.d("Enqueue success $it")
-            sendMessageEvent("Enqueued download ${it.first.chapterName}")
+            sendEvent(ComicDetailSingleEvent.EnqueuedDownloadSuccess(it.first))
           }
           else -> {
             Timber.d("Enqueue error $it")
@@ -274,9 +275,7 @@ class ComicDetailViewModel(
         is ComicDetailViewState.ComicDetail.Initial -> detail.title
         null -> return@rxSingle chapter to IllegalStateException("State is null")
       }
-      val chapterJson = moshi
-        .adapter<ComicDetail.Chapter>(ComicDetail.Chapter::class.java)
-        .toJson(chapter.toComicDetailChapterDomain())
+      val chapterJson = chapterJsonAdapter.toJson(chapter.toComicDetailChapterDomain())
 
       val workRequest = OneTimeWorkRequestBuilder<DownloadComicWorker>()
         .setInputData(

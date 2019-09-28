@@ -220,4 +220,6 @@ sealed class ComicDetailPartialChange {
 
 sealed class ComicDetailSingleEvent : SingleEvent {
   data class MessageEvent(val message: String) : ComicDetailSingleEvent()
+
+  data class EnqueuedDownloadSuccess(val chapter: ComicDetailViewState.Chapter) : ComicDetailSingleEvent()
 }

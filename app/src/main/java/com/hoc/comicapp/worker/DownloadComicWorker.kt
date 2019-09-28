@@ -12,34 +12,26 @@ import com.hoc.comicapp.R
 import com.hoc.comicapp.activity.SplashActivity
 import com.hoc.comicapp.domain.models.ComicDetail.Chapter
 import com.hoc.comicapp.domain.repository.DownloadComicsRepository
-import com.hoc.comicapp.koin.appModule
-import com.hoc.comicapp.koin.dataModule
-import com.hoc.comicapp.koin.networkModule
-import com.squareup.moshi.Moshi
+import com.squareup.moshi.JsonAdapter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
-import org.koin.android.ext.koin.androidContext
-import org.koin.dsl.koinApplication
+import org.koin.core.KoinComponent
+import org.koin.core.inject
 import timber.log.Timber
 
 @ExperimentalCoroutinesApi
 class DownloadComicWorker(
   appContext: Context,
   params: WorkerParameters
-) : CoroutineWorker(appContext, params) {
-  private val koin = koinApplication {
-    androidContext(applicationContext)
-    modules(dataModule, networkModule, appModule)
-  }.koin
-
-  private val downloadComicsRepo by koin.inject<DownloadComicsRepository>()
-  private val moshi by koin.inject<Moshi>()
+) : CoroutineWorker(appContext, params), KoinComponent {
+  private val downloadComicsRepo by inject<DownloadComicsRepository>()
+  private val chapterJsonAdapter by inject<JsonAdapter<Chapter>>()
 
   override suspend fun doWork(): Result {
     val chapterJson = inputData.getString(CHAPTER)
       ?: return Result.failure(workDataOf(ERROR to "chapterJson is null"))
 
-    val (chapterLink, chapterName) = moshi.adapter<Chapter>(Chapter::class.java).fromJson(chapterJson)
+    val (chapterLink, chapterName) = chapterJsonAdapter.fromJson(chapterJson)
       ?: return Result.failure(workDataOf(ERROR to "chapter is null"))
 
     val comicName = inputData.getString(COMIC_NAME)
@@ -77,7 +69,13 @@ class DownloadComicWorker(
               .build()
           )
 
-          setProgress(workDataOf(PROGRESS to it))
+          setProgress(
+            workDataOf(
+              PROGRESS to it,
+              COMIC_NAME to comicName,
+              CHAPTER to chapterJson
+            )
+          )
         }
 
       notificationManagerCompat.notify(
