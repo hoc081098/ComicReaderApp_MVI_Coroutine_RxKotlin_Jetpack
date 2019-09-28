@@ -9,6 +9,7 @@ import com.hoc.comicapp.base.ViewState as BaseViewState
 interface DownloadingChaptersContract {
 
   sealed class ViewIntent : Intent {
+    object Initial : ViewIntent()
   }
 
   data class ViewState(
@@ -32,7 +33,15 @@ interface DownloadingChaptersContract {
       val link: String,
       val comicTitle: String,
       val progress: Int
-    )
+    ) {
+      fun isSameExceptProgress(other: Chapter): Boolean {
+        if (this === other) return true
+        if (title != other.title) return false
+        if (link != other.link) return false
+        if (comicTitle != other.comicTitle) return false
+        return true
+      }
+    }
   }
 
   sealed class PartialChange {

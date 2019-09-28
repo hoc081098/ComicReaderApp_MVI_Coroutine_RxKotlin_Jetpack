@@ -21,6 +21,7 @@ import com.miguelcatalan.materialsearchview.MaterialSearchView
 import com.shopify.livedataktx.LiveDataKtx
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
+import io.reactivex.ObservableEmitter
 import io.reactivex.android.MainThreadDisposable
 import io.reactivex.annotations.CheckReturnValue
 import io.reactivex.annotations.SchedulerSupport
@@ -28,6 +29,7 @@ import io.reactivex.disposables.Disposables
 import io.reactivex.subjects.Subject
 import java.io.File
 import java.io.InputStream
+import androidx.lifecycle.Observer as LiveDataObserver
 
 @CheckReturnValue
 @SchedulerSupport(SchedulerSupport.NONE)
@@ -128,6 +130,18 @@ inline fun <T> LiveDataKtx<T>.observe(
   crossinline observer: (T) -> Unit
 ) = Observer<T?> { it?.let { observer(it) } }.also { observe(owner, it) }
 
+fun <T> LiveData<T>.toObservable(fallbackNullValue: (() -> T)? = null): Observable<T> {
+  return Observable.create { emitter: ObservableEmitter<T> ->
+    val observer = LiveDataObserver<T> { value: T? ->
+      if (!emitter.isDisposed) {
+        val notnullValue = value ?: fallbackNullValue?.invoke() ?: return@LiveDataObserver
+        emitter.onNext(notnullValue)
+      }
+    }
+    observeForever(observer)
+    emitter.setCancellable { removeObserver(observer) }
+  }
+}
 
 inline fun <T> LiveData<Event<T>>.observeEvent(
   owner: LifecycleOwner,

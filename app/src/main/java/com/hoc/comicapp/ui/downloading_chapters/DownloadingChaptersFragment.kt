@@ -4,18 +4,23 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
-import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersContract.*
+import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersContract.SingleEvent
+import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersContract.ViewIntent
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.snack
+import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.fragment_downloading_chapters.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import timber.log.Timber
 
 @ExperimentalCoroutinesApi
 class DownloadingChaptersFragment : Fragment() {
@@ -28,6 +33,7 @@ class DownloadingChaptersFragment : Fragment() {
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
+    Timber.d("DownloadingChaptersFragment::onViewCreated")
 
     val adapter = DownloadingChaptersAdapter(GlideApp.with(this))
     initView(adapter)
@@ -43,14 +49,11 @@ class DownloadingChaptersFragment : Fragment() {
   }
 
   private fun bind(adapter: DownloadingChaptersAdapter) {
-    viewModel.state.observe(owner = viewLifecycleOwner) { (isLoading, errorMessage, comics) ->
-      if (isLoading) {
-        progress_bar.visibility = View.VISIBLE
-      } else {
-        progress_bar.visibility = View.INVISIBLE
-      }
-
-      adapter.submitList(comics)
+    viewModel.state.observe(owner = viewLifecycleOwner) { (isLoading, errorMessage, chapters) ->
+      progress_bar.isVisible = isLoading
+      empty_layout.isVisible = chapters.isEmpty()
+      adapter.submitList(chapters)
+      Timber.d("DownloadingChaptersFragment::state $isLoading $errorMessage ${chapters.size}")
     }
     viewModel.singleEvent.observeEvent(owner = viewLifecycleOwner) {
       when (it) {
@@ -59,10 +62,18 @@ class DownloadingChaptersFragment : Fragment() {
         }
       }
     }
+    viewModel
+      .processIntents(
+        Observable.mergeArray(
+          Observable.just(ViewIntent.Initial)
+        )
+      )
+      .addTo(compositeDisposable)
   }
 
   override fun onDestroyView() {
     super.onDestroyView()
     compositeDisposable.clear()
+    Timber.d("DownloadingChaptersFragment::onDestroyView")
   }
 }
