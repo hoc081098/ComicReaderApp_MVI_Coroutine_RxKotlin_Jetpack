@@ -15,7 +15,7 @@ class DownloadedComicsInteractorImpl(
 ) : DownloadedComicsContract.Interactor {
   override fun getDownloadedComics(): Observable<PartialChange> {
     return downloadComicsRepository
-      .downloadedComics()
+      .getDownloadedComics()
       .map<PartialChange> { result ->
         result.fold(
           left = { PartialChange.Error(it) },

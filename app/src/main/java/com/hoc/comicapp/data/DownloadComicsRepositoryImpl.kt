@@ -4,6 +4,8 @@ import android.app.Application
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
 import androidx.room.withTransaction
+import androidx.work.WorkManager
+import androidx.work.await
 import com.hoc.comicapp.data.local.AppDatabase
 import com.hoc.comicapp.data.local.dao.ChapterDao
 import com.hoc.comicapp.data.local.dao.ComicDao
@@ -39,9 +41,15 @@ class DownloadComicsRepositoryImpl(
   private val chapterDao: ChapterDao,
   private val appDatabase: AppDatabase,
   private val rxSchedulerProvider: RxSchedulerProvider,
-  private val retrofit: Retrofit
+  private val retrofit: Retrofit,
+  private val workManager: WorkManager
 ) : DownloadComicsRepository {
   override suspend fun deleteDownloadedChapter(chapter: DownloadedChapter): Either<ComicAppError, Unit> {
+    workManager.cancelAllWorkByTag(chapter.chapterLink).await()
+    return _deleteEntityAndImages(chapter)
+  }
+
+  private suspend fun _deleteEntityAndImages(chapter: DownloadedChapter): Either<ComicAppError, Unit> {
     return runCatching {
       withContext(dispatcherProvider.io) {
         chapterDao.delete(Mapper.domainToEntity(chapter))
@@ -79,13 +87,13 @@ class DownloadComicsRepositoryImpl(
     )
   }
 
-  override fun downloadedChapters(): LiveData<List<DownloadedChapter>> {
+  override fun getDownloadedChapters(): LiveData<List<DownloadedChapter>> {
     return chapterDao.getAllChapters().map { chapters ->
       chapters.map { Mapper.entityToDomainModel(it) }
     }
   }
 
-  override fun downloadedComics(): Observable<Either<ComicAppError, List<DownloadedComic>>> {
+  override fun getDownloadedComics(): Observable<Either<ComicAppError, List<DownloadedComic>>> {
     return chapterDao
       .getComicAndChapters()
       .map<Either<ComicAppError, List<DownloadedComic>>> { list ->

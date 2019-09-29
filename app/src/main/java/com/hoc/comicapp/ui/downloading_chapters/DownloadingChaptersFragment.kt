@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
+import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersContract.SingleEvent
 import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersContract.ViewIntent
 import com.hoc.comicapp.utils.observe
@@ -35,7 +36,10 @@ class DownloadingChaptersFragment : Fragment() {
     super.onViewCreated(view, savedInstanceState)
     Timber.d("DownloadingChaptersFragment::onViewCreated")
 
-    val adapter = DownloadingChaptersAdapter(GlideApp.with(this))
+    val adapter = DownloadingChaptersAdapter(
+      GlideApp.with(this),
+      compositeDisposable
+    )
     initView(adapter)
     bind(adapter)
   }
@@ -60,12 +64,21 @@ class DownloadingChaptersFragment : Fragment() {
         is SingleEvent.Message -> {
           view?.snack(it.message)
         }
+        is SingleEvent.Deleted -> {
+          view?.snack("Cancel downloading ${it.chapter.title}")
+        }
+        is SingleEvent.DeleteError -> {
+          view?.snack("Error when canceling downloading ${it.chapter.title}: ${it.error.getMessage()}")
+        }
       }
     }
     viewModel
       .processIntents(
         Observable.mergeArray(
-          Observable.just(ViewIntent.Initial)
+          Observable.just(ViewIntent.Initial),
+          adapter
+            .clickCancel
+            .map { ViewIntent.CancelDownload(it) }
         )
       )
       .addTo(compositeDisposable)

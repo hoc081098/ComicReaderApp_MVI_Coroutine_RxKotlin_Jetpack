@@ -22,7 +22,6 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import com.shopify.livedataktx.MutableLiveDataKtx
 import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.Moshi
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
 import io.reactivex.Single
@@ -143,7 +142,7 @@ class ComicDetailViewModel(
 
     // combine live datas -> state live data
     val workInfosD = workManager.getWorkInfosByTagLiveData(DownloadComicWorker.TAG)
-    val downloadedChaptersD = downloadComicsRepository.downloadedChapters()
+    val downloadedChaptersD = downloadComicsRepository.getDownloadedChapters()
 
     return stateD.combineLatest(workInfosD, downloadedChaptersD) { state, workInfos, downloadedChapters ->
       Timber.d("[combine] ${workInfos.size} ${downloadedChapters.size}")
@@ -268,7 +267,7 @@ class ComicDetailViewModel(
 
   private fun enqueueDownloadComicWorker(chapter: Chapter): Single<Pair<Chapter, Throwable?>> {
     return rxSingle {
-      workManager.cancelAllWorkByTag(chapter.chapterLink).await()
+      downloadComicsRepository.deleteDownloadedChapter(chapter.toDownloadedChapterDomain())
 
       val comicName = when (val detail = state.value.comicDetail) {
         is ComicDetailViewState.ComicDetail.Detail -> detail.title
@@ -300,7 +299,6 @@ class ComicDetailViewModel(
 
   private fun deleteDownloadedChapter(chapter: Chapter): Single<Pair<Chapter, Throwable?>> {
     return rxSingle {
-      workManager.cancelAllWorkByTag(chapter.chapterLink).await()
       downloadComicsRepository
         .deleteDownloadedChapter(chapter = chapter.toDownloadedChapterDomain())
         .fold(

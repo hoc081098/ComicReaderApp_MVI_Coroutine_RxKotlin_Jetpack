@@ -3,12 +3,15 @@ package com.hoc.comicapp.ui.downloading_chapters
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.hoc.comicapp.base.BaseViewModel
+import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.ComicDetail
 import com.hoc.comicapp.domain.models.UnexpectedError
 import com.hoc.comicapp.domain.models.getMessage
+import com.hoc.comicapp.domain.repository.DownloadComicsRepository
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersContract.*
 import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersContract.ViewState.Chapter
+import com.hoc.comicapp.utils.fold
 import com.hoc.comicapp.utils.notOfType
 import com.hoc.comicapp.utils.toObservable
 import com.hoc.comicapp.worker.DownloadComicWorker
@@ -21,13 +24,15 @@ import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.ofType
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.rx2.rxSingle
 import timber.log.Timber
 
 @ExperimentalCoroutinesApi
 class DownloadingChaptersViewModel(
   private val rxSchedulerProvider: RxSchedulerProvider,
   private val workManager: WorkManager,
-  private val chapterJsonAdapter: JsonAdapter<ComicDetail.Chapter>
+  private val chapterJsonAdapter: JsonAdapter<ComicDetail.Chapter>,
+  private val downloadComicsRepository: DownloadComicsRepository
 ) : BaseViewModel<ViewIntent, ViewState, SingleEvent>() {
 
   override val initialState = ViewState.initial()
@@ -73,19 +78,47 @@ class DownloadingChaptersViewModel(
   override fun processIntents(intents: Observable<ViewIntent>) = intents.subscribe(intentS)!!
 
   init {
-    intentS
-      .compose(intentFilter)
+    Timber.d("DownloadingChaptersViewModel::init")
+
+    val filteredIntent = intentS.compose(intentFilter)
+
+    filteredIntent
       .compose(intentToChanges)
       .scan(initialState, reducer)
       .observeOn(rxSchedulerProvider.main)
       .subscribeBy(onNext = ::setNewState)
       .addTo(compositeDisposable)
-    Timber.d("DownloadingChaptersViewModel::init")
+
+    filteredIntent
+      .ofType<ViewIntent.CancelDownload>()
+      .map { it.chapter }
+      .flatMap(::deleteDownloadingChapter)
+      .observeOn(rxSchedulerProvider.main)
+      .subscribeBy {
+        when (val error = it.second) {
+          null -> sendEvent(SingleEvent.Deleted(it.first))
+          else -> sendEvent(SingleEvent.DeleteError(it.first, error))
+        }
+      }
+      .addTo(compositeDisposable)
   }
 
   override fun onCleared() {
     super.onCleared()
     Timber.d("DownloadingChaptersViewModel::onCleared")
+  }
+
+  private fun deleteDownloadingChapter(chapter: Chapter): Observable<Pair<Chapter, ComicAppError?>> {
+    return rxSingle {
+      downloadComicsRepository
+        .deleteDownloadedChapter(chapter = chapter.toDomain())
+        .fold(
+          { chapter to it },
+          { chapter to null }
+        )
+    }
+      .toObservable()
+      .onErrorReturn { chapter to UnexpectedError(it.message ?: "", it) }
   }
 
   private companion object {
