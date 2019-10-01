@@ -58,6 +58,20 @@ class DownloadedComicsViewModel(
       .observeOn(rxSchedulerProvider.main)
       .subscribeBy(onNext = ::setNewState)
       .addTo(compositeDisposable)
+
+    filteredIntent
+      .ofType<ViewIntent.DeleteComic>()
+      .map { it.comic }
+      .flatMap { interactor.deleteComic(it).toObservable() }
+      .subscribeBy { (comic, error) ->
+        val event = if (error === null) {
+          SingleEvent.DeletedComic(comic)
+        } else {
+          SingleEvent.DeleteComicError(comic, error)
+        }
+        sendEvent(event)
+      }
+      .addTo(compositeDisposable)
   }
 
   private companion object {

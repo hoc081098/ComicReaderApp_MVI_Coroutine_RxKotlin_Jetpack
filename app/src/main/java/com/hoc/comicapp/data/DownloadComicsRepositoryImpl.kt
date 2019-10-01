@@ -41,6 +41,17 @@ class DownloadComicsRepositoryImpl(
   private val retrofit: Retrofit,
   private val workManager: WorkManager
 ) : DownloadComicsRepository {
+  override suspend fun deleteComic(comic: DownloadedComic): Either<ComicAppError, Unit> {
+    return runCatching {
+      withContext(dispatcherProvider.ui) {
+        comicDao.delete(Mapper.domainToEntity(comic))
+      }
+    }.fold(
+      onSuccess = { Unit.right() },
+      onFailure = { it.toError(retrofit).left() }
+    )
+  }
+
   override suspend fun deleteDownloadedChapter(chapter: DownloadedChapter): Either<ComicAppError, Unit> {
     workManager.cancelAllWorkByTag(chapter.chapterLink).await()
     return _deleteEntityAndImages(chapter)

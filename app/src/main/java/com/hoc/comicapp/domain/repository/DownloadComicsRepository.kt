@@ -16,4 +16,6 @@ interface DownloadComicsRepository {
   fun getDownloadedChapters() : LiveData<List<DownloadedChapter>>
 
   suspend fun deleteDownloadedChapter(chapter: DownloadedChapter): Either<ComicAppError, Unit>
+
+  suspend fun deleteComic(comic: DownloadedComic): Either<ComicAppError, Unit>
 }
