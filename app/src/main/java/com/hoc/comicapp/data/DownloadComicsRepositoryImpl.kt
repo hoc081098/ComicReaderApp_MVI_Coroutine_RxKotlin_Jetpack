@@ -17,10 +17,7 @@ import com.hoc.comicapp.domain.models.*
 import com.hoc.comicapp.domain.repository.DownloadComicsRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
-import com.hoc.comicapp.utils.Either
-import com.hoc.comicapp.utils.copyTo
-import com.hoc.comicapp.utils.left
-import com.hoc.comicapp.utils.right
+import com.hoc.comicapp.utils.*
 import io.reactivex.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -119,7 +116,11 @@ class DownloadComicsRepositoryImpl(
 
       emit(0)
 
-      val chapterDetail = comicApiService.getChapterDetail(chapterLink)
+      val chapterDetail = retryIO(
+        times = 3,
+        initialDelay = 1_000,
+        factor = 2.0
+      ) { comicApiService.getChapterDetail(chapterLink) }
       val comicNameEscaped = chapterDetail.comicName.escapeFileName()
       val chapterNameEscaped = chapterDetail.chapterName.escapeFileName()
       val totalImageSize = chapterDetail.images.size
@@ -138,7 +139,11 @@ class DownloadComicsRepositoryImpl(
         imagePaths = it
       }
 
-      val comicDetail = comicApiService.getComicDetail(chapterDetail.comicLink)
+      val comicDetail = retryIO(
+        times = 3,
+        initialDelay = 1_000,
+        factor = 2.0
+      ) { comicApiService.getComicDetail(chapterDetail.comicLink) }
       val thumbnailPath = downloadComicThumbnail(
         thumbnailUrl = comicDetail.thumbnail,
         comicName = comicNameEscaped
@@ -192,7 +197,12 @@ class DownloadComicsRepositoryImpl(
   }
 
   private suspend fun downloadComicThumbnail(thumbnailUrl: String, comicName: String): String {
-    return comicApiService.downloadFile(thumbnailUrl).use { responseBody ->
+    return retryIO(
+      times = 3,
+      initialDelay = 1_000,
+      factor = 2.0
+    ) { comicApiService.downloadFile(thumbnailUrl) }
+      .use { responseBody ->
       val imagePath = listOf(
         "images",
         comicName,
@@ -225,8 +235,11 @@ class DownloadComicsRepositoryImpl(
       for ((index, imageUrl) in images.withIndex()) {
         Timber.d("$tag Begin $index $imageUrl")
 
-        comicApiService
-          .downloadFile(imageUrl)
+        retryIO(
+          times = 3,
+          initialDelay = 1_000,
+          factor = 2.0
+        ) { comicApiService.downloadFile(imageUrl) }
           .use { responseBody ->
             val imagePath = listOf(
               "images",
