@@ -1,6 +1,7 @@
 package com.hoc.comicapp.ui.category
 
 import com.hoc.comicapp.base.BaseViewModel
+import com.hoc.comicapp.domain.models.Category
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.utils.exhaustMap
@@ -41,13 +42,12 @@ class CategoryViewModel(
         source2 = intents.ofType<CategoryViewIntent.ChangeSortOrder>().map { it.sortOrder },
         combineFunction = { viewState, sortOrder ->
           viewState.copy(
-            categories = viewState.categories.sortedWith(
-              when (sortOrder) {
-                CATEGORY_NAME_ASC -> compareBy { it.name }
-                CATEGORY_NAME_DESC -> compareByDescending { it.name }
-                else -> return@combineLatest viewState
-              }
-            )
+            categories = viewState
+              .categories
+              .sortedWith(
+                categoryComparators[sortOrder]
+                  ?: return@combineLatest viewState
+              )
           )
         }
       ).distinctUntilChanged().observeOn(rxSchedulerProvider.main)
@@ -120,6 +120,11 @@ class CategoryViewModel(
     sendEvent(CategorySingleEvent.MessageEvent(message))
 
   private companion object {
+    val categoryComparators = mapOf<String, Comparator<Category>>(
+      CATEGORY_NAME_ASC to compareBy { it.name },
+      CATEGORY_NAME_DESC to compareByDescending { it.name }
+    )
+
     /**
      * Only take 1 [HomeViewIntent.Initial]
      */

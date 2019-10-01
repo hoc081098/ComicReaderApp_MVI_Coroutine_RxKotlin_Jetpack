@@ -8,11 +8,12 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
-import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.SingleEvent
-import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.ViewIntent
+import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.*
+import com.hoc.comicapp.utils.itemSelections
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.snack
+import com.jaredrummler.materialspinner.MaterialSpinnerAdapter
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
@@ -41,6 +42,8 @@ class DownloadedComicsFragment : Fragment() {
       layoutManager = LinearLayoutManager(context)
       adapter = downloadedComicsAdapter
     }
+
+    spinner_sort.setItems(SortOrder.values().toList())
   }
 
   private fun bind(adapter: DownloadedComicsAdapter) {
@@ -68,7 +71,12 @@ class DownloadedComicsFragment : Fragment() {
       }
     }
     viewModel.processIntents(
-      Observable.just(ViewIntent.Initial)
+      Observable.mergeArray(
+        Observable.just(ViewIntent.Initial),
+        spinner_sort
+          .itemSelections<SortOrder>()
+          .map { ViewIntent.ChangeSortOrder(it) }
+      )
     ).addTo(compositeDisposable)
   }
 

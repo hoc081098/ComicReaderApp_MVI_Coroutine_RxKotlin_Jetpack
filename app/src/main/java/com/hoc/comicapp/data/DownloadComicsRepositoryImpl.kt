@@ -94,16 +94,17 @@ class DownloadComicsRepositoryImpl(
     return chapterDao
       .getComicAndChapters()
       .map<Either<ComicAppError, List<DownloadedComic>>> { list ->
-        list.map { item ->
-          Mapper.entityToDomainModel(
-            ComicAndChapters().also { copied ->
+        list
+          .map { item ->
+            val entity = ComicAndChapters().also { copied ->
               copied.comic = item.comic
               copied.chapters = item.chapters
                 .sortedByDescending { it.downloadedAt }
                 .take(3)
             }
-          )
-        }.right()
+            Mapper.entityToDomainModel(entity)
+          }
+          .right()
       }
       .onErrorReturn { t: Throwable -> t.toError(retrofit).left() }
       .subscribeOn(rxSchedulerProvider.io)

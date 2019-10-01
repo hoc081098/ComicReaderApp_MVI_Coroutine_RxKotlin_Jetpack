@@ -4,11 +4,13 @@ import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.*
+import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.SortOrder.*
 import com.hoc.comicapp.utils.notOfType
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
 import io.reactivex.functions.BiFunction
+import io.reactivex.rxkotlin.Observables.combineLatest
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.ofType
 import io.reactivex.rxkotlin.subscribeBy
@@ -38,16 +40,34 @@ class DownloadedComicsViewModel(
   }
 
   init {
-    intentS
-      .compose(intentFilter)
+    val filteredIntent = intentS.compose(intentFilter)
+    val scannedState = filteredIntent
       .compose(intentToChanges)
       .scan(initialState, reducer)
+
+    combineLatest(
+      scannedState,
+      filteredIntent.ofType<ViewIntent.ChangeSortOrder>().map { it.order }
+    ) { state, order ->
+      state.copy(
+        comics = state
+          .comics
+          .sortedWith(comicItemComparators[order]!!)
+      )
+    }
       .observeOn(rxSchedulerProvider.main)
       .subscribeBy(onNext = ::setNewState)
       .addTo(compositeDisposable)
   }
 
   private companion object {
+    val comicItemComparators = mapOf<SortOrder, Comparator<ViewState.ComicItem>>(
+      ComicTitleAsc to compareBy { it.title },
+      ComicTitleDesc to compareByDescending { it.title },
+      LatestChapterAsc to compareBy { it.chapters.first().downloadedAt },
+      LatestChapterDesc to compareByDescending { it.chapters.first().downloadedAt }
+    )
+
     val intentFilter = ObservableTransformer<ViewIntent, ViewIntent> { intents ->
       intents.publish { shared ->
         Observable.mergeArray(

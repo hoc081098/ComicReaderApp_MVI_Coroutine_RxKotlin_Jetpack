@@ -12,9 +12,8 @@ import com.hoc.comicapp.R
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersContract.SingleEvent
 import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersContract.ViewIntent
-import com.hoc.comicapp.utils.observe
-import com.hoc.comicapp.utils.observeEvent
-import com.hoc.comicapp.utils.snack
+import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersContract.ViewState.Chapter
+import com.hoc.comicapp.utils.*
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
@@ -78,10 +77,37 @@ class DownloadingChaptersFragment : Fragment() {
           Observable.just(ViewIntent.Initial),
           adapter
             .clickCancel
+            .exhaustMap(::showCancelDownloadingDialog)
             .map { ViewIntent.CancelDownload(it) }
         )
       )
       .addTo(compositeDisposable)
+  }
+
+  private fun showCancelDownloadingDialog(chapter: Chapter): Observable<Chapter> {
+    return Observable.create<Chapter> { emitter ->
+      val alertDialog = requireActivity().showAlertDialog {
+        title("Cancel downloading")
+        message("This chapter won't be available to read offline")
+        cancelable(true)
+        iconId(R.drawable.ic_delete_white_24dp)
+
+        negativeAction("Cancel") { dialog, _ ->
+          dialog.cancel()
+          if (!emitter.isDisposed) {
+            emitter.onComplete()
+          }
+        }
+        positiveAction("OK") { dialog, _ ->
+          dialog.dismiss()
+          if (!emitter.isDisposed) {
+            emitter.onNext(chapter)
+            emitter.onComplete()
+          }
+        }
+      }
+      emitter.setCancellable { alertDialog.dismiss() }
+    }
   }
 
   override fun onDestroyView() {

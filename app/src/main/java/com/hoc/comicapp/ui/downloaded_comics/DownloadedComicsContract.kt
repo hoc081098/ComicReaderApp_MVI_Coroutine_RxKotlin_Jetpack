@@ -15,6 +15,16 @@ interface DownloadedComicsContract {
 
   sealed class ViewIntent : Intent {
     object Initial : ViewIntent()
+    data class ChangeSortOrder(val order: SortOrder) : ViewIntent()
+  }
+
+  enum class SortOrder(val description: String) {
+    ComicTitleAsc("Comic title ascending"),
+    ComicTitleDesc("Comic title descending"),
+    LatestChapterAsc("Latest chapter first"),
+    LatestChapterDesc("Latest chapter last");
+
+    override fun toString() = description
   }
 
   data class ViewState(
