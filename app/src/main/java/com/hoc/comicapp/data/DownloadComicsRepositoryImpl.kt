@@ -4,6 +4,8 @@ import android.app.Application
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
 import androidx.room.withTransaction
+import androidx.work.WorkManager
+import androidx.work.await
 import com.hoc.comicapp.data.local.AppDatabase
 import com.hoc.comicapp.data.local.dao.ChapterDao
 import com.hoc.comicapp.data.local.dao.ComicDao
@@ -15,10 +17,7 @@ import com.hoc.comicapp.domain.models.*
 import com.hoc.comicapp.domain.repository.DownloadComicsRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
-import com.hoc.comicapp.utils.Either
-import com.hoc.comicapp.utils.copyTo
-import com.hoc.comicapp.utils.left
-import com.hoc.comicapp.utils.right
+import com.hoc.comicapp.utils.*
 import io.reactivex.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -39,9 +38,26 @@ class DownloadComicsRepositoryImpl(
   private val chapterDao: ChapterDao,
   private val appDatabase: AppDatabase,
   private val rxSchedulerProvider: RxSchedulerProvider,
-  private val retrofit: Retrofit
+  private val retrofit: Retrofit,
+  private val workManager: WorkManager
 ) : DownloadComicsRepository {
+  override suspend fun deleteComic(comic: DownloadedComic): Either<ComicAppError, Unit> {
+    return runCatching {
+      withContext(dispatcherProvider.ui) {
+        comicDao.delete(Mapper.domainToEntity(comic))
+      }
+    }.fold(
+      onSuccess = { Unit.right() },
+      onFailure = { it.toError(retrofit).left() }
+    )
+  }
+
   override suspend fun deleteDownloadedChapter(chapter: DownloadedChapter): Either<ComicAppError, Unit> {
+    workManager.cancelAllWorkByTag(chapter.chapterLink).await()
+    return _deleteEntityAndImages(chapter)
+  }
+
+  private suspend fun _deleteEntityAndImages(chapter: DownloadedChapter): Either<ComicAppError, Unit> {
     return runCatching {
       withContext(dispatcherProvider.io) {
         chapterDao.delete(Mapper.domainToEntity(chapter))
@@ -79,26 +95,27 @@ class DownloadComicsRepositoryImpl(
     )
   }
 
-  override fun downloadedChapters(): LiveData<List<DownloadedChapter>> {
+  override fun getDownloadedChapters(): LiveData<List<DownloadedChapter>> {
     return chapterDao.getAllChapters().map { chapters ->
       chapters.map { Mapper.entityToDomainModel(it) }
     }
   }
 
-  override fun downloadedComics(): Observable<Either<ComicAppError, List<DownloadedComic>>> {
+  override fun getDownloadedComics(): Observable<Either<ComicAppError, List<DownloadedComic>>> {
     return chapterDao
       .getComicAndChapters()
       .map<Either<ComicAppError, List<DownloadedComic>>> { list ->
-        list.map { item ->
-          Mapper.entityToDomainModel(
-            ComicAndChapters().also { copied ->
+        list
+          .map { item ->
+            val entity = ComicAndChapters().also { copied ->
               copied.comic = item.comic
               copied.chapters = item.chapters
                 .sortedByDescending { it.downloadedAt }
                 .take(3)
             }
-          )
-        }.right()
+            Mapper.entityToDomainModel(entity)
+          }
+          .right()
       }
       .onErrorReturn { t: Throwable -> t.toError(retrofit).left() }
       .subscribeOn(rxSchedulerProvider.io)
@@ -111,7 +128,11 @@ class DownloadComicsRepositoryImpl(
 
       emit(0)
 
-      val chapterDetail = comicApiService.getChapterDetail(chapterLink)
+      val chapterDetail = retryIO(
+        times = 3,
+        initialDelay = 1_000,
+        factor = 2.0
+      ) { comicApiService.getChapterDetail(chapterLink) }
       val comicNameEscaped = chapterDetail.comicName.escapeFileName()
       val chapterNameEscaped = chapterDetail.chapterName.escapeFileName()
       val totalImageSize = chapterDetail.images.size
@@ -130,7 +151,11 @@ class DownloadComicsRepositoryImpl(
         imagePaths = it
       }
 
-      val comicDetail = comicApiService.getComicDetail(chapterDetail.comicLink)
+      val comicDetail = retryIO(
+        times = 3,
+        initialDelay = 1_000,
+        factor = 2.0
+      ) { comicApiService.getComicDetail(chapterDetail.comicLink) }
       val thumbnailPath = downloadComicThumbnail(
         thumbnailUrl = comicDetail.thumbnail,
         comicName = comicNameEscaped
@@ -184,7 +209,12 @@ class DownloadComicsRepositoryImpl(
   }
 
   private suspend fun downloadComicThumbnail(thumbnailUrl: String, comicName: String): String {
-    return comicApiService.downloadFile(thumbnailUrl).use { responseBody ->
+    return retryIO(
+      times = 3,
+      initialDelay = 1_000,
+      factor = 2.0
+    ) { comicApiService.downloadFile(thumbnailUrl) }
+      .use { responseBody ->
       val imagePath = listOf(
         "images",
         comicName,
@@ -217,8 +247,11 @@ class DownloadComicsRepositoryImpl(
       for ((index, imageUrl) in images.withIndex()) {
         Timber.d("$tag Begin $index $imageUrl")
 
-        comicApiService
-          .downloadFile(imageUrl)
+        retryIO(
+          times = 3,
+          initialDelay = 1_000,
+          factor = 2.0
+        ) { comicApiService.downloadFile(imageUrl) }
           .use { responseBody ->
             val imagePath = listOf(
               "images",

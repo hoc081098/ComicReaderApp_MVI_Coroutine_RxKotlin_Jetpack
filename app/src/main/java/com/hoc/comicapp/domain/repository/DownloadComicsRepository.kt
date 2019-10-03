@@ -11,9 +11,11 @@ import kotlinx.coroutines.flow.Flow
 interface DownloadComicsRepository {
   fun downloadChapter(chapterLink: String): Flow<Int>
 
-  fun downloadedComics(): Observable<Either<ComicAppError, List<DownloadedComic>>>
+  fun getDownloadedComics(): Observable<Either<ComicAppError, List<DownloadedComic>>>
 
-  fun downloadedChapters() : LiveData<List<DownloadedChapter>>
+  fun getDownloadedChapters() : LiveData<List<DownloadedChapter>>
 
   suspend fun deleteDownloadedChapter(chapter: DownloadedChapter): Either<ComicAppError, Unit>
+
+  suspend fun deleteComic(comic: DownloadedComic): Either<ComicAppError, Unit>
 }

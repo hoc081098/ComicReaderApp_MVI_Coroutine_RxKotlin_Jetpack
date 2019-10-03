@@ -4,6 +4,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationCompat.PRIORITY_HIGH
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -40,11 +41,12 @@ class DownloadComicWorker(
     val notificationBuilder =
       NotificationCompat.Builder(applicationContext, applicationContext.getString(R.string.notification_channel_id))
         .setSmallIcon(R.mipmap.ic_launcher_round)
-        .setContentTitle("Downloading $chapterComicName")
+        .setContentTitle("Download $chapterComicName")
         .setContentText("Downloading...")
         .setProgress(100, 0, false)
         .setAutoCancel(true)
-        .setOngoing(true)
+        .setOngoing(false)
+        .setPriority(PRIORITY_HIGH)
         .setWhen(System.currentTimeMillis())
         .setContentIntent(
           PendingIntent.getActivity(

@@ -6,10 +6,12 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.chauthai.swipereveallayout.ViewBinderHelper
 import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.ViewState.ComicItem
 import com.hoc.comicapp.utils.inflate
+import com.hoc.comicapp.utils.toast
 import kotlinx.android.synthetic.main.item_recycler_downloaded_comics.view.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -24,6 +26,7 @@ class DownloadedComicsAdapter(
 ) :
   ListAdapter<ComicItem, DownloadedComicsAdapter.VH>(DownloadedComicItemDiffUtilItemCallback) {
   private val dateFormatter = SimpleDateFormat("hh:mm, dd/MM/yyyy", Locale.getDefault())
+  private val viewBinderHelper = ViewBinderHelper()
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
     VH(parent inflate R.layout.item_recycler_downloaded_comics)
@@ -32,6 +35,7 @@ class DownloadedComicsAdapter(
 
   inner class VH(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private val imageComic = itemView.image_comic!!
+    private val swipeRevealLayout = itemView.swipe_reveal_layout!!
 
     private val textComicName = itemView.text_comic_name!!
     private val textView = itemView.text_view!!
@@ -51,7 +55,15 @@ class DownloadedComicsAdapter(
       textChapterName3 to textChapterTime3
     )
 
+    init {
+      itemView.text_delete.setOnClickListener {
+        it.context.toast("Clicked")
+      }
+    }
+
     fun bind(comic: ComicItem) {
+      viewBinderHelper.bind(swipeRevealLayout ,comic.comicLink)
+
       glide
         .load(comic.thumbnail)
         .thumbnail(0.5f)

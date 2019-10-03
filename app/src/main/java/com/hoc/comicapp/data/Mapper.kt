@@ -2,6 +2,7 @@ package com.hoc.comicapp.data
 
 import com.hoc.comicapp.data.local.entities.ChapterEntity
 import com.hoc.comicapp.data.local.entities.ComicAndChapters
+import com.hoc.comicapp.data.local.entities.ComicEntity
 import com.hoc.comicapp.data.remote.response.CategoryResponse
 import com.hoc.comicapp.data.remote.response.ChapterDetailResponse
 import com.hoc.comicapp.data.remote.response.ComicDetailResponse
@@ -19,6 +20,29 @@ object Mapper {
       view = domain.view,
       chapterName = domain.chapterName,
       order = -1
+    )
+  }
+
+  fun domainToEntity(domain: DownloadedComic): ComicEntity {
+    return ComicEntity(
+      comicLink = domain.comicLink,
+      view = domain.view,
+      categories = domain.categories.map {
+        ComicEntity.Category(
+          link = it.link,
+          name = it.name
+        )
+      },
+      authors = domain.authors.map {
+        ComicEntity.Author(
+          link = it.link,
+          name = it.name
+        )
+      },
+      thumbnail = domain.thumbnail,
+      lastUpdated = domain.lastUpdated,
+      shortenedContent = domain.shortenedContent,
+      title = domain.title
     )
   }
 

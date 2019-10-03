@@ -56,5 +56,5 @@ val viewModelModule = module {
 
   viewModel { DownloadedComicsViewModel(get(), get()) }
 
-  viewModel { DownloadingChaptersViewModel(get(), get(), get()) }
+  viewModel { DownloadingChaptersViewModel(get(), get(), get(), get()) }
 }

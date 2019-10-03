@@ -21,13 +21,17 @@ import com.miguelcatalan.materialsearchview.MaterialSearchView
 import com.shopify.livedataktx.LiveDataKtx
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
+import io.reactivex.ObservableEmitter
 import io.reactivex.android.MainThreadDisposable
 import io.reactivex.annotations.CheckReturnValue
 import io.reactivex.annotations.SchedulerSupport
 import io.reactivex.disposables.Disposables
 import io.reactivex.subjects.Subject
+import kotlinx.coroutines.delay
 import java.io.File
+import java.io.IOException
 import java.io.InputStream
+import androidx.lifecycle.Observer as LiveDataObserver
 
 @CheckReturnValue
 @SchedulerSupport(SchedulerSupport.NONE)
@@ -128,6 +132,18 @@ inline fun <T> LiveDataKtx<T>.observe(
   crossinline observer: (T) -> Unit
 ) = Observer<T?> { it?.let { observer(it) } }.also { observe(owner, it) }
 
+fun <T> LiveData<T>.toObservable(fallbackNullValue: (() -> T)? = null): Observable<T> {
+  return Observable.create { emitter: ObservableEmitter<T> ->
+    val observer = LiveDataObserver<T> { value: T? ->
+      if (!emitter.isDisposed) {
+        val notnullValue = value ?: fallbackNullValue?.invoke() ?: return@LiveDataObserver
+        emitter.onNext(notnullValue)
+      }
+    }
+    observeForever(observer)
+    emitter.setCancellable { removeObserver(observer) }
+  }
+}
 
 inline fun <T> LiveData<Event<T>>.observeEvent(
   owner: LifecycleOwner,
@@ -280,4 +296,25 @@ fun <A, B, C, R> LiveData<A>.combineLatest(b: LiveData<B>, c: LiveData<C>, combi
       }
     }
   }
+}
+
+suspend fun <T> retryIO(
+  times: Int,
+  initialDelay: Long,
+  factor: Double,
+  maxDelay: Long = Long.MAX_VALUE,
+  block: suspend () -> T): T
+{
+  var currentDelay = initialDelay
+  repeat(times - 1) {
+    try {
+      return block()
+    } catch (e: IOException) {
+      // you can log an error here and/or make a more finer-grained
+      // analysis of the cause to see if retry is needed
+    }
+    delay(currentDelay)
+    currentDelay = (currentDelay * factor).toLong().coerceAtMost(maxDelay)
+  }
+  return block() // last attempt
 }
