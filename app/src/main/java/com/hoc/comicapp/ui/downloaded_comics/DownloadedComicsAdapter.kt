@@ -22,12 +22,11 @@ object DownloadedComicItemDiffUtilItemCallback : DiffUtil.ItemCallback<ComicItem
 }
 
 class DownloadedComicsAdapter(
-  private val glide: GlideRequests
+  private val glide: GlideRequests,
+  private val viewBinderHelper: ViewBinderHelper
 ) :
   ListAdapter<ComicItem, DownloadedComicsAdapter.VH>(DownloadedComicItemDiffUtilItemCallback) {
   private val dateFormatter = SimpleDateFormat("hh:mm, dd/MM/yyyy", Locale.getDefault())
-  private val viewBinderHelper = ViewBinderHelper()
-
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
     VH(parent inflate R.layout.item_recycler_downloaded_comics)
 

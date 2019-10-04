@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.chauthai.swipereveallayout.ViewBinderHelper
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.*
@@ -13,16 +14,18 @@ import com.hoc.comicapp.utils.itemSelections
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.snack
-import com.jaredrummler.materialspinner.MaterialSpinnerAdapter
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.fragment_downloaded_comics.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import timber.log.Timber
 
 class DownloadedComicsFragment : Fragment() {
   private val viewModel by viewModel<DownloadedComicsViewModel>()
   private val compositeDisposable = CompositeDisposable()
+
+  private val viewBinderHelper = ViewBinderHelper()
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
     return inflater.inflate(R.layout.fragment_downloaded_comics, container, false)
@@ -31,9 +34,19 @@ class DownloadedComicsFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    val adapter = DownloadedComicsAdapter(GlideApp.with(this))
+    val adapter = DownloadedComicsAdapter(GlideApp.with(this), viewBinderHelper)
     initView(adapter)
     bind(adapter)
+  }
+
+  override fun onActivityCreated(savedInstanceState: Bundle?) {
+    super.onActivityCreated(savedInstanceState)
+    viewBinderHelper.restoreStates(savedInstanceState)
+  }
+
+  override fun onSaveInstanceState(outState: Bundle) {
+    super.onSaveInstanceState(outState)
+    viewBinderHelper.saveStates(outState)
   }
 
   private fun initView(downloadedComicsAdapter: DownloadedComicsAdapter) {
@@ -76,6 +89,7 @@ class DownloadedComicsFragment : Fragment() {
         spinner_sort
           .itemSelections<SortOrder>()
           .map { ViewIntent.ChangeSortOrder(it) }
+          .doOnNext { Timber.d("Sort $it") }
       )
     ).addTo(compositeDisposable)
   }
