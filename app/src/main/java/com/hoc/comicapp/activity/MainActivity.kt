@@ -75,6 +75,11 @@ class MainActivity : AppCompatActivity() {
   }
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    if (item.itemId == R.id.searchComicFragment &&
+      findNavController(R.id.main_nav_fragment).currentDestination?.id == R.id.searchComicFragment
+    ) {
+      return showSearch().let { true }
+    }
     return item.onNavDestinationSelected(findNavController(R.id.main_nav_fragment))
         || super.onOptionsItemSelected(item)
   }

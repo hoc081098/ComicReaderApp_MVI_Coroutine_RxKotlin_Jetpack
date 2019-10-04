@@ -3,6 +3,7 @@ package com.hoc.comicapp.ui.search_comic
 import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
+import com.hoc.comicapp.ui.search_comic.SearchComicContract.*
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.addTo
@@ -13,20 +14,20 @@ import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
 class SearchComicViewModel(
-  private val interactor: SearchComicInteractor,
+  private val interactor: Interactor,
   rxSchedulerProvider: RxSchedulerProvider
 ) :
-  BaseViewModel<SearchComicViewIntent, SearchComicViewState, SearchComicSingleEvent>() {
-  private val intentS = PublishRelay.create<SearchComicViewIntent>()
+  BaseViewModel<ViewIntent, ViewState, SingleEvent>() {
+  private val intentS = PublishRelay.create<ViewIntent>()
 
-  override val initialState = SearchComicViewState.initialState()
+  override val initialState = ViewState.initialState()
 
-  override fun processIntents(intents: Observable<SearchComicViewIntent>) =
+  override fun processIntents(intents: Observable<ViewIntent>) =
     intents.subscribe(intentS)!!
 
   init {
     val searchTerm = intentS
-      .ofType<SearchComicViewIntent.SearchIntent>()
+      .ofType<ViewIntent.SearchIntent>()
       .map { it.term }
       .doOnNext { Timber.d("[SEARCH-1] $it") }
       .debounce(600, TimeUnit.MILLISECONDS)
@@ -35,7 +36,7 @@ class SearchComicViewModel(
       .doOnNext { Timber.d("[SEARCH-2] $it") }
 
     val retryPartialChange = intentS
-      .ofType<SearchComicViewIntent.RetryIntent>()
+      .ofType<ViewIntent.RetryIntent>()
       .withLatestFrom(searchTerm)
       .map { it.second }
       .doOnNext { Timber.d("[RETRY] $it") }
@@ -44,9 +45,9 @@ class SearchComicViewModel(
           .searchComic(term)
           .doOnNext {
             val messageFromError =
-              (it as? SearchComicPartialChange.Error ?: return@doOnNext).error.getMessage()
+              (it as? PartialChange.Error ?: return@doOnNext).error.getMessage()
             sendEvent(
-              SearchComicSingleEvent.MessageEvent(
+              SingleEvent.MessageEvent(
                 "Search for '$term', error occurred: $messageFromError"
               )
             )
@@ -58,9 +59,9 @@ class SearchComicViewModel(
           .searchComic(term)
           .doOnNext {
             val messageFromError =
-            (it as? SearchComicPartialChange.Error ?: return@doOnNext).error.getMessage()
+            (it as? PartialChange.Error ?: return@doOnNext).error.getMessage()
             sendEvent(
-              SearchComicSingleEvent.MessageEvent(
+              SingleEvent.MessageEvent(
                 "Retry search for '$term', error occurred: $messageFromError"
               )
             )

@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.activity.MainActivity
+import com.hoc.comicapp.ui.search_comic.SearchComicContract.SingleEvent
+import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewIntent
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.snack
@@ -66,7 +68,7 @@ class SearchComicFragment : Fragment() {
   private fun bind(adapter: SearchComicAdapter) {
     viewModel.singleEvent.observeEvent(owner = viewLifecycleOwner) {
       when (it) {
-        is SearchComicSingleEvent.MessageEvent -> {
+        is SingleEvent.MessageEvent -> {
           view?.snack(it.message)
         }
       }
@@ -93,10 +95,10 @@ class SearchComicFragment : Fragment() {
       Observable.mergeArray(
         mainActivity
           .textSearchChanges()
-          .map { SearchComicViewIntent.SearchIntent(it) },
+          .map { ViewIntent.SearchIntent(it) },
         button_retry
           .clicks()
-          .map { SearchComicViewIntent.RetryIntent }
+          .map { ViewIntent.RetryIntent }
       )
     ).addTo(compositeDisposable)
   }

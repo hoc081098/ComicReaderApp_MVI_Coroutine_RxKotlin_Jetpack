@@ -8,8 +8,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R.layout.item_recycler_search_comic
-import com.hoc.comicapp.domain.models.Comic
 import com.hoc.comicapp.ui.home.ComicArg
+import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewState.ComicItem
 import com.hoc.comicapp.utils.asObservable
 import com.hoc.comicapp.utils.inflate
 import com.jakewharton.rxbinding3.view.clicks
@@ -19,15 +19,22 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.item_recycler_search_comic.view.*
 
-object SearchComicDiffUtilItemCallback : DiffUtil.ItemCallback<Comic>() {
-  override fun areItemsTheSame(oldItem: Comic, newItem: Comic) = oldItem.link == newItem.link
-  override fun areContentsTheSame(oldItem: Comic, newItem: Comic) = oldItem == newItem
+object SearchComicDiffUtilItemCallback : DiffUtil.ItemCallback<ComicItem>() {
+  override fun areItemsTheSame(
+    oldItem: ComicItem,
+    newItem: ComicItem
+  ) = oldItem.link == newItem.link
+
+  override fun areContentsTheSame(
+    oldItem: ComicItem,
+    newItem: ComicItem
+  ) = oldItem == newItem
 }
 
 class SearchComicAdapter(
   private val glide: GlideRequests,
   private val compositeDisposable: CompositeDisposable
-) : ListAdapter<Comic, SearchComicAdapter.VH>(SearchComicDiffUtilItemCallback) {
+) : ListAdapter<ComicItem, SearchComicAdapter.VH>(SearchComicDiffUtilItemCallback) {
   private val clickComicS = PublishRelay.create<ComicArg>()
   val clickComicObservable get() = clickComicS.asObservable()
 
@@ -60,7 +67,7 @@ class SearchComicAdapter(
         .addTo(compositeDisposable)
     }
 
-    fun bind(item: Comic) {
+    fun bind(item: ComicItem) {
       glide
         .load(item.thumbnail)
         .thumbnail(0.5f)

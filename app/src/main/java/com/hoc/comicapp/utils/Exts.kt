@@ -230,7 +230,7 @@ internal class MaterialSearchViewObservable(private val view: MaterialSearchView
       } == true
     }
 
-    override fun onQueryTextSubmit(query: String?) = true
+    override fun onQueryTextSubmit(query: String?) = false
 
     override fun onDispose() = view.setOnQueryTextListener(null)
   }

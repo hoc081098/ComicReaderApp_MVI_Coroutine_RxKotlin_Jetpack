@@ -12,13 +12,12 @@ import com.hoc.comicapp.ui.detail.ComicDetailViewModel
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsInteractorImpl
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsViewModel
-import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersContract
 import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersViewModel
 import com.hoc.comicapp.ui.home.HomeInteractor
 import com.hoc.comicapp.ui.home.HomeInteractorImpl
 import com.hoc.comicapp.ui.home.HomeInteractorImpl1
 import com.hoc.comicapp.ui.home.HomeViewModel
-import com.hoc.comicapp.ui.search_comic.SearchComicInteractor
+import com.hoc.comicapp.ui.search_comic.SearchComicContract
 import com.hoc.comicapp.ui.search_comic.SearchComicInteractorImpl
 import com.hoc.comicapp.ui.search_comic.SearchComicViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -36,7 +35,7 @@ val viewModelModule = module {
 
   single { ComicDetailInteractorImpl(get(), get()) } bind ComicDetailInteractor::class
 
-  single { SearchComicInteractorImpl(get(), get()) } bind SearchComicInteractor::class
+  single { SearchComicInteractorImpl(get(), get()) } bind SearchComicContract.Interactor::class
 
   single { CategoryInteractorImpl(get(), get()) } bind CategoryInteractor::class
 
