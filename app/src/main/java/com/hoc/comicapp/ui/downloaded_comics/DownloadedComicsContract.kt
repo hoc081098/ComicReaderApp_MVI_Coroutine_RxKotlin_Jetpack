@@ -25,11 +25,14 @@ interface DownloadedComicsContract {
     data class DeleteComic(val comic: ComicItem) : ViewIntent()
   }
 
-  enum class SortOrder(val description: String) {
-    ComicTitleAsc("Comic title ascending"),
-    ComicTitleDesc("Comic title descending"),
-    LatestChapterAsc("Latest chapter first"),
-    LatestChapterDesc("Latest chapter last");
+  enum class SortOrder(
+    private val description: String,
+    val comparator: Comparator<ComicItem>
+  ) {
+    ComicTitleAsc("Comic title ascending", compareBy { it.title }),
+    ComicTitleDesc("Comic title descending", compareByDescending { it.title }),
+    LatestChapterAsc("Latest chapter first", compareBy { it.chapters.first().downloadedAt }),
+    LatestChapterDesc("Latest chapter last", compareByDescending { it.chapters.first().downloadedAt });
 
     override fun toString() = description
   }
@@ -37,7 +40,8 @@ interface DownloadedComicsContract {
   data class ViewState(
     val isLoading: Boolean,
     val error: String?,
-    val comics: List<ComicItem>
+    val comics: List<ComicItem>,
+    val sortOrder: SortOrder
   ) : BaseViewState {
 
     companion object {
@@ -45,7 +49,8 @@ interface DownloadedComicsContract {
         return ViewState(
           isLoading = true,
           error = null,
-          comics = emptyList()
+          comics = emptyList(),
+          sortOrder = SortOrder.ComicTitleAsc
         )
       }
     }

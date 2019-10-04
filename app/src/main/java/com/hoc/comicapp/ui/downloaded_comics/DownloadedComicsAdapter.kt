@@ -5,13 +5,19 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.NO_POSITION
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.chauthai.swipereveallayout.ViewBinderHelper
 import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.ViewState.ComicItem
+import com.hoc.comicapp.utils.asObservable
 import com.hoc.comicapp.utils.inflate
-import com.hoc.comicapp.utils.toast
+import com.jakewharton.rxbinding3.view.clicks
+import com.jakewharton.rxbinding3.view.detaches
+import com.jakewharton.rxrelay2.PublishRelay
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.item_recycler_downloaded_comics.view.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -22,18 +28,23 @@ object DownloadedComicItemDiffUtilItemCallback : DiffUtil.ItemCallback<ComicItem
 }
 
 class DownloadedComicsAdapter(
-  private val glide: GlideRequests
+  private val glide: GlideRequests,
+  private val viewBinderHelper: ViewBinderHelper,
+  private val compositeDisposable: CompositeDisposable
 ) :
   ListAdapter<ComicItem, DownloadedComicsAdapter.VH>(DownloadedComicItemDiffUtilItemCallback) {
   private val dateFormatter = SimpleDateFormat("hh:mm, dd/MM/yyyy", Locale.getDefault())
-  private val viewBinderHelper = ViewBinderHelper()
+
+  private val _clickDelete = PublishRelay.create<ComicItem>()
+
+  val clickDelete get() = _clickDelete.asObservable()
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-    VH(parent inflate R.layout.item_recycler_downloaded_comics)
+    VH(parent inflate R.layout.item_recycler_downloaded_comics, parent)
 
   override fun onBindViewHolder(holder: VH, position: Int) = holder.bind(getItem(position))
 
-  inner class VH(itemView: View) : RecyclerView.ViewHolder(itemView) {
+  inner class VH(itemView: View, parent: View) : RecyclerView.ViewHolder(itemView) {
     private val imageComic = itemView.image_comic!!
     private val swipeRevealLayout = itemView.swipe_reveal_layout!!
 
@@ -56,9 +67,15 @@ class DownloadedComicsAdapter(
     )
 
     init {
-      itemView.text_delete.setOnClickListener {
-        it.context.toast("Clicked")
-      }
+      itemView
+        .text_delete
+        .clicks()
+        .takeUntil(parent.detaches())
+        .map { adapterPosition }
+        .filter { it != NO_POSITION }
+        .map { getItem(it) }
+        .subscribe(_clickDelete)
+        .addTo(compositeDisposable)
     }
 
     fun bind(comic: ComicItem) {

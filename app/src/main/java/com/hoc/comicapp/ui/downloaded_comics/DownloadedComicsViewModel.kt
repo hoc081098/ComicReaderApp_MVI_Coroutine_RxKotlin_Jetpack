@@ -4,7 +4,6 @@ import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.*
-import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.SortOrder.*
 import com.hoc.comicapp.utils.notOfType
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
@@ -14,6 +13,7 @@ import io.reactivex.rxkotlin.Observables.combineLatest
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.ofType
 import io.reactivex.rxkotlin.subscribeBy
+import timber.log.Timber
 
 class DownloadedComicsViewModel(
   private val rxSchedulerProvider: RxSchedulerProvider,
@@ -47,12 +47,17 @@ class DownloadedComicsViewModel(
 
     combineLatest(
       scannedState,
-      filteredIntent.ofType<ViewIntent.ChangeSortOrder>().map { it.order }
+      filteredIntent
+        .ofType<ViewIntent.ChangeSortOrder>()
+        .map { it.order }
+        .distinctUntilChanged()
+        .doOnNext { Timber.d("Sort actual $it") }
     ) { state, order ->
       state.copy(
         comics = state
           .comics
-          .sortedWith(comicItemComparators[order]!!)
+          .sortedWith(order.comparator),
+        sortOrder = order
       )
     }
       .observeOn(rxSchedulerProvider.main)
@@ -63,6 +68,7 @@ class DownloadedComicsViewModel(
       .ofType<ViewIntent.DeleteComic>()
       .map { it.comic }
       .flatMap { interactor.deleteComic(it).toObservable() }
+      .observeOn(rxSchedulerProvider.main)
       .subscribeBy { (comic, error) ->
         val event = if (error === null) {
           SingleEvent.DeletedComic(comic)
@@ -75,12 +81,6 @@ class DownloadedComicsViewModel(
   }
 
   private companion object {
-    val comicItemComparators = mapOf<SortOrder, Comparator<ViewState.ComicItem>>(
-      ComicTitleAsc to compareBy { it.title },
-      ComicTitleDesc to compareByDescending { it.title },
-      LatestChapterAsc to compareBy { it.chapters.first().downloadedAt },
-      LatestChapterDesc to compareByDescending { it.chapters.first().downloadedAt }
-    )
 
     val intentFilter = ObservableTransformer<ViewIntent, ViewIntent> { intents ->
       intents.publish { shared ->
