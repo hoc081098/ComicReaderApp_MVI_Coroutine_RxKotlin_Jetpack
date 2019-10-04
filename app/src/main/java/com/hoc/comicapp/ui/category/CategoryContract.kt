@@ -19,7 +19,8 @@ data class CategoryViewState(
   val isLoading: Boolean,
   val categories: List<Category>,
   val errorMessage: String?,
-  val refreshLoading: Boolean
+  val refreshLoading: Boolean,
+  @SortOrder val sortOrder: String
 ) : ViewState {
   companion object {
     @JvmStatic
@@ -27,7 +28,8 @@ data class CategoryViewState(
       isLoading = false,
       categories = emptyList(),
       errorMessage = null,
-      refreshLoading = false
+      refreshLoading = false,
+      sortOrder = CATEGORY_NAME_ASC
     )
   }
 }

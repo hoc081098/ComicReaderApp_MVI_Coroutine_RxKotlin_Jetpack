@@ -39,7 +39,10 @@ class CategoryViewModel(
               .compose(retryProcessor)
           )
         }.scan(initialState) { state, change -> change.reducer(state) },
-        source2 = intents.ofType<CategoryViewIntent.ChangeSortOrder>().map { it.sortOrder },
+        source2 = intents
+          .ofType<CategoryViewIntent.ChangeSortOrder>()
+          .map { it.sortOrder }
+          .distinctUntilChanged(),
         combineFunction = { viewState, sortOrder ->
           viewState.copy(
             categories = viewState
@@ -47,7 +50,8 @@ class CategoryViewModel(
               .sortedWith(
                 categoryComparators[sortOrder]
                   ?: return@combineLatest viewState
-              )
+              ),
+            sortOrder = sortOrder
           )
         }
       ).distinctUntilChanged().observeOn(rxSchedulerProvider.main)
