@@ -48,7 +48,12 @@ class CategoryFragment : Fragment() {
       }
       .addTo(compositeDisposable)
 
-    spinner_sort_title.setItems(listOf(CATEGORY_NAME_ASC, CATEGORY_NAME_DESC))
+    spinner_sort_title.setItems(orders)
+    spinner_sort_title.selectedIndex = viewModel.state
+      .safeValue
+      ?.sortOrder
+      ?.let(orders::indexOf)
+      ?: 0
   }
 
   private fun bind(adapter: CategoryAdapter) {
@@ -101,5 +106,9 @@ class CategoryFragment : Fragment() {
     super.onDestroyView()
 
     compositeDisposable.clear()
+  }
+
+  private companion object{
+    val orders = listOf(CATEGORY_NAME_ASC, CATEGORY_NAME_DESC)
   }
 }
