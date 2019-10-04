@@ -57,10 +57,12 @@ class DownloadedComicsFragment : Fragment() {
     }
 
     spinner_sort.setItems(SortOrder.values().toList())
+    spinner_sort.selectedIndex = viewModel.state.safeValue?.sortOrder?.let { SortOrder.values().indexOf(it) } ?: 0
   }
 
   private fun bind(adapter: DownloadedComicsAdapter) {
     viewModel.state.observe(owner = viewLifecycleOwner) { (isLoading, errorMessage, comics) ->
+
       if (isLoading) {
         progress_bar.visibility = View.VISIBLE
       } else {
