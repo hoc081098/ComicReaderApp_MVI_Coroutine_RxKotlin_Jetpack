@@ -9,11 +9,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.chauthai.swipereveallayout.ViewBinderHelper
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
+import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.*
-import com.hoc.comicapp.utils.itemSelections
-import com.hoc.comicapp.utils.observe
-import com.hoc.comicapp.utils.observeEvent
-import com.hoc.comicapp.utils.snack
+import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.ViewState.ComicItem
+import com.hoc.comicapp.utils.*
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
@@ -34,7 +33,11 @@ class DownloadedComicsFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    val adapter = DownloadedComicsAdapter(GlideApp.with(this), viewBinderHelper)
+    val adapter = DownloadedComicsAdapter(
+      GlideApp.with(this),
+      viewBinderHelper,
+      compositeDisposable
+    )
     initView(adapter)
     bind(adapter)
   }
@@ -83,6 +86,12 @@ class DownloadedComicsFragment : Fragment() {
         is SingleEvent.Message -> {
           view?.snack(it.message)
         }
+        is SingleEvent.DeletedComic -> {
+          view?.snack("Deleted ${it.comic.title}")
+        }
+        is SingleEvent.DeleteComicError -> {
+          view?.snack("Error when deleting ${it.comic.title}, error: ${it.error.getMessage()}")
+        }
       }
     }
     viewModel.processIntents(
@@ -91,7 +100,13 @@ class DownloadedComicsFragment : Fragment() {
         spinner_sort
           .itemSelections<SortOrder>()
           .map { ViewIntent.ChangeSortOrder(it) }
-          .doOnNext { Timber.d("Sort $it") }
+          .doOnNext { Timber.d("Sort $it") },
+        adapter
+          .clickDelete
+          .doOnNext { Timber.d("Delete[1] $it") }
+          .exhaustMap(::showDeleteComicDialog)
+          .doOnNext { Timber.d("Delete[2] $it") }
+          .map { ViewIntent.DeleteComic(it) }
       )
     ).addTo(compositeDisposable)
   }
@@ -100,4 +115,31 @@ class DownloadedComicsFragment : Fragment() {
     super.onDestroyView()
     compositeDisposable.clear()
   }
+
+  private fun showDeleteComicDialog(comic: ComicItem): Observable<ComicItem> {
+    return Observable.create<ComicItem> { emitter ->
+      val alertDialog = requireActivity().showAlertDialog {
+        title("Delete comic")
+        message("All chapter in this comic won't be available to read offline")
+        cancelable(true)
+        iconId(R.drawable.ic_delete_white_24dp)
+
+        negativeAction("Cancel") { dialog, _ ->
+          dialog.cancel()
+          if (!emitter.isDisposed) {
+            emitter.onComplete()
+          }
+        }
+        positiveAction("OK") { dialog, _ ->
+          dialog.dismiss()
+          if (!emitter.isDisposed) {
+            emitter.onNext(comic)
+            emitter.onComplete()
+          }
+        }
+      }
+      emitter.setCancellable { alertDialog.dismiss() }
+    }
+  }
+
 }

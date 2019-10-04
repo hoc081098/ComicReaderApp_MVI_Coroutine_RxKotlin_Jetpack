@@ -68,6 +68,7 @@ class DownloadedComicsViewModel(
       .ofType<ViewIntent.DeleteComic>()
       .map { it.comic }
       .flatMap { interactor.deleteComic(it).toObservable() }
+      .observeOn(rxSchedulerProvider.main)
       .subscribeBy { (comic, error) ->
         val event = if (error === null) {
           SingleEvent.DeletedComic(comic)
