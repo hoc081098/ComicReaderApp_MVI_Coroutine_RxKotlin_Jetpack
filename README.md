@@ -6,7 +6,7 @@ Comic reader app 📘. Learning MVVM / MVI with RxKotlin, Retrofit, Kotlin Corou
 - **Delete `.idea` folder**
 - Open project by `Android Studio` and run as usual
 
-## Screenshots
+# Screenshots
 
 |  |  |   | |
 | :---:                              | :---:                             | :---:                              | :---:     |
