@@ -137,6 +137,11 @@ class DownloadedComicsFragment : Fragment() {
             emitter.onComplete()
           }
         }
+        onCancel {
+          if (!emitter.isDisposed) {
+            emitter.onComplete()
+          }
+        }
       }
       emitter.setCancellable { alertDialog.dismiss() }
     }
