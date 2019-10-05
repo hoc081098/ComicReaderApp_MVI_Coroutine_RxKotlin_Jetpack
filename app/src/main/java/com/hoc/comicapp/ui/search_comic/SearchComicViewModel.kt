@@ -29,11 +29,12 @@ class SearchComicViewModel(
     val searchTerm = intentS
       .ofType<ViewIntent.SearchIntent>()
       .map { it.term }
+      .filter { it.isNotBlank() }
       .doOnNext { Timber.d("[SEARCH-1] $it") }
       .debounce(600, TimeUnit.MILLISECONDS)
-      .filter { it.isNotBlank() }
       .distinctUntilChanged()
       .doOnNext { Timber.d("[SEARCH-2] $it") }
+      .share()
 
     val retryPartialChange = intentS
       .ofType<ViewIntent.RetryIntent>()
