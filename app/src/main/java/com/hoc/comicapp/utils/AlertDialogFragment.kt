@@ -17,6 +17,11 @@ fun FragmentActivity.showAlertDialog(init: AlertDialogFragment.Builder.() -> Uni
 }
 
 class AlertDialogFragment(private val builder: Builder) : DialogFragment() {
+  override fun onCancel(dialog: DialogInterface) {
+    super.onCancel(dialog)
+    builder.onCancelListener?.onCancel(dialog)
+  }
+
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
     return AlertDialog
       .Builder(requireContext())
@@ -65,6 +70,8 @@ class AlertDialogFragment(private val builder: Builder) : DialogFragment() {
     var iconId: Int = 0
     var icon: Drawable? = null
 
+    var onCancelListener: DialogInterface.OnCancelListener? = null
+
     var negativeButtonText: String? = null
     var negativeButtonClickListener: DialogInterface.OnClickListener? = null
 
@@ -83,6 +90,10 @@ class AlertDialogFragment(private val builder: Builder) : DialogFragment() {
     fun iconId(@DrawableRes iconId: Int) = apply { this.iconId = iconId }
 
     fun icon(icon: Drawable) = apply { this.icon = icon }
+
+    fun onCancel(listener: (DialogInterface) -> Unit) {
+      this.onCancelListener = DialogInterface.OnCancelListener(listener)
+    }
 
     fun negativeAction(
       text: String,
