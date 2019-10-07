@@ -4,12 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.activity.MainActivity
+import com.hoc.comicapp.ui.search_comic.SearchComicContract.SingleEvent
+import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewIntent
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.snack
@@ -46,7 +49,16 @@ class SearchComicFragment : Fragment() {
 
     recycler_search_comic.run {
       setHasFixedSize(true)
-      layoutManager = GridLayoutManager(context, 2)
+      layoutManager = GridLayoutManager(context, 2).apply {
+        spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+          override fun getSpanSize(position: Int): Int {
+            return when (searchComicAdapter.getItemViewType(position)) {
+              R.layout.item_recycler_search_comic_load_more -> 2
+              else -> 1
+            }
+          }
+        }
+      }
       adapter = searchComicAdapter
     }
 
@@ -66,7 +78,7 @@ class SearchComicFragment : Fragment() {
   private fun bind(adapter: SearchComicAdapter) {
     viewModel.singleEvent.observeEvent(owner = viewLifecycleOwner) {
       when (it) {
-        is SearchComicSingleEvent.MessageEvent -> {
+        is SingleEvent.MessageEvent -> {
           view?.snack(it.message)
         }
       }
@@ -88,15 +100,20 @@ class SearchComicFragment : Fragment() {
       }
 
       adapter.submitList(comics)
+
+      empty_layout.isVisible = !isLoading && comics.isEmpty()
     }
     viewModel.processIntents(
       Observable.mergeArray(
         mainActivity
           .textSearchChanges()
-          .map { SearchComicViewIntent.SearchIntent(it) },
+          .map { ViewIntent.SearchIntent(it) },
         button_retry
           .clicks()
-          .map { SearchComicViewIntent.RetryIntent }
+          .map { ViewIntent.RetryFirstIntent },
+        adapter
+          .clickButtonRetryOrLoadMoreObservable
+          .map { if (it) ViewIntent.RetryNextPage else ViewIntent.LoadNextPage }
       )
     ).addTo(compositeDisposable)
   }
