@@ -16,6 +16,7 @@ import com.hoc.comicapp.utils.inflate
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxbinding3.view.detaches
 import com.jakewharton.rxrelay2.PublishRelay
+import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.item_recycler_downloaded_comics.view.*
@@ -36,8 +37,10 @@ class DownloadedComicsAdapter(
   private val dateFormatter = SimpleDateFormat("hh:mm, dd/MM/yyyy", Locale.getDefault())
 
   private val _clickDelete = PublishRelay.create<ComicItem>()
-
   val clickDelete get() = _clickDelete.asObservable()
+
+  private val _clickItem = PublishRelay.create<ComicItem>()
+  val clickItem get() = _clickItem.asObservable()
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
     VH(parent inflate R.layout.item_recycler_downloaded_comics, parent)
@@ -66,15 +69,28 @@ class DownloadedComicsAdapter(
       textChapterName3 to textChapterTime3
     )
 
+
+    private fun <T> Observable<T>.getItemAtPosition(): Observable<ComicItem> {
+      return map { adapterPosition }
+        .filter { it != NO_POSITION }
+        .map { getItem(it) }
+    }
+
     init {
       itemView
         .text_delete
         .clicks()
         .takeUntil(parent.detaches())
-        .map { adapterPosition }
-        .filter { it != NO_POSITION }
-        .map { getItem(it) }
+        .getItemAtPosition()
         .subscribe(_clickDelete)
+        .addTo(compositeDisposable)
+
+      itemView
+        .cardView
+        .clicks()
+        .takeUntil(parent.detaches())
+        .getItemAtPosition()
+        .subscribe(_clickItem)
         .addTo(compositeDisposable)
     }
 

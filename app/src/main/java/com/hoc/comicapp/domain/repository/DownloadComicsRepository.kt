@@ -13,6 +13,8 @@ interface DownloadComicsRepository {
 
   fun getDownloadedComics(): Observable<Either<ComicAppError, List<DownloadedComic>>>
 
+  fun getDownloadedComic(link: String): Observable<Either<ComicAppError, DownloadedComic>>
+
   fun getDownloadedChapters() : LiveData<List<DownloadedChapter>>
 
   suspend fun deleteDownloadedChapter(chapter: DownloadedChapter): Either<ComicAppError, Unit>

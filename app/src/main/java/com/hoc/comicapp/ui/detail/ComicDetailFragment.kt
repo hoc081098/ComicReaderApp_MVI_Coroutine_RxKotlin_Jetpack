@@ -1,6 +1,8 @@
 package com.hoc.comicapp.ui.detail
 
+import android.net.Uri
 import android.os.Bundle
+import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -31,14 +33,16 @@ import io.reactivex.rxkotlin.withLatestFrom
 import kotlinx.android.synthetic.main.fragment_comic_detail.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import timber.log.Timber
+import java.io.File
 import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.math.absoluteValue
 import com.hoc.comicapp.ui.detail.ComicDetailFragmentDirections.Companion.actionComicDetailFragmentToChapterDetailFragment as toChapterDetail
 
 @ExperimentalCoroutinesApi
 class ComicDetailFragment : Fragment() {
-  private val viewModel by viewModel<ComicDetailViewModel>()
+  private val viewModel by viewModel<ComicDetailViewModel>() { parametersOf(args.isDownloaded) }
   private val args by navArgs<ComicDetailFragmentArgs>()
 
   private val compositeDisposable = CompositeDisposable()
@@ -301,7 +305,12 @@ class ComicDetailFragment : Fragment() {
         )
 
         glide
-          .load(detail.thumbnail)
+          .load(
+            when {
+              Patterns.WEB_URL.matcher(detail.thumbnail).matches() -> Uri.parse(detail.thumbnail)
+              else -> Uri.fromFile(File(requireContext().filesDir, detail.thumbnail))
+            }
+          )
           .fitCenter()
           .transition(DrawableTransitionOptions.withCrossFade())
           .into(image_thumbnail)

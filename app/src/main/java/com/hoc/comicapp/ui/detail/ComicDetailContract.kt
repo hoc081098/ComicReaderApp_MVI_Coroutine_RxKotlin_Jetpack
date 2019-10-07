@@ -16,10 +16,14 @@ interface ComicDetailInteractor {
   fun getComicDetail(
     link: String,
     name: String? = null,
-    thumbnail: String? = null
+    thumbnail: String? = null,
+    isDownloaded: Boolean
   ): Observable<ComicDetailPartialChange>
 
-  fun refreshPartialChanges(link: String): Observable<ComicDetailPartialChange>
+  fun refreshPartialChanges(
+    link: String,
+    isDownloaded: Boolean
+  ): Observable<ComicDetailPartialChange>
 }
 
 sealed class ComicDetailIntent : Intent {

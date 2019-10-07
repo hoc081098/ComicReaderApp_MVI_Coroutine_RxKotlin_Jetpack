@@ -1,67 +1,154 @@
 package com.hoc.comicapp.ui.detail
 
 import com.hoc.comicapp.domain.models.ComicDetail
+import com.hoc.comicapp.domain.models.DownloadedComic
 import com.hoc.comicapp.domain.repository.ComicRepository
+import com.hoc.comicapp.domain.repository.DownloadComicsRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
+import com.hoc.comicapp.ui.detail.ComicDetailPartialChange.InitialRetryPartialChange
+import com.hoc.comicapp.ui.detail.ComicDetailPartialChange.RefreshPartialChange
+import com.hoc.comicapp.ui.detail.ComicDetailViewState.ComicDetail.Detail
+import com.hoc.comicapp.ui.detail.ComicDetailViewState.ComicDetail.Initial
 import com.hoc.comicapp.utils.fold
 import io.reactivex.Observable
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.rx2.collect
 import kotlinx.coroutines.rx2.rxObservable
 
 @ExperimentalCoroutinesApi
 class ComicDetailInteractorImpl(
   private val comicRepository: ComicRepository,
-  private val dispatcherProvider: CoroutinesDispatcherProvider
+  private val dispatcherProvider: CoroutinesDispatcherProvider,
+  private val downloadedComicRepository: DownloadComicsRepository
 ) :
   ComicDetailInteractor {
-  override fun refreshPartialChanges(link: String): Observable<ComicDetailPartialChange> {
-    return rxObservable<ComicDetailPartialChange>(dispatcherProvider.ui) {
-      send(ComicDetailPartialChange.RefreshPartialChange.Loading)
+  override fun refreshPartialChanges(
+    link: String,
+    isDownloaded: Boolean
+  ): Observable<ComicDetailPartialChange> {
+    return if (isDownloaded) {
+      rxObservable<ComicDetailPartialChange> {
+        send(RefreshPartialChange.Loading)
 
-      comicRepository
-        .getComicDetail(link)
-        .fold(
-          { ComicDetailPartialChange.RefreshPartialChange.Error(it) },
-          { ComicDetailPartialChange.RefreshPartialChange.Success(it.toViewComicDetail()) }
-        )
-        .let { send(it) }
+        downloadedComicRepository
+          .getDownloadedComic(link)
+          .map {
+            it.fold(
+              { RefreshPartialChange.Error(it) },
+              { RefreshPartialChange.Success(it.toViewComicDetail()) }
+            )
+          }
+          .collect { send(it) }
+      }
+    } else {
+      rxObservable<ComicDetailPartialChange>(dispatcherProvider.ui) {
+        send(RefreshPartialChange.Loading)
+
+        comicRepository
+          .getComicDetail(link)
+          .fold(
+            { RefreshPartialChange.Error(it) },
+            { RefreshPartialChange.Success(it.toViewComicDetail()) }
+          )
+          .let { send(it) }
+      }
     }
   }
 
   override fun getComicDetail(
     link: String,
     name: String?,
-    thumbnail: String?
+    thumbnail: String?,
+    isDownloaded: Boolean
   ): Observable<ComicDetailPartialChange> {
-    return rxObservable<ComicDetailPartialChange>(dispatcherProvider.ui) {
-
-      if (thumbnail != null && name != null) {
-        send(
-          ComicDetailPartialChange.InitialRetryPartialChange.InitialData(
-            initialComic = ComicDetailViewState.ComicDetail.Initial(
-              link = link,
-              thumbnail = thumbnail,
-              title = name
+    return if (isDownloaded) {
+      rxObservable<ComicDetailPartialChange>(dispatcherProvider.ui) {
+        if (thumbnail != null && name != null) {
+          send(
+            InitialRetryPartialChange.InitialData(
+              initialComic = Initial(
+                link = link,
+                thumbnail = thumbnail,
+                title = name
+              )
             )
           )
-        )
+        }
+        send(InitialRetryPartialChange.Loading)
+        downloadedComicRepository
+          .getDownloadedComic(link)
+          .map {
+            it.fold(
+              { InitialRetryPartialChange.Error(it) },
+              { InitialRetryPartialChange.Data(it.toViewComicDetail()) }
+            )
+          }
+          .collect { send(it) }
       }
-      send(ComicDetailPartialChange.InitialRetryPartialChange.Loading)
+    } else {
+      rxObservable<ComicDetailPartialChange>(dispatcherProvider.ui) {
 
-      comicRepository
-        .getComicDetail(link)
-        .fold(
-          { ComicDetailPartialChange.InitialRetryPartialChange.Error(it) },
-          { ComicDetailPartialChange.InitialRetryPartialChange.Data(it.toViewComicDetail()) }
-        )
-        .let { send(it) }
+        if (thumbnail != null && name != null) {
+          send(
+            InitialRetryPartialChange.InitialData(
+              initialComic = Initial(
+                link = link,
+                thumbnail = thumbnail,
+                title = name
+              )
+            )
+          )
+        }
+        send(InitialRetryPartialChange.Loading)
+
+        comicRepository
+          .getComicDetail(link)
+          .fold(
+            { InitialRetryPartialChange.Error(it) },
+            { InitialRetryPartialChange.Data(it.toViewComicDetail()) }
+          )
+          .let { send(it) }
+      }
     }
   }
 }
 
-private fun ComicDetail.toViewComicDetail(): ComicDetailViewState.ComicDetail.Detail {
-  return ComicDetailViewState.ComicDetail.Detail(
+private fun DownloadedComic.toViewComicDetail(): Detail {
+  return Detail(
+    link = comicLink,
+    thumbnail = thumbnail,
+    title = title,
+    shortenedContent = shortenedContent,
+    lastUpdated = lastUpdated,
+    view = view,
+    authors = authors.map {
+      ComicDetailViewState.Author(
+        name = it.name,
+        link = it.name
+      )
+    },
+    chapters = chapters.map {
+      ComicDetailViewState.Chapter(
+        chapterName = it.chapterName,
+        chapterLink = it.chapterLink,
+        view = it.view,
+        comicLink = it.comicLink,
+        time = it.time,
+        downloadState = ComicDetailViewState.DownloadState.Downloaded
+      )
+    },
+    categories = categories.map {
+      ComicDetailViewState.Category(
+        name = it.name,
+        link = it.link
+      )
+    },
+    relatedComics = emptyList()
+  )
+}
+
+private fun ComicDetail.toViewComicDetail(): Detail {
+  return Detail(
     title = title,
     view = view,
     link = link,

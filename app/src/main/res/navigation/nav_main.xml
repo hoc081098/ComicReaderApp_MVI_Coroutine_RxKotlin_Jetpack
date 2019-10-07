@@ -46,6 +46,11 @@
             app:argType="string"
             app:nullable="false" />
 
+        <argument
+            android:name="isDownloaded"
+            app:argType="boolean"
+            app:nullable="false" />
+
         <action
             android:id="@+id/action_comicDetailFragment_to_chapterDetailFragment"
             app:destination="@id/chapterDetailFragment"
@@ -89,7 +94,16 @@
     <fragment
         android:id="@+id/downloadedComicsFragment"
         android:name="com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsFragment"
-        android:label="Downloaded comics" />
+        android:label="Downloaded comics">
+        <action
+            android:id="@+id/action_downloadedComicsFragment_to_comicDetailFragment"
+            app:destination="@id/comicDetailFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
     <fragment
         android:id="@+id/downloadingChaptersFragment"
         android:name="com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersFragment"

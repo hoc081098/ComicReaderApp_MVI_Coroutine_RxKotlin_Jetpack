@@ -33,7 +33,7 @@ val viewModelModule = module {
 
   single { HomeInteractorImpl1(get(), get(), get()) } bind HomeInteractor::class
 
-  single { ComicDetailInteractorImpl(get(), get()) } bind ComicDetailInteractor::class
+  single { ComicDetailInteractorImpl(get(), get(), get()) } bind ComicDetailInteractor::class
 
   single { SearchComicInteractorImpl(get(), get()) } bind SearchComicContract.Interactor::class
 
@@ -45,7 +45,7 @@ val viewModelModule = module {
 
   viewModel { HomeViewModel(get(), get()) }
 
-  viewModel { ComicDetailViewModel(get(), get(), get(), get(), get()) }
+  viewModel { (isDownloaded: Boolean) -> ComicDetailViewModel(get(), get(), get(), get(), get(), isDownloaded) }
 
   viewModel { SearchComicViewModel(get(), get()) }
 
