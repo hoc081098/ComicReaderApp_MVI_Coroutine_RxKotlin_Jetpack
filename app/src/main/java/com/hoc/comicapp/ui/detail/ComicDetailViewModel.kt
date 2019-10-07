@@ -120,6 +120,7 @@ class ComicDetailViewModel(
     val filteredIntent = intentS
       .compose(intentFilter)
       .doOnNext { Timber.d("intent=$it") }
+      .share()
 
     _stateD = initStateD(filteredIntent)
     processDownloadChapterIntent(filteredIntent)

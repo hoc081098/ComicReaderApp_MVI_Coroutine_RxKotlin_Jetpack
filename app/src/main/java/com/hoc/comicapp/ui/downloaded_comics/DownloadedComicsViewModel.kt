@@ -40,7 +40,10 @@ class DownloadedComicsViewModel(
   }
 
   init {
-    val filteredIntent = intentS.compose(intentFilter)
+    val filteredIntent = intentS
+      .compose(intentFilter)
+      .share()
+
     val scannedState = filteredIntent
       .compose(intentToChanges)
       .scan(initialState, reducer)

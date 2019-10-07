@@ -124,15 +124,18 @@ class ChapterDetailViewModel(
     intents.subscribe(intentS)!!
 
   init {
-    val intents = intentS.compose(intentFilter)
-    Observables.combineLatest(
-      intents
-        .compose(intentToChanges)
-        .scan(initialState) { vs, change -> change.reducer(vs) },
-      intents
-        .ofType<ChangeOrientation>()
-        .map { it.orientation }
-    ) { state, orientation -> state.copy(orientation = orientation) }
+    intentS
+      .compose(intentFilter)
+      .publish { intents ->
+        Observables.combineLatest(
+          intents
+            .compose(intentToChanges)
+            .scan(initialState) { vs, change -> change.reducer(vs) },
+          intents
+            .ofType<ChangeOrientation>()
+            .map { it.orientation }
+        ) { state, orientation -> state.copy(orientation = orientation) }
+      }
       .observeOn(rxSchedulerProvider.main)
       .subscribeBy(onNext = ::setNewState)
       .addTo(compositeDisposable)

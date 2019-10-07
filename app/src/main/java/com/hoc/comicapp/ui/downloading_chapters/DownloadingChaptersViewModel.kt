@@ -80,7 +80,7 @@ class DownloadingChaptersViewModel(
   init {
     Timber.d("DownloadingChaptersViewModel::init")
 
-    val filteredIntent = intentS.compose(intentFilter)
+    val filteredIntent = intentS.compose(intentFilter).share()
 
     filteredIntent
       .compose(intentToChanges)
