@@ -4,7 +4,7 @@ import com.hoc.comicapp.domain.repository.ComicRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.Interactor
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.PartialChange
-import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewState.ComicItem
+import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewState.Item.ComicItem
 import com.hoc.comicapp.utils.fold
 import io.reactivex.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi

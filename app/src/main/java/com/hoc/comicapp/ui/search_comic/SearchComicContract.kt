@@ -4,7 +4,7 @@ import com.hoc.comicapp.base.Intent
 import com.hoc.comicapp.domain.models.Comic
 import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.getMessage
-import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewState.ComicItem
+import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewState.Item.ComicItem
 import io.reactivex.Observable
 
 interface SearchComicContract {
@@ -14,7 +14,7 @@ interface SearchComicContract {
 
   data class ViewState(
     val isLoading: Boolean,
-    val comics: List<ComicItem>,
+    val comics: List<Item>,
     val errorMessage: String?
   ) : com.hoc.comicapp.base.ViewState {
     companion object {
@@ -26,18 +26,20 @@ interface SearchComicContract {
       )
     }
 
-    data class ComicItem(
-      val title: String,
-      val thumbnail: String,
-      val link: String,
-      val lastChapters: List<ChapterItem>
-    ) {
-      constructor(domain: Comic) : this(
-        title = domain.title,
-        thumbnail = domain.thumbnail,
-        link = domain.link,
-        lastChapters = domain.lastChapters.map(::ChapterItem)
-      )
+    sealed class Item {
+      data class ComicItem(
+        val title: String,
+        val thumbnail: String,
+        val link: String,
+        val lastChapters: List<ChapterItem>
+      ) : Item() {
+        constructor(domain: Comic) : this(
+          title = domain.title,
+          thumbnail = domain.thumbnail,
+          link = domain.link,
+          lastChapters = domain.lastChapters.map(::ChapterItem)
+        )
+      }
     }
 
     data class ChapterItem(
