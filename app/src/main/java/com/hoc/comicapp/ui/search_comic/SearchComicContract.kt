@@ -4,6 +4,7 @@ import com.hoc.comicapp.base.Intent
 import com.hoc.comicapp.domain.models.Comic
 import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.getMessage
+import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewState.Item
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewState.Item.ComicItem
 import io.reactivex.Observable
 
@@ -15,14 +16,16 @@ interface SearchComicContract {
   data class ViewState(
     val isLoading: Boolean,
     val comics: List<Item>,
-    val errorMessage: String?
+    val errorMessage: String?,
+    val page: Int
   ) : com.hoc.comicapp.base.ViewState {
     companion object {
       @JvmStatic
       fun initialState() = ViewState(
         isLoading = false,
         comics = emptyList(),
-        errorMessage = null
+        errorMessage = null,
+        page = 0
       )
     }
 
@@ -40,6 +43,10 @@ interface SearchComicContract {
           lastChapters = domain.lastChapters.map(::ChapterItem)
         )
       }
+
+      object Idle : Item()
+      object Loading : Item()
+      data class Error(val errorMessage: String) : Item()
     }
 
     data class ChapterItem(
@@ -67,7 +74,8 @@ interface SearchComicContract {
             state.copy(
               isLoading = false,
               errorMessage = null,
-              comics = comics
+              comics = comics + if (comics.isNotEmpty()) listOf(Item.Idle) else emptyList(),
+              page = 1
             )
           }
           Loading -> {
@@ -87,11 +95,57 @@ interface SearchComicContract {
         }
       }
     }
+
+    sealed class NextPage : PartialChange() {
+      data class Data(val comics: List<ComicItem>) : NextPage()
+      object Loading : NextPage()
+      data class Error(val error: ComicAppError, val term: String) : NextPage()
+
+      override fun reducer(state: ViewState): ViewState {
+        val oldComics = state.comics.filterIsInstance<ComicItem>()
+
+        return when (this) {
+          is Data -> {
+            state.copy(
+              isLoading = false,
+              errorMessage = null,
+              comics = oldComics + comics + if (comics.isNotEmpty()) {
+                listOf(Item.Idle)
+              } else {
+                emptyList()
+              },
+              page = state.page + if (comics.isNotEmpty()) {
+                1
+              } else {
+                0
+              }
+            )
+          }
+          Loading -> {
+            state.copy(
+              isLoading = false,
+              errorMessage = null,
+              comics = oldComics + Item.Loading
+            )
+          }
+          is Error -> {
+            state.copy(
+              isLoading = false,
+              errorMessage = null,
+              comics = oldComics + Item.Error(this.error.getMessage())
+            )
+          }
+        }
+      }
+    }
   }
 
   sealed class ViewIntent : Intent {
     data class SearchIntent(val term: String) : ViewIntent()
     object RetryFirstIntent : ViewIntent()
+
+    object LoadNextPage : ViewIntent()
+    object RetryNextPage : ViewIntent()
   }
 
   sealed class SingleEvent : com.hoc.comicapp.base.SingleEvent {

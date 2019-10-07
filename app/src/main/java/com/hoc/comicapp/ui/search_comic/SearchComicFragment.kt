@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
@@ -48,7 +49,16 @@ class SearchComicFragment : Fragment() {
 
     recycler_search_comic.run {
       setHasFixedSize(true)
-      layoutManager = GridLayoutManager(context, 2)
+      layoutManager = GridLayoutManager(context, 2).apply {
+        spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+          override fun getSpanSize(position: Int): Int {
+            return when (searchComicAdapter.getItemViewType(position)) {
+              R.layout.item_recycler_search_comic_load_more -> 2
+              else -> 1
+            }
+          }
+        }
+      }
       adapter = searchComicAdapter
     }
 
@@ -90,6 +100,8 @@ class SearchComicFragment : Fragment() {
       }
 
       adapter.submitList(comics)
+
+      empty_layout.isVisible = !isLoading && comics.isEmpty()
     }
     viewModel.processIntents(
       Observable.mergeArray(
@@ -98,7 +110,10 @@ class SearchComicFragment : Fragment() {
           .map { ViewIntent.SearchIntent(it) },
         button_retry
           .clicks()
-          .map { ViewIntent.RetryFirstIntent }
+          .map { ViewIntent.RetryFirstIntent },
+        adapter
+          .clickButtonRetryOrLoadMoreObservable
+          .map { if (it) ViewIntent.RetryNextPage else ViewIntent.LoadNextPage }
       )
     ).addTo(compositeDisposable)
   }

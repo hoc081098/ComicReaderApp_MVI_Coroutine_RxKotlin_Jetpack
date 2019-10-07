@@ -4,6 +4,8 @@ import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.*
+import com.hoc.comicapp.utils.exhaustMap
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.addTo
@@ -26,6 +28,8 @@ class SearchComicViewModel(
     intents.subscribe(intentS)!!
 
   init {
+    val stateS = BehaviorRelay.createDefault(initialState)
+
     val searchTerm = intentS
       .ofType<ViewIntent.SearchIntent>()
       .map { it.term }
@@ -68,11 +72,63 @@ class SearchComicViewModel(
             )
           }
       }
-    Observable.mergeArray(searchPartialChange, retryPartialChange)
+
+    val loadNextPagePartialChange = intentS
+      .ofType<ViewIntent.LoadNextPage>()
+      .withLatestFrom(searchTerm) { _, term -> term }
+      .withLatestFrom(stateS)
+      .map { it.first to it.second.page + 1 }
+      .doOnNext { Timber.d("[LOAD NEXT PAGE] $it") }
+      .exhaustMap { (term, page) ->
+        interactor
+          .searchComic(term, page)
+          .doOnNext {
+            val messageFromError =
+              (it as? PartialChange.NextPage.Error ?: return@doOnNext).error.getMessage()
+            sendEvent(
+              SingleEvent.MessageEvent(
+                "Load next page, error occurred: $messageFromError"
+              )
+            )
+          }
+      }
+
+    val retryNextPagePartialChange = intentS
+      .ofType<ViewIntent.RetryNextPage>()
+      .withLatestFrom(searchTerm) { _, term -> term }
+      .withLatestFrom(stateS)
+      .map { it.first to it.second.page + 1 }
+      .doOnNext { Timber.d("[RETRY NEXT PAGE] $it") }
+      .exhaustMap { (term, page) ->
+        interactor
+          .searchComic(term, page)
+          .doOnNext {
+            val messageFromError =
+              (it as? PartialChange.NextPage.Error ?: return@doOnNext).error.getMessage()
+            sendEvent(
+              SingleEvent.MessageEvent(
+                "Retry Load next page, error occurred: $messageFromError"
+              )
+            )
+          }
+      }
+
+    /**
+     * Subscribe
+     */
+
+    Observable.mergeArray(
+      searchPartialChange,
+      retryPartialChange,
+      loadNextPagePartialChange,
+      retryNextPagePartialChange
+    )
       .scan(initialState) { state, change -> change.reducer(state) }
       .distinctUntilChanged()
       .observeOn(rxSchedulerProvider.main)
-      .subscribeBy(onNext = ::setNewState)
+      .subscribe(stateS)
       .addTo(compositeDisposable)
+
+    stateS.subscribeBy(onNext = ::setNewState).addTo(compositeDisposable)
   }
 }

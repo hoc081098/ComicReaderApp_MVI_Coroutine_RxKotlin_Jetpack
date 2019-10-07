@@ -9,6 +9,7 @@ import com.hoc.comicapp.utils.fold
 import io.reactivex.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.rx2.rxObservable
+import timber.log.Timber
 
 @ExperimentalCoroutinesApi
 class SearchComicInteractorImpl(
@@ -16,18 +17,27 @@ class SearchComicInteractorImpl(
   private val dispatcherProvider: CoroutinesDispatcherProvider
 ) : Interactor {
   override fun searchComic(term: String, page: Int): Observable<PartialChange> {
-    return rxObservable<PartialChange>(dispatcherProvider.ui) {
+    return rxObservable(dispatcherProvider.ui) {
+      Timber.d("[INTERACTOR] $term $page")
+
       if (page == 1) {
         send(PartialChange.FirstPage.Loading)
         comicRepository
-          .searchComic(query = term)
+          .searchComic(query = term, page = page)
           .fold(
             left = { PartialChange.FirstPage.Error(error = it, term = term) },
             right = { PartialChange.FirstPage.Data(comics = it.map(::ComicItem)) }
           )
           .let { send(it) }
       } else {
-        TODO()
+        send(PartialChange.NextPage.Loading)
+        comicRepository
+          .searchComic(query = term, page = page)
+          .fold(
+            left = { PartialChange.NextPage.Error(error = it, term = term) },
+            right = { PartialChange.NextPage.Data(comics = it.map(::ComicItem)) }
+          )
+          .let { send(it) }
       }
     }
   }
