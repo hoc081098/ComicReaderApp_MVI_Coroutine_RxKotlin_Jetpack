@@ -37,16 +37,16 @@ class SearchComicViewModel(
       .share()
 
     val retryPartialChange = intentS
-      .ofType<ViewIntent.RetryIntent>()
+      .ofType<ViewIntent.RetryFirstIntent>()
       .withLatestFrom(searchTerm)
       .map { it.second }
       .doOnNext { Timber.d("[RETRY] $it") }
       .switchMap { term ->
         interactor
-          .searchComic(term)
+          .searchComic(term, page = 1)
           .doOnNext {
             val messageFromError =
-              (it as? PartialChange.Error ?: return@doOnNext).error.getMessage()
+              (it as? PartialChange.FirstPage.Error ?: return@doOnNext).error.getMessage()
             sendEvent(
               SingleEvent.MessageEvent(
                 "Search for '$term', error occurred: $messageFromError"
@@ -57,10 +57,10 @@ class SearchComicViewModel(
     val searchPartialChange = searchTerm
       .switchMap { term ->
         interactor
-          .searchComic(term)
+          .searchComic(term, page = 1)
           .doOnNext {
             val messageFromError =
-            (it as? PartialChange.Error ?: return@doOnNext).error.getMessage()
+              (it as? PartialChange.FirstPage.Error ?: return@doOnNext).error.getMessage()
             sendEvent(
               SingleEvent.MessageEvent(
                 "Retry search for '$term', error occurred: $messageFromError"

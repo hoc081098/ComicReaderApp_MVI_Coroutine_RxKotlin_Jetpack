@@ -15,16 +15,20 @@ class SearchComicInteractorImpl(
   private val comicRepository: ComicRepository,
   private val dispatcherProvider: CoroutinesDispatcherProvider
 ) : Interactor {
-  override fun searchComic(term: String): Observable<PartialChange> {
-    return rxObservable(dispatcherProvider.ui) {
-      send(PartialChange.Loading)
-      comicRepository
-        .searchComic(query = term)
-        .fold(
-          left = { PartialChange.Error(error = it, term = term) },
-          right = { PartialChange.Data(comics = it.map(::ComicItem)) }
-        )
-        .let { send(it) }
+  override fun searchComic(term: String, page: Int): Observable<PartialChange> {
+    return rxObservable<PartialChange>(dispatcherProvider.ui) {
+      if (page == 1) {
+        send(PartialChange.FirstPage.Loading)
+        comicRepository
+          .searchComic(query = term)
+          .fold(
+            left = { PartialChange.FirstPage.Error(error = it, term = term) },
+            right = { PartialChange.FirstPage.Data(comics = it.map(::ComicItem)) }
+          )
+          .let { send(it) }
+      } else {
+        TODO()
+      }
     }
   }
 }

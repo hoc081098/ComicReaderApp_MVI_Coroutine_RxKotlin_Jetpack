@@ -9,7 +9,7 @@ import io.reactivex.Observable
 
 interface SearchComicContract {
   interface Interactor {
-    fun searchComic(term: String): Observable<PartialChange>
+    fun searchComic(term: String, page: Int): Observable<PartialChange>
   }
 
   data class ViewState(
@@ -54,40 +54,44 @@ interface SearchComicContract {
   }
 
   sealed class PartialChange {
-    fun reducer(state: ViewState): ViewState {
-      return when (this) {
-        is Data -> {
-          state.copy(
-            isLoading = false,
-            errorMessage = null,
-            comics = comics
-          )
-        }
-        Loading -> {
-          state.copy(
-            isLoading = true,
-            errorMessage = null,
-            comics = emptyList()
-          )
-        }
-        is Error -> {
-          state.copy(
-            isLoading = false,
-            errorMessage = "Search for '$term', error occurred: ${error.getMessage()}",
-            comics = emptyList()
-          )
+    abstract fun reducer(state: ViewState): ViewState
+
+    sealed class FirstPage : PartialChange() {
+      data class Data(val comics: List<ComicItem>) : FirstPage()
+      object Loading : FirstPage()
+      data class Error(val error: ComicAppError, val term: String) : FirstPage()
+
+      override fun reducer(state: ViewState): ViewState {
+        return when (this) {
+          is Data -> {
+            state.copy(
+              isLoading = false,
+              errorMessage = null,
+              comics = comics
+            )
+          }
+          Loading -> {
+            state.copy(
+              isLoading = true,
+              errorMessage = null,
+              comics = emptyList()
+            )
+          }
+          is Error -> {
+            state.copy(
+              isLoading = false,
+              errorMessage = "Search for '$term', error occurred: ${error.getMessage()}",
+              comics = emptyList()
+            )
+          }
         }
       }
     }
-
-    data class Data(val comics: List<ComicItem>) : PartialChange()
-    object Loading : PartialChange()
-    data class Error(val error: ComicAppError, val term: String) : PartialChange()
   }
 
   sealed class ViewIntent : Intent {
     data class SearchIntent(val term: String) : ViewIntent()
-    object RetryIntent : ViewIntent()
+    object RetryFirstIntent : ViewIntent()
   }
 
   sealed class SingleEvent : com.hoc.comicapp.base.SingleEvent {

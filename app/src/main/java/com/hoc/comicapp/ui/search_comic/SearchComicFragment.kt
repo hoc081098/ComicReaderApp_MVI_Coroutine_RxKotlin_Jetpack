@@ -98,7 +98,7 @@ class SearchComicFragment : Fragment() {
           .map { ViewIntent.SearchIntent(it) },
         button_retry
           .clicks()
-          .map { ViewIntent.RetryIntent }
+          .map { ViewIntent.RetryFirstIntent }
       )
     ).addTo(compositeDisposable)
   }
