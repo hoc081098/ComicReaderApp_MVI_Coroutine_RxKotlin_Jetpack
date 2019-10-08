@@ -311,7 +311,7 @@ class ComicDetailFragment : Fragment() {
             categories = detail.categories,
             shortenedContent = detail.shortenedContent
           )
-        ) + detail.chapters.map { ChapterAdapterItem.Chapter(it) })
+        ) + detail.chapters.map { ChapterAdapterItem.Chapter(it) } + ChapterAdapterItem.Dummy)
       }
       is ComicDetail.Initial -> {
         text_title.text = detail.title
