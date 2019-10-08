@@ -1,6 +1,8 @@
 package com.hoc.comicapp.ui.detail
 
+import android.net.Uri
 import android.os.Bundle
+import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -31,14 +33,16 @@ import io.reactivex.rxkotlin.withLatestFrom
 import kotlinx.android.synthetic.main.fragment_comic_detail.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import timber.log.Timber
+import java.io.File
 import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.math.absoluteValue
 import com.hoc.comicapp.ui.detail.ComicDetailFragmentDirections.Companion.actionComicDetailFragmentToChapterDetailFragment as toChapterDetail
 
 @ExperimentalCoroutinesApi
 class ComicDetailFragment : Fragment() {
-  private val viewModel by viewModel<ComicDetailViewModel>()
+  private val viewModel by viewModel<ComicDetailViewModel>() { parametersOf(args.isDownloaded) }
   private val args by navArgs<ComicDetailFragmentArgs>()
 
   private val compositeDisposable = CompositeDisposable()
@@ -300,29 +304,39 @@ class ComicDetailFragment : Fragment() {
           HtmlCompat.FROM_HTML_MODE_LEGACY
         )
 
-        glide
-          .load(detail.thumbnail)
-          .fitCenter()
-          .transition(DrawableTransitionOptions.withCrossFade())
-          .into(image_thumbnail)
+        loadThumbnail(detail.thumbnail)
 
         chapterAdapter.submitList(listOf(
           ChapterAdapterItem.Header(
             categories = detail.categories,
             shortenedContent = detail.shortenedContent
           )
-        ) + detail.chapters.map { ChapterAdapterItem.Chapter(it) })
+        ) + detail.chapters.map { ChapterAdapterItem.Chapter(it) } + ChapterAdapterItem.Dummy)
       }
       is ComicDetail.Initial -> {
         text_title.text = detail.title
-
-        glide
-          .load(detail.thumbnail)
-          .fitCenter()
-          .transition(DrawableTransitionOptions.withCrossFade())
-          .into(image_thumbnail)
+        loadThumbnail(detail.thumbnail)
       }
     }
+  }
+
+  private fun loadThumbnail(thumbnail: String) {
+    glide
+      .load(
+        when {
+          Patterns.WEB_URL.matcher(thumbnail).matches() -> {
+            Timber.d("load_thumbnail [1] $thumbnail")
+            Uri.parse(thumbnail)
+          }
+          else -> {
+            Timber.d("load_thumbnail [2] $thumbnail")
+            Uri.fromFile(File(requireContext().filesDir, thumbnail))
+          }
+        }
+      )
+      .fitCenter()
+      .transition(DrawableTransitionOptions.withCrossFade())
+      .into(image_thumbnail)
   }
 
   override fun onDestroyView() {

@@ -138,7 +138,8 @@ class HomeFragment : Fragment() {
         val toComicDetailFragment =
           HomeFragmentDirections.actionHomeFragmentDestToComicDetailFragment(
             comic = it,
-            title = it.title
+            title = it.title,
+            isDownloaded = false
           )
         findNavController().navigate(toComicDetailFragment)
       }

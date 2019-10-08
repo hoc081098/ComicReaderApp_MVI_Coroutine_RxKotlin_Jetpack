@@ -25,12 +25,15 @@ sealed class ChapterAdapterItem {
   ) : ChapterAdapterItem()
 
   data class Chapter(val chapter: ComicDetailViewState.Chapter) : ChapterAdapterItem()
+
+  object Dummy : ChapterAdapterItem()
 }
 
 object ChapterDiffUtilItemCallback : DiffUtil.ItemCallback<ChapterAdapterItem>() {
   override fun areItemsTheSame(oldItem: ChapterAdapterItem, newItem: ChapterAdapterItem) = when {
     oldItem is ChapterAdapterItem.Header && newItem is ChapterAdapterItem.Header -> true
     oldItem is ChapterAdapterItem.Chapter && newItem is ChapterAdapterItem.Chapter -> oldItem.chapter.chapterLink == newItem.chapter.chapterLink
+    oldItem is ChapterAdapterItem.Dummy && newItem is ChapterAdapterItem.Dummy -> true
     else -> oldItem == newItem
   }
 
@@ -57,6 +60,7 @@ class ChapterAdapter(
     return when (viewType) {
       R.layout.item_recycler_detail -> HeaderVH(view)
       R.layout.item_recycler_chapter -> ChapterVH(view)
+      R.layout.item_recycler_chapter_dummy -> DummyVH(view)
       else -> error("Unknown viewType=$viewType")
     }
   }
@@ -65,6 +69,7 @@ class ChapterAdapter(
     return when (getItem(position)) {
       is ChapterAdapterItem.Header -> R.layout.item_recycler_detail
       is ChapterAdapterItem.Chapter -> R.layout.item_recycler_chapter
+      ChapterAdapterItem.Dummy -> R.layout.item_recycler_chapter_dummy
     }
   }
 
@@ -169,6 +174,10 @@ class ChapterAdapter(
         }
         .forEach(categoriesGroup::addView)
     }
+  }
+
+  private class DummyVH(itemView: View) : VH(itemView) {
+    override fun bind(item: ChapterAdapterItem) = Unit
   }
 
   private companion object {

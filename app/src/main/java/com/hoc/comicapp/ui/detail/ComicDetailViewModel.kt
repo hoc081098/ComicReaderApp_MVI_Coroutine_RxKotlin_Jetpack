@@ -38,7 +38,8 @@ class ComicDetailViewModel(
   private val workManager: WorkManager,
   private val downloadComicsRepository: DownloadComicsRepository,
   private val rxSchedulerProvider: RxSchedulerProvider,
-  private val chapterJsonAdapter: JsonAdapter<ComicDetail.Chapter>
+  private val chapterJsonAdapter: JsonAdapter<ComicDetail.Chapter>,
+  private val isDownloaded: Boolean
 ) :
   BaseViewModel<ComicDetailIntent, ComicDetailViewState, ComicDetailSingleEvent>(), Observer<ComicDetailViewState> {
   override fun onChanged(t: ComicDetailViewState?) {
@@ -60,7 +61,8 @@ class ComicDetailViewModel(
         comicDetailInteractor.getComicDetail(
           it.link,
           it.title,
-          it.thumbnail
+          it.thumbnail,
+          isDownloaded
         ).doOnNext {
           val message =
             (it as? ComicDetailPartialChange.InitialRetryPartialChange.Error ?: return@doOnNext)
@@ -74,7 +76,7 @@ class ComicDetailViewModel(
   private val retryProcessor =
     ObservableTransformer<ComicDetailIntent.Retry, ComicDetailPartialChange> { intent ->
       intent.flatMap {
-        comicDetailInteractor.getComicDetail(it.link)
+        comicDetailInteractor.getComicDetail(it.link, isDownloaded = isDownloaded)
           .doOnNext {
             val message =
               (it as? ComicDetailPartialChange.InitialRetryPartialChange.Error ?: return@doOnNext)
@@ -90,7 +92,7 @@ class ComicDetailViewModel(
       intentObservable
         .exhaustMap { intent ->
           comicDetailInteractor
-            .refreshPartialChanges(intent.link)
+            .refreshPartialChanges(intent.link, isDownloaded = isDownloaded)
             .doOnNext {
               sendMessageEvent(
                 when (it) {

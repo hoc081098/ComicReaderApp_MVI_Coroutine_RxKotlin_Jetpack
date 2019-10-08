@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chauthai.swipereveallayout.ViewBinderHelper
 import com.hoc.comicapp.GlideApp
@@ -12,13 +13,16 @@ import com.hoc.comicapp.R
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.*
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.ViewState.ComicItem
+import com.hoc.comicapp.ui.home.ComicArg
 import com.hoc.comicapp.utils.*
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.fragment_downloaded_comics.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
+import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsFragmentDirections.Companion.actionDownloadedComicsFragmentToComicDetailFragment as toComicDetailFragment
 
 class DownloadedComicsFragment : Fragment() {
   private val viewModel by viewModel<DownloadedComicsViewModel>()
@@ -61,6 +65,20 @@ class DownloadedComicsFragment : Fragment() {
 
     spinner_sort.setItems(SortOrder.values().toList())
     spinner_sort.selectedIndex = viewModel.state.safeValue?.sortOrder?.let { SortOrder.values().indexOf(it) } ?: 0
+
+    downloadedComicsAdapter.clickItem.subscribeBy {
+      findNavController().navigate(
+        toComicDetailFragment(
+          comic = ComicArg(
+            title = it.title,
+            thumbnail = it.thumbnail.absolutePath,
+            link = it.comicLink
+          ),
+          title = it.title,
+          isDownloaded = true
+        )
+      )
+    }.addTo(compositeDisposable)
   }
 
   private fun bind(adapter: DownloadedComicsAdapter) {

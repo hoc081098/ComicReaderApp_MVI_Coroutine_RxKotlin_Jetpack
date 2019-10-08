@@ -41,6 +41,15 @@ class DownloadComicsRepositoryImpl(
   private val retrofit: Retrofit,
   private val workManager: WorkManager
 ) : DownloadComicsRepository {
+  override fun getDownloadedComic(link: String): Observable<Either<ComicAppError, DownloadedComic>> {
+    return comicDao.getByComicLink(link)
+      .map<Either<ComicAppError, DownloadedComic>> {
+        Mapper.entityToDomainModel(it).right()
+      }
+      .onErrorReturn { t: Throwable -> t.toError(retrofit).left() }
+      .subscribeOn(rxSchedulerProvider.io)
+  }
+
   override suspend fun deleteComic(comic: DownloadedComic): Either<ComicAppError, Unit> {
     return runCatching {
       withContext(dispatcherProvider.ui) {
