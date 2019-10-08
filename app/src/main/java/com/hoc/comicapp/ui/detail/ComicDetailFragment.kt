@@ -304,16 +304,7 @@ class ComicDetailFragment : Fragment() {
           HtmlCompat.FROM_HTML_MODE_LEGACY
         )
 
-        glide
-          .load(
-            when {
-              Patterns.WEB_URL.matcher(detail.thumbnail).matches() -> Uri.parse(detail.thumbnail)
-              else -> Uri.fromFile(File(requireContext().filesDir, detail.thumbnail))
-            }
-          )
-          .fitCenter()
-          .transition(DrawableTransitionOptions.withCrossFade())
-          .into(image_thumbnail)
+        loadThumbnail(detail.thumbnail)
 
         chapterAdapter.submitList(listOf(
           ChapterAdapterItem.Header(
@@ -324,14 +315,28 @@ class ComicDetailFragment : Fragment() {
       }
       is ComicDetail.Initial -> {
         text_title.text = detail.title
-
-        glide
-          .load(detail.thumbnail)
-          .fitCenter()
-          .transition(DrawableTransitionOptions.withCrossFade())
-          .into(image_thumbnail)
+        loadThumbnail(detail.thumbnail)
       }
     }
+  }
+
+  private fun loadThumbnail(thumbnail: String) {
+    glide
+      .load(
+        when {
+          Patterns.WEB_URL.matcher(thumbnail).matches() -> {
+            Timber.d("load_thumbnail [1] $thumbnail")
+            Uri.parse(thumbnail)
+          }
+          else -> {
+            Timber.d("load_thumbnail [2] $thumbnail")
+            Uri.fromFile(File(requireContext().filesDir, thumbnail))
+          }
+        }
+      )
+      .fitCenter()
+      .transition(DrawableTransitionOptions.withCrossFade())
+      .into(image_thumbnail)
   }
 
   override fun onDestroyView() {
