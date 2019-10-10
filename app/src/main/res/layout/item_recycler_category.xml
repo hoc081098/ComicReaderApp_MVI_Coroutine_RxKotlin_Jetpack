@@ -35,7 +35,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_height="100dp">
 
             <TextView
                 android:id="@+id/text_category_name"
@@ -75,8 +76,8 @@
                     android:ellipsize="end"
                     android:fontFamily="@font/google_sans"
                     android:padding="2dp"
-                    android:textColor="#E8FFFFFF"
                     android:textAlignment="center"
+                    android:textColor="#E8FFFFFF"
                     android:textSize="14sp"
                     tools:lines="4"
                     tools:text="Xuyên Không, Xuyên Việt là thể loại nhân vật chính vì một lý do nào đó mà bị đưa đến sinh sống ở một không gian hay một khoảng thời gian khác. Nhân vật chính có thể trực tiếp xuyên qua bằng thân xác mình hoặc sống lại bằng thân xác người khác." />
@@ -91,7 +92,41 @@
             </com.ms.square.android.expandabletextview.ExpandableTextView>
 
 
+            <ImageView
+                android:id="@+id/image_navigation_next"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                android:src="@drawable/ic_navigate_next_white_24dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/text_go_to_detail"
+                app:layout_constraintTop_toBottomOf="@id/text_category_description"
+                app:layout_constraintVertical_bias="0.0" />
+
+            <TextView
+                android:id="@+id/text_go_to_detail"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:ellipsize="end"
+                android:fontFamily="@font/google_sans"
+                android:gravity="center"
+                android:text="Detail"
+                android:textAlignment="center"
+                android:textColor="#fafafa"
+                app:layout_constraintBottom_toBottomOf="@+id/image_navigation_next"
+                app:layout_constraintEnd_toStartOf="@+id/image_navigation_next"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/image_navigation_next"
+                app:layout_constraintVertical_bias="0.0" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

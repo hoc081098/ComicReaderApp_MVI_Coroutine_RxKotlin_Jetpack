@@ -14,6 +14,7 @@ import com.hoc.comicapp.utils.inflate
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxbinding3.view.detaches
 import com.jakewharton.rxrelay2.PublishRelay
+import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.item_recycler_category.view.*
@@ -43,9 +44,11 @@ class CategoryAdapter(
     private val imageCategoryThumbnail = itemView.image_category_thumbnail!!
 
     init {
-      itemView
-        .clicks()
-        .takeUntil(parent.detaches())
+      Observable.mergeArray(
+        itemView.image_navigation_next.clicks(),
+        itemView.text_go_to_detail.clicks(),
+        itemView.clicks()
+      ).takeUntil(parent.detaches())
         .map { adapterPosition }
         .filter { it != RecyclerView.NO_POSITION }
         .map { getItem(it) }
