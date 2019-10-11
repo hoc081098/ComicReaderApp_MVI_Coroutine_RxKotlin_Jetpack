@@ -59,9 +59,7 @@ interface CategoryDetailContract {
     }
 
     sealed class Item {
-      fun isLoadingOrError(): Boolean {
-        return this is Loading || this is Error
-      }
+      fun isLoadingOrError() = this is Loading || this is Error
 
       data class PopularVS(
         val comics: List<PopularItem>,
