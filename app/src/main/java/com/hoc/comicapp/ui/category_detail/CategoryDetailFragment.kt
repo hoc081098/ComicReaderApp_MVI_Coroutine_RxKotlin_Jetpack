@@ -34,7 +34,8 @@ class CategoryDetailFragment : Fragment() {
     super.onViewCreated(view, savedInstanceState)
 
     val categoryDetailAdapter = CategoryDetailAdapter(
-      GlideApp.with(this)
+      GlideApp.with(this),
+      viewLifecycleOwner
     )
     recycler_category_detail.run {
       layoutManager = GridLayoutManager(context, 2).apply {

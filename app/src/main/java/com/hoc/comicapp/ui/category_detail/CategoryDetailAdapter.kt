@@ -1,14 +1,16 @@
 package com.hoc.comicapp.ui.category_detail
 
 import android.annotation.SuppressLint
+import android.util.DisplayMetrics
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
 import androidx.core.view.isVisible
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.OnLifecycleEvent
+import androidx.recyclerview.widget.*
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
@@ -17,11 +19,18 @@ import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.Head
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.HeaderType.Updated
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.Item
 import com.hoc.comicapp.utils.inflate
+import com.jakewharton.rxbinding3.recyclerview.scrollStateChanges
+import com.jakewharton.rxrelay2.PublishRelay
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.item_recycler_category_detail_comic.view.*
 import kotlinx.android.synthetic.main.item_recycler_category_detail_error.view.*
 import kotlinx.android.synthetic.main.item_recycler_category_detail_header.view.*
 import kotlinx.android.synthetic.main.item_recycler_category_detail_popular_horizontal_recycler.view.*
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 
 private object ItemDiffCallback : DiffUtil.ItemCallback<Item>() {
   override fun areItemsTheSame(oldItem: Item, newItem: Item): Boolean {
@@ -39,8 +48,9 @@ private object ItemDiffCallback : DiffUtil.ItemCallback<Item>() {
 }
 
 class CategoryDetailAdapter(
-  private val glide: GlideRequests
-) :
+  private val glide: GlideRequests,
+  private val lifecycleOwner: LifecycleOwner
+  ) :
   ListAdapter<Item, CategoryDetailAdapter.VH>(ItemDiffCallback) {
   override fun onCreateViewHolder(parent: ViewGroup, @LayoutRes viewType: Int): VH {
     val itemView = parent inflate viewType
@@ -81,12 +91,80 @@ class CategoryDetailAdapter(
     private val adapter = PopularHorizontalAdapter(glide)
     private var latestComics: List<CategoryDetailContract.ViewState.PopularItem>? = null
 
+    private val startStopAutoScrollS = PublishRelay.create<Boolean>()
+    private val intervalInMillis = 1_200L
+    private val delayAfterTouchInMillis = 3_000L
+
     init {
       recycler.run {
         setHasFixedSize(true)
         layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
         adapter = this@PopularHorizontalRecyclerVH.adapter
+        LinearSnapHelper().attachToRecyclerView(this)
       }
+
+      val smoothScroller = object : LinearSmoothScroller(itemView.context) {
+        override fun getVerticalSnapPreference(): Int {
+          return SNAP_TO_ANY
+        }
+
+        override fun calculateSpeedPerPixel(displayMetrics: DisplayMetrics): Float {
+          return 120f / displayMetrics.densityDpi
+        }
+      }
+
+      lifecycleOwner.lifecycle.addObserver(object : LifecycleObserver {
+        var disposable: Disposable?=null
+
+        @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+        private fun onCreate() {
+          disposable = startStopAutoScrollS
+            .mergeWith(
+              recycler
+                .scrollStateChanges()
+                .filter { it == RecyclerView.SCROLL_STATE_DRAGGING }
+                .switchMap {
+                  Observable.just(false)
+                    .concatWith(
+                      Observable.timer(
+                        delayAfterTouchInMillis,
+                        TimeUnit.MILLISECONDS
+                      ).map { true }
+                    )
+                }
+            )
+            .map { it to adapter.itemCount }
+            .switchMap { (startAutoScroll, itemCount) ->
+              if (!startAutoScroll || itemCount == 0) {
+                Observable.just(-1L)
+              } else {
+                Observable
+                  .interval(intervalInMillis, TimeUnit.MILLISECONDS)
+                  .map { it % itemCount }
+              }
+            }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
+              onNext = {
+                if (it >= 0 && it != 2L) {
+                  recycler
+                    .layoutManager
+                    ?.startSmoothScroll(smoothScroller.apply { targetPosition = it.toInt() })
+                }
+              },
+              onError = {}
+            )
+        }
+
+        @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+        private fun onResume() = startStopAutoScrollS.accept(true)
+
+        @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+        private fun onPause() = startStopAutoScrollS.accept(false)
+
+        @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        private fun onDestroy() = disposable?.dispose()
+      })
     }
 
     override fun bind(item: Item) = onlyBind<Item.PopularVS>(item) { (comics, error, isLoading) ->
@@ -98,6 +176,7 @@ class CategoryDetailAdapter(
       if (latestComics != comics) {
         adapter.submitList(comics)
         latestComics = comics
+        startStopAutoScrollS.accept(true)
         Timber.d("comics.size=${comics.size}")
       } else {
         Timber.d("comics.size=${comics.size} == ")
