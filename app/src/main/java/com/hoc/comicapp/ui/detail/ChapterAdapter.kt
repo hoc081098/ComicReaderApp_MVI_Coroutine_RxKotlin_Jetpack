@@ -13,7 +13,6 @@ import com.hoc.comicapp.R
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.Category
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.*
 import com.hoc.comicapp.utils.inflate
-import com.hoc.comicapp.utils.toast
 import kotlinx.android.synthetic.main.item_recycler_chapter.view.*
 import kotlinx.android.synthetic.main.item_recycler_detail.view.*
 import timber.log.Timber
@@ -51,7 +50,8 @@ object ChapterDiffUtilItemCallback : DiffUtil.ItemCallback<ChapterAdapterItem>()
 
 class ChapterAdapter(
   private val onClickReadButton: (readFirst: Boolean) -> Unit,
-  private val onClickChapter: (ComicDetailViewState.Chapter, View) -> Unit
+  private val onClickChapter: (ComicDetailViewState.Chapter, View) -> Unit,
+  private val onClickChapterChip: (Category) -> Unit
 ) :
   ListAdapter<ChapterAdapterItem, ChapterAdapter.VH>(ChapterDiffUtilItemCallback) {
 
@@ -169,7 +169,9 @@ class ChapterAdapter(
             text = category.name
             isCheckable = false
             isClickable = true
-            setOnClickListener { context.toast("Click ${category.link}") }
+            setOnClickListener {
+              onClickChapterChip(category)
+            }
           }
         }
         .forEach(categoriesGroup::addView)
