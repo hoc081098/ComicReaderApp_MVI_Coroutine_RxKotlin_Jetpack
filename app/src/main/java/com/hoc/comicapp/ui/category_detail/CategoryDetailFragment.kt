@@ -6,14 +6,16 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.GridLayoutManager
+import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewIntent
 import com.hoc.comicapp.utils.observe
-import com.hoc.comicapp.utils.toast
 import io.reactivex.Observable.just
 import io.reactivex.Observable.mergeArray
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
+import kotlinx.android.synthetic.main.fragment_category_detail.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class CategoryDetailFragment : Fragment() {
@@ -31,8 +33,27 @@ class CategoryDetailFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    vm.state.observe(owner = viewLifecycleOwner) {
-      requireContext().toast(it.toString())
+    val categoryDetailAdapter = CategoryDetailAdapter(
+      GlideApp.with(this)
+    )
+    recycler_category_detail.run {
+      layoutManager = GridLayoutManager(context, 2).apply {
+        spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+          override fun getSpanSize(position: Int): Int {
+            return if (categoryDetailAdapter.getItemViewType(position) == R.layout.item_recycler_category_detail_comic) {
+              1
+            } else {
+              2
+            }
+          }
+        }
+      }
+      setHasFixedSize(true)
+      adapter = categoryDetailAdapter
+    }
+
+    vm.state.observe(owner = viewLifecycleOwner) { (items, isRefreshing) ->
+      categoryDetailAdapter.submitList(items)
     }
     vm.processIntents(
       mergeArray(

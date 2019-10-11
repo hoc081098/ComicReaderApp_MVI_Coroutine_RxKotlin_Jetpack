@@ -48,11 +48,13 @@ interface CategoryDetailContract {
       fun initial(): ViewState {
         return ViewState(
           items = listOf(
+            Item.Header(HeaderType.Popular),
             Item.PopularVS(
               isLoading = true,
               error = null,
               comics = emptyList()
             ),
+            Item.Header(HeaderType.Updated),
             Item.Loading
           ),
           isRefreshing = false,
@@ -89,6 +91,8 @@ interface CategoryDetailContract {
       object Loading : Item()
 
       data class Error(val error: ComicAppError) : Item()
+
+      data class Header(val type: HeaderType) : Item()
     }
 
     data class PopularItem(
@@ -122,6 +126,8 @@ interface CategoryDetailContract {
         chapterName = domain.chapterName
       )
     }
+
+    enum class HeaderType { Popular, Updated }
   }
 
   /**
@@ -210,7 +216,9 @@ interface CategoryDetailContract {
               items = if (this.append) {
                 state.items.filterNot(Item::isLoadingOrError) + newData
               } else {
-                state.items.filterIsInstance<Item.PopularVS>() + newData
+                state.items
+                  .filterNot(Item::isLoadingOrError)
+                  .filter { it !is Item.Comic } + newData
               },
               page = if (this.append) {
                 state.page + 1
