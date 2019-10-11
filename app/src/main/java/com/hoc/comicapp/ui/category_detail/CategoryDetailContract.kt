@@ -1,8 +1,11 @@
 package com.hoc.comicapp.ui.category_detail
 
 import android.os.Parcelable
+import com.hoc.comicapp.domain.models.CategoryDetailPopularComic
+import com.hoc.comicapp.domain.models.Comic
 import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.Item
+import io.reactivex.Observable
 import kotlinx.android.parcel.Parcelize
 
 /**
@@ -25,7 +28,7 @@ interface CategoryDetailContract {
    * View intent
    */
   sealed class ViewIntent : com.hoc.comicapp.base.Intent {
-    object Initial : ViewIntent()
+    data class Initial(val arg: CategoryArg) : ViewIntent()
     object Refresh : ViewIntent()
     object LoadNextPage : ViewIntent()
     object RetryPopular : ViewIntent()
@@ -73,7 +76,15 @@ interface CategoryDetailContract {
         val thumbnail: String,
         val title: String,
         val view: String
-      ) : Item()
+      ) : Item() {
+        constructor(domain: com.hoc.comicapp.domain.models.Comic) : this(
+          title = domain.title,
+          thumbnail = domain.thumbnail,
+          link = domain.link,
+          view = domain.view,
+          lastChapters = domain.lastChapters.map(::LastChapter)
+        )
+      }
 
       object Loading : Item()
 
@@ -85,13 +96,32 @@ interface CategoryDetailContract {
       val link: String,
       val thumbnail: String,
       val title: String
-    )
+    ) {
+      constructor(domain: CategoryDetailPopularComic) : this(
+        title = domain.title,
+        link = domain.link,
+        thumbnail = domain.thumbnail,
+        lastChapter = LastChapter(domain.lastChapter)
+      )
+    }
 
     data class LastChapter(
       val chapterLink: String,
       val chapterName: String,
       val time: String?
-    )
+    ) {
+      constructor(domain: CategoryDetailPopularComic.LastChapter) : this(
+        time = null,
+        chapterName = domain.chapterName,
+        chapterLink = domain.chapterLink
+      )
+
+      constructor(domain: Comic.LastChapter) : this(
+        time = domain.time,
+        chapterLink = domain.chapterLink,
+        chapterName = domain.chapterName
+      )
+    }
   }
 
   /**
@@ -226,5 +256,14 @@ interface CategoryDetailContract {
    */
   sealed class SingleEvent : com.hoc.comicapp.base.SingleEvent {
 
+  }
+
+  /**
+   * Interactor
+   */
+  interface Interactor {
+    fun getPopulars(categoryLink: String): Observable<PartialChange>
+
+    fun getComics(categoryLink: String, page: Int): Observable<PartialChange>
   }
 }

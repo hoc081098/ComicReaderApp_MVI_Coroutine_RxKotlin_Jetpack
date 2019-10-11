@@ -3,6 +3,9 @@ package com.hoc.comicapp.koin
 import com.hoc.comicapp.ui.category.CategoryInteractor
 import com.hoc.comicapp.ui.category.CategoryInteractorImpl
 import com.hoc.comicapp.ui.category.CategoryViewModel
+import com.hoc.comicapp.ui.category_detail.CategoryDetailContract
+import com.hoc.comicapp.ui.category_detail.CategoryDetailInteractorImpl
+import com.hoc.comicapp.ui.category_detail.CategoryDetailVM
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailInteractor
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailInteractorImpl
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewModel
@@ -43,6 +46,8 @@ val viewModelModule = module {
 
   single { DownloadedComicsInteractorImpl(get(), androidApplication()) } bind DownloadedComicsContract.Interactor::class
 
+  single { CategoryDetailInteractorImpl(get(), get()) } bind CategoryDetailContract.Interactor::class
+
   viewModel { HomeViewModel(get(), get()) }
 
   viewModel { (isDownloaded: Boolean) -> ComicDetailViewModel(get(), get(), get(), get(), get(), isDownloaded) }
@@ -56,4 +61,6 @@ val viewModelModule = module {
   viewModel { DownloadedComicsViewModel(get(), get()) }
 
   viewModel { DownloadingChaptersViewModel(get(), get(), get(), get()) }
+
+  viewModel { CategoryDetailVM(get(), get()) }
 }
