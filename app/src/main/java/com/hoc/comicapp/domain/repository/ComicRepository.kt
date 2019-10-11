@@ -40,9 +40,30 @@ interface ComicRepository {
   suspend fun getAllCategories(): Either<ComicAppError, List<Category>>
 
   /**
+   * Get category detail by [categoryLink]
+   * @param categoryLink category url
+   * @param page page number
+   * @return List of comics
+   */
+  suspend fun getCategoryDetail(
+    categoryLink: String,
+    page: Int? = null
+  ): Either<ComicAppError, List<Comic>>
+
+  /**
+   * Get category detail by [categoryLink]
+   * @param categoryLink category url
+   * @return List of comics
+   */
+  suspend fun getCategoryDetailPopular(categoryLink: String): Either<ComicAppError, List<CategoryDetailPopularComic>>
+
+  /**
    * Search comic by [query] (only partial information)
    * @param query term to search
    * @param page page number
    */
-  suspend fun searchComic(query: String, page: Int? = null): Either<ComicAppError, List<Comic>>
+  suspend fun searchComic(
+    query: String,
+    page: Int? = null
+  ): Either<ComicAppError, List<Comic>>
 }
