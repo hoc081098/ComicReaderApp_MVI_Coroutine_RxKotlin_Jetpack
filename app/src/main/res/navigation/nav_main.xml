@@ -64,7 +64,17 @@
     <fragment
         android:id="@+id/categoryFragment"
         android:name="com.hoc.comicapp.ui.category.CategoryFragment"
-        android:label="All categories" />
+        android:label="All categories">
+
+        <action
+            android:id="@+id/action_categoryFragment_to_categoryDetailFragment"
+            app:destination="@id/categoryDetailFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
+    </fragment>
 
     <fragment
         android:id="@+id/searchComicFragment"
@@ -108,5 +118,22 @@
         android:id="@+id/downloadingChaptersFragment"
         android:name="com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersFragment"
         android:label="Downloading" />
+
+    <fragment
+        android:id="@+id/categoryDetailFragment"
+        android:name="com.hoc.comicapp.ui.category_detail.CategoryDetailFragment"
+        android:label="{title}">
+
+        <argument
+            android:name="title"
+            app:argType="string"
+            app:nullable="false" />
+
+        <argument
+            android:name="category"
+            app:argType="com.hoc.comicapp.ui.category_detail.CategoryDetailContract$CategoryArg"
+            app:nullable="false" />
+
+    </fragment>
 
 </navigation>

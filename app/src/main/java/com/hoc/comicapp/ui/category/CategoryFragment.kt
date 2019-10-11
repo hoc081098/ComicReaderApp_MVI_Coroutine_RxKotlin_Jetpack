@@ -5,11 +5,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager.VERTICAL
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
-import com.hoc.comicapp.utils.*
+import com.hoc.comicapp.ui.category_detail.CategoryDetailContract
+import com.hoc.comicapp.utils.itemSelections
+import com.hoc.comicapp.utils.observe
+import com.hoc.comicapp.utils.observeEvent
+import com.hoc.comicapp.utils.snack
 import com.jakewharton.rxbinding3.swiperefreshlayout.refreshes
 import com.jakewharton.rxbinding3.view.clicks
 import io.reactivex.Observable
@@ -44,7 +49,17 @@ class CategoryFragment : Fragment() {
 
     categoryAdapter.clickCategoryObservable
       .subscribeBy {
-        context?.toast("Click $it")
+        val toCategoryDetailFragment =
+          CategoryFragmentDirections.actionCategoryFragmentToCategoryDetailFragment(
+            title = it.name,
+            category = CategoryDetailContract.CategoryArg(
+              description = it.description,
+              link = it.link,
+              name = it.name,
+              thumbnail = it.thumbnail
+            )
+          )
+        findNavController().navigate(toCategoryDetailFragment)
       }
       .addTo(compositeDisposable)
 
