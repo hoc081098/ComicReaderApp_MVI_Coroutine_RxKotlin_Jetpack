@@ -2,10 +2,17 @@ package com.hoc.comicapp.ui.category_detail
 
 import android.os.Parcelable
 import com.hoc.comicapp.domain.models.ComicAppError
+import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.Item
 import kotlinx.android.parcel.Parcelize
 
+/**
+ * Contract
+ */
 interface CategoryDetailContract {
 
+  /**
+   * Argument
+   */
   @Parcelize
   data class CategoryArg(
     val description: String,
@@ -14,43 +21,211 @@ interface CategoryDetailContract {
     val thumbnail: String
   ) : Parcelable
 
+  /**
+   * View intent
+   */
   sealed class ViewIntent : com.hoc.comicapp.base.Intent {
-
+    object Initial : ViewIntent()
+    object Refresh : ViewIntent()
+    object LoadNextPage : ViewIntent()
+    object RetryPopular : ViewIntent()
+    object Retry : ViewIntent()
   }
 
+  /**
+   * View state
+   */
   data class ViewState(
     val items: List<Item>,
-    val isRefreshing: Boolean
+    val isRefreshing: Boolean,
+    val page: Int
   ) : com.hoc.comicapp.base.ViewState {
     companion object {
       @JvmStatic
       fun initial(): ViewState {
         return ViewState(
-          items = emptyList(),
-          isRefreshing = false
+          items = listOf(
+            Item.PopularVS(
+              isLoading = true,
+              error = null,
+              comics = emptyList()
+            ),
+            Item.Loading
+          ),
+          isRefreshing = false,
+          page = 0
         )
       }
     }
 
     sealed class Item {
-      data class Popular(
+      fun isLoadingOrError(): Boolean {
+        return this is Loading || this is Error
+      }
+
+      data class PopularVS(
         val comics: List<PopularItem>,
-        val error: ComicAppError,
+        val error: ComicAppError?,
         val isLoading: Boolean
       ) : Item()
 
-      //TODO
-      data class Comic(val TODO: Any) : Item()
+      data class Comic(
+        val lastChapters: List<LastChapter>,
+        val link: String,
+        val thumbnail: String,
+        val title: String,
+        val view: String
+      ) : Item()
 
       object Loading : Item()
 
       data class Error(val error: ComicAppError) : Item()
     }
 
-    //TODO
-    data class PopularItem(val TODO: Any)
+    data class PopularItem(
+      val lastChapter: LastChapter,
+      val link: String,
+      val thumbnail: String,
+      val title: String
+    )
+
+    data class LastChapter(
+      val chapterLink: String,
+      val chapterName: String,
+      val time: String?
+    )
   }
 
+  /**
+   * Partial change
+   */
+  sealed class PartialChange {
+    abstract fun reducer(state: ViewState): ViewState
+
+    sealed class Popular : PartialChange() {
+      object Loading : Popular()
+      data class Error(val error: ComicAppError) : Popular()
+      data class Data(val comics: List<ViewState.PopularItem>) : Popular()
+
+      override fun reducer(state: ViewState): ViewState {
+        return when (this) {
+          Loading -> {
+            state.copy(
+              items = state.items.map {
+                if (it is Item.PopularVS) {
+                  it.copy(
+                    isLoading = true,
+                    error = null
+                  )
+                } else {
+                  it
+                }
+              }
+            )
+          }
+          is Error -> {
+            state.copy(
+              items = state.items.map {
+                if (it is Item.PopularVS) {
+                  it.copy(
+                    isLoading = false,
+                    error = this.error
+                  )
+                } else {
+                  it
+                }
+              }
+            )
+          }
+          is Data -> {
+            state.copy(
+              items = state.items.map {
+                if (it is Item.PopularVS) {
+                  it.copy(
+                    isLoading = false,
+                    error = null,
+                    comics = this.comics
+                  )
+                } else {
+                  it
+                }
+              }
+            )
+          }
+        }
+      }
+    }
+
+    sealed class ListComics : PartialChange() {
+      object Loading : ListComics()
+      data class Error(val error: ComicAppError) : ListComics()
+      data class Data(val comics: List<Item.Comic>, val append: Boolean = true) : ListComics()
+
+      override fun reducer(state: ViewState): ViewState {
+        return when (this) {
+          Loading -> {
+            state.copy(
+              items = state.items.filterNot(Item::isLoadingOrError) +
+                  Item.Loading
+            )
+          }
+          is Error -> {
+            state.copy(
+              items = state.items.filterNot(Item::isLoadingOrError) +
+                  Item.Error(this.error)
+            )
+          }
+          is Data -> {
+            val newData = this.comics
+
+            state.copy(
+              items = if (this.append) {
+                state.items.filterNot(Item::isLoadingOrError) + newData
+              } else {
+                state.items.filterIsInstance<Item.PopularVS>() + newData
+              },
+              page = if (this.append) {
+                state.page + 1
+              } else {
+                1
+              }
+            )
+          }
+        }
+      }
+    }
+
+    sealed class Refresh : PartialChange() {
+      object Loading : Refresh()
+      data class Error(val error: ComicAppError) : Refresh()
+      data class Data(
+        val comics: List<Item.Comic>,
+        val popularComics: List<ViewState.PopularItem>
+      ) : Refresh()
+
+      override fun reducer(state: ViewState): ViewState {
+        return when (this) {
+          Loading -> {
+            state.copy(isRefreshing = true)
+          }
+          is Error -> {
+            state.copy(
+              isRefreshing = false
+            )
+          }
+          is Data -> {
+            arrayOf(Popular.Data(this.popularComics), ListComics.Data(this.comics, append = false))
+              .fold(state) { acc, change -> change.reducer(acc) }
+              .copy(isRefreshing = false)
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Single event
+   */
   sealed class SingleEvent : com.hoc.comicapp.base.SingleEvent {
 
   }
