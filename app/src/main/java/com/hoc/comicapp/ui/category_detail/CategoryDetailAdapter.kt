@@ -18,6 +18,7 @@ import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.HeaderType.Popular
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.HeaderType.Updated
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.Item
+import com.hoc.comicapp.ui.home.ComicArg
 import com.hoc.comicapp.utils.asObservable
 import com.hoc.comicapp.utils.inflate
 import com.jakewharton.rxbinding3.recyclerview.scrollStateChanges
@@ -56,7 +57,7 @@ class CategoryDetailAdapter(
   private val glide: GlideRequests,
   private val lifecycleOwner: LifecycleOwner,
   private val compositeDisposable: CompositeDisposable,
-  private val onClickComic: (Item.Comic) -> Unit
+  private val onClickComic: (ComicArg) -> Unit
   ) :
   ListAdapter<Item, CategoryDetailAdapter.VH>(ItemDiffCallback) {
   private val _retryPopularS = PublishRelay.create<Unit>()
@@ -104,7 +105,7 @@ class CategoryDetailAdapter(
     private val buttonRetry = itemView.button_popular_horizontal_retry!!
     private val errorGroup = itemView.error_group!!
 
-    private val adapter = PopularHorizontalAdapter(glide)
+    private val adapter = PopularHorizontalAdapter(glide, onClickComic)
     private var latestComics: List<CategoryDetailContract.ViewState.PopularItem>? = null
 
     private val startStopAutoScrollS = PublishRelay.create<Boolean>()
@@ -231,7 +232,14 @@ class CategoryDetailAdapter(
       itemView.setOnClickListener {
         val position = adapterPosition
         if (position != RecyclerView.NO_POSITION) {
-          (getItem(position) as? Item.Comic)?.let(onClickComic)
+          val item = getItem(position) as? Item.Comic ?: return@setOnClickListener
+          onClickComic(
+            ComicArg(
+              title = item.title,
+              link = item.link,
+              thumbnail = item.thumbnail
+            )
+          )
         }
       }
     }
