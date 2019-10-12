@@ -199,9 +199,13 @@ class CategoryDetailAdapter(
       progressBar.isVisible = isLoading
 
       if (latestComics != comics) {
-        adapter.submitList(comics)
+        adapter.submitList(comics) {
+          if (comics.isNotEmpty()) {
+            recycler.scrollToPosition(0)
+          }
+          startStopAutoScrollS.accept(comics.size > 1)
+        }
         latestComics = comics
-        startStopAutoScrollS.accept(true)
         Timber.d("comics.size=${comics.size}")
       } else {
         Timber.d("comics.size=${comics.size} == ")

@@ -84,7 +84,7 @@ class HomeFragment : Fragment() {
   }
 
   private fun initView(homeAdapter: HomeAdapter) {
-    swipe_refresh_layout.setColorSchemeColors(*resources.getIntArray(com.hoc.comicapp.R.array.swipe_refresh_colors))
+    swipe_refresh_layout.setColorSchemeColors(*resources.getIntArray(R.array.swipe_refresh_colors))
 
     recycler_home.run {
 
@@ -102,7 +102,7 @@ class HomeFragment : Fragment() {
       }
       adapter = homeAdapter
 
-      recycler_home.addOnItemTouchListener(object : RecyclerView.SimpleOnItemTouchListener() {
+      addOnItemTouchListener(object : RecyclerView.SimpleOnItemTouchListener() {
         override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
           if (e.action == MotionEvent.ACTION_DOWN &&
             rv.scrollState == RecyclerView.SCROLL_STATE_SETTLING

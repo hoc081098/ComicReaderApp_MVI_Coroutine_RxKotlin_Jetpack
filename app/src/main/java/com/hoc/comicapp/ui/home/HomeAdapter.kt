@@ -223,12 +223,12 @@ class HomeAdapter(
 
         if (currentList != comics) {
           newestAdapter.submitList(comics) {
-            currentList = comics
             if (comics.isNotEmpty()) {
               recycler.scrollToPosition(0)
             }
             startStopAutoScrollS.accept(comics.size > 1)
           }
+          currentList = comics
         }
       }
   }
@@ -389,9 +389,7 @@ class HomeAdapter(
       item: HomeListItem,
       crossinline bind: (T) -> Unit
     ) {
-      if (item !is T) {
-        throw IllegalStateException("${this::class.java.simpleName}::bind only accept ${T::class.java.simpleName}, but item=$item")
-      }
+      check(item is T) { "${this::class.java.simpleName}::bind only accept ${T::class.java.simpleName}, but item=$item" }
       bind(item)
     }
   }

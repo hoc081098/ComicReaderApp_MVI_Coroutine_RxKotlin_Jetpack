@@ -5,10 +5,10 @@ import com.hoc.comicapp.domain.models.Comic
 
 object HomeListItemDiffUtilItemCallback : DiffUtil.ItemCallback<HomeListItem>() {
   override fun areItemsTheSame(oldItem: HomeListItem, newItem: HomeListItem) = when {
-    oldItem is HomeListItem.NewestListState && newItem is HomeListItem.NewestListState -> oldItem == newItem
-    oldItem is HomeListItem.MostViewedListState && newItem is HomeListItem.MostViewedListState -> oldItem == newItem
+    oldItem is HomeListItem.NewestListState && newItem is HomeListItem.NewestListState -> true
+    oldItem is HomeListItem.MostViewedListState && newItem is HomeListItem.MostViewedListState -> true
     oldItem is HomeListItem.UpdatedItem.ComicItem && newItem is HomeListItem.UpdatedItem.ComicItem -> oldItem.comic.link == newItem.comic.link
-    oldItem is HomeListItem.UpdatedItem.Error && newItem is HomeListItem.UpdatedItem.Error -> oldItem.errorMessage == newItem.errorMessage
+    oldItem is HomeListItem.UpdatedItem.Error && newItem is HomeListItem.UpdatedItem.Error -> true
     oldItem is HomeListItem.UpdatedItem.Loading && newItem is HomeListItem.UpdatedItem.Loading -> true
     oldItem is HomeListItem.Header && newItem is HomeListItem.Header -> oldItem.type == newItem.type
     else -> oldItem == newItem
