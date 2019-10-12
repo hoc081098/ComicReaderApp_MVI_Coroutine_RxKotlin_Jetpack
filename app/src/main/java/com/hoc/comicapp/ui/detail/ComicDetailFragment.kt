@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearSmoothScroller
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
+import com.hoc.comicapp.ui.category_detail.CategoryDetailContract
 import com.hoc.comicapp.ui.detail.ComicDetailIntent.*
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.Chapter
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.ComicDetail
@@ -63,7 +64,8 @@ class ComicDetailFragment : Fragment() {
 
     val chapterAdapter = ChapterAdapter(
       ::onClickButtonRead,
-      ::onClickChapter
+      ::onClickChapter,
+      ::onClickChapterChip
     )
     initView(chapterAdapter)
     bind(chapterAdapter)
@@ -352,5 +354,19 @@ class ComicDetailFragment : Fragment() {
       R.id.image_download -> onClickDownload(chapter)
       else -> findNavController().navigate(toChapterDetail(chapter))
     }
+  }
+
+  private fun onClickChapterChip(category: ComicDetailViewState.Category) {
+    val toCategoryDetailFragment =
+      ComicDetailFragmentDirections.actionComicDetailFragmentToCategoryDetailFragment(
+        title = category.name,
+        category = CategoryDetailContract.CategoryArg(
+          description = "",
+          link = category.link,
+          name = category.name,
+          thumbnail = ""
+        )
+      )
+    findNavController().navigate(toCategoryDetailFragment)
   }
 }

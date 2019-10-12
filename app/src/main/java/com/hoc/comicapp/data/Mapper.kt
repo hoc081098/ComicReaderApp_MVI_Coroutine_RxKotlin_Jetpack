@@ -3,10 +3,7 @@ package com.hoc.comicapp.data
 import com.hoc.comicapp.data.local.entities.ChapterEntity
 import com.hoc.comicapp.data.local.entities.ComicAndChapters
 import com.hoc.comicapp.data.local.entities.ComicEntity
-import com.hoc.comicapp.data.remote.response.CategoryResponse
-import com.hoc.comicapp.data.remote.response.ChapterDetailResponse
-import com.hoc.comicapp.data.remote.response.ComicDetailResponse
-import com.hoc.comicapp.data.remote.response.ComicResponse
+import com.hoc.comicapp.data.remote.response.*
 import com.hoc.comicapp.domain.models.*
 
 object Mapper {
@@ -165,6 +162,18 @@ object Mapper {
       name = response.name,
       description = response.description,
       thumbnail = response.thumbnail
+    )
+  }
+
+  fun responseToDomainModel(response: CategoryDetailPopularComicResponse): CategoryDetailPopularComic {
+    return CategoryDetailPopularComic(
+      title = response.title,
+      thumbnail = response.thumbnail,
+      link = response.link,
+      lastChapter = CategoryDetailPopularComic.LastChapter(
+        chapterName = response.lastChapter.chapterName,
+        chapterLink = response.lastChapter.chapterLink
+      )
     )
   }
 }

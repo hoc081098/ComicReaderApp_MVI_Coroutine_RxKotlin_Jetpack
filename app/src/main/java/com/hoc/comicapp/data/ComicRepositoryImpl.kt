@@ -16,101 +16,89 @@ class ComicRepositoryImpl(
   private val comicApiService: ComicApiService,
   private val dispatcherProvider: CoroutinesDispatcherProvider
 ) : ComicRepository {
-  override suspend fun getMostViewedComics(page: Int?): Either<ComicAppError, List<Comic>> {
+  private suspend fun <T> executeApiRequest(
+    tag: String,
+    request: suspend ComicApiService.() -> T
+  ): Either<ComicAppError, T> {
     return try {
       withContext(dispatcherProvider.io) {
         comicApiService
-          .getMostViewedComics(page)
-          .map(Mapper::responseToDomainModel)
+          .request()
           .right()
       }
     } catch (throwable: Throwable) {
-      Timber.d(throwable, "ComicRepositoryImpl::getMostViewedComics $throwable")
+      Timber.d(throwable, "ComicRepositoryImpl::$tag $throwable", throwable)
       throwable.toError(retrofit).left()
+    }
+  }
+
+  override suspend fun getCategoryDetailPopular(categoryLink: String): Either<ComicAppError, List<CategoryDetailPopularComic>> {
+    return executeApiRequest("getCategoryDetailPopular") {
+      getCategoryDetailPopular(categoryLink)
+        .map(Mapper::responseToDomainModel)
+    }
+  }
+
+  override suspend fun getCategoryDetail(categoryLink: String, page: Int?): Either<ComicAppError, List<Comic>> {
+    return executeApiRequest("getCategoryDetail") {
+      getCategoryDetail(categoryLink, page)
+        .map(Mapper::responseToDomainModel)
+    }
+  }
+
+  override suspend fun getMostViewedComics(page: Int?): Either<ComicAppError, List<Comic>> {
+    return executeApiRequest("getMostViewedComics") {
+      comicApiService
+        .getMostViewedComics(page)
+        .map(Mapper::responseToDomainModel)
     }
   }
 
   override suspend fun getUpdatedComics(page: Int?): Either<ComicAppError, List<Comic>> {
-    return try {
-      withContext(dispatcherProvider.io) {
-        comicApiService
-          .getUpdatedComics(page)
-          .map(Mapper::responseToDomainModel)
-          .right()
-      }
-    } catch (throwable: Throwable) {
-      Timber.d(throwable, "ComicRepositoryImpl::getUpdatedComics $throwable")
-      throwable.toError(retrofit).left()
+    return executeApiRequest("getUpdatedComics") {
+      comicApiService
+        .getUpdatedComics(page)
+        .map(Mapper::responseToDomainModel)
     }
   }
 
   override suspend fun getNewestComics(page: Int?): Either<ComicAppError, List<Comic>> {
-    return try {
-      withContext(dispatcherProvider.io) {
-        comicApiService
-          .getNewestComics(page)
-          .map(Mapper::responseToDomainModel)
-          .right()
-      }
-    } catch (throwable: Throwable) {
-      Timber.d(throwable, "ComicRepositoryImpl::getNewestComics $throwable")
-      throwable.toError(retrofit).left()
+    return executeApiRequest("getNewestComics") {
+      comicApiService
+        .getNewestComics(page)
+        .map(Mapper::responseToDomainModel)
     }
   }
 
   override suspend fun getComicDetail(comicLink: String): Either<ComicAppError, ComicDetail> {
-    return try {
-      withContext(dispatcherProvider.io) {
-        comicApiService
-          .getComicDetail(comicLink)
-          .let(Mapper::responseToDomainModel)
-          .right()
-      }
-    } catch (throwable: Throwable) {
-      Timber.d(throwable, "ComicRepositoryImpl::getComicDetail $throwable")
-      throwable.toError(retrofit).left()
+    return executeApiRequest("getComicDetail") {
+      comicApiService
+        .getComicDetail(comicLink)
+        .let(Mapper::responseToDomainModel)
     }
   }
 
   override suspend fun getChapterDetail(chapterLink: String): Either<ComicAppError, ChapterDetail> {
-    return try {
-      withContext(dispatcherProvider.io) {
-        comicApiService
-          .getChapterDetail(chapterLink)
-          .let(Mapper::responseToDomainModel)
-          .right()
-      }
-    } catch (throwable: Throwable) {
-      Timber.d(throwable, "ComicRepositoryImpl::getDetail $throwable")
-      throwable.toError(retrofit).left()
+    return executeApiRequest("chapterLink") {
+      comicApiService
+        .getChapterDetail(chapterLink)
+        .let(Mapper::responseToDomainModel)
     }
   }
 
   override suspend fun getAllCategories(): Either<ComicAppError, List<Category>> {
-    return try {
-      withContext(dispatcherProvider.io) {
-        comicApiService
-          .getAllCategories()
-          .map(Mapper::responseToDomainModel)
-          .right()
-      }
-    } catch (throwable: Throwable) {
-      Timber.d(throwable, "ComicRepositoryImpl::getAllCategories $throwable")
-      throwable.toError(retrofit).left()
+    return executeApiRequest("getAllCategories") {
+      comicApiService
+        .getAllCategories()
+        .map(Mapper::responseToDomainModel)
     }
   }
 
   override suspend fun searchComic(query: String, page: Int?): Either<ComicAppError, List<Comic>> {
-    return try {
-      withContext(dispatcherProvider.io) {
-        comicApiService
-          .searchComic(query, page)
-          .map(Mapper::responseToDomainModel)
-          .right()
-      }
-    } catch (throwable: Throwable) {
-      Timber.d(throwable, "ComicRepositoryImpl::searchComic $throwable")
-      throwable.toError(retrofit).left()
+    return executeApiRequest("searchComic") {
+      comicApiService
+        .searchComic(query, page)
+        .map(Mapper::responseToDomainModel)
     }
   }
 }
