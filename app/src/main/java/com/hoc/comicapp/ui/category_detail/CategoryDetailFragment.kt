@@ -5,12 +5,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewIntent
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.Item.Comic
+import com.hoc.comicapp.ui.category_detail.CategoryDetailFragmentDirections.Companion.actionCategoryDetailFragmentToComicDetailFragment
+import com.hoc.comicapp.ui.home.ComicArg
 import com.hoc.comicapp.utils.isOrientationPortrait
 import com.hoc.comicapp.utils.observe
 import com.jakewharton.rxbinding3.recyclerview.scrollEvents
@@ -63,6 +66,11 @@ class CategoryDetailFragment : Fragment() {
 
     vm.state.observe(owner = viewLifecycleOwner) { (items, isRefreshing) ->
       categoryDetailAdapter.submitList(items)
+      if (isRefreshing) {
+        swipe_refresh_layout.post { swipe_refresh_layout.isRefreshing = true }
+      } else {
+        swipe_refresh_layout.isRefreshing = false
+      }
     }
     vm.processIntents(
       mergeArray(
@@ -93,6 +101,15 @@ class CategoryDetailFragment : Fragment() {
   private val maxSpanCount get() = if (requireContext().isOrientationPortrait) 2 else 4
 
   private fun onClickComic(comic: Comic) {
-
+    val toComicDetailFragment = actionCategoryDetailFragmentToComicDetailFragment(
+      title = comic.title,
+      isDownloaded = false,
+      comic = ComicArg(
+        title = comic.title,
+        link = comic.link,
+        thumbnail = comic.thumbnail
+      )
+    )
+    findNavController().navigate(toComicDetailFragment)
   }
 }
