@@ -62,5 +62,5 @@ val viewModelModule = module {
 
   viewModel { DownloadingChaptersViewModel(get(), get(), get(), get()) }
 
-  viewModel { CategoryDetailVM(get(), get()) }
+  viewModel { (category: CategoryDetailContract.CategoryArg) -> CategoryDetailVM(get(), get(), category) }
 }

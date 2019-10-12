@@ -41,11 +41,12 @@ interface CategoryDetailContract {
   data class ViewState(
     val items: List<Item>,
     val isRefreshing: Boolean,
-    val page: Int
+    val page: Int,
+    val category: CategoryArg
   ) : com.hoc.comicapp.base.ViewState {
     companion object {
       @JvmStatic
-      fun initial(): ViewState {
+      fun initial(category: CategoryArg): ViewState {
         return ViewState(
           items = listOf(
             Item.Header(HeaderType.Popular),
@@ -58,7 +59,8 @@ interface CategoryDetailContract {
             Item.Loading
           ),
           isRefreshing = false,
-          page = 0
+          page = 0,
+          category = category
         )
       }
     }
@@ -273,5 +275,7 @@ interface CategoryDetailContract {
     fun getPopulars(categoryLink: String): Observable<PartialChange>
 
     fun getComics(categoryLink: String, page: Int): Observable<PartialChange>
+
+    fun refreshAll(categoryLink: String): Observable<PartialChange>
   }
 }

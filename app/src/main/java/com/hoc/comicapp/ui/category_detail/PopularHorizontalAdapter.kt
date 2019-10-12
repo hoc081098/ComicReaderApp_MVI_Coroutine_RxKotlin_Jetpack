@@ -21,6 +21,7 @@ class PopularHorizontalAdapter(
   private val glide: GlideRequests
 ) :
   ListAdapter<PopularItem, PopularHorizontalAdapter.VH>(PopularItemDiffCallback) {
+
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
     VH(parent inflate R.layout.item_recycler_category_detail_popular_comic)
 

@@ -18,12 +18,17 @@ import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.HeaderType.Popular
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.HeaderType.Updated
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.Item
+import com.hoc.comicapp.utils.asObservable
 import com.hoc.comicapp.utils.inflate
 import com.jakewharton.rxbinding3.recyclerview.scrollStateChanges
+import com.jakewharton.rxbinding3.view.clicks
+import com.jakewharton.rxbinding3.view.detaches
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.item_recycler_category_detail_comic.view.*
 import kotlinx.android.synthetic.main.item_recycler_category_detail_error.view.*
@@ -49,16 +54,27 @@ private object ItemDiffCallback : DiffUtil.ItemCallback<Item>() {
 
 class CategoryDetailAdapter(
   private val glide: GlideRequests,
-  private val lifecycleOwner: LifecycleOwner
+  private val lifecycleOwner: LifecycleOwner,
+  private val compositeDisposable: CompositeDisposable,
+  private val onClickComic: (Item.Comic) -> Unit
   ) :
   ListAdapter<Item, CategoryDetailAdapter.VH>(ItemDiffCallback) {
+  private val _retryPopularS = PublishRelay.create<Unit>()
+  val retryPopularObservable get() = _retryPopularS.asObservable()
+
+  private val _retryS = PublishRelay.create<Unit>()
+  val retryObservable get() = _retryS.asObservable()
+
   override fun onCreateViewHolder(parent: ViewGroup, @LayoutRes viewType: Int): VH {
     val itemView = parent inflate viewType
     return when (viewType) {
-      R.layout.item_recycler_category_detail_popular_horizontal_recycler -> PopularHorizontalRecyclerVH(itemView)
+      R.layout.item_recycler_category_detail_popular_horizontal_recycler -> PopularHorizontalRecyclerVH(
+        itemView,
+        parent
+      )
       R.layout.item_recycler_category_detail_comic -> ComicVH(itemView)
       R.layout.item_recycler_category_detail_loading -> LoadingVH(itemView)
-      R.layout.item_recycler_category_detail_error -> ErrorVH(itemView)
+      R.layout.item_recycler_category_detail_error -> ErrorVH(itemView, parent)
       R.layout.item_recycler_category_detail_header -> HeaderVH(itemView)
       else -> error("Don't know viewType=$viewType")
     }
@@ -81,7 +97,7 @@ class CategoryDetailAdapter(
     abstract fun bind(item: Item)
   }
 
-  private inner class PopularHorizontalRecyclerVH(itemView: View) : VH(itemView) {
+  private inner class PopularHorizontalRecyclerVH(itemView: View, parent: ViewGroup) : VH(itemView) {
     private val recycler = itemView.popular_recycler_horizontal!!
     private val progressBar = itemView.popular_progress_bar!!
     private val textError = itemView.popular_error_message!!
@@ -96,6 +112,12 @@ class CategoryDetailAdapter(
     private val delayAfterTouchInMillis = 3_000L
 
     init {
+      buttonRetry
+        .clicks()
+        .takeUntil(parent.detaches())
+        .subscribe(_retryPopularS)
+        .addTo(compositeDisposable)
+
       recycler.run {
         setHasFixedSize(true)
         layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
@@ -113,58 +135,60 @@ class CategoryDetailAdapter(
         }
       }
 
-      lifecycleOwner.lifecycle.addObserver(object : LifecycleObserver {
-        var disposable: Disposable?=null
+      lifecycleOwner
+        .lifecycle
+        .addObserver(object : LifecycleObserver {
+          var disposable: Disposable? = null
 
-        @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
-        private fun onCreate() {
-          disposable = startStopAutoScrollS
-            .mergeWith(
-              recycler
-                .scrollStateChanges()
-                .filter { it == RecyclerView.SCROLL_STATE_DRAGGING }
-                .switchMap {
-                  Observable.just(false)
-                    .concatWith(
-                      Observable.timer(
-                        delayAfterTouchInMillis,
-                        TimeUnit.MILLISECONDS
-                      ).map { true }
-                    )
+          @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+          private fun onCreate() {
+            disposable = startStopAutoScrollS
+              .mergeWith(
+                recycler
+                  .scrollStateChanges()
+                  .filter { it == RecyclerView.SCROLL_STATE_DRAGGING }
+                  .switchMap {
+                    Observable.just(false)
+                      .concatWith(
+                        Observable.timer(
+                          delayAfterTouchInMillis,
+                          TimeUnit.MILLISECONDS
+                        ).map { true }
+                      )
+                  }
+              )
+              .map { it to adapter.itemCount }
+              .switchMap { (startAutoScroll, itemCount) ->
+                if (!startAutoScroll || itemCount == 0) {
+                  Observable.just(-1L)
+                } else {
+                  Observable
+                    .interval(intervalInMillis, TimeUnit.MILLISECONDS)
+                    .map { it % itemCount }
                 }
-            )
-            .map { it to adapter.itemCount }
-            .switchMap { (startAutoScroll, itemCount) ->
-              if (!startAutoScroll || itemCount == 0) {
-                Observable.just(-1L)
-              } else {
-                Observable
-                  .interval(intervalInMillis, TimeUnit.MILLISECONDS)
-                  .map { it % itemCount }
               }
-            }
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeBy(
-              onNext = {
-                if (it >= 0 && it != 2L) {
-                  recycler
-                    .layoutManager
-                    ?.startSmoothScroll(smoothScroller.apply { targetPosition = it.toInt() })
-                }
-              },
-              onError = {}
-            )
-        }
+              .observeOn(AndroidSchedulers.mainThread())
+              .subscribeBy(
+                onNext = {
+                  if (it >= 0 && it != 2L) {
+                    recycler
+                      .layoutManager
+                      ?.startSmoothScroll(smoothScroller.apply { targetPosition = it.toInt() })
+                  }
+                },
+                onError = {}
+              )
+          }
 
-        @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
-        private fun onResume() = startStopAutoScrollS.accept(true)
+          @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+          private fun onResume() = startStopAutoScrollS.accept(true)
 
-        @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-        private fun onPause() = startStopAutoScrollS.accept(false)
+          @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+          private fun onPause() = startStopAutoScrollS.accept(false)
 
-        @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        private fun onDestroy() = disposable?.dispose()
-      })
+          @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+          private fun onDestroy() = disposable?.dispose()
+        })
     }
 
     override fun bind(item: Item) = onlyBind<Item.PopularVS>(item) { (comics, error, isLoading) ->
@@ -203,6 +227,15 @@ class CategoryDetailAdapter(
       textChapterName1 to textChapterTime1
     )
 
+    init {
+      itemView.setOnClickListener {
+        val position = adapterPosition
+        if (position != RecyclerView.NO_POSITION) {
+          (getItem(position) as? Item.Comic)?.let(onClickComic)
+        }
+      }
+    }
+
     override fun bind(item: Item) = onlyBind<Item.Comic>(item) { comic ->
       glide
         .load(comic.thumbnail)
@@ -227,9 +260,17 @@ class CategoryDetailAdapter(
     override fun bind(item: Item) = onlyBind<Item.Loading>(item) {}
   }
 
-  private inner class ErrorVH(itemView: View) : VH(itemView) {
+  private inner class ErrorVH(itemView: View, parent: ViewGroup) : VH(itemView) {
     private val textErrorMessage = itemView.text_error_message!!
     private val buttonRetry = itemView.button_retry!!
+
+    init {
+      buttonRetry
+        .clicks()
+        .takeUntil(parent.detaches())
+        .subscribe(_retryS)
+        .addTo(compositeDisposable)
+    }
 
     override fun bind(item: Item) = onlyBind<Item.Error>(item) { (error) ->
       textErrorMessage.text = error.getMessage()

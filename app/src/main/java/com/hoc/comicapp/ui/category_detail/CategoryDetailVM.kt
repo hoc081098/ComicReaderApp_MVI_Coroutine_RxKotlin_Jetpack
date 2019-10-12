@@ -3,7 +3,9 @@ package com.hoc.comicapp.ui.category_detail
 import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.*
+import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.notOfType
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.Observable.mergeArray
@@ -11,13 +13,16 @@ import io.reactivex.ObservableTransformer
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.ofType
 import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.rxkotlin.withLatestFrom
 
 class CategoryDetailVM(
   private val rxSchedulerProvider: RxSchedulerProvider,
-  private val interactor: Interactor
+  private val interactor: Interactor,
+  private val category: CategoryArg
 ) : BaseViewModel<ViewIntent, ViewState, SingleEvent>() {
-  override val initialState = ViewState.initial()
+  override val initialState = ViewState.initial(category)
   private val intentS = PublishRelay.create<ViewIntent>()
+  private val stateS = BehaviorRelay.createDefault(initialState)
 
   override fun processIntents(intents: Observable<ViewIntent>) = intents.subscribe(intentS)!!
 
@@ -30,10 +35,53 @@ class CategoryDetailVM(
     }
   }
 
+  private val loadNextPageProcessor = ObservableTransformer<ViewIntent.LoadNextPage, PartialChange> { intent ->
+    intent
+      .withLatestFrom(stateS) { _, state -> state }
+      .filter { !it.items.any(ViewState.Item::isLoadingOrError) }
+      .map { it.category.link to it.page + 1 }
+      .exhaustMap { (link, page) ->
+        interactor.getComics(
+          categoryLink = link,
+          page = page
+        )
+      }
+  }
+
+  private val refreshProcessor = ObservableTransformer<ViewIntent.Refresh, PartialChange> { intent ->
+    intent
+      .withLatestFrom(stateS) { _, state -> state.category.link }
+      .exhaustMap {
+        interactor.refreshAll(categoryLink = it)
+      }
+  }
+
+  private val retryPopularProcessor = ObservableTransformer<ViewIntent.RetryPopular, PartialChange> { intent ->
+    intent
+      .withLatestFrom(stateS) { _, state -> state.category.link }
+      .exhaustMap { interactor.getPopulars(categoryLink = it) }
+  }
+
+  private val retryProcessor = ObservableTransformer<ViewIntent.Retry, PartialChange> { intent ->
+    intent
+      .withLatestFrom(stateS) { _, state -> state }
+      .map { it.category.link to it.page + 1 }
+      .exhaustMap { (link, page) ->
+        interactor.getComics(
+          categoryLink = link,
+          page = page
+        )
+      }
+  }
+
   private val intentToChanges = ObservableTransformer<ViewIntent, PartialChange> { intent ->
     intent.publish { shared ->
       mergeArray(
-        shared.ofType<ViewIntent.Initial>().compose(initialProcessor)
+        shared.ofType<ViewIntent.Initial>().compose(initialProcessor),
+        shared.ofType<ViewIntent.LoadNextPage>().compose(loadNextPageProcessor),
+        shared.ofType<ViewIntent.Refresh>().compose(refreshProcessor),
+        shared.ofType<ViewIntent.RetryPopular>().compose(retryPopularProcessor),
+        shared.ofType<ViewIntent.Retry>().compose(retryProcessor)
       )
     }
   }
@@ -44,6 +92,10 @@ class CategoryDetailVM(
       .compose(intentToChanges)
       .scan(initialState) { vs, change -> change.reducer(vs) }
       .observeOn(rxSchedulerProvider.main)
+      .subscribe(stateS)
+      .addTo(compositeDisposable)
+
+    stateS
       .subscribeBy(onNext = ::setNewState)
       .addTo(compositeDisposable)
   }
