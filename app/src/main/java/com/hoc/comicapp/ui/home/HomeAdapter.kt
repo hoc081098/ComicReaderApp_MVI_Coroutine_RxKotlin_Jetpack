@@ -4,6 +4,7 @@ import android.util.DisplayMetrics
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.IntDef
+import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -208,18 +209,10 @@ class HomeAdapter(
       onlyBind<HomeListItem.NewestListState>(item) { (comics, errorMessage, isLoading) ->
         Timber.d("suggest_state=[$isLoading, $errorMessage, $comics]")
 
-        if (isLoading) {
-          progressBar.visibility = View.VISIBLE
-        } else {
-          progressBar.visibility = View.INVISIBLE
-        }
+        errorGroup.isVisible = errorMessage !== null
+        textErrorMessage.text = errorMessage
 
-        if (errorMessage != null) {
-          errorGroup.visibility = View.VISIBLE
-          textErrorMessage.text = errorMessage
-        } else {
-          errorGroup.visibility = View.INVISIBLE
-        }
+        progressBar.isVisible = isLoading
 
         if (currentList != comics) {
           newestAdapter.submitList(comics) {
@@ -251,21 +244,14 @@ class HomeAdapter(
       onlyBind<HomeListItem.MostViewedListState>(item) { (comics, errorMessage, isLoading) ->
         Timber.d("top_month_state=[$isLoading, $errorMessage, $comics]")
 
-        if (isLoading) {
-          progressBar.visibility = View.VISIBLE
-        } else {
-          progressBar.visibility = View.INVISIBLE
-        }
+        errorGroup.isVisible = errorMessage !== null
+        textErrorMessage.text = errorMessage
 
-        if (errorMessage != null) {
-          errorGroup.visibility = View.VISIBLE
-          textErrorMessage.text = errorMessage
-        } else {
-          errorGroup.visibility = View.INVISIBLE
-        }
+        progressBar.isVisible = isLoading
 
         if (currentList != comics) {
-          mostViewedAdapter.submitList(comics) { currentList = comics }
+          mostViewedAdapter.submitList(comics)
+          currentList = comics
         }
       }
   }
