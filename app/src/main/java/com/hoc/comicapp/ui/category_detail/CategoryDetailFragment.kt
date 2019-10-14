@@ -81,7 +81,7 @@ class CategoryDetailFragment : Fragment() {
     swipe_refresh_layout.setColorSchemeColors(*resources.getIntArray(R.array.swipe_refresh_colors))
 
     recycler_category_detail.run {
-      layoutManager = GridLayoutManager(context, 2).apply {
+      layoutManager = GridLayoutManager(context, maxSpanCount).apply {
         spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
           override fun getSpanSize(position: Int): Int {
             return if (categoryDetailAdapter.getItemViewType(position) == R.layout.item_recycler_category_detail_comic) {
