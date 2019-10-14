@@ -126,7 +126,12 @@ class ComicDetailFragment : Fragment() {
     if (chapter === null) {
       view?.snack("Chapters list is empty!")
     } else {
-      findNavController().navigate(toChapterDetail(chapter))
+      findNavController().navigate(
+        toChapterDetail(
+          chapter = chapter,
+          isDownloaded = args.isDownloaded
+        )
+      )
     }
   }
 
@@ -352,7 +357,12 @@ class ComicDetailFragment : Fragment() {
   private fun onClickChapter(chapter: Chapter, view: View) {
     when (view.id) {
       R.id.image_download -> onClickDownload(chapter)
-      else -> findNavController().navigate(toChapterDetail(chapter))
+      else -> findNavController().navigate(
+        toChapterDetail(
+          chapter = chapter,
+          isDownloaded = args.isDownloaded
+        )
+      )
     }
   }
 
