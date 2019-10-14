@@ -1,6 +1,8 @@
 package com.hoc.comicapp.ui.chapter_detail
 
 import android.graphics.drawable.Drawable
+import android.net.Uri
+import android.util.Patterns
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
@@ -15,8 +17,10 @@ import com.bumptech.glide.request.target.Target
 import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
 import com.hoc.comicapp.utils.inflate
+import kotlinx.android.synthetic.main.item_recycler_category.view.*
 import kotlinx.android.synthetic.main.item_recycler_chapter_detail_image.view.*
 import timber.log.Timber
+import java.io.File
 
 object StringDiffUtilItemCallback : DiffUtil.ItemCallback<String>() {
   override fun areItemsTheSame(oldItem: String, newItem: String): Boolean = oldItem == newItem
@@ -61,7 +65,18 @@ class ChapterImageAdapter(
       imageChapter.setImageDrawable(null)
 
       glide
-        .load(imageUrl)
+        .load(
+          when {
+            Patterns.WEB_URL.matcher(imageUrl).matches() -> {
+              Timber.d("load_thumbnail [1] $imageUrl")
+              Uri.parse(imageUrl)
+            }
+            else -> {
+              Timber.d("load_thumbnail [2] $imageUrl")
+              Uri.fromFile(File(itemView.context.filesDir, imageUrl))
+            }
+          }
+        )
         .diskCacheStrategy(DiskCacheStrategy.ALL)
         .placeholder(R.drawable.comic)
         .listener(object : RequestListener<Drawable?> {

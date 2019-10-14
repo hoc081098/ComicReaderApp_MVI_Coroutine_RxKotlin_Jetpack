@@ -20,16 +20,14 @@ import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.utils.*
 import io.reactivex.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import timber.log.Timber
 import java.io.File
 import java.util.*
 
+@ExperimentalCoroutinesApi
 class DownloadComicsRepositoryImpl(
   private val comicApiService: ComicApiService,
   private val application: Application,
@@ -41,6 +39,26 @@ class DownloadComicsRepositoryImpl(
   private val retrofit: Retrofit,
   private val workManager: WorkManager
 ) : DownloadComicsRepository {
+  override fun getDownloadedChapter(chapterLink: String): Flow<Either<ComicAppError, DownloadedChapter>> {
+    val allChaptersF = chapterDao.getAllChaptersFlow().distinctUntilChanged()
+    val chapterF = chapterDao.getByChapterLink(chapterLink).distinctUntilChanged()
+
+    return chapterF
+      .combine(allChaptersF) { chapter, chapters ->
+        val index = chapters.indexOfFirst { it.chapterLink == chapterLink }
+        Mapper
+          .entityToDomainModel(chapter)
+          .copy(
+            chapters = chapters.map(Mapper::entityToDomainModel),
+            prevChapterLink = chapters.getOrNull(index - 1)?.chapterLink,
+            nextChapterLink = chapters.getOrNull(index + 1)?.chapterLink
+          )
+      }
+      .map { it.right() as Either<ComicAppError, DownloadedChapter> }
+      .catch { emit(it.toError(retrofit).left()) }
+      .flowOn(dispatcherProvider.io)
+  }
+
   override fun getDownloadedComic(link: String): Observable<Either<ComicAppError, DownloadedComic>> {
     return comicDao
       .getByComicLink(link)
@@ -107,7 +125,7 @@ class DownloadComicsRepositoryImpl(
   }
 
   override fun getDownloadedChapters(): LiveData<List<DownloadedChapter>> {
-    return chapterDao.getAllChapters().map { chapters ->
+    return chapterDao.getAllChaptersLiveData().map { chapters ->
       chapters.map { Mapper.entityToDomainModel(it) }
     }
   }
@@ -226,22 +244,22 @@ class DownloadComicsRepositoryImpl(
       factor = 2.0
     ) { comicApiService.downloadFile(thumbnailUrl) }
       .use { responseBody ->
-      val imagePath = listOf(
-        "images",
-        comicName,
-        "thumbnail.png"
-      ).joinToString(File.separator)
+        val imagePath = listOf(
+          "images",
+          comicName,
+          "thumbnail.png"
+        ).joinToString(File.separator)
 
-      responseBody.byteStream().copyTo(
-        File(
-          application.filesDir.path,
-          imagePath
-        ),
-        overwrite = true
-      )
+        responseBody.byteStream().copyTo(
+          File(
+            application.filesDir.path,
+            imagePath
+          ),
+          overwrite = true
+        )
 
-      imagePath
-    }
+        imagePath
+      }
   }
 
   /**

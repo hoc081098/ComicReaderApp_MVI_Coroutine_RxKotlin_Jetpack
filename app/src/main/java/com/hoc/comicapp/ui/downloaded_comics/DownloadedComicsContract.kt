@@ -75,7 +75,10 @@ interface DownloadedComicsContract {
               view = "",
               images = emptyList(),
               time = "",
-              chapterLink = ""
+              chapterLink = "",
+              prevChapterLink = null,
+              nextChapterLink = null,
+              chapters = emptyList()
             )
           },
           shortenedContent = "",

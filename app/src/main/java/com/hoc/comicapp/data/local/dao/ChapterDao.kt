@@ -6,26 +6,21 @@ import androidx.room.OnConflictStrategy.IGNORE
 import com.hoc.comicapp.data.local.entities.ChapterEntity
 import com.hoc.comicapp.data.local.entities.ComicAndChapters
 import io.reactivex.Observable
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 abstract class ChapterDao {
   @Query("SELECT * FROM downloaded_chapters WHERE chapter_link = :chapterLink")
-  abstract fun getByChapterLink(chapterLink: String): Observable<ChapterEntity>
+  abstract fun getByChapterLink(chapterLink: String): Flow<ChapterEntity>
 
   @Query("SELECT COUNT(*) FROM downloaded_chapters WHERE comic_link = :comicLink")
   abstract suspend fun getCountByComicLink(comicLink: String): List<Int>
 
-  /**
-   * This query will tell Room to query both the [ComicEntity] and [ChapterEntity] tables and handle
-   * the object mapping.
-   */
-  @Transaction
-  @Query("SELECT * FROM downloaded_comics")
-  abstract fun getComicAndChapters(): Observable<List<ComicAndChapters>>
-
-  @Transaction
   @Query("SELECT * FROM downloaded_chapters")
-  abstract fun getAllChapters(): LiveData<List<ChapterEntity>>
+  abstract fun getAllChaptersLiveData(): LiveData<List<ChapterEntity>>
+
+  @Query("SELECT * FROM downloaded_chapters")
+  abstract fun getAllChaptersFlow(): Flow<List<ChapterEntity>>
 
   @Insert(onConflict = IGNORE)
   abstract suspend fun insert(chapter: ChapterEntity): Long
@@ -36,13 +31,19 @@ abstract class ChapterDao {
   @Update
   abstract suspend fun update(chapter: ChapterEntity)
 
-  @Query("DELETE FROM downloaded_chapters WHERE comic_link = :comicLink")
-  abstract suspend fun deleteAllByComicLink(comicLink: Long)
-
   @Transaction
   open suspend fun upsert(chapter: ChapterEntity) {
     insert(chapter)
       .takeIf { it == -1L }
       ?.let { update(chapter) }
   }
+
+  /**
+   * This query will tell Room to query both the [com.hoc.comicapp.data.local.entities.ComicEntity]
+   * and [ChapterEntity] tables and handle
+   * the object mapping.
+   */
+  @Transaction
+  @Query("SELECT * FROM downloaded_comics")
+  abstract fun getComicAndChapters(): Observable<List<ComicAndChapters>>
 }

@@ -2,7 +2,6 @@ package com.hoc.comicapp.domain.models
 
 import java.util.*
 
-
 data class DownloadedChapter(
   val chapterLink: String, // https://ww2.mangafox.online/solo-leveling/chapter-0-275968490470920
 
@@ -16,5 +15,11 @@ data class DownloadedChapter(
 
   val comicLink: String,
 
-  val downloadedAt: Date
+  val downloadedAt: Date,
+
+  val chapters: List<DownloadedChapter>,
+
+  val prevChapterLink: String?, // https://ww2.mangafox.online/solo-leveling/chapter-64-1137969534934196
+
+  val nextChapterLink: String?
 )

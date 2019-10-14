@@ -19,7 +19,8 @@ import io.reactivex.rxkotlin.*
 
 class ChapterDetailViewModel(
   private val interactor: ChapterDetailInteractor,
-  rxSchedulerProvider: RxSchedulerProvider
+  rxSchedulerProvider: RxSchedulerProvider,
+  private val isDownloaded: Boolean
 ) :
   BaseViewModel<ChapterDetailViewIntent, ChapterDetailViewState, ChapterDetailSingleEvent>() {
   override val initialState = ChapterDetailViewState.initial()
@@ -57,7 +58,7 @@ class ChapterDetailViewModel(
     ObservableTransformer<Refresh, ChapterDetailPartialChange> { intents ->
       intents.exhaustMap {
         interactor
-          .refresh(currentChapter)
+          .refresh(currentChapter, isDownloaded)
           .doOnNext {
             when (it) {
               is Error -> sendMessageEvent(message = "Refresh error occurred: ${it.error.getMessage()}")
@@ -72,7 +73,7 @@ class ChapterDetailViewModel(
     ObservableTransformer<Retry, ChapterDetailPartialChange> { intents ->
       intents.exhaustMap {
         interactor
-          .getChapterDetail(currentChapter)
+          .getChapterDetail(currentChapter, isDownloaded)
           .doOnNext {
             if (it is InitialRetryLoadChapterPartialChange.Error) {
               sendMessageEvent(message = "Retry error occurred: ${it.error.getMessage()}")
@@ -87,7 +88,7 @@ class ChapterDetailViewModel(
       intents
         .switchMap { intent ->
           interactor
-            .getChapterDetail(intent.chapter)
+            .getChapterDetail(intent.chapter, isDownloaded)
             .doOnNext {
               if (it is InitialRetryLoadChapterPartialChange.Error) {
                 sendMessageEvent("Load ${intent.chapter.name} error occurred: ${it.error.getMessage()}")

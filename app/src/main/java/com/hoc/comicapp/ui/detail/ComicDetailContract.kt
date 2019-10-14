@@ -120,7 +120,10 @@ data class ComicDetailViewState(
         time = time,
         images = emptyList(),
         downloadedAt = Date(),
-        comicLink = comicLink
+        comicLink = comicLink,
+        prevChapterLink = null,
+        nextChapterLink = null,
+        chapters = emptyList()
       )
     }
 
