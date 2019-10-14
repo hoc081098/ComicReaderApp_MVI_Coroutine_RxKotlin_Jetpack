@@ -45,4 +45,6 @@ interface DownloadComicsRepository {
    * @return either
    */
   suspend fun deleteComic(comic: DownloadedComic): Either<ComicAppError, Unit>
+
+  fun getDownloadedChapter(chapterLink: String) : Flow<Either<ComicAppError, DownloadedChapter>>
 }

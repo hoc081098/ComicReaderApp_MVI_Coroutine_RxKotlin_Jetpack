@@ -51,7 +51,10 @@ object Mapper {
       chapterLink = entity.chapterLink,
       images = entity.images,
       downloadedAt = entity.downloadedAt,
-      comicLink = entity.comicLink
+      comicLink = entity.comicLink,
+      prevChapterLink = null,
+      nextChapterLink = null,
+      chapters = emptyList()
     )
   }
 
@@ -86,7 +89,10 @@ object Mapper {
           downloadedAt = it.downloadedAt,
           chapterLink = it.chapterLink,
           images = it.images,
-          time = it.time
+          time = it.time,
+          prevChapterLink = null,
+          nextChapterLink = null,
+          chapters = emptyList()
         )
       }
     )

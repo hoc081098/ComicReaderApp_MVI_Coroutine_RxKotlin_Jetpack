@@ -42,7 +42,7 @@ val viewModelModule = module {
 
   single { CategoryInteractorImpl(get(), get()) } bind CategoryInteractor::class
 
-  single { ChapterDetailInteractorImpl(get(), get()) } bind ChapterDetailInteractor::class
+  single { ChapterDetailInteractorImpl(get(), get(), get()) } bind ChapterDetailInteractor::class
 
   single { DownloadedComicsInteractorImpl(get(), androidApplication()) } bind DownloadedComicsContract.Interactor::class
 
@@ -56,7 +56,7 @@ val viewModelModule = module {
 
   viewModel { CategoryViewModel(get(), get()) }
 
-  viewModel { ChapterDetailViewModel(get(), get()) }
+  viewModel { (isDownloaded: Boolean) -> ChapterDetailViewModel(get(), get(), isDownloaded) }
 
   viewModel { DownloadedComicsViewModel(get(), get()) }
 

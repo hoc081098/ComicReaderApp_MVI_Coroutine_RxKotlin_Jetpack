@@ -52,7 +52,10 @@ interface DownloadingChaptersContract {
           time = "",
           comicLink = "",
           downloadedAt = Date(),
-          images = emptyList()
+          images = emptyList(),
+          chapters = emptyList(),
+          nextChapterLink = null,
+          prevChapterLink = null
         )
       }
     }

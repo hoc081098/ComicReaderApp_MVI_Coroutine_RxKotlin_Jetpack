@@ -6,6 +6,7 @@ import com.hoc.comicapp.base.Intent
 import com.hoc.comicapp.base.SingleEvent
 import com.hoc.comicapp.base.ViewState
 import com.hoc.comicapp.domain.models.ComicAppError
+import com.hoc.comicapp.domain.models.DownloadedChapter
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailPartialChange.InitialRetryLoadChapterPartialChange
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailPartialChange.RefreshPartialChange
@@ -15,9 +16,9 @@ import io.reactivex.Observable
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewState.Detail.Initial as InitialVS
 
 interface ChapterDetailInteractor {
-  fun getChapterDetail(chapter: Chapter): Observable<InitialRetryLoadChapterPartialChange>
+  fun getChapterDetail(chapter: Chapter, isDownloaded: Boolean): Observable<InitialRetryLoadChapterPartialChange>
 
-  fun refresh(chapter: Chapter): Observable<RefreshPartialChange>
+  fun refresh(chapter: Chapter, isDownloaded: Boolean): Observable<RefreshPartialChange>
 }
 
 sealed class ChapterDetailViewIntent : Intent {
@@ -60,6 +61,25 @@ data class ChapterDetailViewState(
     companion object {
       @JvmStatic
       fun fromDomain(domain: com.hoc.comicapp.domain.models.ChapterDetail): Data {
+        return Data(
+          chapter = Chapter(
+            name = domain.chapterName,
+            link = domain.chapterLink
+          ),
+          images = domain.images,
+          chapters = domain.chapters.map {
+            Chapter(
+              name = it.chapterName,
+              link = it.chapterLink
+            )
+          },
+          nextChapterLink = domain.nextChapterLink,
+          prevChapterLink = domain.prevChapterLink
+        )
+      }
+
+      @JvmStatic
+      fun fromDomain(domain: DownloadedChapter): Data {
         return Data(
           chapter = Chapter(
             name = domain.chapterName,

@@ -107,6 +107,11 @@
             app:argType="com.hoc.comicapp.ui.detail.ComicDetailViewState$Chapter"
             app:nullable="false" />
 
+        <argument
+            android:name="isDownloaded"
+            app:argType="boolean"
+            app:nullable="false" />
+
     </fragment>
 
     <fragment
