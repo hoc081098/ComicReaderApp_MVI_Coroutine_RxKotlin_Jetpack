@@ -42,8 +42,10 @@ class DownloadComicsRepositoryImpl(
   private val workManager: WorkManager
 ) : DownloadComicsRepository {
   override fun getDownloadedComic(link: String): Observable<Either<ComicAppError, DownloadedComic>> {
-    return comicDao.getByComicLink(link)
+    return comicDao
+      .getByComicLink(link)
       .map<Either<ComicAppError, DownloadedComic>> {
+        it.chapters = it.chapters.sortedByDescending { it.order }
         Mapper.entityToDomainModel(it).right()
       }
       .onErrorReturn { t: Throwable -> t.toError(retrofit).left() }

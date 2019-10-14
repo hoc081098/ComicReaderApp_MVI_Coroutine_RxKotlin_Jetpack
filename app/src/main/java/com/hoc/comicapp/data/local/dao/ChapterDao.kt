@@ -12,11 +12,8 @@ abstract class ChapterDao {
   @Query("SELECT * FROM downloaded_chapters WHERE chapter_link = :chapterLink")
   abstract fun getByChapterLink(chapterLink: String): Observable<ChapterEntity>
 
-  @Query("SELECT * FROM downloaded_chapters WHERE comic_link = :comicLink ORDER BY `order` DESC")
-  abstract fun getAllByComicLink(comicLink: String): Observable<List<ChapterEntity>>
-
   @Query("SELECT COUNT(*) FROM downloaded_chapters WHERE comic_link = :comicLink")
-  suspend abstract fun getCountByComicLink(comicLink: String): List<Int>
+  abstract suspend fun getCountByComicLink(comicLink: String): List<Int>
 
   /**
    * This query will tell Room to query both the [ComicEntity] and [ChapterEntity] tables and handle
