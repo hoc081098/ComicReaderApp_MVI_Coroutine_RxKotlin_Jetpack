@@ -13,6 +13,7 @@ import com.hoc.comicapp.R
 import com.hoc.comicapp.activity.MainActivity
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.SingleEvent
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewIntent
+import com.hoc.comicapp.utils.isOrientationPortrait
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.snack
@@ -45,15 +46,16 @@ class SearchComicFragment : Fragment() {
   }
 
   private fun initView(searchComicAdapter: SearchComicAdapter) {
-    mainActivity.showSearch()
+    view?.post { mainActivity.showSearch() }
 
+    val maxSpanCount = if (requireContext().isOrientationPortrait) 2 else 4
     recycler_search_comic.run {
       setHasFixedSize(true)
-      layoutManager = GridLayoutManager(context, 2).apply {
+      layoutManager = GridLayoutManager(context, maxSpanCount).apply {
         spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
           override fun getSpanSize(position: Int): Int {
             return when (searchComicAdapter.getItemViewType(position)) {
-              R.layout.item_recycler_search_comic_load_more -> 2
+              R.layout.item_recycler_search_comic_load_more -> maxSpanCount
               else -> 1
             }
           }
