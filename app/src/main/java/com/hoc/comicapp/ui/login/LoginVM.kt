@@ -22,13 +22,11 @@ class LoginVM(
   init {
     val emailErrorChanges = intentS.ofType<Intent.EmailChanged>()
       .map { it.email }
-      .map { getEmailError(it) }
-      .map { PartialChange.EmailError(it) }
+      .map { PartialChange.EmailError(getEmailError(it)) }
 
     val passwordErrorChange = intentS.ofType<Intent.PasswordChange>()
       .map { it.password }
-      .map { getPasswordError(it) }
-      .map { PartialChange.PasswordError(it) }
+      .map { PartialChange.PasswordError(getPasswordError(it)) }
 
     Observable.mergeArray(
       emailErrorChanges,
