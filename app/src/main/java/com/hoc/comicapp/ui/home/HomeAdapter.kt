@@ -290,6 +290,7 @@ class HomeAdapter(
       onlyBind<HomeListItem.UpdatedItem.ComicItem>(item) { (comic) ->
         glide
           .load(comic.thumbnail)
+          .placeholder(R.drawable.splash_background)
           .thumbnail(0.5f)
           .fitCenter()
           .transition(DrawableTransitionOptions.withCrossFade())
