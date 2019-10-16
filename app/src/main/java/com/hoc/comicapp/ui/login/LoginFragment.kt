@@ -30,8 +30,12 @@ class LoginFragment : Fragment() {
 
   private fun bindVM() {
     vm.state.observe(owner = viewLifecycleOwner) {
-      edit_email.error = it.emailError
-      edit_password.error = it.passwordError
+      if (edit_email.error != it.emailError) {
+        edit_email.error = it.emailError
+      }
+      if (edit_password.error != it.passwordError) {
+        edit_password.error = it.passwordError
+      }
     }
 
     vm.processIntents(

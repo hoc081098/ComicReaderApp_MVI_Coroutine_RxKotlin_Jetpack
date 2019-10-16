@@ -92,7 +92,6 @@ enum class SnackbarLength {
     override val length = Snackbar.LENGTH_INDEFINITE
   };
 
-  @Snackbar.Duration
   abstract val length: Int
 }
 
