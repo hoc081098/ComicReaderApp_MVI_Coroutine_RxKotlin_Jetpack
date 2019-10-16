@@ -10,7 +10,10 @@ import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewState.Detail
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewState.Detail.Companion.fromDomain
 import com.hoc.comicapp.utils.fold
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.rx2.asObservable
 import timber.log.Timber
 
@@ -54,20 +57,30 @@ class ChapterDetailInteractorImpl(
     }
   }.flowOn(dispatcherProvider.ui).asObservable()
 
-  override fun refresh(chapter: Chapter, isDownloaded: Boolean) = flow<RefreshPartialChange> {
+  override fun refresh(chapter: Chapter, isDownloaded: Boolean) = flow<ChapterDetailPartialChange> {
     Timber.tag("LoadChapter###").d("refresh ${chapter.debug}")
 
     emit(RefreshPartialChange.Loading)
 
     if (isDownloaded) {
+      var isFirstEvent = true
       downloadComicsRepository
         .getDownloadedChapter(chapter.link)
-        .first()
-        .fold(
-          left = { RefreshPartialChange.Error(it) },
-          right = { RefreshPartialChange.Success(fromDomain(it)) }
-        )
-        .let { emit(it) }
+        .map {
+          if (isFirstEvent) {
+            it.fold(
+              left = { RefreshPartialChange.Error(it) },
+              right = { RefreshPartialChange.Success(fromDomain(it)) }
+            ).also { isFirstEvent = false }
+          } else {
+            val initial = Detail.Initial(chapter)
+            it.fold(
+              left = { InitialRetryLoadChapterPartialChange.Error(it, initial) },
+              right = { InitialRetryLoadChapterPartialChange.Data(fromDomain(it)) }
+            )
+          }
+        }
+        .let { emitAll(it) }
     } else {
       comicRepository
         .getChapterDetail(chapter.link)

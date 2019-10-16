@@ -35,7 +35,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:scaleType="fitXY"
-        android:src="@drawable/splash_background"
+        tools:src="@drawable/splash_background"
         app:layout_constraintDimensionRatio="H,2:3"
         app:layout_constraintEnd_toEndOf="@id/guideline"
         app:layout_constraintStart_toStartOf="parent"
@@ -177,5 +177,17 @@
         android:layout_height="wrap_content"
         app:constraint_referenced_ids="text_error_message,button_retry"
         app:visibilityMode="ignore" />
+
+    <Switch
+        android:id="@+id/switch_mode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:checked="true"
+        android:gravity="start"
+        android:fontFamily="@font/google_sans"
+        android:text="Offline/Online mode"
+        android:textSize="13sp"
+        android:visibility="gone" />
 
 </androidx.constraintlayout.motion.widget.MotionLayout>

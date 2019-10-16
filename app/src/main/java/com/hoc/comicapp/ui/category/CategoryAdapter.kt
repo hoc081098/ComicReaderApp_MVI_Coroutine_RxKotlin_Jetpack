@@ -59,6 +59,7 @@ class CategoryAdapter(
     fun bind(item: Category, position: Int) {
       glide
         .load(item.thumbnail)
+        .placeholder(R.drawable.splash_background)
         .thumbnail(0.5f)
         .fitCenter()
         .into(imageCategoryThumbnail)

@@ -65,7 +65,6 @@ class ChapterDetailViewModel(
               is Success -> sendMessageEvent(message = "Refresh success")
             }
           }
-          .cast<ChapterDetailPartialChange>()
       }
     }
 
