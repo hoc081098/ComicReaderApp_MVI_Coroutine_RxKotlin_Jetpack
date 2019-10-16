@@ -2,9 +2,11 @@ package com.hoc.comicapp.koin
 
 import com.hoc.comicapp.data.ComicRepositoryImpl
 import com.hoc.comicapp.data.DownloadComicsRepositoryImpl
+import com.hoc.comicapp.data.UserRepositoryImpl
 import com.hoc.comicapp.data.local.AppDatabase
 import com.hoc.comicapp.domain.repository.ComicRepository
 import com.hoc.comicapp.domain.repository.DownloadComicsRepository
+import com.hoc.comicapp.domain.repository.UserRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
@@ -28,6 +30,8 @@ val dataModule = module {
       get()
     )
   } bind DownloadComicsRepository::class
+
+  single { UserRepositoryImpl(get(), get()) } bind UserRepository::class
 
   single { AppDatabase.getInstance(androidContext()) }
 

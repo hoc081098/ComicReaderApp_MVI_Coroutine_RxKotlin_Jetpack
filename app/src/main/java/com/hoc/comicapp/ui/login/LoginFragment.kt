@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import com.hoc.comicapp.R
 import com.hoc.comicapp.ui.login.LoginContract.Intent
 import com.hoc.comicapp.utils.observe
+import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxbinding3.widget.textChanges
 import io.reactivex.Observable
 import kotlinx.android.synthetic.main.fragment_login.*
@@ -41,7 +42,8 @@ class LoginFragment : Fragment() {
     vm.processIntents(
       Observable.mergeArray(
         edit_email.editText!!.textChanges().map { Intent.EmailChanged(it.toString()) },
-        edit_password.editText!!.textChanges().map { Intent.PasswordChange(it.toString()) }
+        edit_password.editText!!.textChanges().map { Intent.PasswordChange(it.toString()) },
+        button_login.clicks().map { Intent.SubmitLogin }
       )
     )
   }

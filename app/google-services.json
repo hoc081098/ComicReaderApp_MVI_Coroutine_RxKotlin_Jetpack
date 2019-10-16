@@ -1,0 +1,98 @@
+{
+  "project_info": {
+    "project_number": "664646152745",
+    "firebase_url": "https://test-crashlytic.firebaseio.com",
+    "project_id": "test-crashlytic",
+    "storage_bucket": "test-crashlytic.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:664646152745:android:a9227d0e403bf8ec",
+        "android_client_info": {
+          "package_name": "animatedphoto.artsketch.cartooneditor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "664646152745-pm34jjbfr45mgfpm8t1egh7430k4lm3u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCKGpZ5ZjHkGt7NnKY5hc2jEFUVQyr--pg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "664646152745-pm34jjbfr45mgfpm8t1egh7430k4lm3u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:664646152745:android:910d127cc3ed339e",
+        "android_client_info": {
+          "package_name": "com.foxcode.billing"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "664646152745-pm34jjbfr45mgfpm8t1egh7430k4lm3u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCKGpZ5ZjHkGt7NnKY5hc2jEFUVQyr--pg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "664646152745-pm34jjbfr45mgfpm8t1egh7430k4lm3u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:664646152745:android:687de1aa05108e49492238",
+        "android_client_info": {
+          "package_name": "com.hoc.comicapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "664646152745-pm34jjbfr45mgfpm8t1egh7430k4lm3u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCKGpZ5ZjHkGt7NnKY5hc2jEFUVQyr--pg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "664646152745-pm34jjbfr45mgfpm8t1egh7430k4lm3u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -20,6 +20,8 @@ import com.hoc.comicapp.ui.home.HomeInteractor
 import com.hoc.comicapp.ui.home.HomeInteractorImpl
 import com.hoc.comicapp.ui.home.HomeInteractorImpl1
 import com.hoc.comicapp.ui.home.HomeViewModel
+import com.hoc.comicapp.ui.login.LoginContract
+import com.hoc.comicapp.ui.login.LoginInteractorImpl
 import com.hoc.comicapp.ui.login.LoginVM
 import com.hoc.comicapp.ui.search_comic.SearchComicContract
 import com.hoc.comicapp.ui.search_comic.SearchComicInteractorImpl
@@ -49,6 +51,8 @@ val viewModelModule = module {
 
   single { CategoryDetailInteractorImpl(get(), get()) } bind CategoryDetailContract.Interactor::class
 
+  single { LoginInteractorImpl(get(), get()) } bind LoginContract.Interactor::class
+
   viewModel { HomeViewModel(get(), get()) }
 
   viewModel { (isDownloaded: Boolean) -> ComicDetailViewModel(get(), get(), get(), get(), get(), isDownloaded) }
@@ -65,5 +69,5 @@ val viewModelModule = module {
 
   viewModel { (category: CategoryDetailContract.CategoryArg) -> CategoryDetailVM(get(), get(), category) }
 
-  viewModel { LoginVM(get()) }
+  viewModel { LoginVM(get(), get()) }
 }
