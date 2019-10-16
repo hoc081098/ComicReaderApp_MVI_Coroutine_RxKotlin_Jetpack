@@ -82,8 +82,12 @@ class DownloadComicsRepositoryImpl(
   }
 
   override suspend fun deleteDownloadedChapter(chapter: DownloadedChapter): Either<ComicAppError, Unit> {
-    workManager.cancelAllWorkByTag(chapter.chapterLink).await()
-    return _deleteEntityAndImages(chapter)
+    return try {
+      workManager.cancelAllWorkByTag(chapter.chapterLink).await()
+      _deleteEntityAndImages(chapter)
+    } catch (e: Exception) {
+      e.toError(retrofit).left()
+    }
   }
 
   private suspend fun _deleteEntityAndImages(chapter: DownloadedChapter): Either<ComicAppError, Unit> {
