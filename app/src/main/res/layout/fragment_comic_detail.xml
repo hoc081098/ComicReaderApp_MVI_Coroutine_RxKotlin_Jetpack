@@ -37,7 +37,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:scaleType="fitXY"
-        android:src="@drawable/splash_background"
+        tools:src="@drawable/splash_background"
         app:layout_constraintDimensionRatio="H,2:3"
         app:layout_constraintEnd_toEndOf="@id/guideline"
         app:layout_constraintStart_toStartOf="parent"
@@ -68,11 +68,12 @@
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
         android:ellipsize="end"
         android:fontFamily="@font/google_sans"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
         android:textColor="#D9FFFFFF"
-        app:layout_constraintBottom_toBottomOf="@+id/image_thumbnail"
+        app:layout_constraintBottom_toTopOf="@+id/switch_mode"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/image_thumbnail"
         app:layout_constraintTop_toBottomOf="@id/text_title"
@@ -180,6 +181,20 @@
         android:layout_height="wrap_content"
         app:constraint_referenced_ids="text_error_message,button_retry"
         app:visibilityMode="ignore" />
+
+    <Switch
+        android:id="@+id/switch_mode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:checked="true"
+        android:layout_marginStart="8dp"
+        android:textSize="13sp"
+        android:gravity="start"
+        android:fontFamily="@font/google_sans"
+        android:text="Offline/Online mode"
+        app:layout_constraintBottom_toTopOf="@+id/recycler_chapters"
+        app:layout_constraintStart_toStartOf="@+id/guideline" />
 
 
 </androidx.constraintlayout.motion.widget.MotionLayout>

@@ -3,12 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
 
-    <com.github.chrisbanes.photoview.PhotoView
+    <ImageView
+        android:layout_height="wrap_content"
         android:id="@+id/image_chapter"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:scaleType="fitCenter"
+        app:layout_constraintTop_toTopOf="parent"
         android:adjustViewBounds="true"
         tools:srcCompat="@tools:sample/backgrounds/scenic[17]" />
 

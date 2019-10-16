@@ -67,6 +67,12 @@
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
 
+        <action
+            android:id="@+id/action_comicDetailFragment_self"
+            app:destination="@id/comicDetailFragment"
+            app:popUpTo="@+id/comicDetailFragment"
+            app:popUpToInclusive="true" />
+
     </fragment>
 
     <fragment

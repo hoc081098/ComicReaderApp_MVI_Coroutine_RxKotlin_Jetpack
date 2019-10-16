@@ -18,7 +18,7 @@ import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewState.Detail.Initial 
 interface ChapterDetailInteractor {
   fun getChapterDetail(chapter: Chapter, isDownloaded: Boolean): Observable<InitialRetryLoadChapterPartialChange>
 
-  fun refresh(chapter: Chapter, isDownloaded: Boolean): Observable<RefreshPartialChange>
+  fun refresh(chapter: Chapter, isDownloaded: Boolean): Observable<ChapterDetailPartialChange>
 }
 
 sealed class ChapterDetailViewIntent : Intent {

@@ -147,6 +147,16 @@ class ComicDetailFragment : Fragment() {
 
     setupFab(chapterAdapter)
     setupMotionLayout()
+
+    switch_mode.isChecked = !args.isDownloaded
+    switch_mode.setOnCheckedChangeListener { _, _ ->
+      val actionComicDetailFragmentSelf = ComicDetailFragmentDirections.actionComicDetailFragmentSelf(
+        comic = args.comic,
+        title = args.title,
+        isDownloaded = !args.isDownloaded
+      )
+      findNavController().navigate(actionComicDetailFragmentSelf)
+    }
   }
 
   private fun setupMotionLayout() {

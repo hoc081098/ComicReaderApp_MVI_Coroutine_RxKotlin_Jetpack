@@ -71,7 +71,7 @@ class DownloadedComicsFragment : Fragment() {
         toComicDetailFragment(
           comic = ComicArg(
             title = it.title,
-            thumbnail = it.thumbnail.absolutePath,
+            thumbnail = it.thumbnail.toRelativeString(requireContext().filesDir),
             link = it.comicLink
           ),
           title = it.title,

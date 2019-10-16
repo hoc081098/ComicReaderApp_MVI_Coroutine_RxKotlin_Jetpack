@@ -9,15 +9,16 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.TransitionOptions
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
 import com.hoc.comicapp.utils.inflate
-import kotlinx.android.synthetic.main.item_recycler_category.view.*
 import kotlinx.android.synthetic.main.item_recycler_chapter_detail_image.view.*
 import timber.log.Timber
 import java.io.File
@@ -57,28 +58,37 @@ class ChapterImageAdapter(
     }
 
     private fun loadImage(imageUrl: String) {
-      // show progressBar, hide error
-      progressBar.isVisible = true
-      groupError.isVisible = false
-
-      // clear image
-      imageChapter.setImageDrawable(null)
-
       glide
-        .load(
+        .run {
           when {
             Patterns.WEB_URL.matcher(imageUrl).matches() -> {
-              Timber.d("load_thumbnail [1] $imageUrl")
+              Timber.d("load_chapter [1] $imageUrl")
+
+              // show progressBar, hide error
+              progressBar.isVisible = true
+              groupError.isVisible = false
+
+              // load image url from remote
               Uri.parse(imageUrl)
+                .let(::load)
+                .thumbnail(0.7f)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .placeholder(R.drawable.splash_background)
             }
             else -> {
-              Timber.d("load_thumbnail [2] $imageUrl")
-              Uri.fromFile(File(itemView.context.filesDir, imageUrl))
+              Timber.d("load_chapter [2] $imageUrl")
+
+              // load a local file, don't need show progress bar
+              // hide progressBar, hide error
+              progressBar.isVisible = false
+              groupError.isVisible = false
+
+              File(itemView.context.filesDir, imageUrl)
+                .let { Uri.fromFile(it) }
+                .let(::load)
             }
           }
-        )
-        .diskCacheStrategy(DiskCacheStrategy.ALL)
-        .placeholder(R.drawable.comic)
+        }
         .listener(object : RequestListener<Drawable?> {
           override fun onLoadFailed(
             e: GlideException?,
@@ -87,8 +97,9 @@ class ChapterImageAdapter(
             isFirstResource: Boolean
           ): Boolean {
             // show error, hide progressBar
-            progressBar.isVisible = false
             groupError.isVisible = true
+            progressBar.isVisible = false
+
             return false
           }
 
@@ -99,11 +110,15 @@ class ChapterImageAdapter(
             dataSource: DataSource?,
             isFirstResource: Boolean
           ): Boolean {
-            // hide progressBar
+            // hide progressBar, hide error
             progressBar.isVisible = false
+            groupError.isVisible = false
+
             return false
           }
         })
+        .transition(DrawableTransitionOptions.withCrossFade())
+        .dontTransform()
         .into(imageChapter)
     }
   }
