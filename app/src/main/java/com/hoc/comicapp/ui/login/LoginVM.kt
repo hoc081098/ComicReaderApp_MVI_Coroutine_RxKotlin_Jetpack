@@ -24,11 +24,12 @@ class LoginVM(
 
   init {
     val emailObservable = intentS.ofType<Intent.EmailChanged>().share()
+    val passwordObservable = intentS.ofType<Intent.PasswordChange>().share()
+
     val emailErrorChanges = emailObservable
       .map { it.email }
       .map { PartialChange.EmailError(getEmailError(it)) }
 
-    val passwordObservable = intentS.ofType<Intent.PasswordChange>().share()
     val passwordErrorChange = passwordObservable
       .map { it.password }
       .map { PartialChange.PasswordError(getPasswordError(it)) }
@@ -44,10 +45,15 @@ class LoginVM(
         getEmailError(email) === null && getPasswordError(password) === null
       }
       .exhaustMap { (email, password) ->
-        interactor.login(
-          email,
-          password
-        )
+        interactor
+          .login(email, password)
+          .observeOn(rxSchedulerProvider.main)
+          .doOnNext {
+            when (it) {
+              PartialChange.LoginSuccess -> sendEvent(SingleEvent.LoginSuccess)
+              is PartialChange.LoginFailure -> sendEvent(SingleEvent.LoginFailure(it.error))
+            }
+          }
       }
 
     Observable.mergeArray(
@@ -60,6 +66,9 @@ class LoginVM(
       .addTo(compositeDisposable)
   }
 
+  /**
+   * @return error message or null if email is valid
+   */
   private fun getEmailError(email: String): String? {
     return if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
       null
@@ -68,6 +77,9 @@ class LoginVM(
     }
   }
 
+  /**
+   * @return error message or null if password is valid
+   */
   private fun getPasswordError(password: String): String? {
     return if (password.length < 6) {
       "Min length of password is 6"

@@ -4,10 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.hoc.comicapp.R
+import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.ui.login.LoginContract.Intent
 import com.hoc.comicapp.utils.observe
+import com.hoc.comicapp.utils.observeEvent
+import com.hoc.comicapp.utils.snack
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxbinding3.widget.textChanges
 import io.reactivex.Observable
@@ -30,12 +34,24 @@ class LoginFragment : Fragment() {
   }
 
   private fun bindVM() {
-    vm.state.observe(owner = viewLifecycleOwner) {
-      if (edit_email.error != it.emailError) {
-        edit_email.error = it.emailError
+    vm.state.observe(owner = viewLifecycleOwner) { (emailError, passwordError, isLoading) ->
+      if (edit_email.error != emailError) {
+        edit_email.error = emailError
       }
-      if (edit_password.error != it.passwordError) {
-        edit_password.error = it.passwordError
+      if (edit_password.error != passwordError) {
+        edit_password.error = passwordError
+      }
+      progress_bar.isVisible = isLoading
+    }
+
+    vm.singleEvent.observeEvent(owner = viewLifecycleOwner) { event ->
+      when (event) {
+        LoginContract.SingleEvent.LoginSuccess -> {
+          view?.snack("Login success")
+        }
+        is LoginContract.SingleEvent.LoginFailure -> {
+          view?.snack("Login error: ${event.error.getMessage()}")
+        }
       }
     }
 

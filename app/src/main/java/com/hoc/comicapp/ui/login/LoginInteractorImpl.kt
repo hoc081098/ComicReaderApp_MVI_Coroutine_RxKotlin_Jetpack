@@ -15,7 +15,7 @@ class LoginInteractorImpl(
   private val dispatcherProvider: CoroutinesDispatcherProvider
 ) : Interactor {
   override fun login(email: String, password: String): Observable<PartialChange> {
-    return rxObservable<PartialChange>(dispatcherProvider.ui) {
+    return rxObservable(dispatcherProvider.ui) {
       send(PartialChange.Loading)
 
       userRepository

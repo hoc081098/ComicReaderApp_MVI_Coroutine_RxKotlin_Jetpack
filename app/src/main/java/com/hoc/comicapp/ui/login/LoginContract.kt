@@ -26,7 +26,8 @@ interface LoginContract {
   }
 
   sealed class SingleEvent : com.hoc.comicapp.base.SingleEvent {
-
+    object LoginSuccess : SingleEvent()
+    data class LoginFailure(val error: ComicAppError) : SingleEvent()
   }
 
   sealed class PartialChange {
