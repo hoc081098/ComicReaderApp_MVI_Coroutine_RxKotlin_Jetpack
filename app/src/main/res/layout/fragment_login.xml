@@ -51,6 +51,7 @@
             android:fontFamily="@font/google_sans"
             android:inputType="textEmailAddress"
             android:singleLine="true"
+            android:imeOptions="actionNext"
             android:textCursorDrawable="@drawable/color_cursor" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -85,6 +86,7 @@
             android:fontFamily="@font/google_sans"
             android:inputType="textPassword"
             android:singleLine="true"
+            android:imeOptions="actionDone"
             android:textCursorDrawable="@drawable/color_cursor" />
 
     </com.google.android.material.textfield.TextInputLayout>
