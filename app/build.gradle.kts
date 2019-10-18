@@ -119,6 +119,9 @@ dependencies {
 
   implementation("com.github.bumptech.glide:glide:$glideVersion")
   kapt("com.github.bumptech.glide:compiler:$glideVersion")
+  implementation("com.github.bumptech.glide:okhttp3-integration:$glideVersion") {
+    exclude(group = "glide-parent")
+  }
 
   implementation("com.miguelcatalan:materialsearchview:1.4.0")
   implementation("com.ms-square:expandableTextView:0.1.4")
