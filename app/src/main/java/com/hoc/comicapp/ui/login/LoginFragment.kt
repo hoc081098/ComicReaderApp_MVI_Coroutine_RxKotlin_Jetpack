@@ -46,6 +46,9 @@ class LoginFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
+    edit_email.editText!!.setText(vm.state.safeValue?.email ?: "")
+    edit_password.editText!!.setText(vm.state.safeValue?.password ?: "")
+
     button_register.setOnClickListener {
       val toRegisterFragment =
         LoginFragmentDirections.actionLoginFragmentToRegisterFragment()

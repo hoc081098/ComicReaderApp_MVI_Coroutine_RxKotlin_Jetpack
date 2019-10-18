@@ -7,14 +7,19 @@ interface LoginContract {
   data class ViewState(
     val emailError: String?,
     val passwordError: String?,
-    val isLoading: Boolean
+    val isLoading: Boolean,
+    // keep latest state when replace fragment
+    val email: String?,
+    val password: String?
   ) : com.hoc.comicapp.base.ViewState {
     companion object {
       @JvmStatic
       fun initial() = ViewState(
         isLoading = false,
         emailError = null,
-        passwordError = null
+        passwordError = null,
+        email = null,
+        password = null
       )
     }
   }
@@ -38,11 +43,17 @@ interface LoginContract {
         Loading -> state.copy(isLoading = true)
         LoginSuccess -> state.copy(isLoading = false)
         is LoginFailure -> state.copy(isLoading = false)
+        is EmailChanged -> state.copy(email = email)
+        is PasswordChanged -> state.copy(password = password)
       }
     }
 
     data class EmailError(val error: String?) : PartialChange()
     data class PasswordError(val error: String?) : PartialChange()
+
+    data class EmailChanged(val email: String) : PartialChange()
+    data class PasswordChanged(val password: String) : PartialChange()
+
     object Loading : PartialChange()
     object LoginSuccess : PartialChange()
     data class LoginFailure(val error: ComicAppError) : PartialChange()

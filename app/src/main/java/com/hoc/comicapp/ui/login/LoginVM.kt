@@ -3,7 +3,11 @@ package com.hoc.comicapp.ui.login
 import android.util.Patterns
 import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
-import com.hoc.comicapp.ui.login.LoginContract.*
+import com.hoc.comicapp.ui.login.LoginContract.Intent
+import com.hoc.comicapp.ui.login.LoginContract.Interactor
+import com.hoc.comicapp.ui.login.LoginContract.PartialChange
+import com.hoc.comicapp.ui.login.LoginContract.SingleEvent
+import com.hoc.comicapp.ui.login.LoginContract.ViewState
 import com.hoc.comicapp.utils.exhaustMap
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
@@ -23,21 +27,20 @@ class LoginVM(
   override fun processIntents(intents: Observable<Intent>) = intents.subscribe(intentS)!!
 
   init {
-    val emailObservable = intentS.ofType<Intent.EmailChanged>().share()
-    val passwordObservable = intentS.ofType<Intent.PasswordChange>().share()
-
-    val emailErrorChanges = emailObservable
+    val emailObservable = intentS.ofType<Intent.EmailChanged>()
       .map { it.email }
-      .map { PartialChange.EmailError(getEmailError(it)) }
-
-    val passwordErrorChange = passwordObservable
+      .share()
+    val passwordObservable = intentS.ofType<Intent.PasswordChange>()
       .map { it.password }
-      .map { PartialChange.PasswordError(getPasswordError(it)) }
+      .share()
+
+    val emailErrorChanges = emailObservable.map { PartialChange.EmailError(getEmailError(it)) }
+    val passwordErrorChange = passwordObservable.map { PartialChange.PasswordError(getPasswordError(it)) }
 
     val submit = intentS
       .ofType<Intent.SubmitLogin>()
       .withLatestFrom(emailObservable, passwordObservable) { _, email, password ->
-        email.email to password.password
+        email to password
       }
 
     val loginChanges = submit
@@ -56,10 +59,15 @@ class LoginVM(
           }
       }
 
+    val emailChange = emailObservable.map { PartialChange.EmailChanged(it) }
+    val passwordChange = passwordObservable.map { PartialChange.PasswordChanged(it) }
+
     Observable.mergeArray(
       emailErrorChanges,
       passwordErrorChange,
-      loginChanges
+      loginChanges,
+      emailChange,
+      passwordChange
     ).scan(initialState) { state, change -> change.reducer(state) }
       .observeOn(rxSchedulerProvider.main)
       .subscribeBy(onNext = ::setNewState)
