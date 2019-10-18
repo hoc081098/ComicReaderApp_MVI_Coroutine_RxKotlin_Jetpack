@@ -10,7 +10,11 @@ interface RegisterContract {
     val passwordError: String?,
     val fullNameError: String?,
     val isLoading: Boolean,
-    val avatar: Uri?
+    val avatar: Uri?,
+    // keep latest state when replace fragment
+    val email: String?,
+    val password: String?,
+    val fullName: String?
   ) : com.hoc.comicapp.base.ViewState {
     companion object {
       @JvmStatic
@@ -19,7 +23,10 @@ interface RegisterContract {
         emailError = null,
         passwordError = null,
         fullNameError = null,
-        avatar = null
+        avatar = null,
+        email = null,
+        password = null,
+        fullName = null
       )
     }
   }
@@ -47,12 +54,19 @@ interface RegisterContract {
         Loading -> state.copy(isLoading = true)
         RegisterSuccess -> state.copy(isLoading = false)
         is RegisterFailure -> state.copy(isLoading = false)
+        is EmailChanged -> state.copy(email = email)
+        is PasswordChanged -> state.copy(password = password)
+        is FullNameChanged -> state.copy(fullName = fullName)
       }
     }
 
     data class EmailError(val error: String?) : PartialChange()
     data class PasswordError(val error: String?) : PartialChange()
     data class FullNameError(val error: String?) : PartialChange()
+
+    data class EmailChanged(val email: String) : PartialChange()
+    data class PasswordChanged(val password: String) : PartialChange()
+    data class FullNameChanged(val fullName: String) : PartialChange()
     data class AvatarChanged(val uri: Uri) : PartialChange()
 
     object Loading : PartialChange()

@@ -59,6 +59,13 @@ class RegisterFragment : Fragment() {
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
+
+    edit_full_name.editText!!.setText(vm.state.safeValue?.fullName ?: "")
+    edit_email.editText!!.setText(vm.state.safeValue?.email ?: "")
+    edit_password.editText!!.setText(vm.state.safeValue?.password ?: "")
+
+    button_back_to_login.setOnClickListener { findNavController().popBackStack() }
+
     bindVM()
   }
 

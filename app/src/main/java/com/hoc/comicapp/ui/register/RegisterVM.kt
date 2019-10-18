@@ -88,6 +88,9 @@ class RegisterVM(
           }
       }
 
+    val emailChange = emailObservable.map { PartialChange.EmailChanged(it) }
+    val passwordChange = passwordObservable.map { PartialChange.PasswordChanged(it) }
+    val fullNameChange = fullNameObservable.map { PartialChange.FullNameChanged(it) }
     val avatarChange = avatarObservable.map { PartialChange.AvatarChanged(it) }
 
     Observable.mergeArray(
@@ -95,7 +98,10 @@ class RegisterVM(
       passwordErrorChange,
       fullNameErrorChange,
       avatarChange,
-      registerChange
+      registerChange,
+      emailChange,
+      passwordChange,
+      fullNameChange
     ).scan(initialState) { state, change -> change.reducer(state) }
       .observeOn(rxSchedulerProvider.main)
       .subscribeBy(onNext = ::setNewState)
