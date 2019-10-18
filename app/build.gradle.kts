@@ -124,6 +124,7 @@ dependencies {
   implementation("com.github.antonKozyriatskyi:CircularProgressIndicator:1.3.0")
   implementation("com.github.chrisbanes:PhotoView:2.3.0")
   implementation("com.chauthai.swipereveallayout:swipe-reveal-layout:1.4.1")
+  implementation("de.hdodenhof:circleimageview:3.0.1")
 
   testImplementation("junit:junit:4.12")
   androidTestImplementation("androidx.test:runner:1.1.2-alpha01")
