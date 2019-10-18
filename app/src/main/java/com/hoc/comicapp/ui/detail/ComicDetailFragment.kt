@@ -2,7 +2,6 @@ package com.hoc.comicapp.ui.detail
 
 import android.net.Uri
 import android.os.Bundle
-import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -338,19 +337,19 @@ class ComicDetailFragment : Fragment() {
   }
 
   private fun loadThumbnail(thumbnail: String) {
-    glide
-      .load(
-        when {
-          Patterns.WEB_URL.matcher(thumbnail).matches() -> {
-            Timber.d("load_thumbnail [1] $thumbnail")
-            Uri.parse(thumbnail)
-          }
-          else -> {
-            Timber.d("load_thumbnail [2] $thumbnail")
-            Uri.fromFile(File(requireContext().filesDir, thumbnail))
-          }
-        }
-      )
+    val localFile = File(requireContext().filesDir, thumbnail)
+
+    when {
+      localFile.exists() -> {
+        Timber.d("load_thumbnail [local] $thumbnail")
+        Uri.fromFile(localFile)
+      }
+      else -> {
+        Timber.d("load_thumbnail [remote] $thumbnail")
+        Uri.parse(thumbnail)
+      }
+    }
+      .let(glide::load)
       .fitCenter()
       .transition(DrawableTransitionOptions.withCrossFade())
       .into(image_thumbnail)

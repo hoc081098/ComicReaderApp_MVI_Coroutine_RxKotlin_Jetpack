@@ -23,6 +23,9 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
+        android:indeterminate="true"
+        android:indeterminateTint="@android:color/white"
+        android:indeterminateTintMode="src_atop"
         app:layout_constraintTop_toTopOf="parent" />
 
 
