@@ -42,7 +42,10 @@ android {
   buildTypes {
     getByName("release") {
       isMinifyEnabled = false
-      proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+      proguardFiles(
+        getDefaultProguardFile("proguard-android-optimize.txt"),
+        "proguard-rules.pro"
+      )
     }
   }
 
@@ -65,11 +68,12 @@ dependencies {
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-rx2:$coroutinesVersion")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutinesVersion")
 
   implementation("androidx.appcompat:appcompat:1.1.0")
-  implementation("androidx.core:core-ktx:1.2.0-alpha04")
-  implementation("androidx.activity:activity-ktx:1.1.0-alpha03")
-  implementation("androidx.fragment:fragment-ktx:1.2.0-alpha03")
+  implementation("androidx.core:core-ktx:1.2.0-beta01")
+  implementation("androidx.activity:activity-ktx:1.1.0-beta01")
+  implementation("androidx.fragment:fragment-ktx:1.2.0-beta02")
   implementation("androidx.constraintlayout:constraintlayout:2.0.0-beta2")
 
   implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
@@ -85,8 +89,8 @@ dependencies {
   implementation("com.google.android.material:material:$materialVersion")
 
   implementation("androidx.room:room-runtime:$roomVersion")
-  kapt("androidx.room:room-compiler:$roomVersion") // For Kotlin use kapt instead of annotationProcessor
-  implementation("androidx.room:room-ktx:$roomVersion") // optional - Kotlin Extensions and Coroutines support for Room
+  kapt("androidx.room:room-compiler:$roomVersion")
+  implementation("androidx.room:room-ktx:$roomVersion")
   implementation("androidx.room:room-rxjava2:$roomVersion") // optional - RxJava support for Room
 
   implementation("androidx.work:work-runtime-ktx:$workVersion") // Kotlin + coroutines
@@ -96,7 +100,7 @@ dependencies {
   implementation("com.squareup.moshi:moshi-kotlin:1.8.0")
   implementation("com.squareup.retrofit2:retrofit:$retrofit2Version")
   implementation("com.squareup.retrofit2:converter-moshi:$retrofit2Version")
-  implementation("com.squareup.okhttp3:logging-interceptor:3.13.1")
+  implementation("com.squareup.okhttp3:logging-interceptor:4.2.1")
   debugImplementation("com.squareup.leakcanary:leakcanary-android:2.0-alpha-2")
 
   implementation("com.jakewharton.rxrelay2:rxrelay:$rxRelayVersion")
@@ -124,4 +128,8 @@ dependencies {
   testImplementation("junit:junit:4.12")
   androidTestImplementation("androidx.test:runner:1.1.2-alpha01")
   androidTestImplementation("androidx.test.espresso:espresso-core:3.1.2-alpha01")
+
+  implementation("com.google.firebase:firebase-auth:19.1.0")
 }
+
+apply(plugin = "com.google.gms.google-services")

@@ -7,12 +7,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.annotation.*
+import androidx.annotation.CheckResult
+import androidx.annotation.ColorInt
+import androidx.annotation.ColorRes
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.Observer
+import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding3.InitialValueObservable
 import com.jakewharton.rxrelay2.Relay
@@ -92,7 +97,6 @@ enum class SnackbarLength {
     override val length = Snackbar.LENGTH_INDEFINITE
   };
 
-  @Snackbar.Duration
   abstract val length: Int
 }
 
@@ -125,6 +129,17 @@ fun Snackbar.action(
 ) = apply {
   setAction(action, listener)
   color?.let { setActionTextColor(color) }
+}
+
+
+fun Snackbar.onDismissed(f: () -> Unit) {
+  addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar?>() {
+    override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+      super.onDismissed(transientBottomBar, event)
+      f()
+      removeCallback(this)
+    }
+  })
 }
 
 inline fun <T> LiveDataKtx<T>.observe(
