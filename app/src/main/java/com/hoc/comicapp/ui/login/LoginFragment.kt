@@ -40,6 +40,13 @@ class LoginFragment : Fragment() {
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
+
+    button_register.setOnClickListener {
+      val toRegisterFragment =
+        LoginFragmentDirections.actionLoginFragmentToRegisterFragment()
+      findNavController().navigate(toRegisterFragment)
+    }
+
     bindVM()
   }
 
