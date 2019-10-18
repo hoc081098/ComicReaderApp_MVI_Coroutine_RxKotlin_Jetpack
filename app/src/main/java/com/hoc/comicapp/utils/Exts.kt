@@ -1,18 +1,26 @@
 package com.hoc.comicapp.utils
 
+import android.content.ContentResolver
 import android.content.Context
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
+import android.net.Uri
 import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.annotation.*
+import androidx.annotation.AnyRes
+import androidx.annotation.CheckResult
+import androidx.annotation.ColorInt
+import androidx.annotation.ColorRes
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.Observer
+import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding3.InitialValueObservable
 import com.jakewharton.rxrelay2.Relay
@@ -63,6 +71,24 @@ inline fun Context.getColorBy(@ColorRes id: Int) = ContextCompat.getColor(this, 
 @Suppress("nothing_to_inline")
 inline fun Context.getDrawableBy(@DrawableRes id: Int) = ContextCompat.getDrawable(this, id)
 
+/**
+ * Get uri from any resource type
+ * @param this@uriFromResourceId - Context
+ * @param resId - Resource id
+ * @return - Uri to resource by given id or null
+ */
+fun Context.uriFromResourceId(@AnyRes resId: Int): Uri? {
+  return runCatching {
+    val res = this@uriFromResourceId.resources
+    Uri.parse(
+      ContentResolver.SCHEME_ANDROID_RESOURCE +
+          "://" + res.getResourcePackageName(resId)
+          + '/' + res.getResourceTypeName(resId)
+          + '/' + res.getResourceEntryName(resId)
+    )
+  }.getOrNull()
+}
+
 @Suppress("nothing_to_inline")
 inline fun Context.toast(
   @StringRes messageRes: Int,
@@ -92,7 +118,6 @@ enum class SnackbarLength {
     override val length = Snackbar.LENGTH_INDEFINITE
   };
 
-  @Snackbar.Duration
   abstract val length: Int
 }
 
@@ -125,6 +150,17 @@ fun Snackbar.action(
 ) = apply {
   setAction(action, listener)
   color?.let { setActionTextColor(color) }
+}
+
+
+fun Snackbar.onDismissed(f: () -> Unit) {
+  addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar?>() {
+    override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+      super.onDismissed(transientBottomBar, event)
+      f()
+      removeCallback(this)
+    }
+  })
 }
 
 inline fun <T> LiveDataKtx<T>.observe(

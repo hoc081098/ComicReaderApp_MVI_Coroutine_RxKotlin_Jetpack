@@ -1,0 +1,150 @@
+package com.hoc.comicapp.ui.register
+
+import android.net.Uri
+import android.util.Patterns
+import com.hoc.comicapp.base.BaseViewModel
+import com.hoc.comicapp.domain.thread.RxSchedulerProvider
+import com.hoc.comicapp.ui.register.RegisterContract.Intent
+import com.hoc.comicapp.ui.register.RegisterContract.Interactor
+import com.hoc.comicapp.ui.register.RegisterContract.PartialChange
+import com.hoc.comicapp.ui.register.RegisterContract.SingleEvent
+import com.hoc.comicapp.ui.register.RegisterContract.User
+import com.hoc.comicapp.ui.register.RegisterContract.ViewState
+import com.hoc.comicapp.utils.None
+import com.hoc.comicapp.utils.Optional
+import com.hoc.comicapp.utils.exhaustMap
+import com.hoc.comicapp.utils.getOrNull
+import com.hoc.comicapp.utils.toOptional
+import com.jakewharton.rxrelay2.BehaviorRelay
+import com.jakewharton.rxrelay2.PublishRelay
+import io.reactivex.Observable
+import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.ofType
+import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.rxkotlin.withLatestFrom
+
+class RegisterVM(
+  private val interactor: Interactor,
+  private val rxSchedulerProvider: RxSchedulerProvider
+) : BaseViewModel<Intent, ViewState, SingleEvent>() {
+  override val initialState = ViewState.initial()
+
+  private val intentS = PublishRelay.create<Intent>()
+
+  override fun processIntents(intents: Observable<Intent>) = intents.subscribe(intentS)!!
+
+  init {
+    val avatarSubject = BehaviorRelay.createDefault<Optional<Uri>>(None)
+
+    val emailObservable = intentS.ofType<Intent.EmailChanged>()
+      .map { it.email }
+      .share()
+    val passwordObservable = intentS.ofType<Intent.PasswordChanged>()
+      .map { it.password }
+      .share()
+    val fullNameObservable = intentS.ofType<Intent.FullNameChanged>()
+      .map { it.fullName }
+      .share()
+    val avatarObservable = intentS.ofType<Intent.AvatarChanged>()
+      .map { it.uri }
+      .share()
+
+    avatarObservable
+      .map { it.toOptional() }
+      .subscribe(avatarSubject)
+      .addTo(compositeDisposable)
+
+    val emailErrorChange = emailObservable.map { PartialChange.EmailError(getEmailError(it)) }
+    val passwordErrorChange =
+      passwordObservable.map { PartialChange.PasswordError(getPasswordError(it)) }
+    val fullNameErrorChange =
+      fullNameObservable.map { PartialChange.FullNameError(getFullNameError(it)) }
+
+    val registerChange = intentS
+      .ofType<Intent.SubmitRegister>()
+      .withLatestFrom(
+        emailObservable,
+        passwordObservable,
+        fullNameObservable,
+        avatarSubject
+      ) { _, email, password, fullName, avatarOptional ->
+        User(
+          email = email,
+          password = password,
+          fullName = fullName,
+          avatar = avatarOptional.getOrNull()
+        )
+      }
+      .filter(::isValidUser)
+      .exhaustMap {
+        interactor
+          .register(it)
+          .observeOn(rxSchedulerProvider.main)
+          .doOnNext {
+            when (it) {
+              PartialChange.RegisterSuccess -> sendEvent(SingleEvent.RegisterSuccess)
+              is PartialChange.RegisterFailure -> sendEvent(SingleEvent.RegisterFailure(it.error))
+            }
+          }
+      }
+
+    val emailChange = emailObservable.map { PartialChange.EmailChanged(it) }
+    val passwordChange = passwordObservable.map { PartialChange.PasswordChanged(it) }
+    val fullNameChange = fullNameObservable.map { PartialChange.FullNameChanged(it) }
+    val avatarChange = avatarObservable.map { PartialChange.AvatarChanged(it) }
+
+    Observable.mergeArray(
+      emailErrorChange,
+      passwordErrorChange,
+      fullNameErrorChange,
+      avatarChange,
+      registerChange,
+      emailChange,
+      passwordChange,
+      fullNameChange
+    ).scan(initialState) { state, change -> change.reducer(state) }
+      .observeOn(rxSchedulerProvider.main)
+      .subscribeBy(onNext = ::setNewState)
+      .addTo(compositeDisposable)
+  }
+
+  /**
+   * @return error message or null if full name is valid
+   */
+  private fun getFullNameError(fullName: String): String? {
+    return if (fullName.length < 3) {
+      "Min length of full name is 3"
+    } else {
+      null
+    }
+  }
+
+  /**
+   * @return error message or null if email is valid
+   */
+  private fun getEmailError(email: String): String? {
+    return if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+      null
+    } else {
+      "Invalid email address"
+    }
+  }
+
+  /**
+   * @return error message or null if password is valid
+   */
+  private fun getPasswordError(password: String): String? {
+    return if (password.length < 6) {
+      "Min length of password is 6"
+    } else {
+      null
+    }
+  }
+
+  private fun isValidUser(user: User): Boolean {
+    val (email, password, fullName) = user
+    return getEmailError(email) === null &&
+        getPasswordError(password) === null &&
+        getFullNameError(fullName) === null
+  }
+}

@@ -3,7 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
-    <group android:checkableBehavior="single">
+    <group
+        android:id="@+id/group1"
+        android:checkableBehavior="single">
         <item
             android:id="@+id/home_fragment_dest"
             android:icon="@drawable/ic_home_white_24dp"
@@ -16,7 +18,7 @@
 
         <item
             android:id="@+id/downloadedComicsFragment"
-            android:icon="@drawable/ic_file_download_white_24dp"
+            android:icon="@drawable/ic_done_white_24dp"
             android:title="Downloaded comics" />
 
         <item
@@ -24,6 +26,15 @@
             android:icon="@drawable/ic_file_download_white_24dp"
             android:title="Downloading" />
 
+    </group>
+
+    <group
+        android:id="@+id/group2"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/action_home_fragment_dest_to_loginFragment"
+            android:icon="@drawable/ic_home_white_24dp"
+            android:title="Login" />
     </group>
 
     <item android:title="Communicate">
