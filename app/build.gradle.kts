@@ -133,6 +133,7 @@ dependencies {
   androidTestImplementation("androidx.test.espresso:espresso-core:3.1.2-alpha01")
 
   implementation("com.google.firebase:firebase-auth:19.1.0")
+  implementation("com.google.firebase:firebase-storage:19.1.0")
 }
 
 apply(plugin = "com.google.gms.google-services")

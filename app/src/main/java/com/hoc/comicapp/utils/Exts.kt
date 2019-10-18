@@ -80,7 +80,7 @@ inline fun Context.getDrawableBy(@DrawableRes id: Int) = ContextCompat.getDrawab
 fun Context.uriFromResourceId(@AnyRes resId: Int): Uri? {
   return runCatching {
     val res = this@uriFromResourceId.resources
-    return Uri.parse(
+    Uri.parse(
       ContentResolver.SCHEME_ANDROID_RESOURCE +
           "://" + res.getResourcePackageName(resId)
           + '/' + res.getResourceTypeName(resId)

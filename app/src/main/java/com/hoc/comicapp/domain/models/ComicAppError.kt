@@ -4,6 +4,7 @@ import android.database.sqlite.SQLiteException
 import com.google.firebase.FirebaseException
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.storage.StorageException
 import com.hoc.comicapp.data.remote.ErrorResponseParser
 import retrofit2.HttpException
 import retrofit2.Retrofit
@@ -48,6 +49,8 @@ sealed class AuthError : ComicAppError() {
   object InvalidUserToken : AuthError()
   object OperationNotAllowed : AuthError()
   object WeakPassword : AuthError()
+
+  object UploadFile: AuthError()
 }
 
 fun Throwable.toError(retrofit: Retrofit): ComicAppError {
@@ -79,6 +82,7 @@ fun Throwable.toError(retrofit: Retrofit): ComicAppError {
             )
           }
         }
+        is StorageException -> AuthError.UploadFile
         else -> UnexpectedError(
           cause = this,
           message = "Unknown throwable $this"
@@ -136,5 +140,6 @@ fun ComicAppError.getMessage(): String {
     AuthError.InvalidUserToken -> "Invalid user token"
     AuthError.OperationNotAllowed -> "Operation not allowed"
     AuthError.WeakPassword -> "Weak password"
+    AuthError.UploadFile -> "Upload file error"
   }
 }

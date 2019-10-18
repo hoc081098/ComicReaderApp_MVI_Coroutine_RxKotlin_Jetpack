@@ -1,5 +1,6 @@
 package com.hoc.comicapp.ui.register
 
+import android.net.Uri
 import android.util.Patterns
 import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
@@ -7,8 +8,14 @@ import com.hoc.comicapp.ui.register.RegisterContract.Intent
 import com.hoc.comicapp.ui.register.RegisterContract.Interactor
 import com.hoc.comicapp.ui.register.RegisterContract.PartialChange
 import com.hoc.comicapp.ui.register.RegisterContract.SingleEvent
+import com.hoc.comicapp.ui.register.RegisterContract.User
 import com.hoc.comicapp.ui.register.RegisterContract.ViewState
+import com.hoc.comicapp.utils.None
+import com.hoc.comicapp.utils.Optional
 import com.hoc.comicapp.utils.exhaustMap
+import com.hoc.comicapp.utils.getOrNull
+import com.hoc.comicapp.utils.toOptional
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.addTo
@@ -27,6 +34,8 @@ class RegisterVM(
   override fun processIntents(intents: Observable<Intent>) = intents.subscribe(intentS)!!
 
   init {
+    val avatarSubject = BehaviorRelay.createDefault<Optional<Uri>>(None)
+
     val emailObservable = intentS.ofType<Intent.EmailChanged>()
       .map { it.email }
       .share()
@@ -36,6 +45,14 @@ class RegisterVM(
     val fullNameObservable = intentS.ofType<Intent.FullNameChanged>()
       .map { it.fullName }
       .share()
+    val avatarObservable = intentS.ofType<Intent.AvatarChanged>()
+      .map { it.uri }
+      .share()
+
+    avatarObservable
+      .map { it.toOptional() }
+      .subscribe(avatarSubject)
+      .addTo(compositeDisposable)
 
     val emailErrorChange = emailObservable.map { PartialChange.EmailError(getEmailError(it)) }
     val passwordErrorChange =
@@ -43,25 +60,25 @@ class RegisterVM(
     val fullNameErrorChange =
       fullNameObservable.map { PartialChange.FullNameError(getFullNameError(it)) }
 
-    val submit = intentS
+    val registerChange = intentS
       .ofType<Intent.SubmitRegister>()
       .withLatestFrom(
         emailObservable,
         passwordObservable,
-        fullNameObservable
-      ) { _, email, password, fullName ->
-        Triple(email, password, fullName)
+        fullNameObservable,
+        avatarSubject
+      ) { _, email, password, fullName, avatarOptional ->
+        User(
+          email = email,
+          password = password,
+          fullName = fullName,
+          avatar = avatarOptional.getOrNull()
+        )
       }
-
-    val registerChange = submit
-      .filter { (email, password, fullName) ->
-        getEmailError(email) === null &&
-            getPasswordError(password) === null &&
-            getFullNameError(fullName) === null
-      }
-      .exhaustMap { (email, password, fullName) ->
+      .filter(::isValidUser)
+      .exhaustMap {
         interactor
-          .register(email, password, fullName)
+          .register(it)
           .observeOn(rxSchedulerProvider.main)
           .doOnNext {
             when (it) {
@@ -71,10 +88,13 @@ class RegisterVM(
           }
       }
 
+    val avatarChange = avatarObservable.map { PartialChange.AvatarChanged(it) }
+
     Observable.mergeArray(
       emailErrorChange,
       passwordErrorChange,
       fullNameErrorChange,
+      avatarChange,
       registerChange
     ).scan(initialState) { state, change -> change.reducer(state) }
       .observeOn(rxSchedulerProvider.main)
@@ -113,5 +133,12 @@ class RegisterVM(
     } else {
       null
     }
+  }
+
+  private fun isValidUser(user: User): Boolean {
+    val (email, password, fullName) = user
+    return getEmailError(email) === null &&
+        getPasswordError(password) === null &&
+        getFullNameError(fullName) === null
   }
 }
