@@ -1,12 +1,15 @@
 package com.hoc.comicapp.utils
 
+import android.content.ContentResolver
 import android.content.Context
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
+import android.net.Uri
 import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.annotation.AnyRes
 import androidx.annotation.CheckResult
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
@@ -67,6 +70,24 @@ inline fun Context.getColorBy(@ColorRes id: Int) = ContextCompat.getColor(this, 
 
 @Suppress("nothing_to_inline")
 inline fun Context.getDrawableBy(@DrawableRes id: Int) = ContextCompat.getDrawable(this, id)
+
+/**
+ * Get uri from any resource type
+ * @param this@uriFromResourceId - Context
+ * @param resId - Resource id
+ * @return - Uri to resource by given id or null
+ */
+fun Context.uriFromResourceId(@AnyRes resId: Int): Uri? {
+  return runCatching {
+    val res = this@uriFromResourceId.resources
+    return Uri.parse(
+      ContentResolver.SCHEME_ANDROID_RESOURCE +
+          "://" + res.getResourcePackageName(resId)
+          + '/' + res.getResourceTypeName(resId)
+          + '/' + res.getResourceEntryName(resId)
+    )
+  }.getOrNull()
+}
 
 @Suppress("nothing_to_inline")
 inline fun Context.toast(

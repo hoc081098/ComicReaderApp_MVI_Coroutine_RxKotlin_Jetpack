@@ -25,12 +25,15 @@ import com.hoc.comicapp.utils.snack
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxbinding3.widget.textChanges
 import io.reactivex.Observable
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.fragment_login.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class LoginFragment : Fragment() {
 
   private val vm by viewModel<LoginVM>()
+  private val compositeDisposable = CompositeDisposable()
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -87,7 +90,12 @@ class LoginFragment : Fragment() {
         edit_password.editText!!.textChanges().map { Intent.PasswordChange(it.toString()) },
         button_login.clicks().map { Intent.SubmitLogin }
       )
-    )
+    ).addTo(compositeDisposable)
+  }
+
+  override fun onDestroyView() {
+    super.onDestroyView()
+    compositeDisposable.clear()
   }
 
   private fun beginTransition(

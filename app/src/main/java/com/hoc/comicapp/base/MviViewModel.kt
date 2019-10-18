@@ -1,5 +1,6 @@
 package com.hoc.comicapp.base
 
+import androidx.annotation.CheckResult
 import androidx.lifecycle.LiveData
 import com.hoc.comicapp.utils.Event
 import com.shopify.livedataktx.LiveDataKtx
@@ -20,5 +21,6 @@ interface MviViewModel<I : Intent, S : ViewState, E : SingleEvent> {
 
   val singleEvent: LiveData<Event<E>>
 
+  @CheckResult
   fun processIntents(intents: Observable<I>): Disposable
 }

@@ -115,6 +115,8 @@ dependencies {
   implementation("io.reactivex.rxjava2:rxkotlin:2.4.0")
   implementation("io.reactivex.rxjava2:rxandroid:2.1.1")
 
+  implementation("com.github.VictorAlbertos:RxActivityResult:0.5.0-2.x")
+
   implementation("com.github.bumptech.glide:glide:$glideVersion")
   kapt("com.github.bumptech.glide:compiler:$glideVersion")
 
