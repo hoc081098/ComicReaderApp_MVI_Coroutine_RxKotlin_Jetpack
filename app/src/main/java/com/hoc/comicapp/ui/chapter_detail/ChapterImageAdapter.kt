@@ -1,7 +1,6 @@
 package com.hoc.comicapp.ui.chapter_detail
 
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
@@ -105,8 +104,8 @@ class ChapterImageAdapter(
       groupError.isVisible = false
 
       // load image url from remote
-      return Uri.parse(imageUrl)
-        .let(glide::load)
+      return glide
+        .load(imageUrl)
         .thumbnail(0.7f)
         .diskCacheStrategy(DiskCacheStrategy.ALL)
     }
@@ -119,9 +118,7 @@ class ChapterImageAdapter(
       progressBar.isVisible = false
       groupError.isVisible = false
 
-      return file
-        .let { Uri.fromFile(it) }
-        .let(glide::load)
+      return glide.load(file)
     }
   }
 }
