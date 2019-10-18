@@ -7,6 +7,7 @@ interface RegisterContract {
   data class ViewState(
     val emailError: String?,
     val passwordError: String?,
+    val fullNameError: String?,
     val isLoading: Boolean
   ) : com.hoc.comicapp.base.ViewState {
     companion object {
@@ -14,20 +15,22 @@ interface RegisterContract {
       fun initial() = ViewState(
         isLoading = false,
         emailError = null,
-        passwordError = null
+        passwordError = null,
+        fullNameError = null
       )
     }
   }
 
   sealed class Intent : com.hoc.comicapp.base.Intent {
     data class EmailChanged(val email: String) : Intent()
-    data class PasswordChange(val password: String) : Intent()
-    object SubmitLogin : Intent()
+    data class PasswordChanged(val password: String) : Intent()
+    data class FullNameChanged(val fullName: String) : Intent()
+    object SubmitRegister : Intent()
   }
 
   sealed class SingleEvent : com.hoc.comicapp.base.SingleEvent {
-    object LoginSuccess : SingleEvent()
-    data class LoginFailure(val error: ComicAppError) : SingleEvent()
+    object RegisterSuccess : SingleEvent()
+    data class RegisterFailure(val error: ComicAppError) : SingleEvent()
   }
 
   sealed class PartialChange {
@@ -35,20 +38,27 @@ interface RegisterContract {
       return when (this) {
         is EmailError -> state.copy(emailError = error)
         is PasswordError -> state.copy(passwordError = error)
+        is FullNameError -> state.copy(fullNameError = error)
         Loading -> state.copy(isLoading = true)
-        LoginSuccess -> state.copy(isLoading = false)
-        is LoginFailure -> state.copy(isLoading = false)
+        RegisterSuccess -> state.copy(isLoading = false)
+        is RegisterFailure -> state.copy(isLoading = false)
       }
     }
 
     data class EmailError(val error: String?) : PartialChange()
     data class PasswordError(val error: String?) : PartialChange()
+    data class FullNameError(val error: String?) : PartialChange()
+
     object Loading : PartialChange()
-    object LoginSuccess : PartialChange()
-    data class LoginFailure(val error: ComicAppError) : PartialChange()
+    object RegisterSuccess : PartialChange()
+    data class RegisterFailure(val error: ComicAppError) : PartialChange()
   }
 
   interface Interactor {
-    fun login(email: String, password: String): Observable<PartialChange>
+    fun register(
+      email: String,
+      password: String,
+      fullName: String
+    ): Observable<PartialChange>
   }
 }

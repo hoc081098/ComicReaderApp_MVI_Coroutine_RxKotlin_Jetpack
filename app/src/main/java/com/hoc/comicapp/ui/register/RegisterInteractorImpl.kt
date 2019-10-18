@@ -2,8 +2,8 @@ package com.hoc.comicapp.ui.register
 
 import com.hoc.comicapp.domain.repository.UserRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
-import com.hoc.comicapp.ui.login.LoginContract.Interactor
-import com.hoc.comicapp.ui.login.LoginContract.PartialChange
+import com.hoc.comicapp.ui.register.RegisterContract.Interactor
+import com.hoc.comicapp.ui.register.RegisterContract.PartialChange
 import com.hoc.comicapp.utils.fold
 import io.reactivex.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -14,15 +14,19 @@ class RegisterInteractorImpl(
   private val userRepository: UserRepository,
   private val dispatcherProvider: CoroutinesDispatcherProvider
 ) : Interactor {
-  override fun login(email: String, password: String): Observable<PartialChange> {
+  override fun register(
+    email: String,
+    password: String,
+    fullName: String
+  ): Observable<PartialChange> {
     return rxObservable(dispatcherProvider.ui) {
       send(PartialChange.Loading)
 
       userRepository
-        .login(email, password)
+        .register(email, password, fullName)
         .fold(
-          left = { PartialChange.LoginFailure(it) },
-          right = { PartialChange.LoginSuccess }
+          left = { PartialChange.RegisterFailure(it) },
+          right = { PartialChange.RegisterSuccess }
         )
         .let { send(it) }
     }

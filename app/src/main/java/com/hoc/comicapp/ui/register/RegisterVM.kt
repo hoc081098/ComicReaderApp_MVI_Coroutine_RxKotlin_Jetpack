@@ -3,7 +3,11 @@ package com.hoc.comicapp.ui.register
 import android.util.Patterns
 import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
-import com.hoc.comicapp.ui.login.LoginContract.*
+import com.hoc.comicapp.ui.register.RegisterContract.Intent
+import com.hoc.comicapp.ui.register.RegisterContract.Interactor
+import com.hoc.comicapp.ui.register.RegisterContract.PartialChange
+import com.hoc.comicapp.ui.register.RegisterContract.SingleEvent
+import com.hoc.comicapp.ui.register.RegisterContract.ViewState
 import com.hoc.comicapp.utils.exhaustMap
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
@@ -23,47 +27,70 @@ class RegisterVM(
   override fun processIntents(intents: Observable<Intent>) = intents.subscribe(intentS)!!
 
   init {
-    val emailObservable = intentS.ofType<Intent.EmailChanged>().share()
-    val passwordObservable = intentS.ofType<Intent.PasswordChange>().share()
-
-    val emailErrorChanges = emailObservable
+    val emailObservable = intentS.ofType<Intent.EmailChanged>()
       .map { it.email }
-      .map { PartialChange.EmailError(getEmailError(it)) }
-
-    val passwordErrorChange = passwordObservable
+      .share()
+    val passwordObservable = intentS.ofType<Intent.PasswordChanged>()
       .map { it.password }
-      .map { PartialChange.PasswordError(getPasswordError(it)) }
+      .share()
+    val fullNameObservable = intentS.ofType<Intent.FullNameChanged>()
+      .map { it.fullName }
+      .share()
+
+    val emailErrorChange = emailObservable.map { PartialChange.EmailError(getEmailError(it)) }
+    val passwordErrorChange =
+      passwordObservable.map { PartialChange.PasswordError(getPasswordError(it)) }
+    val fullNameErrorChange =
+      fullNameObservable.map { PartialChange.FullNameError(getFullNameError(it)) }
 
     val submit = intentS
-      .ofType<Intent.SubmitLogin>()
-      .withLatestFrom(emailObservable, passwordObservable) { _, email, password ->
-        email.email to password.password
+      .ofType<Intent.SubmitRegister>()
+      .withLatestFrom(
+        emailObservable,
+        passwordObservable,
+        fullNameObservable
+      ) { _, email, password, fullName ->
+        Triple(email, password, fullName)
       }
 
-    val loginChanges = submit
-      .filter { (email, password) ->
-        getEmailError(email) === null && getPasswordError(password) === null
+    val registerChange = submit
+      .filter { (email, password, fullName) ->
+        getEmailError(email) === null &&
+            getPasswordError(password) === null &&
+            getFullNameError(fullName) === null
       }
-      .exhaustMap { (email, password) ->
+      .exhaustMap { (email, password, fullName) ->
         interactor
-          .login(email, password)
+          .register(email, password, fullName)
           .observeOn(rxSchedulerProvider.main)
           .doOnNext {
             when (it) {
-              PartialChange.LoginSuccess -> sendEvent(SingleEvent.LoginSuccess)
-              is PartialChange.LoginFailure -> sendEvent(SingleEvent.LoginFailure(it.error))
+              PartialChange.RegisterSuccess -> sendEvent(SingleEvent.RegisterSuccess)
+              is PartialChange.RegisterFailure -> sendEvent(SingleEvent.RegisterFailure(it.error))
             }
           }
       }
 
     Observable.mergeArray(
-      emailErrorChanges,
+      emailErrorChange,
       passwordErrorChange,
-      loginChanges
+      fullNameErrorChange,
+      registerChange
     ).scan(initialState) { state, change -> change.reducer(state) }
       .observeOn(rxSchedulerProvider.main)
       .subscribeBy(onNext = ::setNewState)
       .addTo(compositeDisposable)
+  }
+
+  /**
+   * @return error message or null if full name is valid
+   */
+  private fun getFullNameError(fullName: String): String? {
+    return if (fullName.length < 3) {
+      "Min length of full name is 3"
+    } else {
+      null
+    }
   }
 
   /**

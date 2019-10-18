@@ -8,8 +8,8 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.hoc.comicapp.R
 import com.hoc.comicapp.domain.models.getMessage
-import com.hoc.comicapp.ui.login.LoginContract.Intent
-import com.hoc.comicapp.ui.login.LoginContract.SingleEvent
+import com.hoc.comicapp.ui.register.RegisterContract.Intent
+import com.hoc.comicapp.ui.register.RegisterContract.SingleEvent
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.onDismissed
@@ -36,28 +36,29 @@ class RegisterFragment : Fragment() {
   }
 
   private fun bindVM() {
-    vm.state.observe(owner = viewLifecycleOwner) { (emailError, passwordError, isLoading) ->
+    vm.state.observe(owner = viewLifecycleOwner) { (emailError, passwordError, fullNameError, isLoading) ->
       if (edit_email.error != emailError) {
         edit_email.error = emailError
       }
       if (edit_password.error != passwordError) {
         edit_password.error = passwordError
       }
-
-
+      if (edit_full_name.error != fullNameError) {
+        edit_full_name.error = fullNameError
+      }
     }
 
     vm.singleEvent.observeEvent(owner = viewLifecycleOwner) { event ->
       when (event) {
-        SingleEvent.LoginSuccess -> {
-          view?.snack("Login success") {
+        SingleEvent.RegisterSuccess -> {
+          view?.snack("Register success") {
             onDismissed {
-              findNavController().popBackStack()
+              findNavController().popBackStack(R.id.home_fragment_dest, false)
             }
           }
         }
-        is SingleEvent.LoginFailure -> {
-          view?.snack("Login error: ${event.error.getMessage()}")
+        is SingleEvent.RegisterFailure -> {
+          view?.snack("Register error: ${event.error.getMessage()}")
         }
       }
     }
@@ -65,12 +66,12 @@ class RegisterFragment : Fragment() {
     vm.processIntents(
       Observable.mergeArray(
         edit_email.editText!!.textChanges().map { Intent.EmailChanged(it.toString()) },
-        edit_password.editText!!.textChanges().map { Intent.PasswordChange(it.toString()) },
-        button_register.clicks().map { Intent.SubmitLogin }
+        edit_password.editText!!.textChanges().map { Intent.PasswordChanged(it.toString()) },
+        edit_full_name.editText!!.textChanges().map { Intent.FullNameChanged(it.toString()) },
+        button_register.clicks().map { Intent.SubmitRegister }
       )
     )
   }
-
 
   private companion object {
     const val ANIM_DURATION = 300L
