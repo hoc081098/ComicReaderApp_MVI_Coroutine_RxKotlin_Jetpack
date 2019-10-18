@@ -13,6 +13,7 @@ import android.widget.Button
 import android.widget.ProgressBar
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.transition.ChangeBounds
 import androidx.transition.Fade
@@ -99,7 +100,10 @@ class RegisterFragment : Fragment() {
         SingleEvent.RegisterSuccess -> {
           view?.snack("Register success") {
             onDismissed {
-              findNavController().popBackStack(R.id.home_fragment_dest, false)
+              Timber.d("onDismissed")
+              activity
+                ?.findNavController(R.id.main_nav_fragment)
+                ?.popBackStack(R.id.home_fragment_dest, false)
             }
           }
         }
