@@ -115,6 +115,8 @@ dependencies {
   implementation("io.reactivex.rxjava2:rxkotlin:2.4.0")
   implementation("io.reactivex.rxjava2:rxandroid:2.1.1")
 
+  implementation("com.github.VictorAlbertos:RxActivityResult:0.5.0-2.x")
+
   implementation("com.github.bumptech.glide:glide:$glideVersion")
   kapt("com.github.bumptech.glide:compiler:$glideVersion")
 
@@ -124,12 +126,14 @@ dependencies {
   implementation("com.github.antonKozyriatskyi:CircularProgressIndicator:1.3.0")
   implementation("com.github.chrisbanes:PhotoView:2.3.0")
   implementation("com.chauthai.swipereveallayout:swipe-reveal-layout:1.4.1")
+  implementation("de.hdodenhof:circleimageview:3.0.1")
 
   testImplementation("junit:junit:4.12")
   androidTestImplementation("androidx.test:runner:1.1.2-alpha01")
   androidTestImplementation("androidx.test.espresso:espresso-core:3.1.2-alpha01")
 
   implementation("com.google.firebase:firebase-auth:19.1.0")
+  implementation("com.google.firebase:firebase-storage:19.1.0")
 }
 
 apply(plugin = "com.google.gms.google-services")

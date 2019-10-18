@@ -2,7 +2,12 @@ package com.hoc.comicapp.ui.category_detail
 
 import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
-import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.*
+import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.CategoryArg
+import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.Interactor
+import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.PartialChange
+import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.SingleEvent
+import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewIntent
+import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.notOfType
 import com.jakewharton.rxrelay2.BehaviorRelay
@@ -16,9 +21,9 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.rxkotlin.withLatestFrom
 
 class CategoryDetailVM(
-  private val rxSchedulerProvider: RxSchedulerProvider,
+  rxSchedulerProvider: RxSchedulerProvider,
   private val interactor: Interactor,
-  private val category: CategoryArg
+  category: CategoryArg
 ) : BaseViewModel<ViewIntent, ViewState, SingleEvent>() {
   override val initialState = ViewState.initial(category)
   private val intentS = PublishRelay.create<ViewIntent>()

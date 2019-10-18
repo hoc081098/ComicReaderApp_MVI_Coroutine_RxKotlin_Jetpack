@@ -264,9 +264,7 @@ interface CategoryDetailContract {
   /**
    * Single event
    */
-  sealed class SingleEvent : com.hoc.comicapp.base.SingleEvent {
-
-  }
+  sealed class SingleEvent : com.hoc.comicapp.base.SingleEvent
 
   /**
    * Interactor

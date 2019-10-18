@@ -10,9 +10,7 @@
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:contentDescription="@string/nav_header_desc"
-        android:paddingTop="@dimen/nav_header_vertical_spacing"
+        android:layout_height="46dp"
         android:scaleType="fitCenter"
         app:layout_constraintBottom_toTopOf="@+id/edit_email"
         app:layout_constraintEnd_toEndOf="parent"
@@ -28,13 +26,13 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="12dp"
-        app:boxBackgroundColor="@color/colorCardBackground"
         android:layout_marginEnd="16dp"
         android:hint="Email"
-        app:endIconMode="none"
+        app:boxBackgroundColor="@color/colorCardBackground"
         app:boxStrokeColor="@color/colorAccent"
-        app:errorIconDrawable="@null"
+        app:endIconMode="none"
         app:errorEnabled="true"
+        app:errorIconDrawable="@null"
         app:errorTextColor="@color/colorRedAccent"
         app:helperTextEnabled="false"
         app:hintAnimationEnabled="true"
@@ -43,15 +41,17 @@
         app:layout_constraintBottom_toTopOf="@+id/edit_password"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView">
+        app:layout_constraintTop_toBottomOf="@+id/imageView"
+        app:startIconDrawable="@drawable/ic_email_white_24dp"
+        app:startIconTint="@color/colorIcons">
 
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="@font/google_sans"
+            android:imeOptions="actionNext"
             android:inputType="textEmailAddress"
             android:singleLine="true"
-            android:imeOptions="actionNext"
             android:textCursorDrawable="@drawable/color_cursor" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -69,24 +69,26 @@
         app:errorEnabled="true"
         app:errorIconDrawable="@null"
         app:errorTextColor="@color/colorRedAccent"
+        app:helperTextEnabled="false"
         app:hintAnimationEnabled="true"
         app:hintEnabled="true"
-        app:helperTextEnabled="false"
         app:hintTextColor="@color/colorTextOnBackground"
         app:layout_constraintBottom_toTopOf="@+id/button_login"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/edit_email"
-        app:passwordToggleEnabled="true">
+        app:passwordToggleEnabled="true"
+        app:startIconDrawable="@drawable/ic_lock_white_24dp"
+        app:startIconTint="@color/colorIcons">
 
 
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="@font/google_sans"
+            android:imeOptions="actionDone"
             android:inputType="textPassword"
             android:singleLine="true"
-            android:imeOptions="actionDone"
             android:textCursorDrawable="@drawable/color_cursor" />
 
     </com.google.android.material.textfield.TextInputLayout>

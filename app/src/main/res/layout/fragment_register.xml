@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root_register_frag"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorCardBackground">
+
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <View
+                android:id="@+id/dummy1"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                app:layout_constraintBottom_toTopOf="@+id/image_avatar"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_chainStyle="packed" />
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/image_avatar"
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:layout_marginTop="1dp"
+                android:scaleType="centerCrop"
+                app:civ_border_width="0dp"
+                app:layout_constraintBottom_toTopOf="@+id/edit_email"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/dummy1"
+                app:srcCompat="@drawable/ic_person_white_24dp" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/edit_email"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="16dp"
+                android:hint="Email"
+                app:boxBackgroundColor="@color/colorCardBackground"
+                app:boxStrokeColor="@color/colorAccent"
+                app:endIconMode="none"
+                app:errorEnabled="true"
+                app:errorIconDrawable="@null"
+                app:errorTextColor="@color/colorRedAccent"
+                app:helperTextEnabled="false"
+                app:hintAnimationEnabled="true"
+                app:hintEnabled="true"
+                app:hintTextColor="@color/colorTextOnBackground"
+                app:layout_constraintBottom_toTopOf="@+id/edit_password"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/image_avatar"
+                app:startIconDrawable="@drawable/ic_email_white_24dp"
+                app:startIconTint="@color/colorIcons">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/google_sans"
+                    android:imeOptions="actionNext"
+                    android:inputType="textEmailAddress"
+                    android:singleLine="true"
+                    android:textCursorDrawable="@drawable/color_cursor" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/edit_password"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:hint="Password"
+                app:boxBackgroundColor="@color/colorCardBackground"
+                app:boxStrokeColor="@color/colorAccent"
+                app:errorEnabled="true"
+                app:errorIconDrawable="@null"
+                app:errorTextColor="@color/colorRedAccent"
+                app:helperTextEnabled="false"
+                app:hintAnimationEnabled="true"
+                app:hintEnabled="true"
+                app:hintTextColor="@color/colorTextOnBackground"
+                app:layout_constraintBottom_toTopOf="@+id/edit_full_name"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/edit_email"
+                app:passwordToggleEnabled="true"
+                app:startIconDrawable="@drawable/ic_lock_white_24dp"
+                app:startIconTint="@color/colorIcons">
+
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/google_sans"
+                    android:imeOptions="actionNext"
+                    android:inputType="textPassword"
+                    android:singleLine="true"
+                    android:textCursorDrawable="@drawable/color_cursor" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/edit_full_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:hint="Full name"
+                app:boxBackgroundColor="@color/colorCardBackground"
+                app:boxStrokeColor="@color/colorAccent"
+                app:errorEnabled="true"
+                app:errorIconDrawable="@null"
+                app:errorTextColor="@color/colorRedAccent"
+                app:helperTextEnabled="false"
+                app:hintAnimationEnabled="true"
+                app:hintEnabled="true"
+                app:hintTextColor="@color/colorTextOnBackground"
+                app:layout_constraintBottom_toTopOf="@+id/button_register"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/edit_password"
+                app:startIconDrawable="@drawable/ic_person_white_24dp"
+                app:startIconTint="@color/colorIcons">
+
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/google_sans"
+                    android:imeOptions="actionDone"
+                    android:inputType="textPersonName"
+                    android:singleLine="true"
+                    android:textCursorDrawable="@drawable/color_cursor" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_register"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="16dp"
+                android:fontFamily="@font/google_sans"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+                android:text="REGISTER"
+                android:textAlignment="center"
+                android:textColor="@color/colorAccent"
+                android:textSize="15sp"
+                app:backgroundTint="@color/colorPrimary"
+                app:cornerRadius="4dp"
+                app:layout_constraintBottom_toTopOf="@+id/button_back_to_login"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/edit_full_name"
+                app:strokeColor="@color/colorAccent"
+                app:strokeWidth="1dp" />
+
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:progressDrawable="@android:color/white"
+                android:visibility="invisible"
+                app:layout_constraintBottom_toBottomOf="@id/button_register"
+                app:layout_constraintEnd_toEndOf="@id/button_register"
+                app:layout_constraintStart_toStartOf="@id/button_register"
+                app:layout_constraintTop_toTopOf="@id/button_register"
+                tools:visibility="visible" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_back_to_login"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:fontFamily="@font/google_sans"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+                android:text="BACK TO LOGIN"
+                android:textAlignment="center"
+                android:textColor="@color/colorAccent"
+                android:textSize="15sp"
+                app:backgroundTint="@color/colorPrimary"
+                app:cornerRadius="4dp"
+                app:icon="@drawable/ic_navigate_next_white_24dp"
+                app:iconSize="18dp"
+                app:iconTint="@color/colorIcons"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/button_register"
+                app:strokeColor="@color/colorAccent"
+                app:strokeWidth="1dp" />
+
+            <View
+                android:id="@+id/dummy2"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/button_back_to_login" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

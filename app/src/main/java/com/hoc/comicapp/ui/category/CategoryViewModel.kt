@@ -9,7 +9,11 @@ import com.hoc.comicapp.utils.notOfType
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
-import io.reactivex.rxkotlin.*
+import io.reactivex.rxkotlin.Observables
+import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.cast
+import io.reactivex.rxkotlin.ofType
+import io.reactivex.rxkotlin.subscribeBy
 
 class CategoryViewModel(
   private val categoryInteractor: CategoryInteractor,
@@ -130,7 +134,7 @@ class CategoryViewModel(
     )
 
     /**
-     * Only take 1 [HomeViewIntent.Initial]
+     * Only take 1 [CategoryViewIntent.Initial]
      */
     @JvmStatic
     private val intentFilter = ObservableTransformer<CategoryViewIntent, CategoryViewIntent> {
