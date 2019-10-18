@@ -8,8 +8,8 @@ import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 
 /**
- * Object that will subscribes to a [MviView]'s [MviIntent]s,
- * process it and emit a [MviViewState] back.
+ * Object that will subscribes to a MviView's [Intent]s,
+ * process it and emit a [ViewState] back.
  *
  * @param I Top class of the [Intent] that the [MviViewModel] will be subscribing
  * to.

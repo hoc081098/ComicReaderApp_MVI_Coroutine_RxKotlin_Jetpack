@@ -39,7 +39,7 @@ private fun getOkHttpClient(): OkHttpClient {
     .apply {
       if (BuildConfig.DEBUG) {
         HttpLoggingInterceptor()
-          .setLevel(HttpLoggingInterceptor.Level.BODY)
+          .apply { this.level = HttpLoggingInterceptor.Level.BODY }
           .let(::addInterceptor)
       }
     }
