@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:background="@color/colorBackground"
     android:layout_height="match_parent">
 
     <androidx.cardview.widget.CardView
@@ -90,7 +91,6 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:padding="0dp"
-        android:background="@color/colorCardBackground"
         app:layout_constraintBottom_toTopOf="@+id/bottom_nav"
         app:layout_constraintEnd_toEndOf="parent"
         tools:listitem="@layout/item_recycler_chapter_detail_image"

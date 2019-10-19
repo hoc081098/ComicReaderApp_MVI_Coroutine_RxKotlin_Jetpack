@@ -10,7 +10,6 @@
         android:id="@+id/home_recycler_horizontal"
         android:layout_width="0dp"
         android:layout_height="250dp"
-        android:background="@color/colorBackground"
         android:clipToPadding="false"
         android:padding="4dp"
         android:scrollbars="none"

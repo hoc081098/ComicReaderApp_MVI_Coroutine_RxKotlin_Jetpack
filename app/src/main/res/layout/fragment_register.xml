@@ -5,7 +5,7 @@
     android:id="@+id/root_register_frag"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorCardBackground">
+    android:background="@color/colorBackground">
 
     <ScrollView
         android:id="@+id/scrollView"
@@ -58,7 +58,7 @@
                 app:endIconMode="none"
                 app:errorEnabled="true"
                 app:errorIconDrawable="@null"
-                app:errorTextColor="@color/colorRedAccent"
+                app:errorTextColor="@color/colorError"
                 app:helperTextEnabled="false"
                 app:hintAnimationEnabled="true"
                 app:hintEnabled="true"
@@ -94,7 +94,7 @@
                 app:boxStrokeColor="@color/colorAccent"
                 app:errorEnabled="true"
                 app:errorIconDrawable="@null"
-                app:errorTextColor="@color/colorRedAccent"
+                app:errorTextColor="@color/colorError"
                 app:helperTextEnabled="false"
                 app:hintAnimationEnabled="true"
                 app:hintEnabled="true"
@@ -132,7 +132,7 @@
                 app:boxStrokeColor="@color/colorAccent"
                 app:errorEnabled="true"
                 app:errorIconDrawable="@null"
-                app:errorTextColor="@color/colorRedAccent"
+                app:errorTextColor="@color/colorError"
                 app:helperTextEnabled="false"
                 app:hintAnimationEnabled="true"
                 app:hintEnabled="true"
@@ -171,7 +171,7 @@
                 android:textAlignment="center"
                 android:textColor="@color/colorAccent"
                 android:textSize="15sp"
-                app:backgroundTint="@color/colorPrimary"
+                app:backgroundTint="@color/colorBackground"
                 app:cornerRadius="4dp"
                 app:layout_constraintBottom_toTopOf="@+id/button_back_to_login"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -208,7 +208,7 @@
                 android:textAlignment="center"
                 android:textColor="@color/colorAccent"
                 android:textSize="15sp"
-                app:backgroundTint="@color/colorPrimary"
+                app:backgroundTint="@color/colorBackground"
                 app:cornerRadius="4dp"
                 app:icon="@drawable/ic_navigate_next_white_24dp"
                 app:iconSize="18dp"

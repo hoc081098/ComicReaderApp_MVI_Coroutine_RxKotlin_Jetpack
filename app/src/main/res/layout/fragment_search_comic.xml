@@ -19,6 +19,7 @@
 
     <androidx.constraintlayout.widget.Group
         android:id="@+id/group_error"
+        tools:visibility="gone"
         app:constraint_referenced_ids="text_error_message,button_retry"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
@@ -86,6 +87,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
+        tools:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -97,7 +99,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:scaleType="centerCrop"
-            android:src="@drawable/ic_file_download_white_24dp"
+            android:src="@drawable/ic_search_while_24dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"

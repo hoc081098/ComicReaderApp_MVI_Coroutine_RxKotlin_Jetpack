@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -11,10 +12,17 @@ import com.chauthai.swipereveallayout.ViewBinderHelper
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.domain.models.getMessage
-import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.*
+import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.SingleEvent
+import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.SortOrder
+import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.ViewIntent
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.ViewState.ComicItem
 import com.hoc.comicapp.ui.home.ComicArg
-import com.hoc.comicapp.utils.*
+import com.hoc.comicapp.utils.exhaustMap
+import com.hoc.comicapp.utils.itemSelections
+import com.hoc.comicapp.utils.observe
+import com.hoc.comicapp.utils.observeEvent
+import com.hoc.comicapp.utils.showAlertDialog
+import com.hoc.comicapp.utils.snack
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
@@ -98,6 +106,8 @@ class DownloadedComicsFragment : Fragment() {
       }
 
       adapter.submitList(comics)
+
+      empty_layout.isVisible = !isLoading && errorMessage === null && comics.isEmpty()
     }
     viewModel.singleEvent.observeEvent(owner = viewLifecycleOwner) {
       when (it) {

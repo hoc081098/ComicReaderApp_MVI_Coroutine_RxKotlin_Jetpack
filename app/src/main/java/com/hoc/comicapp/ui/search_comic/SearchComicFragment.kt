@@ -104,7 +104,7 @@ class SearchComicFragment : Fragment() {
 
       adapter.submitList(comics)
 
-      empty_layout.isVisible = !isLoading && comics.isEmpty()
+      empty_layout.isVisible = !isLoading && errorMessage === null && comics.isEmpty()
     }
     viewModel.processIntents(
       Observable.mergeArray(

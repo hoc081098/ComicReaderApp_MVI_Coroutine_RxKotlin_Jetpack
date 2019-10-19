@@ -92,7 +92,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/space"
         tools:listitem="@layout/item_recycler_chapter"
-        tools:visibility="invisible" />
+        tools:visibility="visible" />
 
     <ProgressBar
         android:id="@+id/progress_bar"
