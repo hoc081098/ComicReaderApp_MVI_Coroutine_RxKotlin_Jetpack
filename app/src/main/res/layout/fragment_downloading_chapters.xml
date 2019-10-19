@@ -16,8 +16,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:itemCount="8"
-        tools:listitem="@layout/item_recycler_chapter"
-        tools:visibility="invisible" />
+        tools:listitem="@layout/item_recycler_downloading_chapter"
+        tools:visibility="visible" />
 
     <ProgressBar
         android:id="@+id/progress_bar"
