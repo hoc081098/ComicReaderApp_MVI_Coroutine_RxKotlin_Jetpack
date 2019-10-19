@@ -26,11 +26,21 @@ import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
+import kotlin.LazyThreadSafetyMode.NONE
 
 @ExperimentalCoroutinesApi
 class HomeFragment : Fragment() {
   private val homeViewModel by viewModel<HomeViewModel>()
   private val compositeDisposable = CompositeDisposable()
+
+  private val homeAdapter by lazy(NONE) {
+    HomeAdapter(
+      viewLifecycleOwner,
+      GlideApp.with(this),
+      recycler_home.recycledViewPool,
+      compositeDisposable
+    )
+  }
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -43,12 +53,6 @@ class HomeFragment : Fragment() {
     super.onViewCreated(view, savedInstanceState)
     Timber.d("HomeFragment::onViewCreated")
 
-    val homeAdapter = HomeAdapter(
-      viewLifecycleOwner,
-      GlideApp.with(this),
-      recycler_home.recycledViewPool,
-      compositeDisposable
-    )
     initView(homeAdapter)
     bind(homeAdapter)
   }
@@ -160,6 +164,7 @@ class HomeFragment : Fragment() {
     super.onDestroyView()
     Timber.d("HomeFragment::onDestroyView")
     compositeDisposable.clear()
+    recycler_home.adapter = null
   }
 
   private fun getMaxSpanCount() = if (requireContext().isOrientationPortrait) 2 else 4

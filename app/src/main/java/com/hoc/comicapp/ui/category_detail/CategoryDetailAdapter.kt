@@ -1,6 +1,7 @@
 package com.hoc.comicapp.ui.category_detail
 
 import android.annotation.SuppressLint
+import android.os.Parcelable
 import android.util.DisplayMetrics
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +11,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
-import androidx.recyclerview.widget.*
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearSmoothScroller
+import androidx.recyclerview.widget.LinearSnapHelper
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
@@ -60,6 +66,8 @@ class CategoryDetailAdapter(
   private val onClickComic: (ComicArg) -> Unit
   ) :
   ListAdapter<Item, CategoryDetailAdapter.VH>(ItemDiffCallback) {
+  private var outLayoutManagerSavedState: Parcelable? = null
+
   private val _retryPopularS = PublishRelay.create<Unit>()
   val retryPopularObservable get() = _retryPopularS.asObservable()
 
@@ -94,6 +102,14 @@ class CategoryDetailAdapter(
 
   override fun onBindViewHolder(holder: VH, position: Int) = holder.bind(getItem(position))
 
+  override fun onViewRecycled(holder: VH) {
+    super.onViewRecycled(holder)
+    if (holder is PopularHorizontalRecyclerVH) {
+      outLayoutManagerSavedState = holder.linearLayoutManager.onSaveInstanceState()
+      Timber.tag("@@@").d("onViewRecycled $outLayoutManagerSavedState")
+    }
+  }
+
   abstract class VH(itemView: View) : RecyclerView.ViewHolder(itemView) {
     abstract fun bind(item: Item)
   }
@@ -112,6 +128,8 @@ class CategoryDetailAdapter(
     private val intervalInMillis = 1_200L
     private val delayAfterTouchInMillis = 3_000L
 
+    val linearLayoutManager: LinearLayoutManager
+
     init {
       buttonRetry
         .clicks()
@@ -121,7 +139,8 @@ class CategoryDetailAdapter(
 
       recycler.run {
         setHasFixedSize(true)
-        layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
+        linearLayoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
+        layoutManager = linearLayoutManager
         adapter = this@PopularHorizontalRecyclerVH.adapter
         LinearSnapHelper().attachToRecyclerView(this)
       }
@@ -209,6 +228,12 @@ class CategoryDetailAdapter(
         Timber.d("comics.size=${comics.size}")
       } else {
         Timber.d("comics.size=${comics.size} == ")
+      }
+
+      outLayoutManagerSavedState?.let {
+        Timber.tag("@@@").d("onRestoreInstanceState $it")
+        linearLayoutManager.onRestoreInstanceState(it)
+        outLayoutManagerSavedState = null
       }
     }
   }

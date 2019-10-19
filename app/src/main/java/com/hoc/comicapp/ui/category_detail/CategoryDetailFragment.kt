@@ -30,12 +30,23 @@ import kotlinx.android.synthetic.main.fragment_category_detail.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import timber.log.Timber
+import kotlin.LazyThreadSafetyMode.NONE
 
 class CategoryDetailFragment : Fragment() {
   private val args by navArgs<CategoryDetailFragmentArgs>()
 
-  private val vm by viewModel<CategoryDetailVM>() { parametersOf(args.category) }
+  private val vm by viewModel<CategoryDetailVM> { parametersOf(args.category) }
   private val compositeDisposable = CompositeDisposable()
+
+  private val categoryDetailAdapter by lazy(NONE) {
+    CategoryDetailAdapter(
+      GlideApp.with(this),
+      viewLifecycleOwner,
+      compositeDisposable,
+      ::onClickComic
+    )
+  }
+
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -45,13 +56,6 @@ class CategoryDetailFragment : Fragment() {
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
-
-    val categoryDetailAdapter = CategoryDetailAdapter(
-      GlideApp.with(this),
-      viewLifecycleOwner,
-      compositeDisposable,
-      ::onClickComic
-    )
 
     initView(categoryDetailAdapter)
     bindVM(categoryDetailAdapter)
@@ -129,6 +133,7 @@ class CategoryDetailFragment : Fragment() {
   override fun onDestroyView() {
     super.onDestroyView()
     compositeDisposable.clear()
+    recycler_category_detail.adapter = null
   }
 
   private fun loadNextPageIntent(): Observable<ViewIntent.LoadNextPage> {

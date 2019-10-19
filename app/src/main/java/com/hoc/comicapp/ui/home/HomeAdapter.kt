@@ -1,5 +1,6 @@
 package com.hoc.comicapp.ui.home
 
+import android.os.Parcelable
 import android.util.DisplayMetrics
 import android.view.View
 import android.view.ViewGroup
@@ -9,12 +10,18 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
-import androidx.recyclerview.widget.*
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearSmoothScroller
+import androidx.recyclerview.widget.LinearSnapHelper
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
 import com.hoc.comicapp.domain.models.Comic
-import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.*
+import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.MOST_VIEWED
+import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.NEWEST
+import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.UPDATED
 import com.hoc.comicapp.utils.inflate
 import com.jakewharton.rxbinding3.recyclerview.scrollStateChanges
 import com.jakewharton.rxbinding3.view.clicks
@@ -42,6 +49,8 @@ class HomeAdapter(
   private val compositeDisposable: CompositeDisposable
 ) :
   ListAdapter<HomeListItem, HomeAdapter.VH>(HomeListItemDiffUtilItemCallback) {
+  private var outLayoutManagerSavedState: Parcelable? = null
+
   private val newestAdapter = NewestAdapter(glide, compositeDisposable).apply { submitList(emptyList()) }
   private val mostViewedAdapter = MostViewedAdapter(glide, compositeDisposable).apply { submitList(emptyList()) }
 
@@ -229,13 +238,16 @@ class HomeAdapter(
   private inner class TopMonthListVH(itemView: View) : HorizontalRecyclerVH(itemView) {
     private var currentList = emptyList<Comic>()
 
+    val linearLayoutManager: LinearLayoutManager
+
     init {
       Timber.d("[###] TopMonthListVH::init")
       buttonRetry.setOnClickListener { mostViewedRetryS.accept(Unit) }
 
       recycler.run {
         setHasFixedSize(true)
-        layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
+        linearLayoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
+        layoutManager = linearLayoutManager
         adapter = mostViewedAdapter
       }
     }
@@ -252,6 +264,12 @@ class HomeAdapter(
         if (currentList != comics) {
           mostViewedAdapter.submitList(comics)
           currentList = comics
+        }
+
+        outLayoutManagerSavedState?.let {
+          Timber.tag("@@@").d("onRestoreInstanceState $it")
+          linearLayoutManager.onRestoreInstanceState(it)
+          outLayoutManagerSavedState = null
         }
       }
   }
@@ -338,13 +356,13 @@ class HomeAdapter(
     }
   }
 
-  /*override fun onViewRecycled(holder: VH) {
+  override fun onViewRecycled(holder: VH) {
     super.onViewRecycled(holder)
-    if (holder is ComicItemVH) {
-      glide.clear(holder.imageComic)
-      Timber.d("onViewRecycled")
+    if (holder is TopMonthListVH) {
+      outLayoutManagerSavedState = holder.linearLayoutManager.onSaveInstanceState()
+      Timber.tag("@@@").d("onViewRecycled $outLayoutManagerSavedState")
     }
-  }*/
+  }
 
   companion object {
     const val NEWEST_LIST_VIEW_TYPE = 1
