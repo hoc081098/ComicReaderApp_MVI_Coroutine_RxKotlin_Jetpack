@@ -72,9 +72,9 @@ dependencies {
 
   implementation("androidx.appcompat:appcompat:1.1.0")
   implementation("androidx.core:core-ktx:1.2.0-beta01")
-  implementation("androidx.activity:activity-ktx:1.1.0-beta01")
-  implementation("androidx.fragment:fragment-ktx:1.2.0-beta02")
-  implementation("androidx.constraintlayout:constraintlayout:2.0.0-beta2")
+  implementation("androidx.activity:activity-ktx:1.1.0-rc01")
+  implementation("androidx.fragment:fragment-ktx:1.2.0-rc01")
+  implementation("androidx.constraintlayout:constraintlayout:2.0.0-beta3")
 
   implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
   implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
@@ -137,6 +137,7 @@ dependencies {
 
   implementation("com.google.firebase:firebase-auth:19.1.0")
   implementation("com.google.firebase:firebase-storage:19.1.0")
+  implementation("com.google.firebase:firebase-firestore:21.2.0")
 }
 
 apply(plugin = "com.google.gms.google-services")

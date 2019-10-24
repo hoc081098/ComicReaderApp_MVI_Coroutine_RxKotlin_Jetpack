@@ -2,6 +2,7 @@ package com.hoc.comicapp.koin
 
 import androidx.work.WorkManager
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.hoc.comicapp.domain.models.ComicDetail
 import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
@@ -29,6 +30,8 @@ val appModule = module {
   single { FirebaseAuth.getInstance() }
 
   single { FirebaseStorage.getInstance() }
+
+  single { FirebaseFirestore.getInstance() }
 }
 
 private fun getChapterJsonAdapter(moshi: Moshi): JsonAdapter<ComicDetail.Chapter> {

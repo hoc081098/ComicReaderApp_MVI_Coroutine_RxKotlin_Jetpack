@@ -6,12 +6,21 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.navigation.findNavController
-import androidx.navigation.ui.*
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.navigateUp
+import androidx.navigation.ui.onNavDestinationSelected
+import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.navigation.ui.setupWithNavController
 import com.hoc.comicapp.R
+import com.hoc.comicapp.domain.repository.UserRepository
 import com.hoc.comicapp.utils.getColorBy
 import com.hoc.comicapp.utils.getDrawableBy
 import com.hoc.comicapp.utils.textChanges
+import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.activity_main.*
+import org.koin.android.ext.android.get
+import timber.log.Timber
 import kotlin.LazyThreadSafetyMode.NONE
 
 class MainActivity : AppCompatActivity() {
@@ -46,6 +55,15 @@ class MainActivity : AppCompatActivity() {
       setBackIcon(getDrawableBy(id = R.drawable.ic_keyboard_backspace_white_24dp))
       setCloseIcon(getDrawableBy(id = R.drawable.ic_close_white_24dp))
     }
+
+    dis = get<UserRepository>().userObservable().subscribeBy {
+      Timber.tag("[USER]").d("$it")
+    }
+  }
+  var dis: Disposable? = null
+  override fun onDestroy() {
+    super.onDestroy()
+    dis?.dispose()
   }
 
   override fun onSupportNavigateUp() =
