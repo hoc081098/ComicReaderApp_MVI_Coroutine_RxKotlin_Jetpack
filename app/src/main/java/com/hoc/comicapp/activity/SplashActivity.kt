@@ -3,6 +3,7 @@ package com.hoc.comicapp.activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.hoc.comicapp.activity.main.MainActivity
 
 class SplashActivity : AppCompatActivity() {
 

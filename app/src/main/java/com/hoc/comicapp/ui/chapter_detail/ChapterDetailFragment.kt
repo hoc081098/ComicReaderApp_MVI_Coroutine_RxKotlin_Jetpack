@@ -17,7 +17,7 @@ import androidx.transition.TransitionManager
 import androidx.viewpager2.widget.ViewPager2
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
-import com.hoc.comicapp.activity.MainActivity
+import com.hoc.comicapp.activity.main.MainActivity
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewIntent.*
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent

@@ -1,4 +1,4 @@
-package com.hoc.comicapp.activity
+package com.hoc.comicapp.activity.main
 
 import android.os.Bundle
 import android.view.Menu
@@ -12,18 +12,23 @@ import androidx.navigation.ui.onNavDestinationSelected
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.hoc.comicapp.R
-import com.hoc.comicapp.domain.repository.UserRepository
+import com.hoc.comicapp.activity.main.MainContract.ViewIntent
 import com.hoc.comicapp.utils.getColorBy
 import com.hoc.comicapp.utils.getDrawableBy
+import com.hoc.comicapp.utils.observe
+import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.textChanges
-import io.reactivex.disposables.Disposable
-import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.Observable
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.activity_main.*
-import org.koin.android.ext.android.get
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
 import kotlin.LazyThreadSafetyMode.NONE
 
 class MainActivity : AppCompatActivity() {
+  private val vm by viewModel<MainVM>()
+  private val compositeDisposable = CompositeDisposable()
 
   private val appBarConfiguration: AppBarConfiguration by lazy(NONE) {
     AppBarConfiguration(
@@ -56,14 +61,30 @@ class MainActivity : AppCompatActivity() {
       setCloseIcon(getDrawableBy(id = R.drawable.ic_close_white_24dp))
     }
 
-    dis = get<UserRepository>().userObservable().subscribeBy {
-      Timber.tag("[USER]").d("$it")
-    }
+    bindVM()
   }
-  var dis: Disposable? = null
+
+  private fun bindVM() {
+    vm.state.observe(owner = this) {
+      Timber.d("State=$it")
+    }
+
+    vm.singleEvent.observeEvent(owner = this) {
+      Timber.d("Event=$it")
+    }
+
+    vm
+      .processIntents(
+        Observable.just(
+          ViewIntent.Initial
+        )
+      )
+      .addTo(compositeDisposable)
+  }
+
   override fun onDestroy() {
     super.onDestroy()
-    dis?.dispose()
+    compositeDisposable.clear()
   }
 
   override fun onSupportNavigateUp() =

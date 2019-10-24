@@ -13,6 +13,7 @@ import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.User
 import com.hoc.comicapp.domain.models.toError
 import com.hoc.comicapp.domain.repository.UserRepository
+import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.utils.Either
 import com.hoc.comicapp.utils.None
 import com.hoc.comicapp.utils.Optional
@@ -34,7 +35,8 @@ class UserRepositoryImpl(
   private val firebaseAuth: FirebaseAuth,
   private val firebaseStorage: FirebaseStorage,
   private val firebaseFirestore: FirebaseFirestore,
-  private val retrofit: Retrofit
+  private val retrofit: Retrofit,
+  private val rxSchedulerProvider: RxSchedulerProvider
 ) : UserRepository {
   @IgnoreExtraProperties
   private data class _User(
@@ -51,7 +53,16 @@ class UserRepositoryImpl(
     )
   }
 
-  override fun userObservable(): Observable<Optional<User>> {
+  override suspend fun signOut(): Either<ComicAppError, Unit> {
+    return try {
+      firebaseAuth.signOut()
+      Unit.right()
+    } catch (e: Exception) {
+      e.toError(retrofit).left()
+    }
+  }
+
+  override fun userObservable(): Observable<Either<ComicAppError, User?>> {
     val uidObservable = Observable
       .create { emitter: ObservableEmitter<Optional<String>> ->
         val authStateListener = FirebaseAuth.AuthStateListener { auth ->
@@ -79,12 +90,15 @@ class UserRepositoryImpl(
               .map {
                 it.toObject(_User::class.java)
                   ?.toDomain()
-                  .toOptional()
+                  .right() as Either<ComicAppError, User?>
               }
+              .onErrorReturn { t: Throwable -> t.toError(retrofit).left() }
+              .subscribeOn(rxSchedulerProvider.io)
           }
-          None -> Observable.just(None)
+          None -> Observable.just(null.right())
         }
       }
+      .subscribeOn(rxSchedulerProvider.io)
       .replay(1)
       .refCount()
   }

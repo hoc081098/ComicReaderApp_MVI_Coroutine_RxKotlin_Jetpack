@@ -31,7 +31,7 @@ val dataModule = module {
     )
   } bind DownloadComicsRepository::class
 
-  single { UserRepositoryImpl(get(), get(), get(), get()) } bind UserRepository::class
+  single { UserRepositoryImpl(get(), get(), get(), get(), get()) } bind UserRepository::class
 
   single { AppDatabase.getInstance(androidContext()) }
 

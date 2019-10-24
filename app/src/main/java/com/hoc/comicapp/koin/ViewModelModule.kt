@@ -1,5 +1,8 @@
 package com.hoc.comicapp.koin
 
+import com.hoc.comicapp.activity.main.MainContract
+import com.hoc.comicapp.activity.main.MainInteractorImpl
+import com.hoc.comicapp.activity.main.MainVM
 import com.hoc.comicapp.ui.category.CategoryInteractor
 import com.hoc.comicapp.ui.category.CategoryInteractorImpl
 import com.hoc.comicapp.ui.category.CategoryViewModel
@@ -58,6 +61,8 @@ val viewModelModule = module {
 
   single { RegisterInteractorImpl(get(), get()) } bind RegisterContract.Interactor::class
 
+  single { MainInteractorImpl(get(), get(), get()) } bind MainContract.Interactor::class
+
   viewModel { HomeViewModel(get(), get()) }
 
   viewModel { (isDownloaded: Boolean) -> ComicDetailViewModel(get(), get(), get(), get(), get(), isDownloaded) }
@@ -77,4 +82,6 @@ val viewModelModule = module {
   viewModel { LoginVM(get(), get()) }
 
   viewModel { RegisterVM(get(), get()) }
+
+  viewModel { MainVM(get(), get()) }
 }
