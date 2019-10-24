@@ -3,6 +3,7 @@ package com.hoc.comicapp.activity.main
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.navigation.findNavController
@@ -13,21 +14,25 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.hoc.comicapp.R
 import com.hoc.comicapp.activity.main.MainContract.ViewIntent
+import com.hoc.comicapp.domain.models.getMessage
+import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.getColorBy
 import com.hoc.comicapp.utils.getDrawableBy
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
+import com.hoc.comicapp.utils.showAlertDialog
+import com.hoc.comicapp.utils.snack
 import com.hoc.comicapp.utils.textChanges
+import com.jakewharton.rxbinding3.view.clicks
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import timber.log.Timber
 import kotlin.LazyThreadSafetyMode.NONE
 
 class MainActivity : AppCompatActivity() {
-  private val vm by viewModel<MainVM>()
+  private val mainVM by viewModel<MainVM>()
   private val compositeDisposable = CompositeDisposable()
 
   private val appBarConfiguration: AppBarConfiguration by lazy(NONE) {
@@ -65,22 +70,82 @@ class MainActivity : AppCompatActivity() {
   }
 
   private fun bindVM() {
-    vm.state.observe(owner = this) {
-      Timber.d("State=$it")
+    val mainContent = findViewById<View>(android.R.id.content)
+    val loginMenuItem = nav_view.menu.findItem(R.id.action_home_fragment_dest_to_loginFragment)
+    val logoutMenuItem = nav_view.menu.findItem(R.id.action_logout)
+
+    mainVM.state.observe(owner = this) { (user, isLoading, error) ->
+      nav_view.menu.setGroupVisible(R.id.group2, !isLoading)
+
+      if (user === null) {
+        loginMenuItem.isVisible = true
+        logoutMenuItem.isVisible = false
+      } else {
+        loginMenuItem.isVisible = false
+        logoutMenuItem.isVisible = true
+      }
     }
 
-    vm.singleEvent.observeEvent(owner = this) {
-      Timber.d("Event=$it")
+    mainVM.singleEvent.observeEvent(owner = this) { event ->
+      when (event) {
+        is MainContract.SingleEvent.GetUserError -> {
+          mainContent.snack("Get user error: ${event.error.getMessage()}")
+        }
+        MainContract.SingleEvent.SignOutSuccess -> {
+          mainContent.snack("Sign out success")
+        }
+        is MainContract.SingleEvent.SignOutFailure -> {
+          mainContent.snack("Sign out error: ${event.error.getMessage()}")
+        }
+      }
     }
 
-    vm
+    mainVM
       .processIntents(
-        Observable.just(
-          ViewIntent.Initial
+        Observable.mergeArray(
+          Observable.just(ViewIntent.Initial),
+          logoutMenuItem
+            .clicks()
+            .doOnNext { drawer_layout.closeDrawer(GravityCompat.START) }
+            .exhaustMap { showDeleteComicDialog() }
+            .map { ViewIntent.SignOut }
         )
       )
       .addTo(compositeDisposable)
   }
+
+
+  private fun showDeleteComicDialog(): Observable<Unit> {
+    return Observable.create<Unit> { emitter ->
+      val alertDialog = showAlertDialog {
+        title("Sign out")
+        message("Are you sure want to sign out?")
+        cancelable(true)
+        iconId(R.drawable.ic_exit_to_app_white_24dp)
+
+        negativeAction("Cancel") { dialog, _ ->
+          dialog.cancel()
+          if (!emitter.isDisposed) {
+            emitter.onComplete()
+          }
+        }
+        positiveAction("OK") { dialog, _ ->
+          dialog.dismiss()
+          if (!emitter.isDisposed) {
+            emitter.onNext(Unit)
+            emitter.onComplete()
+          }
+        }
+        onCancel {
+          if (!emitter.isDisposed) {
+            emitter.onComplete()
+          }
+        }
+      }
+      emitter.setCancellable { alertDialog.dismiss() }
+    }
+  }
+
 
   override fun onDestroy() {
     super.onDestroy()

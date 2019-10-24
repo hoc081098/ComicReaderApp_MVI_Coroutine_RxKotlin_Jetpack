@@ -33,8 +33,14 @@
         android:checkableBehavior="single">
         <item
             android:id="@+id/action_home_fragment_dest_to_loginFragment"
-            android:icon="@drawable/ic_home_white_24dp"
+            android:icon="@drawable/ic_person_add_white_24dp"
             android:title="Login" />
+
+        <item
+            android:visible="false"
+            android:id="@+id/action_logout"
+            android:icon="@drawable/ic_exit_to_app_white_24dp"
+            android:title="Logout" />
     </group>
 
     <item android:title="Communicate">
