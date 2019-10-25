@@ -9,6 +9,7 @@ import java.util.*
 interface FavoriteComicsContract {
   sealed class ViewIntent : Intent {
     object Initial : ViewIntent()
+    data class Remove(val item: ComicItem) : ViewIntent()
   }
 
   data class ViewState(
@@ -39,6 +40,14 @@ interface FavoriteComicsContract {
     val view: String,
     val createdAt: Date?
   ) {
+    fun toDomain() = FavoriteComic(
+      url = url,
+      view = view,
+      createdAt = createdAt,
+      thumbnail = thumbnail,
+      title = title
+    )
+
     constructor(domain: FavoriteComic) : this(
       url = domain.url,
       title = domain.title,
@@ -53,14 +62,23 @@ interface FavoriteComicsContract {
   }
 
   sealed class PartialChange {
-    data class Data(val comics: List<ComicItem>) : PartialChange()
+    sealed class FavoriteComics : PartialChange() {
+      data class Data(val comics: List<ComicItem>) : FavoriteComics()
+      data class Error(val error: ComicAppError) : FavoriteComics()
+      object Loading : FavoriteComics()
+    }
 
-    data class Error(val error: ComicAppError) : PartialChange()
-
-    object Loading : PartialChange()
+    sealed class Remove : PartialChange() {
+      data class Success(val item: ComicItem) : Remove()
+      data class Failure(
+        val item: ComicItem,
+        val comicAppError: ComicAppError
+      ) : Remove()
+    }
   }
 
   interface Interactor {
     fun getFavoriteComics(): Observable<PartialChange>
+    fun remove(item: ComicItem): Observable<PartialChange>
   }
 }

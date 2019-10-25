@@ -10,7 +10,7 @@ interface FavoriteComicsRepository {
 
   suspend fun addToFavorite(comic: FavoriteComic)
 
-  suspend fun removeFromFavorite(comic: FavoriteComic)
+  suspend fun removeFromFavorite(comic: FavoriteComic): Either<ComicAppError, Unit>
 
   suspend fun toggle(comic: FavoriteComic)
 }

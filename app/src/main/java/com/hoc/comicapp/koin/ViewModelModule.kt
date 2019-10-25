@@ -66,7 +66,7 @@ val viewModelModule = module {
 
   single { MainInteractorImpl(get(), get(), get()) } bind MainContract.Interactor::class
 
-  single { FavoriteComicsInteractorImpl(get(), get()) } bind FavoriteComicsContract.Interactor::class
+  single { FavoriteComicsInteractorImpl(get(), get(), get()) } bind FavoriteComicsContract.Interactor::class
 
   viewModel { HomeViewModel(get(), get()) }
 

@@ -8,6 +8,39 @@ import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentActivity
+import io.reactivex.Observable
+
+/**
+ * Show alert dialog fragment
+ * @return an [Observable] emit Unit when select OK button, otherwise return an empty [Observable]
+ */
+fun FragmentActivity.showDialogAsObservable(init: AlertDialogFragment.Builder.() -> Unit): Observable<Unit> {
+  return Observable.create<Unit> { emitter ->
+    val alertDialog = showAlertDialog {
+      init()
+
+      negativeAction("Cancel") { dialog, _ ->
+        dialog.cancel()
+        if (!emitter.isDisposed) {
+          emitter.onComplete()
+        }
+      }
+      positiveAction("OK") { dialog, _ ->
+        dialog.dismiss()
+        if (!emitter.isDisposed) {
+          emitter.onNext(Unit)
+          emitter.onComplete()
+        }
+      }
+      onCancel {
+        if (!emitter.isDisposed) {
+          emitter.onComplete()
+        }
+      }
+    }
+    emitter.setCancellable { alertDialog.dismiss() }
+  }
+}
 
 fun FragmentActivity.showAlertDialog(init: AlertDialogFragment.Builder.() -> Unit): AlertDialogFragment {
   return AlertDialogFragment.Builder()

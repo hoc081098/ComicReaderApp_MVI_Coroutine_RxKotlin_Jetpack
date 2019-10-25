@@ -57,6 +57,7 @@ sealed class AuthError : ComicAppError() {
 
 fun Throwable.toError(retrofit: Retrofit): ComicAppError {
   return when (this) {
+    is ComicAppError -> this
     is FirebaseException -> {
       when (this) {
         is FirebaseNetworkException -> NetworkError

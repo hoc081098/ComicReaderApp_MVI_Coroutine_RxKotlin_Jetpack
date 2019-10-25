@@ -93,10 +93,15 @@ class FavoriteComicsRepositoryImpl(
       .await()
   }
 
-  override suspend fun removeFromFavorite(comic: FavoriteComic) {
-    val snapshot = findQueryDocumentSnapshotByUrl(comic.url)
-      ?: error("snapshot is null")
-    snapshot.reference.delete().await()
+  override suspend fun removeFromFavorite(comic: FavoriteComic): Either<ComicAppError, Unit> {
+    return try {
+      val snapshot = findQueryDocumentSnapshotByUrl(comic.url)
+        ?: error("snapshot is null")
+      snapshot.reference.delete().await()
+      Unit.right()
+    } catch (e: Exception) {
+      e.toError(retrofit).left()
+    }
   }
 
   override suspend fun toggle(comic: FavoriteComic) {
