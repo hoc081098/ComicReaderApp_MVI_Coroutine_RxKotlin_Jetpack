@@ -1,5 +1,6 @@
 package com.hoc.comicapp.activity.main
 
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -33,6 +34,7 @@ import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.nav_header_main.view.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import timber.log.Timber
 import kotlin.LazyThreadSafetyMode.NONE
 
 class MainActivity : AppCompatActivity() {
@@ -90,28 +92,39 @@ class MainActivity : AppCompatActivity() {
     val mainContent = findViewById<View>(android.R.id.content)!!
 
     mainVM.state.observe(owner = this) { (user, isLoading, error) ->
+      Timber.d("User = $user, isLoading = $isLoading, error = $error")
+
       nav_view.menu.setGroupVisible(R.id.group2, !isLoading)
 
       if (user === null) {
+        // not logged in
+        // show login, hide logout, hide user account, show comic image
         loginMenuItem.isVisible = true
         logoutMenuItem.isVisible = false
         userAccountGroup.isVisible = false
         imageView.isVisible = true
       } else {
+        // user already logged in
+        // hide login, show logout, show user account, hide comic image
         loginMenuItem.isVisible = false
         logoutMenuItem.isVisible = true
         userAccountGroup.isVisible = true
         imageView.isVisible = false
 
+        // update user account header
         textDisplayName.text = user.displayName
         textEmail.text = user.email
-        glide
-          .load(user.photoURL)
-          .centerCrop()
-          .placeholder(R.drawable.person_white_96x96)
-          .error(R.drawable.person_white_96x96)
-          .diskCacheStrategy(DiskCacheStrategy.ALL)
-          .into(imageAvatar)
+
+        if (user.photoURL.isNotBlank()) {
+          glide
+            .load(user.photoURL)
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .centerCrop()
+            .dontAnimate()
+            .into(imageAvatar)
+        } else {
+          imageAvatar.setImageDrawable(ColorDrawable(getColorBy(id = R.color.colorCardBackground)))
+        }
       }
     }
 
