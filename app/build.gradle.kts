@@ -130,6 +130,7 @@ dependencies {
   implementation("com.github.chrisbanes:PhotoView:2.3.0")
   implementation("com.chauthai.swipereveallayout:swipe-reveal-layout:1.4.1")
   implementation("de.hdodenhof:circleimageview:3.0.1")
+  implementation("com.amulyakhare:com.amulyakhare.textdrawable:1.0.1")
 
   testImplementation("junit:junit:4.12")
   androidTestImplementation("androidx.test:runner:1.1.2-alpha01")

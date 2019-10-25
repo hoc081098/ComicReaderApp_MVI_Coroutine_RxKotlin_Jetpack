@@ -33,11 +33,11 @@
         android:layout_width="72dp"
         android:layout_height="72dp"
         android:layout_marginBottom="8dp"
-        android:scaleType="centerCrop"
+        android:src="@color/colorCardBackground"
+        app:civ_circle_background_color="@color/colorCardBackground"
         app:civ_border_width="0dp"
         app:layout_constraintBottom_toTopOf="@+id/text_display_name"
-        app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/ic_person_white_24dp" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/text_display_name"

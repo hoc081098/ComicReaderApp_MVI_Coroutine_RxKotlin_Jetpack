@@ -27,6 +27,7 @@ import io.reactivex.ObservableEmitter
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.tasks.await
 import retrofit2.Retrofit
 import timber.log.Timber
@@ -167,6 +168,7 @@ class UserRepositoryImpl(
       Unit.right()
     } catch (e: Exception) {
       Timber.d("register error $e")
+      delay(1_000)
       e.toError(retrofit).left()
     }
   }
@@ -176,6 +178,7 @@ class UserRepositoryImpl(
       firebaseAuth.signInWithEmailAndPassword(email, password).await()
       Unit.right()
     } catch (e: Exception) {
+      delay(1_000)
       e.toError(retrofit).left()
     }
   }
