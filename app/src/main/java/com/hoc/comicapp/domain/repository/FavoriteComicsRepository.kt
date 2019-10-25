@@ -7,4 +7,10 @@ import io.reactivex.Observable
 
 interface FavoriteComicsRepository {
   fun favoriteComics(): Observable<Either<ComicAppError, List<FavoriteComic>>>
+
+  suspend fun addToFavorite(comic: FavoriteComic)
+
+  suspend fun removeFromFavorite(comic: FavoriteComic)
+
+  suspend fun toggle(comic: FavoriteComic)
 }
