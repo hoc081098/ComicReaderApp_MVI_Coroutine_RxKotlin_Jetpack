@@ -128,6 +128,7 @@ class MainActivity : AppCompatActivity() {
                 .load(user.photoURL)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .centerCrop()
+                .placeholder(ColorDrawable(getColorBy(id = R.color.colorCardBackground)))
                 .dontAnimate()
                 .into(imageAvatar)
             }
