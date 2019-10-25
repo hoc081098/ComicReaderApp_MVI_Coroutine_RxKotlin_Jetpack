@@ -42,14 +42,16 @@ class UserRepositoryImpl(
   private data class _User(
     @PropertyName("uid") val uid: String,
     @PropertyName("displayName") val displayName: String,
+    @PropertyName("email") val email: String,
     @PropertyName("photoURL") val photoURL: String
   ) {
-    constructor() : this("", "", "")
+    constructor() : this("", "", "", "")
 
     fun toDomain() = User(
       uid = uid,
       displayName = displayName,
-      photoURL = photoURL
+      photoURL = photoURL,
+      email = email
     )
   }
 
@@ -99,6 +101,7 @@ class UserRepositoryImpl(
         }
       }
       .subscribeOn(rxSchedulerProvider.io)
+      .doOnNext { Timber.d("User = $it") }
       .replay(1)
       .refCount()
   }
@@ -132,13 +135,13 @@ class UserRepositoryImpl(
             _User(
               uid = user.uid,
               displayName = fullName,
-              photoURL = ""
+              photoURL = "",
+              email = email
             )
           )
           .await()
 
         val photoUri = uploadPhotoDeferred.await()
-
 
         awaitAll(
           async {

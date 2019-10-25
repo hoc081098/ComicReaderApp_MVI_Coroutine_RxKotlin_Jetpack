@@ -28,12 +28,14 @@ interface MainContract {
     data class User(
       val uid: String,
       val displayName: String?,
-      val photoURL: String
+      val photoURL: String,
+      val email: String
     ) {
       constructor(domain: com.hoc.comicapp.domain.models.User) : this(
         uid = domain.uid,
         displayName = domain.displayName,
-        photoURL = domain.photoURL
+        photoURL = domain.photoURL,
+        email = domain.email
       )
     }
   }
