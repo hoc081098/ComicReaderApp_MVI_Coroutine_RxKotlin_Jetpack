@@ -18,6 +18,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.activity.main.MainContract.ViewIntent
+import com.hoc.comicapp.activity.main.MainContract.ViewState.User
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.getColorBy
@@ -89,45 +90,49 @@ class MainActivity : AppCompatActivity() {
     val loginMenuItem = nav_view.menu.findItem(R.id.action_home_fragment_dest_to_loginFragment)!!
     val logoutMenuItem = nav_view.menu.findItem(R.id.action_logout)!!
 
-    val mainContent = findViewById<View>(android.R.id.content)!!
-
+    var prevUser: User? = null
     mainVM.state.observe(owner = this) { (user, isLoading, error) ->
       Timber.d("User = $user, isLoading = $isLoading, error = $error")
 
       nav_view.menu.setGroupVisible(R.id.group2, !isLoading)
 
-      if (user === null) {
-        // not logged in
-        // show login, hide logout, hide user account, show comic image
-        loginMenuItem.isVisible = true
-        logoutMenuItem.isVisible = false
-        userAccountGroup.isVisible = false
-        imageView.isVisible = true
-      } else {
-        // user already logged in
-        // hide login, show logout, show user account, hide comic image
-        loginMenuItem.isVisible = false
-        logoutMenuItem.isVisible = true
-        userAccountGroup.isVisible = true
-        imageView.isVisible = false
-
-        // update user account header
-        textDisplayName.text = user.displayName
-        textEmail.text = user.email
-
-        if (user.photoURL.isNotBlank()) {
-          glide
-            .load(user.photoURL)
-            .diskCacheStrategy(DiskCacheStrategy.ALL)
-            .centerCrop()
-            .dontAnimate()
-            .into(imageAvatar)
+      if (prevUser === null || prevUser != user) {
+        Timber.d(">>>>>>>>> $user")
+        prevUser = user
+        if (user === null) {
+          // not logged in
+          // show login, hide logout, hide user account, show comic image
+          loginMenuItem.isVisible = true
+          logoutMenuItem.isVisible = false
+          userAccountGroup.isVisible = false
+          imageView.isVisible = true
         } else {
-          imageAvatar.setImageDrawable(ColorDrawable(getColorBy(id = R.color.colorCardBackground)))
+          // user already logged in
+          // hide login, show logout, show user account, hide comic image
+          loginMenuItem.isVisible = false
+          logoutMenuItem.isVisible = true
+          userAccountGroup.isVisible = true
+          imageView.isVisible = false
+
+          // update user account header
+          textDisplayName.text = user.displayName
+          textEmail.text = user.email
+
+          if (user.photoURL.isNotBlank()) {
+            glide
+              .load(user.photoURL)
+              .diskCacheStrategy(DiskCacheStrategy.ALL)
+              .centerCrop()
+              .dontAnimate()
+              .into(imageAvatar)
+          } else {
+            imageAvatar.setImageDrawable(ColorDrawable(getColorBy(id = R.color.colorCardBackground)))
+          }
         }
       }
     }
 
+    val mainContent = findViewById<View>(android.R.id.content)!!
     mainVM.singleEvent.observeEvent(owner = this) { event ->
       when (event) {
         is MainContract.SingleEvent.GetUserError -> {
