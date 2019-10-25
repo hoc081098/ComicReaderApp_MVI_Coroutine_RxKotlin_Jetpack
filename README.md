@@ -12,4 +12,4 @@ Comic reader app 📘. Learning MVVM / MVI with RxKotlin, Retrofit, Kotlin Corou
 | :---:                              | :---:                             | :---:                              | :---:     |
 |![](screenshots/1.jpeg) |![](screenshots/2.jpeg) | ![](screenshots/3.jpeg)|![](screenshots/4.jpeg) |
 |![](screenshots/5.jpeg) |![](screenshots/6.jpeg) | ![](screenshots/7.jpeg)|![](screenshots/8.jpeg) |
-|![](screenshots/9.jpeg) | | |  |
+|![](screenshots/9.jpeg) |![](screenshots/10.png) | ![](screenshots/11.png) |  |
