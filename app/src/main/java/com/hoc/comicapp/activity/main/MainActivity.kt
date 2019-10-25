@@ -92,6 +92,7 @@ class MainActivity : AppCompatActivity() {
 
     val loginMenuItem = nav_view.menu.findItem(R.id.action_home_fragment_dest_to_loginFragment)!!
     val logoutMenuItem = nav_view.menu.findItem(R.id.action_logout)!!
+    val favoriteMenuItem = nav_view.menu.findItem(R.id.action_home_fragment_dest_to_favoriteComicsFragment)!!
 
     var prevUser: User? = null
     mainVM.state.observe(owner = this) { (user, isLoading, error) ->
@@ -108,6 +109,7 @@ class MainActivity : AppCompatActivity() {
           // show login, hide logout, hide user account, show comic image
           loginMenuItem.isVisible = true
           logoutMenuItem.isVisible = false
+          favoriteMenuItem.isVisible = false
           userAccountGroup.isVisible = false
           imageView.isVisible = true
         } else {
@@ -115,6 +117,7 @@ class MainActivity : AppCompatActivity() {
           // hide login, show logout, show user account, hide comic image
           loginMenuItem.isVisible = false
           logoutMenuItem.isVisible = true
+          favoriteMenuItem.isVisible = true
           userAccountGroup.isVisible = true
           imageView.isVisible = false
 
@@ -136,7 +139,7 @@ class MainActivity : AppCompatActivity() {
               when (val firstLetter = user.displayName.firstOrNull()) {
                 null -> ColorDrawable(getColorBy(id = R.color.colorCardBackground))
                 else -> {
-                  val size = dpToPx(72).also { Timber.d("72dp = ${it}px") }
+                  val size = dpToPx(64).also { Timber.d("64dp = ${it}px") }
                   TextDrawable
                     .builder()
                     .beginConfig()

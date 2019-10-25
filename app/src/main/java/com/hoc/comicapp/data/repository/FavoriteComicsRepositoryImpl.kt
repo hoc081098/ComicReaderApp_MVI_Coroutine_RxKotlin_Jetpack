@@ -29,17 +29,19 @@ class FavoriteComicsRepositoryImpl(
   @Suppress("ClassName")
   @IgnoreExtraProperties
   private data class _FavoriteComic(
-    @PropertyName("url") val url: String,
-    @PropertyName("title") val title: String,
-    @PropertyName("thumbnail") val thumbnail: String,
-    @PropertyName("created_at") val createdAt: Timestamp?
+    @get:PropertyName("url") @set:PropertyName("url") var url: String,
+    @get:PropertyName("title") @set:PropertyName("title") var title: String,
+    @get:PropertyName("thumbnail") @set:PropertyName("thumbnail") var thumbnail: String,
+    @get:PropertyName("view") @set:PropertyName("view") var view: String,
+    @get:PropertyName("created_at") @set:PropertyName("created_at") var createdAt: Timestamp?
   ) {
     fun toDomain(): FavoriteComic {
       return FavoriteComic(
         title = title,
         thumbnail = thumbnail,
         createdAt = createdAt?.toDate(),
-        url = url
+        url = url,
+        view = view
       )
     }
 
@@ -48,7 +50,8 @@ class FavoriteComicsRepositoryImpl(
       url = "",
       createdAt = null,
       thumbnail = "",
-      title = ""
+      title = "",
+      view = ""
     )
   }
 

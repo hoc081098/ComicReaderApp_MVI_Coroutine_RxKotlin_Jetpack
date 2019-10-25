@@ -19,6 +19,9 @@ import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsInteractorImpl
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsViewModel
 import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersViewModel
+import com.hoc.comicapp.ui.favorite_comics.FavoriteComicsContract
+import com.hoc.comicapp.ui.favorite_comics.FavoriteComicsInteractorImpl
+import com.hoc.comicapp.ui.favorite_comics.FavoriteComicsVM
 import com.hoc.comicapp.ui.home.HomeInteractor
 import com.hoc.comicapp.ui.home.HomeInteractorImpl
 import com.hoc.comicapp.ui.home.HomeInteractorImpl1
@@ -63,6 +66,8 @@ val viewModelModule = module {
 
   single { MainInteractorImpl(get(), get(), get()) } bind MainContract.Interactor::class
 
+  single { FavoriteComicsInteractorImpl(get(), get()) } bind FavoriteComicsContract.Interactor::class
+
   viewModel { HomeViewModel(get(), get()) }
 
   viewModel { (isDownloaded: Boolean) -> ComicDetailViewModel(get(), get(), get(), get(), get(), isDownloaded) }
@@ -84,4 +89,6 @@ val viewModelModule = module {
   viewModel { RegisterVM(get(), get()) }
 
   viewModel { MainVM(get(), get()) }
+
+  viewModel { FavoriteComicsVM(get(), get()) }
 }
