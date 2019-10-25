@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.net.Uri
 import android.os.Looper
+import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -39,6 +40,7 @@ import kotlinx.coroutines.delay
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
+import kotlin.math.roundToInt
 import androidx.lifecycle.Observer as LiveDataObserver
 
 @CheckReturnValue
@@ -87,6 +89,11 @@ fun Context.uriFromResourceId(@AnyRes resId: Int): Uri? {
           + '/' + res.getResourceEntryName(resId)
     )
   }.getOrNull()
+}
+
+fun Context.dpToPx(dp: Int): Int {
+  val displayMetrics = resources.displayMetrics
+  return (dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT)).roundToInt()
 }
 
 @Suppress("nothing_to_inline")

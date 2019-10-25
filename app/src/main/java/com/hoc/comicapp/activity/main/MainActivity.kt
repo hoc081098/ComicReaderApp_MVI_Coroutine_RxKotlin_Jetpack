@@ -14,12 +14,15 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.onNavDestinationSelected
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.amulyakhare.textdrawable.TextDrawable
+import com.amulyakhare.textdrawable.util.ColorGenerator
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.activity.main.MainContract.ViewIntent
 import com.hoc.comicapp.activity.main.MainContract.ViewState.User
 import com.hoc.comicapp.domain.models.getMessage
+import com.hoc.comicapp.utils.dpToPx
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.getColorBy
 import com.hoc.comicapp.utils.getDrawableBy
@@ -97,8 +100,9 @@ class MainActivity : AppCompatActivity() {
       nav_view.menu.setGroupVisible(R.id.group2, !isLoading)
 
       if (prevUser === null || prevUser != user) {
-        Timber.d(">>>>>>>>> $user")
+        Timber.d("Updated with user = $user")
         prevUser = user
+
         if (user === null) {
           // not logged in
           // show login, hide logout, hide user account, show comic image
@@ -118,15 +122,33 @@ class MainActivity : AppCompatActivity() {
           textDisplayName.text = user.displayName
           textEmail.text = user.email
 
-          if (user.photoURL.isNotBlank()) {
-            glide
-              .load(user.photoURL)
-              .diskCacheStrategy(DiskCacheStrategy.ALL)
-              .centerCrop()
-              .dontAnimate()
-              .into(imageAvatar)
-          } else {
-            imageAvatar.setImageDrawable(ColorDrawable(getColorBy(id = R.color.colorCardBackground)))
+          when {
+            user.photoURL.isNotBlank() -> {
+              glide
+                .load(user.photoURL)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .centerCrop()
+                .dontAnimate()
+                .into(imageAvatar)
+            }
+            else -> {
+              when (val firstLetter = user.displayName.firstOrNull()) {
+                null -> ColorDrawable(getColorBy(id = R.color.colorCardBackground))
+                else -> {
+                  val size = dpToPx(72).also { Timber.d("72dp = ${it}px") }
+                  TextDrawable
+                    .builder()
+                    .beginConfig()
+                    .width(size)
+                    .height(size)
+                    .endConfig()
+                    .buildRect(
+                      firstLetter.toUpperCase().toString(),
+                      ColorGenerator.MATERIAL.getColor(user.email)
+                    )
+                }
+              }.let(imageAvatar::setImageDrawable)
+            }
           }
         }
       }
@@ -154,7 +176,7 @@ class MainActivity : AppCompatActivity() {
           logoutMenuItem
             .clicks()
             .doOnNext { drawer_layout.closeDrawer(GravityCompat.START) }
-            .exhaustMap { showDeleteComicDialog() }
+            .exhaustMap { showSignOutDialog() }
             .map { ViewIntent.SignOut }
         )
       )
@@ -162,7 +184,7 @@ class MainActivity : AppCompatActivity() {
   }
 
 
-  private fun showDeleteComicDialog(): Observable<Unit> {
+  private fun showSignOutDialog(): Observable<Unit> {
     return Observable.create<Unit> { emitter ->
       val alertDialog = showAlertDialog {
         title("Sign out")

@@ -27,7 +27,7 @@ interface MainContract {
 
     data class User(
       val uid: String,
-      val displayName: String?,
+      val displayName: String,
       val photoURL: String,
       val email: String
     ) {
