@@ -1,4 +1,4 @@
-package com.hoc.comicapp.data
+package com.hoc.comicapp.data.repository
 
 import android.app.Application
 import androidx.lifecycle.LiveData
@@ -6,6 +6,7 @@ import androidx.lifecycle.map
 import androidx.room.withTransaction
 import androidx.work.WorkManager
 import androidx.work.await
+import com.hoc.comicapp.data.Mapper
 import com.hoc.comicapp.data.local.AppDatabase
 import com.hoc.comicapp.data.local.dao.ChapterDao
 import com.hoc.comicapp.data.local.dao.ComicDao
@@ -46,8 +47,7 @@ class DownloadComicsRepositoryImpl(
     return chapterF
       .combine(allChaptersF) { chapter, chapters ->
         val index = chapters.indexOfFirst { it.chapterLink == chapterLink }
-        Mapper
-          .entityToDomainModel(chapter)
+        Mapper.entityToDomainModel(chapter)
           .copy(
             chapters = chapters.map(Mapper::entityToDomainModel),
             prevChapterLink = chapters.getOrNull(index - 1)?.chapterLink,

@@ -1,8 +1,8 @@
 package com.hoc.comicapp.koin
 
-import com.hoc.comicapp.data.ComicRepositoryImpl
-import com.hoc.comicapp.data.DownloadComicsRepositoryImpl
-import com.hoc.comicapp.data.UserRepositoryImpl
+import com.hoc.comicapp.data.repository.ComicRepositoryImpl
+import com.hoc.comicapp.data.repository.DownloadComicsRepositoryImpl
+import com.hoc.comicapp.data.repository.UserRepositoryImpl
 import com.hoc.comicapp.data.local.AppDatabase
 import com.hoc.comicapp.domain.repository.ComicRepository
 import com.hoc.comicapp.domain.repository.DownloadComicsRepository

@@ -1,4 +1,4 @@
-package com.hoc.comicapp.data
+package com.hoc.comicapp.data.repository
 
 import android.net.Uri
 import com.google.firebase.auth.FirebaseAuth
