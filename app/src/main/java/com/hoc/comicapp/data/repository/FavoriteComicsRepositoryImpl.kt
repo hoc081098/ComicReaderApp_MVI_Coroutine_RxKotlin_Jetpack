@@ -22,6 +22,7 @@ class FavoriteComicsRepositoryImpl(
   private val firebaseFirestore: FirebaseFirestore,
   private val retrofit: Retrofit
 ) : FavoriteComicsRepository {
+  @Suppress("ClassName")
   @IgnoreExtraProperties
   private data class _FavoriteComic(
     @PropertyName("url") val url: String,
