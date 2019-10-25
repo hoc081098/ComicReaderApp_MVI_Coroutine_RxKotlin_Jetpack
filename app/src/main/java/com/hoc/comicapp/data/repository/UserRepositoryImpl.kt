@@ -3,8 +3,6 @@ package com.hoc.comicapp.data.repository
 import android.net.Uri
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
-import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.IgnoreExtraProperties
 import com.google.firebase.firestore.PropertyName
@@ -21,6 +19,7 @@ import com.hoc.comicapp.utils.Some
 import com.hoc.comicapp.utils.left
 import com.hoc.comicapp.utils.map
 import com.hoc.comicapp.utils.right
+import com.hoc.comicapp.utils.snapshots
 import com.hoc.comicapp.utils.toOptional
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
@@ -180,23 +179,6 @@ class UserRepositoryImpl(
     } catch (e: Exception) {
       delay(1_000)
       e.toError(retrofit).left()
-    }
-  }
-}
-
-private fun DocumentReference.snapshots(): Observable<DocumentSnapshot> {
-  return Observable.create { emitter: ObservableEmitter<DocumentSnapshot> ->
-    val registration = addSnapshotListener listener@{ documentSnapshot, exception ->
-      if (exception !== null && !emitter.isDisposed) {
-        return@listener emitter.onError(exception)
-      }
-      if (documentSnapshot != null && !emitter.isDisposed) {
-        emitter.onNext(documentSnapshot)
-      }
-    }
-    emitter.setCancellable {
-      registration.remove()
-      Timber.d("Remove snapshot listener")
     }
   }
 }

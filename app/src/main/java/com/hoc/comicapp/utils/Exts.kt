@@ -23,6 +23,10 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.Observer
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.QuerySnapshot
 import com.jakewharton.rxbinding3.InitialValueObservable
 import com.jakewharton.rxrelay2.Relay
 import com.jaredrummler.materialspinner.MaterialSpinner
@@ -37,6 +41,7 @@ import io.reactivex.annotations.SchedulerSupport
 import io.reactivex.disposables.Disposables
 import io.reactivex.subjects.Subject
 import kotlinx.coroutines.delay
+import timber.log.Timber
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
@@ -367,4 +372,38 @@ suspend fun <T> retryIO(
     currentDelay = (currentDelay * factor).toLong().coerceAtMost(maxDelay)
   }
   return block() // last attempt
+}
+
+fun DocumentReference.snapshots(): Observable<DocumentSnapshot> {
+  return Observable.create { emitter: ObservableEmitter<DocumentSnapshot> ->
+    val registration = addSnapshotListener listener@{ documentSnapshot, exception ->
+      if (exception !== null && !emitter.isDisposed) {
+        return@listener emitter.onError(exception)
+      }
+      if (documentSnapshot != null && !emitter.isDisposed) {
+        emitter.onNext(documentSnapshot)
+      }
+    }
+    emitter.setCancellable {
+      registration.remove()
+      Timber.d("Remove snapshot listener")
+    }
+  }
+}
+
+fun Query.snapshots(): Observable<QuerySnapshot> {
+  return Observable.create { emitter: ObservableEmitter<QuerySnapshot> ->
+    val registration = addSnapshotListener listener@{ querySnapshot, exception ->
+      if (exception !== null && !emitter.isDisposed) {
+        return@listener emitter.onError(exception)
+      }
+      if (querySnapshot != null && !emitter.isDisposed) {
+        emitter.onNext(querySnapshot)
+      }
+    }
+    emitter.setCancellable {
+      registration.remove()
+      Timber.d("Remove snapshot listener")
+    }
+  }
 }
