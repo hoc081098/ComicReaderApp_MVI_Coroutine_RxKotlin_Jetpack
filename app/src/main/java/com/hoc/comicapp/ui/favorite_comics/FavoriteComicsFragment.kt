@@ -16,7 +16,7 @@ import com.hoc.comicapp.ui.favorite_comics.FavoriteComicsContract.SortOrder
 import com.hoc.comicapp.ui.favorite_comics.FavoriteComicsContract.ViewIntent
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.observeEvent
-import com.hoc.comicapp.utils.showDialogAsObservable
+import com.hoc.comicapp.utils.showAlertDialogAsObservable
 import com.hoc.comicapp.utils.snack
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
@@ -106,7 +106,7 @@ class FavoriteComicsFragment : Fragment() {
           adapter.clickDelete
             .exhaustMap { item ->
               requireActivity()
-                .showDialogAsObservable {
+                .showAlertDialogAsObservable {
                   title("Remove favorite")
                   message("Remove this comic from favorites")
                   cancelable(true)

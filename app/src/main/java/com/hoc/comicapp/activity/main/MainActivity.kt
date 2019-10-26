@@ -22,13 +22,14 @@ import com.hoc.comicapp.R
 import com.hoc.comicapp.activity.main.MainContract.ViewIntent
 import com.hoc.comicapp.activity.main.MainContract.ViewState.User
 import com.hoc.comicapp.domain.models.getMessage
+import com.hoc.comicapp.utils.dismissAlertDialog
 import com.hoc.comicapp.utils.dpToPx
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.getColorBy
 import com.hoc.comicapp.utils.getDrawableBy
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
-import com.hoc.comicapp.utils.showAlertDialog
+import com.hoc.comicapp.utils.showAlertDialogAsObservable
 import com.hoc.comicapp.utils.snack
 import com.hoc.comicapp.utils.textChanges
 import com.jakewharton.rxbinding3.view.clicks
@@ -80,6 +81,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     bindVM()
+
+    if (savedInstanceState !== null) {
+      dismissAlertDialog()
+    }
   }
 
   private fun bindVM() {
@@ -189,33 +194,11 @@ class MainActivity : AppCompatActivity() {
 
 
   private fun showSignOutDialog(): Observable<Unit> {
-    return Observable.create<Unit> { emitter ->
-      val alertDialog = showAlertDialog {
-        title("Sign out")
-        message("Are you sure want to sign out?")
-        cancelable(true)
-        iconId(R.drawable.ic_exit_to_app_white_24dp)
-
-        negativeAction("Cancel") { dialog, _ ->
-          dialog.cancel()
-          if (!emitter.isDisposed) {
-            emitter.onComplete()
-          }
-        }
-        positiveAction("OK") { dialog, _ ->
-          dialog.dismiss()
-          if (!emitter.isDisposed) {
-            emitter.onNext(Unit)
-            emitter.onComplete()
-          }
-        }
-        onCancel {
-          if (!emitter.isDisposed) {
-            emitter.onComplete()
-          }
-        }
-      }
-      emitter.setCancellable { alertDialog.dismiss() }
+    return showAlertDialogAsObservable {
+      title("Sign out")
+      message("Are you sure want to sign out?")
+      cancelable(true)
+      iconId(R.drawable.ic_exit_to_app_white_24dp)
     }
   }
 
@@ -223,6 +206,7 @@ class MainActivity : AppCompatActivity() {
   override fun onDestroy() {
     super.onDestroy()
     compositeDisposable.clear()
+    dismissAlertDialog()
   }
 
   override fun onSupportNavigateUp() =
