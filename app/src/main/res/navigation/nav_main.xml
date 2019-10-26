@@ -202,6 +202,15 @@
     <fragment
         android:id="@+id/favoriteComicsFragment"
         android:name="com.hoc.comicapp.ui.favorite_comics.FavoriteComicsFragment"
-        android:label="Favorites" />
+        android:label="Favorites">
+
+        <action
+            android:id="@+id/action_favoriteComicsFragment_to_comicDetailFragment"
+            app:destination="@id/comicDetailFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
 
 </navigation>

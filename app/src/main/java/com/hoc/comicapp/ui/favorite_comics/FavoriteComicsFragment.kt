@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.observe
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chauthai.swipereveallayout.ViewBinderHelper
 import com.hoc.comicapp.GlideApp
@@ -14,6 +15,7 @@ import com.hoc.comicapp.R
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.ui.favorite_comics.FavoriteComicsContract.SortOrder
 import com.hoc.comicapp.ui.favorite_comics.FavoriteComicsContract.ViewIntent
+import com.hoc.comicapp.ui.home.ComicArg
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.itemSelections
 import com.hoc.comicapp.utils.observeEvent
@@ -22,6 +24,7 @@ import com.hoc.comicapp.utils.snack
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.fragment_favorite_comics.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -59,6 +62,25 @@ class FavoriteComicsFragment : Fragment() {
     spinner_sort.setItems(SortOrder.values().toList())
     spinner_sort.selectedIndex = viewModel.state.safeValue?.sortOrder
       ?.let { SortOrder.values().indexOf(it) } ?: 0
+
+    favoriteComicsAdapter
+      .clickItem
+      .map {
+        ComicArg(
+          link = it.url,
+          thumbnail = it.thumbnail,
+          title = it.title
+        )
+      }
+      .map {
+        FavoriteComicsFragmentDirections.actionFavoriteComicsFragmentToComicDetailFragment(
+          comic = it,
+          isDownloaded = false,
+          title = it.title
+        )
+      }
+      .subscribeBy(onNext = findNavController()::navigate)
+      .addTo(compositeDisposable)
   }
 
 
