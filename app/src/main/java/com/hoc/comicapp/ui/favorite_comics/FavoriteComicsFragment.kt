@@ -15,6 +15,7 @@ import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.ui.favorite_comics.FavoriteComicsContract.SortOrder
 import com.hoc.comicapp.ui.favorite_comics.FavoriteComicsContract.ViewIntent
 import com.hoc.comicapp.utils.exhaustMap
+import com.hoc.comicapp.utils.itemSelections
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.showAlertDialogAsObservable
 import com.hoc.comicapp.utils.snack
@@ -114,7 +115,10 @@ class FavoriteComicsFragment : Fragment() {
                 }
                 .map { item }
             }
-            .map { ViewIntent.Remove(it) }
+            .map { ViewIntent.Remove(it) },
+          spinner_sort
+            .itemSelections<SortOrder>()
+            .map { ViewIntent.ChangeSortOrder(it) }
         )
       )
       .addTo(compositeDisposable)

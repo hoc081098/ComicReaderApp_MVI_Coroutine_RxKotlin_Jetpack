@@ -90,7 +90,7 @@ class FavoriteComicsAdapter(
         .into(imageComic)
 
       textComicName.text = comic.title
-      textCreatedAt.text = comic.createdAt?.let { dateFormatter.format(it) } ?: "..."
+      textCreatedAt.text = "Added at: ${comic.createdAt?.let { dateFormatter.format(it) } ?: "N/A"}"
       textViewCount.text = comic.view
     }
   }

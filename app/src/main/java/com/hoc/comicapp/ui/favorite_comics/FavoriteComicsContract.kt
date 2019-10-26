@@ -10,6 +10,7 @@ interface FavoriteComicsContract {
   sealed class ViewIntent : Intent {
     object Initial : ViewIntent()
     data class Remove(val item: ComicItem) : ViewIntent()
+    data class ChangeSortOrder(val sortOrder: SortOrder) : ViewIntent()
   }
 
   data class ViewState(
@@ -28,9 +29,25 @@ interface FavoriteComicsContract {
     }
   }
 
-  enum class SortOrder {
-    ComicTitleAsc,
-    ComicTitleDesc
+  enum class SortOrder(val comparator: Comparator<in ComicItem>, val description: String) {
+    ComicTitleAsc(
+      comparator = compareBy { it.title },
+      description = "Title ascending"
+    ),
+    ComicTitleDesc(
+      comparator = compareByDescending { it.title },
+      description = "Title descending"
+    ),
+    CreatedAtAsc(
+      comparator = nullsFirst(compareBy { it.createdAt }),
+      description = "Added date - older first"
+    ),
+    CreatedAtDesc(
+      comparator = nullsFirst(compareByDescending { it.createdAt }),
+      description = "Added date - latest first"
+    );
+
+    override fun toString() = description
   }
 
   data class ComicItem(

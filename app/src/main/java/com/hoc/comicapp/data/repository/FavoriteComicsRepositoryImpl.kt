@@ -97,6 +97,9 @@ class FavoriteComicsRepositoryImpl(
     return try {
       val snapshot = findQueryDocumentSnapshotByUrl(comic.url)
         ?: error("snapshot is null")
+      if (!snapshot.exists()) {
+        error("snapshot is not exists")
+      }
       snapshot.reference.delete().await()
       Unit.right()
     } catch (e: Exception) {

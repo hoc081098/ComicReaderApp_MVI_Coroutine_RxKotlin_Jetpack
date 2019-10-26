@@ -14,6 +14,7 @@ import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
 import io.reactivex.functions.BiFunction
+import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.ofType
 import io.reactivex.rxkotlin.subscribeBy
@@ -79,8 +80,24 @@ class FavoriteComicsVM(
   init {
     intentS
       .compose(intentFilter)
-      .compose(intentToChanges)
-      .scan(initialState, reducer)
+      .publish { filteredIntent ->
+        Observables.combineLatest(
+          filteredIntent
+            .ofType<ViewIntent.ChangeSortOrder>()
+            .map { it.sortOrder }
+            .distinctUntilChanged(),
+          filteredIntent
+            .compose(intentToChanges)
+            .scan(initialState, reducer)
+        ) { sortOrder, viewState ->
+          viewState.copy(
+            comics = viewState
+              .comics
+              .sortedWith(sortOrder.comparator),
+            sortOrder = sortOrder
+          )
+        }
+      }
       .observeOn(rxSchedulerProvider.main)
       .subscribeBy(onNext = ::setNewState)
       .addTo(compositeDisposable)
