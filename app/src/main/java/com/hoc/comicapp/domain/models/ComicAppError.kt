@@ -51,10 +51,13 @@ sealed class AuthError : ComicAppError() {
   object WeakPassword : AuthError()
 
   object UploadFile: AuthError()
+
+  object Unauthenticated: AuthError()
 }
 
 fun Throwable.toError(retrofit: Retrofit): ComicAppError {
   return when (this) {
+    is ComicAppError -> this
     is FirebaseException -> {
       when (this) {
         is FirebaseNetworkException -> NetworkError
@@ -141,5 +144,6 @@ fun ComicAppError.getMessage(): String {
     AuthError.OperationNotAllowed -> "Operation not allowed"
     AuthError.WeakPassword -> "Weak password"
     AuthError.UploadFile -> "Upload file error"
+    AuthError.Unauthenticated -> "Unauthenticated error"
   }
 }

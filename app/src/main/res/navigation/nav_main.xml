@@ -32,6 +32,14 @@
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
 
+        <action
+            android:id="@+id/action_home_fragment_dest_to_favoriteComicsFragment"
+            app:destination="@id/favoriteComicsFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
     </fragment>
 
     <fragment
@@ -190,5 +198,19 @@
         android:id="@+id/registerFragment"
         android:name="com.hoc.comicapp.ui.register.RegisterFragment"
         android:label="Register" />
+
+    <fragment
+        android:id="@+id/favoriteComicsFragment"
+        android:name="com.hoc.comicapp.ui.favorite_comics.FavoriteComicsFragment"
+        android:label="Favorites">
+
+        <action
+            android:id="@+id/action_favoriteComicsFragment_to_comicDetailFragment"
+            app:destination="@id/comicDetailFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
 
 </navigation>

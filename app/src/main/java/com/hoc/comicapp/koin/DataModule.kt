@@ -1,11 +1,13 @@
 package com.hoc.comicapp.koin
 
-import com.hoc.comicapp.data.ComicRepositoryImpl
-import com.hoc.comicapp.data.DownloadComicsRepositoryImpl
-import com.hoc.comicapp.data.UserRepositoryImpl
 import com.hoc.comicapp.data.local.AppDatabase
+import com.hoc.comicapp.data.repository.ComicRepositoryImpl
+import com.hoc.comicapp.data.repository.DownloadComicsRepositoryImpl
+import com.hoc.comicapp.data.repository.FavoriteComicsRepositoryImpl
+import com.hoc.comicapp.data.repository.UserRepositoryImpl
 import com.hoc.comicapp.domain.repository.ComicRepository
 import com.hoc.comicapp.domain.repository.DownloadComicsRepository
+import com.hoc.comicapp.domain.repository.FavoriteComicsRepository
 import com.hoc.comicapp.domain.repository.UserRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.android.ext.koin.androidApplication
@@ -15,6 +17,8 @@ import org.koin.dsl.module
 
 @ExperimentalCoroutinesApi
 val dataModule = module {
+  single { FavoriteComicsRepositoryImpl(get(), get(), get()) } bind FavoriteComicsRepository::class
+
   single { ComicRepositoryImpl(get(), get(), get()) } bind ComicRepository::class
 
   single {

@@ -22,13 +22,14 @@ import com.hoc.comicapp.R
 import com.hoc.comicapp.activity.main.MainContract.ViewIntent
 import com.hoc.comicapp.activity.main.MainContract.ViewState.User
 import com.hoc.comicapp.domain.models.getMessage
+import com.hoc.comicapp.utils.dismissAlertDialog
 import com.hoc.comicapp.utils.dpToPx
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.getColorBy
 import com.hoc.comicapp.utils.getDrawableBy
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
-import com.hoc.comicapp.utils.showAlertDialog
+import com.hoc.comicapp.utils.showAlertDialogAsObservable
 import com.hoc.comicapp.utils.snack
 import com.hoc.comicapp.utils.textChanges
 import com.jakewharton.rxbinding3.view.clicks
@@ -80,6 +81,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     bindVM()
+
+    if (savedInstanceState !== null) {
+      dismissAlertDialog()
+    }
   }
 
   private fun bindVM() {
@@ -92,6 +97,7 @@ class MainActivity : AppCompatActivity() {
 
     val loginMenuItem = nav_view.menu.findItem(R.id.action_home_fragment_dest_to_loginFragment)!!
     val logoutMenuItem = nav_view.menu.findItem(R.id.action_logout)!!
+    val favoriteMenuItem = nav_view.menu.findItem(R.id.action_home_fragment_dest_to_favoriteComicsFragment)!!
 
     var prevUser: User? = null
     mainVM.state.observe(owner = this) { (user, isLoading, error) ->
@@ -108,6 +114,7 @@ class MainActivity : AppCompatActivity() {
           // show login, hide logout, hide user account, show comic image
           loginMenuItem.isVisible = true
           logoutMenuItem.isVisible = false
+          favoriteMenuItem.isVisible = false
           userAccountGroup.isVisible = false
           imageView.isVisible = true
         } else {
@@ -115,6 +122,7 @@ class MainActivity : AppCompatActivity() {
           // hide login, show logout, show user account, hide comic image
           loginMenuItem.isVisible = false
           logoutMenuItem.isVisible = true
+          favoriteMenuItem.isVisible = true
           userAccountGroup.isVisible = true
           imageView.isVisible = false
 
@@ -136,7 +144,7 @@ class MainActivity : AppCompatActivity() {
               when (val firstLetter = user.displayName.firstOrNull()) {
                 null -> ColorDrawable(getColorBy(id = R.color.colorCardBackground))
                 else -> {
-                  val size = dpToPx(72).also { Timber.d("72dp = ${it}px") }
+                  val size = dpToPx(64).also { Timber.d("64dp = ${it}px") }
                   TextDrawable
                     .builder()
                     .beginConfig()
@@ -186,33 +194,11 @@ class MainActivity : AppCompatActivity() {
 
 
   private fun showSignOutDialog(): Observable<Unit> {
-    return Observable.create<Unit> { emitter ->
-      val alertDialog = showAlertDialog {
-        title("Sign out")
-        message("Are you sure want to sign out?")
-        cancelable(true)
-        iconId(R.drawable.ic_exit_to_app_white_24dp)
-
-        negativeAction("Cancel") { dialog, _ ->
-          dialog.cancel()
-          if (!emitter.isDisposed) {
-            emitter.onComplete()
-          }
-        }
-        positiveAction("OK") { dialog, _ ->
-          dialog.dismiss()
-          if (!emitter.isDisposed) {
-            emitter.onNext(Unit)
-            emitter.onComplete()
-          }
-        }
-        onCancel {
-          if (!emitter.isDisposed) {
-            emitter.onComplete()
-          }
-        }
-      }
-      emitter.setCancellable { alertDialog.dismiss() }
+    return showAlertDialogAsObservable {
+      title("Sign out")
+      message("Are you sure want to sign out?")
+      cancelable(true)
+      iconId(R.drawable.ic_exit_to_app_white_24dp)
     }
   }
 
@@ -220,6 +206,7 @@ class MainActivity : AppCompatActivity() {
   override fun onDestroy() {
     super.onDestroy()
     compositeDisposable.clear()
+    dismissAlertDialog()
   }
 
   override fun onSupportNavigateUp() =

@@ -1,5 +1,6 @@
-package com.hoc.comicapp.data
+package com.hoc.comicapp.data.repository
 
+import com.hoc.comicapp.data.Mapper
 import com.hoc.comicapp.data.remote.ComicApiService
 import com.hoc.comicapp.domain.models.*
 import com.hoc.comicapp.domain.repository.ComicRepository
