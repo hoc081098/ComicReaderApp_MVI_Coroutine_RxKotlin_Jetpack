@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
-import com.hoc.comicapp.ui.home.ComicArg
+import com.hoc.comicapp.ui.detail.ComicArg
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewState.Item
 import com.hoc.comicapp.utils.Some
 import com.hoc.comicapp.utils.asObservable
@@ -141,7 +141,8 @@ class SearchComicAdapter(
           ComicArg(
             title = it.title,
             thumbnail = it.thumbnail,
-            link = it.link
+            link = it.link,
+            view = "TODO"
           )
         }
         .subscribe(clickComicS)

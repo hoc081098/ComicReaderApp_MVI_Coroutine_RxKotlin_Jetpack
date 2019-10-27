@@ -10,16 +10,6 @@ import com.hoc.comicapp.domain.models.getMessage
 import io.reactivex.Observable
 import kotlinx.android.parcel.Parcelize
 
-/**
- * Argument to pass to [com.hoc.comicapp.ui.detail.ComicDetailFragment]
- */
-@Parcelize
-data class ComicArg(
-  val link: String,
-  val thumbnail: String,
-  val title: String
-): Parcelable
-
 interface HomeInteractor {
   fun newestComics(): Observable<HomePartialChange>
 

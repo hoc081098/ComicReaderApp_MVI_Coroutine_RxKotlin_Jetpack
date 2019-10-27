@@ -190,4 +190,19 @@
         android:textSize="13sp"
         android:visibility="gone" />
 
+    <ImageView
+        android:id="@+id/image_favorite"
+        android:layout_width="46dp"
+        android:layout_height="46dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:padding="8dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/switch_mode"
+        app:layout_constraintStart_toStartOf="@id/guideline"
+        app:srcCompat="@drawable/ic_favorite_white_24dp" />
+
 </androidx.constraintlayout.motion.widget.MotionLayout>

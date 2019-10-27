@@ -54,7 +54,7 @@
 
         <argument
             android:name="comic"
-            app:argType="com.hoc.comicapp.ui.home.ComicArg"
+            app:argType="com.hoc.comicapp.ui.detail.ComicArg"
             app:nullable="false" />
 
         <argument

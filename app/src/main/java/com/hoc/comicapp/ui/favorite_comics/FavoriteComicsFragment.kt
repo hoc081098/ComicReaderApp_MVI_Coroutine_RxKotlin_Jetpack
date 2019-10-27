@@ -13,9 +13,9 @@ import com.chauthai.swipereveallayout.ViewBinderHelper
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.domain.models.getMessage
+import com.hoc.comicapp.ui.detail.ComicArg
 import com.hoc.comicapp.ui.favorite_comics.FavoriteComicsContract.SortOrder
 import com.hoc.comicapp.ui.favorite_comics.FavoriteComicsContract.ViewIntent
-import com.hoc.comicapp.ui.home.ComicArg
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.itemSelections
 import com.hoc.comicapp.utils.observeEvent
@@ -69,7 +69,8 @@ class FavoriteComicsFragment : Fragment() {
         ComicArg(
           link = it.url,
           thumbnail = it.thumbnail,
-          title = it.title
+          title = it.title,
+          view = it.view
         )
       }
       .map {
@@ -95,7 +96,7 @@ class FavoriteComicsFragment : Fragment() {
   }
 
   private fun bindVM(adapter: FavoriteComicsAdapter) {
-    viewModel.state.observe(owner = viewLifecycleOwner) { (isLoading, error, comics, sortOrder) ->
+    viewModel.state.observe(owner = viewLifecycleOwner) { (isLoading, error, comics) ->
       if (isLoading) {
         progress_bar.visibility = View.VISIBLE
       } else {

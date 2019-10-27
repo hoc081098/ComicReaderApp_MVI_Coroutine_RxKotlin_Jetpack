@@ -19,6 +19,7 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
 import com.hoc.comicapp.domain.models.Comic
+import com.hoc.comicapp.ui.detail.ComicArg
 import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.MOST_VIEWED
 import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.NEWEST
 import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.UPDATED
@@ -67,21 +68,24 @@ class HomeAdapter(
       ComicArg(
         link = it.link,
         thumbnail = it.thumbnail,
-        title = it.title
+        title = it.title,
+        view = it.view
       )
     },
     mostViewedAdapter.clickComicObservable.map {
       ComicArg(
         link = it.link,
         thumbnail = it.thumbnail,
-        title = it.title
+        title = it.title,
+        view = it.view
       )
     },
     clickComicS.map {
       ComicArg(
         link = it.link,
         thumbnail = it.thumbnail,
-        title = it.title
+        title = it.title,
+        view = it.view
       )
     }
   ).doOnNext { Timber.d("[*] Click comic $it") }!!

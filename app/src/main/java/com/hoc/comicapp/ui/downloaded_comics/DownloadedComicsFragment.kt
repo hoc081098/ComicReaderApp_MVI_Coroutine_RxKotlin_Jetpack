@@ -12,11 +12,11 @@ import com.chauthai.swipereveallayout.ViewBinderHelper
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.domain.models.getMessage
+import com.hoc.comicapp.ui.detail.ComicArg
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.SingleEvent
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.SortOrder
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.ViewIntent
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.ViewState.ComicItem
-import com.hoc.comicapp.ui.home.ComicArg
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.itemSelections
 import com.hoc.comicapp.utils.observe
@@ -80,7 +80,8 @@ class DownloadedComicsFragment : Fragment() {
           comic = ComicArg(
             title = it.title,
             thumbnail = it.thumbnail.toRelativeString(requireContext().filesDir),
-            link = it.comicLink
+            link = it.comicLink,
+            view = it.view
           ),
           title = it.title,
           isDownloaded = true

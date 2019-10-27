@@ -15,7 +15,7 @@ import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewIntent
 import com.hoc.comicapp.ui.category_detail.CategoryDetailFragmentDirections.Companion.actionCategoryDetailFragmentToComicDetailFragment
-import com.hoc.comicapp.ui.home.ComicArg
+import com.hoc.comicapp.ui.detail.ComicArg
 import com.hoc.comicapp.utils.isOrientationPortrait
 import com.hoc.comicapp.utils.observe
 import com.jakewharton.rxbinding3.recyclerview.scrollEvents

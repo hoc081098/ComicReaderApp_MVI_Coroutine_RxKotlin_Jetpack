@@ -48,7 +48,15 @@ val viewModelModule = module {
 
   single { HomeInteractorImpl1(get(), get(), get()) } bind HomeInteractor::class
 
-  single { ComicDetailInteractorImpl(get(), get(), get()) } bind ComicDetailInteractor::class
+  single {
+    ComicDetailInteractorImpl(
+      get(),
+      get(),
+      get(),
+      get(),
+      get()
+    )
+  } bind ComicDetailInteractor::class
 
   single { SearchComicInteractorImpl(get(), get()) } bind SearchComicContract.Interactor::class
 

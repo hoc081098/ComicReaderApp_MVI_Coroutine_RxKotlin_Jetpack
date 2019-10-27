@@ -9,7 +9,7 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.PopularItem
-import com.hoc.comicapp.ui.home.ComicArg
+import com.hoc.comicapp.ui.detail.ComicArg
 import com.hoc.comicapp.utils.inflate
 import kotlinx.android.synthetic.main.item_recycler_category_detail_popular_comic.view.*
 
@@ -43,7 +43,8 @@ class PopularHorizontalAdapter(
             ComicArg(
               title = item.title,
               thumbnail = item.thumbnail,
-              link = item.link
+              link = item.link,
+              view = "TODO"
             )
           )
         }

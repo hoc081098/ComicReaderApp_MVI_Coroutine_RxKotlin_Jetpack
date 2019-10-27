@@ -24,7 +24,7 @@ import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.HeaderType.Popular
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.HeaderType.Updated
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.Item
-import com.hoc.comicapp.ui.home.ComicArg
+import com.hoc.comicapp.ui.detail.ComicArg
 import com.hoc.comicapp.utils.asObservable
 import com.hoc.comicapp.utils.inflate
 import com.jakewharton.rxbinding3.recyclerview.scrollStateChanges
@@ -266,7 +266,8 @@ class CategoryDetailAdapter(
             ComicArg(
               title = item.title,
               link = item.link,
-              thumbnail = item.thumbnail
+              thumbnail = item.thumbnail,
+              view = item.view
             )
           )
         }
