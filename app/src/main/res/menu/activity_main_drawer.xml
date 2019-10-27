@@ -37,29 +37,17 @@
             android:title="Login" />
 
         <item
-            android:visible="false"
-            android:id="@+id/action_logout"
-            android:icon="@drawable/ic_exit_to_app_white_24dp"
-            android:title="Logout" />
-
-        <item
             android:id="@+id/action_home_fragment_dest_to_favoriteComicsFragment"
             android:icon="@drawable/ic_favorite_white_24dp"
             android:title="Favorite comics"
             android:visible="false" />
+
+        <item
+            android:visible="false"
+            android:id="@+id/action_logout"
+            android:icon="@drawable/ic_exit_to_app_white_24dp"
+            android:title="Logout" />
     </group>
 
-    <item android:title="Communicate">
-        <menu>
-            <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_share_white_24dp"
-                android:title="Share" />
-            <item
-                android:id="@+id/nav_send"
-                android:icon="@drawable/ic_send_white_24dp"
-                android:title="Send" />
-        </menu>
-    </item>
 
 </menu>
