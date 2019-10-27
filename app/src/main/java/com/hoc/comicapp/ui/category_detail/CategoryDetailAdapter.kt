@@ -266,7 +266,8 @@ class CategoryDetailAdapter(
             ComicArg(
               title = item.title,
               link = item.link,
-              thumbnail = item.thumbnail
+              thumbnail = item.thumbnail,
+              view = item.view
             )
           )
         }

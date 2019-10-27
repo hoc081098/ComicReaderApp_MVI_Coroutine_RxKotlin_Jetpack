@@ -25,7 +25,7 @@ class ComicDetailInteractorImpl(
   private val favoriteComicsRepository: FavoriteComicsRepository,
   private val rxSchedulerProvider: RxSchedulerProvider
 ) : ComicDetailInteractor {
-  override fun toggleFavorite(comic: Detail): Observable<Unit> {
+  override fun toggleFavorite(comic: ComicDetailViewState.ComicDetail): Observable<Unit> {
     return rxObservable(dispatcherProvider.ui) {
       favoriteComicsRepository.toggle(comic.toDomain())
       send(Unit)
@@ -81,17 +81,19 @@ class ComicDetailInteractorImpl(
     link: String,
     name: String?,
     thumbnail: String?,
+    view: String?,
     isDownloaded: Boolean
   ): Observable<ComicDetailPartialChange> {
     return if (isDownloaded) {
       rxObservable<ComicDetailPartialChange>(dispatcherProvider.ui) {
-        if (thumbnail != null && name != null) {
+        if (thumbnail != null && name != null && view != null) {
           send(
             InitialRetryPartialChange.InitialData(
               initialComic = Initial(
                 link = link,
                 thumbnail = thumbnail,
-                title = name
+                title = name,
+                view = view
               )
             )
           )
@@ -110,13 +112,14 @@ class ComicDetailInteractorImpl(
     } else {
       rxObservable<ComicDetailPartialChange>(dispatcherProvider.ui) {
 
-        if (thumbnail != null && name != null) {
+        if (thumbnail != null && name != null && view != null) {
           send(
             InitialRetryPartialChange.InitialData(
               initialComic = Initial(
                 link = link,
                 thumbnail = thumbnail,
-                title = name
+                title = name,
+                view = view
               )
             )
           )

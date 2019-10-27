@@ -69,7 +69,8 @@ class FavoriteComicsFragment : Fragment() {
         ComicArg(
           link = it.url,
           thumbnail = it.thumbnail,
-          title = it.title
+          title = it.title,
+          view = it.view
         )
       }
       .map {

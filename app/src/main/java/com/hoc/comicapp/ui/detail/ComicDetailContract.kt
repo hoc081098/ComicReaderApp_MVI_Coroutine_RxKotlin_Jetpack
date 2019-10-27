@@ -20,7 +20,8 @@ import java.util.*
 data class ComicArg(
   val link: String,
   val thumbnail: String,
-  val title: String
+  val title: String,
+  val view: String
 ): Parcelable
 
 interface ComicDetailInteractor {
@@ -30,6 +31,7 @@ interface ComicDetailInteractor {
     link: String,
     name: String? = null,
     thumbnail: String? = null,
+    view: String?=null,
     isDownloaded: Boolean
   ): Observable<ComicDetailPartialChange>
 
@@ -38,15 +40,11 @@ interface ComicDetailInteractor {
     isDownloaded: Boolean
   ): Observable<ComicDetailPartialChange>
 
-  fun toggleFavorite(comic: ComicDetail.Detail): Observable<Unit>
+  fun toggleFavorite(comic: ComicDetail): Observable<Unit>
 }
 
 sealed class ComicDetailIntent : Intent {
-  data class Initial(
-    val link: String,
-    val thumbnail: String,
-    val title: String
-  ) : ComicDetailIntent()
+  data class Initial(val arg: ComicArg) : ComicDetailIntent()
 
   object Refresh : ComicDetailIntent()
   object Retry : ComicDetailIntent()
@@ -80,32 +78,34 @@ data class ComicDetailViewState(
     abstract val link: String
     abstract val thumbnail: String
     abstract val title: String
+    abstract val view: String
+
+    fun toDomain() = FavoriteComic(
+      url = link,
+      title = title,
+      thumbnail = thumbnail,
+      view = view,
+      createdAt = null
+    )
 
     data class Detail(
       override val link: String,
       override val thumbnail: String,
       override val title: String,
+      override val view: String,
       val authors: List<Author>,
       val categories: List<Category>,
       val chapters: List<Chapter>,
       val lastUpdated: String,
       val relatedComics: List<Comic>,
-      val shortenedContent: String,
-      val view: String
-    ) : ComicDetail() {
-      fun toDomain() = FavoriteComic(
-        url = link,
-        title = title,
-        thumbnail = thumbnail,
-        view = view,
-        createdAt = null
-      )
-    }
+      val shortenedContent: String
+    ) : ComicDetail()
 
     data class Initial(
       override val link: String,
       override val thumbnail: String,
-      override val title: String
+      override val title: String,
+      override val view: String
     ) : ComicDetail()
   }
 

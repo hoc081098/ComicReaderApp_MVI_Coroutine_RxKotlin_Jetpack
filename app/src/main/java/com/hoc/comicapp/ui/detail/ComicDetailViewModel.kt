@@ -67,15 +67,16 @@ class ComicDetailViewModel(
 
   private val initialProcessor =
     ObservableTransformer<ComicDetailIntent.Initial, ComicDetailPartialChange> { intent ->
-      intent.flatMap { (link, thumbnail, title) ->
+      intent.flatMap { (comicArg) ->
         comicDetailInteractor
           .getComicDetail(
-            link,
-            title,
-            thumbnail,
-            isDownloaded
+            link = comicArg.link,
+            name = comicArg.title,
+            thumbnail = comicArg.thumbnail,
+            view = comicArg.view,
+            isDownloaded = isDownloaded
           )
-          .mergeWith(comicDetailInteractor.getFavoriteChange(link))
+          .mergeWith(comicDetailInteractor.getFavoriteChange(comicArg.link))
           .doOnNext {
             val message =
               (it as? ComicDetailPartialChange.InitialRetryPartialChange.Error ?: return@doOnNext)
@@ -153,7 +154,7 @@ class ComicDetailViewModel(
     filteredIntent
       .ofType<ComicDetailIntent.ToggleFavorite>()
       .withLatestFrom(stateS)
-      .filterNotNull { it.second.comicDetail as? ComicDetailViewState.ComicDetail.Detail }
+      .filterNotNull { it.second.comicDetail }
       .concatMap {
         comicDetailInteractor
           .toggleFavorite(it)

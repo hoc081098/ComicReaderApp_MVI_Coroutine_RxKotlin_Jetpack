@@ -68,21 +68,24 @@ class HomeAdapter(
       ComicArg(
         link = it.link,
         thumbnail = it.thumbnail,
-        title = it.title
+        title = it.title,
+        view = it.view
       )
     },
     mostViewedAdapter.clickComicObservable.map {
       ComicArg(
         link = it.link,
         thumbnail = it.thumbnail,
-        title = it.title
+        title = it.title,
+        view = it.view
       )
     },
     clickComicS.map {
       ComicArg(
         link = it.link,
         thumbnail = it.thumbnail,
-        title = it.title
+        title = it.title,
+        view = it.view
       )
     }
   ).doOnNext { Timber.d("[*] Click comic $it") }!!

@@ -270,15 +270,10 @@ class ComicDetailFragment : Fragment() {
       }
     }
 
-    val argComic = args.comic
     viewModel.processIntents(
       Observable.mergeArray(
         Observable.just(
-          ComicDetailIntent.Initial(
-            link = argComic.link,
-            title = argComic.title,
-            thumbnail = argComic.thumbnail
-          )
+          ComicDetailIntent.Initial(args.comic)
         ),
         button_retry
           .clicks()

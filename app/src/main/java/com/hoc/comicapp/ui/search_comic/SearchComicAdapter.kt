@@ -141,7 +141,8 @@ class SearchComicAdapter(
           ComicArg(
             title = it.title,
             thumbnail = it.thumbnail,
-            link = it.link
+            link = it.link,
+            view = "TODO"
           )
         }
         .subscribe(clickComicS)

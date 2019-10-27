@@ -43,7 +43,8 @@ class PopularHorizontalAdapter(
             ComicArg(
               title = item.title,
               thumbnail = item.thumbnail,
-              link = item.link
+              link = item.link,
+              view = "TODO"
             )
           )
         }
