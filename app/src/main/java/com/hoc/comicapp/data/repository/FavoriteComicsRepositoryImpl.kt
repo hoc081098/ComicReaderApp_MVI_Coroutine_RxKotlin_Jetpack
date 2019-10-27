@@ -127,11 +127,11 @@ class FavoriteComicsRepositoryImpl(
   override suspend fun toggle(comic: FavoriteComic) {
     return withContext(dispatcherProvider.io) {
       val snapshot = findQueryDocumentSnapshotByUrl(comic.url)
-      if (snapshot === null) {
+      if (snapshot?.exists() == true) {
+        snapshot.reference.delete().await()
+      } else {
         (favoriteCollectionForCurrentUserOrNull
           ?: throw AuthError.Unauthenticated).add(comic.toEntity()).await()
-      } else {
-        snapshot.reference.delete().await()
       }
       Unit
     }
