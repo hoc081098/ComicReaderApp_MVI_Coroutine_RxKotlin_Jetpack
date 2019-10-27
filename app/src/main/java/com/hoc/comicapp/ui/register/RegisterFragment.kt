@@ -3,7 +3,6 @@ package com.hoc.comicapp.ui.register
 import android.app.Activity
 import android.content.Intent.ACTION_OPEN_DOCUMENT
 import android.content.Intent.CATEGORY_OPENABLE
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -24,21 +23,18 @@ import com.hoc.comicapp.R
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.ui.register.RegisterContract.Intent
 import com.hoc.comicapp.ui.register.RegisterContract.SingleEvent
-import com.hoc.comicapp.utils.None
-import com.hoc.comicapp.utils.Some
 import com.hoc.comicapp.utils.exhaustMap
+import com.hoc.comicapp.utils.mapNotNull
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.onDismissed
 import com.hoc.comicapp.utils.snack
-import com.hoc.comicapp.utils.toOptional
 import com.hoc.comicapp.utils.uriFromResourceId
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxbinding3.widget.textChanges
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.ofType
 import kotlinx.android.synthetic.main.fragment_register.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import rx_activity_result2.RxActivityResult
@@ -142,16 +138,15 @@ class RegisterFragment : Fragment() {
           .startIntent(intent)
 
       }
-      .map {
+      .mapNotNull {
         if (it.resultCode() == Activity.RESULT_OK) {
-          it.data()?.data.toOptional()
+          it.data()?.data
         } else {
-          None
+          null
         }
       }
       .doOnNext { Timber.d("Select image $it") }
-      .ofType<Some<Uri>>()
-      .map { (value) -> Intent.AvatarChanged(value) }
+      .map { Intent.AvatarChanged(it) }
   }
 
   override fun onDestroyView() {

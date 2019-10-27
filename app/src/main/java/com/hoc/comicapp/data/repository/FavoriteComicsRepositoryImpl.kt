@@ -32,6 +32,7 @@ class FavoriteComicsRepositoryImpl(
   private val rxSchedulerProvider: RxSchedulerProvider,
   private val dispatcherProvider: CoroutinesDispatcherProvider
 ) : FavoriteComicsRepository {
+
   @Suppress("ClassName")
   @IgnoreExtraProperties
   private data class _FavoriteComic(

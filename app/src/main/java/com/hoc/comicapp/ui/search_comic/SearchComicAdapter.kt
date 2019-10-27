@@ -12,10 +12,9 @@ import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
 import com.hoc.comicapp.ui.detail.ComicArg
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewState.Item
-import com.hoc.comicapp.utils.Some
 import com.hoc.comicapp.utils.asObservable
 import com.hoc.comicapp.utils.inflate
-import com.hoc.comicapp.utils.toOptional
+import com.hoc.comicapp.utils.mapNotNull
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxbinding3.view.detaches
 import com.jakewharton.rxrelay2.PublishRelay
@@ -84,16 +83,14 @@ class SearchComicAdapter(
         .takeUntil(parent.detaches())
         .map { adapterPosition }
         .filter { it != RecyclerView.NO_POSITION }
-        .map {
+        .mapNotNull {
           when (getItem(it)) {
             is Item.ComicItem -> null
             Item.Idle -> false
             Item.Loading -> null
             is Item.Error -> true
-          }.toOptional()
+          }
         }
-        .ofType<Some<Boolean>>()
-        .map { it.value }
         .subscribe(clickButtonRetryOrLoadMoreS)
         .addTo(compositeDisposable)
     }

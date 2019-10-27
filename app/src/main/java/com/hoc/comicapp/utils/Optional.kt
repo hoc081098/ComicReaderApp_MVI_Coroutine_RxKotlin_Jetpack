@@ -10,22 +10,31 @@ object None : Optional<Nothing>() {
   override fun toString() = "None"
 }
 
-fun <T, R : Any> Optional<T>.map(transform: (T) -> R): Optional<R> = when (this) {
+inline fun <T, R : Any> Optional<T>.map(transform: (T) -> R): Optional<R> = when (this) {
   is Some -> Some(transform(value))
   is None -> None
 }
 
+/**
+ *
+ */
+
+inline fun <T, R> Optional<T>.fold(ifEmpty: () -> R, ifSome: (T) -> R): R = when (this) {
+  is None -> ifEmpty()
+  is Some -> ifSome(value)
+}
+
+inline fun <T> Optional<T>.getOrElse(ifNone: () -> T) = fold(ifNone) { it }
+
+fun <T> Optional<T>.getOrNull(): T? = getOrElse { null }
+
+fun <T> Optional<T>.getOrThrow(): T = getOrElse { throw NoSuchElementException("No value present") }
+
+/**
+ *
+ */
+
 fun <T : Any> T?.toOptional(): Optional<T> = when (this) {
   null -> None
   else -> Some(this)
-}
-
-fun <T> Optional<T>.getOrNull(): T? = when (this) {
-  is Some -> value
-  else -> null
-}
-
-fun <T> Optional<T>.getOrThrow(): T = when (this) {
-  is Some -> value
-  else -> throw NoSuchElementException("No value present")
 }

@@ -6,16 +6,25 @@ import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailPartialChange.InitialRetryLoadChapterPartialChange
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailPartialChange.RefreshPartialChange.Error
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailPartialChange.RefreshPartialChange.Success
-import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewIntent.*
+import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewIntent.ChangeOrientation
+import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewIntent.Initial
+import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewIntent.LoadChapter
+import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewIntent.LoadNextChapter
+import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewIntent.LoadPrevChapter
+import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewIntent.Refresh
+import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewIntent.Retry
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewState.Chapter
-import com.hoc.comicapp.utils.Some
 import com.hoc.comicapp.utils.exhaustMap
+import com.hoc.comicapp.utils.mapNotNull
 import com.hoc.comicapp.utils.notOfType
-import com.hoc.comicapp.utils.toOptional
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
-import io.reactivex.rxkotlin.*
+import io.reactivex.rxkotlin.Observables
+import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.cast
+import io.reactivex.rxkotlin.ofType
+import io.reactivex.rxkotlin.subscribeBy
 
 class ChapterDetailViewModel(
   private val interactor: ChapterDetailInteractor,
@@ -103,14 +112,10 @@ class ChapterDetailViewModel(
           intents.ofType(),
           intents.ofType<Initial>().map { LoadChapter(it.chapter) },
           intents.ofType<LoadNextChapter>()
-            .map { nextChapter.toOptional() }
-            .ofType<Some<Chapter>>()
-            .map { it.value }
+            .mapNotNull { nextChapter }
             .map(::LoadChapter),
           intents.ofType<LoadPrevChapter>()
-            .map { prevChapter.toOptional() }
-            .ofType<Some<Chapter>>()
-            .map { it.value }
+            .mapNotNull { prevChapter }
             .map(::LoadChapter)
         )
           .distinctUntilChanged()

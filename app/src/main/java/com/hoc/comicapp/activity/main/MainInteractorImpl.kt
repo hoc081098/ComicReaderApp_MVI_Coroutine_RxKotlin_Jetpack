@@ -7,7 +7,6 @@ import com.hoc.comicapp.domain.repository.UserRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.utils.fold
-import com.hoc.comicapp.utils.getOrNull
 import io.reactivex.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.rx2.rxObservable

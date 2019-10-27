@@ -13,9 +13,8 @@ import com.hoc.comicapp.domain.models.toError
 import com.hoc.comicapp.domain.repository.UserRepository
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.utils.Either
-import com.hoc.comicapp.utils.None
 import com.hoc.comicapp.utils.Optional
-import com.hoc.comicapp.utils.Some
+import com.hoc.comicapp.utils.fold
 import com.hoc.comicapp.utils.left
 import com.hoc.comicapp.utils.map
 import com.hoc.comicapp.utils.right
@@ -38,13 +37,16 @@ class UserRepositoryImpl(
   private val retrofit: Retrofit,
   private val rxSchedulerProvider: RxSchedulerProvider
 ) : UserRepository {
+
+  @Suppress("ClassName")
   @IgnoreExtraProperties
   private data class _User(
-    @PropertyName("uid") val uid: String,
-    @PropertyName("displayName") val displayName: String,
-    @PropertyName("email") val email: String,
-    @PropertyName("photoURL") val photoURL: String
+    @get:PropertyName("uid") @set:PropertyName("uid") var uid: String,
+    @get:PropertyName("display_name") @set:PropertyName("display_name") var displayName: String,
+    @get:PropertyName("email") @set:PropertyName("email") var email: String,
+    @get:PropertyName("photo_url") @set:PropertyName("photo_url") var photoURL: String
   ) {
+    @Suppress("unused")
     constructor() : this("", "", "", "")
 
     fun toDomain() = User(
@@ -84,10 +86,11 @@ class UserRepositoryImpl(
     return uidObservable
       .distinctUntilChanged()
       .switchMap { uidOptional ->
-        when (uidOptional) {
-          is Some -> {
+        uidOptional.fold(
+          ifEmpty = { Observable.just(null.right()) },
+          ifSome = { uid ->
             firebaseFirestore
-              .document("users/${uidOptional.value}")
+              .document("users/$uid")
               .snapshots()
               .map {
                 it.toObject(_User::class.java)
@@ -97,8 +100,7 @@ class UserRepositoryImpl(
               .onErrorReturn { t: Throwable -> t.toError(retrofit).left() }
               .subscribeOn(rxSchedulerProvider.io)
           }
-          None -> Observable.just(null.right())
-        }
+        )
       }
       .subscribeOn(rxSchedulerProvider.io)
       .doOnNext { Timber.d("User = $it") }
@@ -158,7 +160,7 @@ class UserRepositoryImpl(
           async {
             firebaseFirestore
               .document("users/${user.uid}")
-              .update("photoURL", photoUri?.toString() ?: "")
+              .update("photo_url", photoUri?.toString() ?: "")
               .await()
           }
         )
