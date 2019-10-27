@@ -28,7 +28,7 @@
             android:gravity="center"
             android:maxLines="1"
             android:padding="2dp"
-            android:text="Delete"
+            android:text="Remove"
             android:textAlignment="center"
             android:textColor="@android:color/white"
             android:textSize="14sp"
