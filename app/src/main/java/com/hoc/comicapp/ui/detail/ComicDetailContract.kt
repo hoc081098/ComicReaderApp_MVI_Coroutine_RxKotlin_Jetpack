@@ -6,6 +6,7 @@ import com.hoc.comicapp.base.SingleEvent
 import com.hoc.comicapp.base.ViewState
 import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.DownloadedChapter
+import com.hoc.comicapp.domain.models.FavoriteComic
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.ComicDetail
 import io.reactivex.Observable
@@ -13,6 +14,8 @@ import kotlinx.android.parcel.Parcelize
 import java.util.*
 
 interface ComicDetailInteractor {
+  fun getFavoriteChange(link: String): Observable<ComicDetailPartialChange>
+
   fun getComicDetail(
     link: String,
     name: String? = null,
@@ -24,6 +27,8 @@ interface ComicDetailInteractor {
     link: String,
     isDownloaded: Boolean
   ): Observable<ComicDetailPartialChange>
+
+  fun toggleFavorite(comic: ComicDetail.Detail): Observable<Unit>
 }
 
 sealed class ComicDetailIntent : Intent {
@@ -33,19 +38,21 @@ sealed class ComicDetailIntent : Intent {
     val title: String
   ) : ComicDetailIntent()
 
-  data class Refresh(val link: String) : ComicDetailIntent()
-  data class Retry(val link: String) : ComicDetailIntent()
+  object Refresh : ComicDetailIntent()
+  object Retry : ComicDetailIntent()
 
   data class CancelDownloadChapter(val chapter: ComicDetailViewState.Chapter) : ComicDetailIntent()
   data class DownloadChapter(val chapter: ComicDetailViewState.Chapter) : ComicDetailIntent()
   data class DeleteChapter(val chapter: ComicDetailViewState.Chapter) : ComicDetailIntent()
+  object ToggleFavorite : ComicDetailIntent()
 }
 
 data class ComicDetailViewState(
   val comicDetail: ComicDetail?,
   val errorMessage: String?,
   val isLoading: Boolean,
-  val isRefreshing: Boolean
+  val isRefreshing: Boolean,
+  val isFavorited: Boolean?
 ) : ViewState {
   companion object {
     @JvmStatic
@@ -53,28 +60,42 @@ data class ComicDetailViewState(
       comicDetail = null,
       errorMessage = null,
       isLoading = true,
-      isRefreshing = false
+      isRefreshing = false,
+      isFavorited = null
     )
   }
 
   sealed class ComicDetail {
+
+    abstract val link: String
+    abstract val thumbnail: String
+    abstract val title: String
+
     data class Detail(
+      override val link: String,
+      override val thumbnail: String,
+      override val title: String,
       val authors: List<Author>,
       val categories: List<Category>,
       val chapters: List<Chapter>,
       val lastUpdated: String,
-      val link: String,
       val relatedComics: List<Comic>,
       val shortenedContent: String,
-      val thumbnail: String,
-      val title: String,
       val view: String
-    ) : ComicDetail()
+    ) : ComicDetail() {
+      fun toDomain() = FavoriteComic(
+        url = link,
+        title = title,
+        thumbnail = thumbnail,
+        view = view,
+        createdAt = null
+      )
+    }
 
     data class Initial(
-      val link: String,
-      val thumbnail: String,
-      val title: String
+      override val link: String,
+      override val thumbnail: String,
+      override val title: String
     ) : ComicDetail()
   }
 
@@ -222,6 +243,10 @@ sealed class ComicDetailPartialChange {
     data class Success(val comicDetail: ComicDetail.Detail) : RefreshPartialChange()
     data class Error(val error: ComicAppError) : RefreshPartialChange()
     object Loading : RefreshPartialChange()
+  }
+
+  data class FavoriteChange(val isFavorited: Boolean?) : ComicDetailPartialChange() {
+    override fun reducer(state: ComicDetailViewState) = state.copy(isFavorited = isFavorited)
   }
 }
 

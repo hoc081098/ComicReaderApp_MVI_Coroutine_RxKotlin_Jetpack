@@ -4,7 +4,9 @@ import com.hoc.comicapp.domain.models.ComicDetail
 import com.hoc.comicapp.domain.models.DownloadedComic
 import com.hoc.comicapp.domain.repository.ComicRepository
 import com.hoc.comicapp.domain.repository.DownloadComicsRepository
+import com.hoc.comicapp.domain.repository.FavoriteComicsRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
+import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.ui.detail.ComicDetailPartialChange.InitialRetryPartialChange
 import com.hoc.comicapp.ui.detail.ComicDetailPartialChange.RefreshPartialChange
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.ComicDetail.Detail
@@ -19,9 +21,29 @@ import kotlinx.coroutines.rx2.rxObservable
 class ComicDetailInteractorImpl(
   private val comicRepository: ComicRepository,
   private val dispatcherProvider: CoroutinesDispatcherProvider,
-  private val downloadedComicRepository: DownloadComicsRepository
-) :
-  ComicDetailInteractor {
+  private val downloadedComicRepository: DownloadComicsRepository,
+  private val favoriteComicsRepository: FavoriteComicsRepository,
+  private val rxSchedulerProvider: RxSchedulerProvider
+) : ComicDetailInteractor {
+  override fun toggleFavorite(comic: Detail): Observable<Unit> {
+    return rxObservable(dispatcherProvider.ui) {
+      favoriteComicsRepository.toggle(comic.toDomain())
+      send(Unit)
+    }
+  }
+
+  override fun getFavoriteChange(link: String): Observable<ComicDetailPartialChange> {
+    return favoriteComicsRepository
+      .isFavorited(link)
+      .map<ComicDetailPartialChange> { either ->
+        either.fold(
+          left = { ComicDetailPartialChange.FavoriteChange(null) },
+          right = { ComicDetailPartialChange.FavoriteChange(it) }
+        )
+      }
+      .observeOn(rxSchedulerProvider.main)
+  }
+
   override fun refreshPartialChanges(
     link: String,
     isDownloaded: Boolean

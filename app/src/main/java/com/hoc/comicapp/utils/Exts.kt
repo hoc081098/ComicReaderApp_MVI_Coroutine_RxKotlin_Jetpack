@@ -39,6 +39,7 @@ import io.reactivex.android.MainThreadDisposable
 import io.reactivex.annotations.CheckReturnValue
 import io.reactivex.annotations.SchedulerSupport
 import io.reactivex.disposables.Disposables
+import io.reactivex.rxkotlin.ofType
 import io.reactivex.subjects.Subject
 import kotlinx.coroutines.delay
 import timber.log.Timber
@@ -53,16 +54,24 @@ import androidx.lifecycle.Observer as LiveDataObserver
 inline fun <reified U : Any, T : Any> Observable<T>.notOfType() = filter { it !is U }!!
 
 @Suppress("nothing_to_inline")
-inline fun <T> Relay<T>.asObservable(): Observable<T> = this
+inline fun <T : Any> Relay<T>.asObservable(): Observable<T> = this
 
 @Suppress("nothing_to_inline")
-inline fun <T> Subject<T>.asObservable(): Observable<T> = this
+inline fun <T : Any> Subject<T>.asObservable(): Observable<T> = this
 
-inline fun <T, R> Observable<T>.exhaustMap(crossinline transform: (T) -> Observable<R>): Observable<R> {
+@CheckResult
+inline fun <T : Any, R : Any> Observable<T>.exhaustMap(crossinline transform: (T) -> Observable<R>): Observable<R> {
   return this
     .toFlowable(BackpressureStrategy.DROP)
     .flatMap({ transform(it).toFlowable(BackpressureStrategy.MISSING) }, 1)
     .toObservable()
+}
+
+@CheckResult
+inline fun <T : Any, R : Any> Observable<T>.filterNotNull(crossinline transform: (T) -> R?): Observable<R> {
+  return map { transform(it).toOptional() }
+    .ofType<Some<R>>()
+    .map { it.value }
 }
 
 @Suppress("nothing_to_inline")
@@ -386,7 +395,7 @@ fun DocumentReference.snapshots(): Observable<DocumentSnapshot> {
     }
     emitter.setCancellable {
       registration.remove()
-      Timber.d("Remove snapshot listener")
+      Timber.d("Remove snapshot listener $this")
     }
   }
 }
@@ -403,7 +412,7 @@ fun Query.snapshots(): Observable<QuerySnapshot> {
     }
     emitter.setCancellable {
       registration.remove()
-      Timber.d("Remove snapshot listener")
+      Timber.d("Remove snapshot listener $this")
     }
   }
 }

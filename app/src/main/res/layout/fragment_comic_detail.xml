@@ -68,12 +68,12 @@
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
         android:ellipsize="end"
+        android:layout_marginBottom="8dp"
         android:fontFamily="@font/google_sans"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
         android:textColor="#D9FFFFFF"
-        app:layout_constraintBottom_toTopOf="@+id/switch_mode"
+        app:layout_constraintBottom_toTopOf="@id/image_favorite"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/image_thumbnail"
         app:layout_constraintTop_toBottomOf="@id/text_title"
@@ -196,5 +196,18 @@
         app:layout_constraintBottom_toTopOf="@+id/recycler_chapters"
         app:layout_constraintStart_toStartOf="@+id/guideline" />
 
+    <ImageView
+        android:id="@+id/image_favorite"
+        android:layout_width="46dp"
+        android:layout_height="46dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:padding="8dp"
+        app:layout_constraintBottom_toTopOf="@id/switch_mode"
+        app:layout_constraintStart_toStartOf="@id/guideline"
+        app:srcCompat="@drawable/ic_favorite_white_24dp" />
 
 </androidx.constraintlayout.motion.widget.MotionLayout>

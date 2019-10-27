@@ -2,8 +2,14 @@ package com.hoc.comicapp.ui.detail
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
-import androidx.work.*
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkInfo
 import androidx.work.WorkInfo.State.RUNNING
+import androidx.work.WorkManager
+import androidx.work.await
+import androidx.work.workDataOf
 import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.domain.models.ComicDetail
 import com.hoc.comicapp.domain.models.DownloadedChapter
@@ -12,9 +18,12 @@ import com.hoc.comicapp.domain.repository.DownloadComicsRepository
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.Chapter
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState
-import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.*
+import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.Downloaded
+import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.Downloading
+import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.NotYetDownload
 import com.hoc.comicapp.utils.combineLatest
 import com.hoc.comicapp.utils.exhaustMap
+import com.hoc.comicapp.utils.filterNotNull
 import com.hoc.comicapp.utils.fold
 import com.hoc.comicapp.utils.notOfType
 import com.hoc.comicapp.worker.DownloadComicWorker
@@ -28,6 +37,7 @@ import io.reactivex.Single
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.ofType
 import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.rxkotlin.withLatestFrom
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.rx2.rxSingle
 import timber.log.Timber
@@ -57,42 +67,51 @@ class ComicDetailViewModel(
 
   private val initialProcessor =
     ObservableTransformer<ComicDetailIntent.Initial, ComicDetailPartialChange> { intent ->
-      intent.flatMap {
-        comicDetailInteractor.getComicDetail(
-          it.link,
-          it.title,
-          it.thumbnail,
-          isDownloaded
-        ).doOnNext {
-          val message =
-            (it as? ComicDetailPartialChange.InitialRetryPartialChange.Error ?: return@doOnNext)
-              .error
-              .getMessage()
-          sendMessageEvent("Get detail comic error: $message")
-        }
-      }
-    }
-
-  private val retryProcessor =
-    ObservableTransformer<ComicDetailIntent.Retry, ComicDetailPartialChange> { intent ->
-      intent.flatMap {
-        comicDetailInteractor.getComicDetail(it.link, isDownloaded = isDownloaded)
+      intent.flatMap { (link, thumbnail, title) ->
+        comicDetailInteractor
+          .getComicDetail(
+            link,
+            title,
+            thumbnail,
+            isDownloaded
+          )
+          .mergeWith(comicDetailInteractor.getFavoriteChange(link))
           .doOnNext {
             val message =
               (it as? ComicDetailPartialChange.InitialRetryPartialChange.Error ?: return@doOnNext)
                 .error
                 .getMessage()
-            sendMessageEvent("Retry get detail comic error: $message")
+            sendMessageEvent("Get detail comic error: $message")
           }
+      }
+    }
+
+  private val retryProcessor =
+    ObservableTransformer<ComicDetailIntent.Retry, ComicDetailPartialChange> { intent ->
+      intent
+        .withLatestFrom(stateS)
+        .filterNotNull { it.second.comicDetail?.link }
+        .flatMap { link ->
+          comicDetailInteractor
+            .getComicDetail(link, isDownloaded = isDownloaded)
+            .doOnNext {
+              val message =
+                (it as? ComicDetailPartialChange.InitialRetryPartialChange.Error ?: return@doOnNext)
+                  .error
+                  .getMessage()
+              sendMessageEvent("Retry get detail comic error: $message")
+            }
       }
     }
 
   private val refreshProcessor =
     ObservableTransformer<ComicDetailIntent.Refresh, ComicDetailPartialChange> { intentObservable ->
       intentObservable
-        .exhaustMap { intent ->
+        .withLatestFrom(stateS)
+        .filterNotNull { it.second.comicDetail?.link }
+        .exhaustMap { link ->
           comicDetailInteractor
-            .refreshPartialChanges(intent.link, isDownloaded = isDownloaded)
+            .refreshPartialChanges(link, isDownloaded = isDownloaded)
             .doOnNext {
               sendMessageEvent(
                 when (it) {
@@ -127,6 +146,21 @@ class ComicDetailViewModel(
     _stateD = initStateD(filteredIntent)
     processDownloadChapterIntent(filteredIntent)
     processDeleteAndCancelDownloadingChapterIntent(filteredIntent)
+    processToggleFavorite(filteredIntent)
+  }
+
+  private fun processToggleFavorite(filteredIntent: Observable<ComicDetailIntent>) {
+    filteredIntent
+      .ofType<ComicDetailIntent.ToggleFavorite>()
+      .withLatestFrom(stateS)
+      .filterNotNull { it.second.comicDetail as? ComicDetailViewState.ComicDetail.Detail }
+      .concatMap {
+        comicDetailInteractor
+          .toggleFavorite(it)
+          .onErrorReturnItem(Unit)
+      }
+      .subscribeBy { Timber.d("[TOGGLE_FAV] $it") }
+      .addTo(compositeDisposable)
   }
 
   private fun initStateD(filteredIntent: Observable<ComicDetailIntent>): LiveData<ComicDetailViewState> {

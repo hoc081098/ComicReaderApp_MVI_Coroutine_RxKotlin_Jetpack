@@ -17,7 +17,7 @@ import org.koin.dsl.module
 
 @ExperimentalCoroutinesApi
 val dataModule = module {
-  single { FavoriteComicsRepositoryImpl(get(), get(), get()) } bind FavoriteComicsRepository::class
+  single { FavoriteComicsRepositoryImpl(get(), get(), get(), get(), get()) } bind FavoriteComicsRepository::class
 
   single { ComicRepositoryImpl(get(), get(), get()) } bind ComicRepository::class
 

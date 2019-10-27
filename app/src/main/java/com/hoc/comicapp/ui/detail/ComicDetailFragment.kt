@@ -17,11 +17,21 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract
-import com.hoc.comicapp.ui.detail.ComicDetailIntent.*
+import com.hoc.comicapp.ui.detail.ComicDetailIntent.CancelDownloadChapter
+import com.hoc.comicapp.ui.detail.ComicDetailIntent.DeleteChapter
+import com.hoc.comicapp.ui.detail.ComicDetailIntent.DownloadChapter
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.Chapter
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.ComicDetail
-import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.*
-import com.hoc.comicapp.utils.*
+import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.Downloaded
+import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.Downloading
+import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.NotYetDownload
+import com.hoc.comicapp.utils.action
+import com.hoc.comicapp.utils.getDrawableBy
+import com.hoc.comicapp.utils.isOrientationPortrait
+import com.hoc.comicapp.utils.observe
+import com.hoc.comicapp.utils.observeEvent
+import com.hoc.comicapp.utils.showAlertDialog
+import com.hoc.comicapp.utils.snack
 import com.jakewharton.rxbinding3.recyclerview.scrollEvents
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxrelay2.PublishRelay
@@ -36,6 +46,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import timber.log.Timber
 import java.io.File
+import java.util.concurrent.TimeUnit
 import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.math.absoluteValue
 import com.hoc.comicapp.ui.detail.ComicDetailFragmentDirections.Companion.actionComicDetailFragmentToChapterDetailFragment as toChapterDetail
@@ -271,12 +282,16 @@ class ComicDetailFragment : Fragment() {
         ),
         button_retry
           .clicks()
-          .map { ComicDetailIntent.Retry(argComic.link) },
+          .map { ComicDetailIntent.Retry },
 //        TODO: Refresh detail page
 //        swipe_refresh_layout
 //          .refreshes()
 //          .map { ComicDetailIntent.Refresh(argComic.link) }
-        intentS
+        intentS,
+        image_favorite
+          .clicks()
+          .throttleFirst(300, TimeUnit.MILLISECONDS)
+          .map { ComicDetailIntent.ToggleFavorite }
       )
     ).addTo(compositeDisposable)
   }
@@ -286,6 +301,15 @@ class ComicDetailFragment : Fragment() {
     chapterAdapter: ChapterAdapter
   ) {
     Timber.d("state=$viewState")
+    Timber.d("isFavorited=${viewState.isFavorited}")
+
+    image_favorite.setImageDrawable(
+      when (viewState.isFavorited) {
+        true -> requireContext().getDrawableBy(id = R.drawable.ic_favorite_white_24dp)
+        false -> requireContext().getDrawableBy(id = R.drawable.ic_favorite_border_white_24dp)
+        null -> null
+      }
+    )
 
     if (viewState.isLoading) {
       progress_bar.visibility = View.VISIBLE
