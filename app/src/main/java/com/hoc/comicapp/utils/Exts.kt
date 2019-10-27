@@ -68,7 +68,7 @@ inline fun <T : Any, R : Any> Observable<T>.exhaustMap(crossinline transform: (T
 }
 
 @CheckResult
-inline fun <T : Any, R : Any> Observable<T>.filterNotNull(crossinline transform: (T) -> R?): Observable<R> {
+inline fun <T : Any, R : Any> Observable<T>.mapNotNull(crossinline transform: (T) -> R?): Observable<R> {
   return map { transform(it).toOptional() }
     .ofType<Some<R>>()
     .map { it.value }

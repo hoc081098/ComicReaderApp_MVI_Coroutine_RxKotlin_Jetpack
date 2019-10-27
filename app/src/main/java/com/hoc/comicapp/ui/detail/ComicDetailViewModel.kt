@@ -23,7 +23,7 @@ import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.Downloading
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.NotYetDownload
 import com.hoc.comicapp.utils.combineLatest
 import com.hoc.comicapp.utils.exhaustMap
-import com.hoc.comicapp.utils.filterNotNull
+import com.hoc.comicapp.utils.mapNotNull
 import com.hoc.comicapp.utils.fold
 import com.hoc.comicapp.utils.notOfType
 import com.hoc.comicapp.worker.DownloadComicWorker
@@ -91,7 +91,7 @@ class ComicDetailViewModel(
     ObservableTransformer<ComicDetailIntent.Retry, ComicDetailPartialChange> { intent ->
       intent
         .withLatestFrom(stateS)
-        .filterNotNull { it.second.comicDetail?.link }
+        .mapNotNull { it.second.comicDetail?.link }
         .flatMap { link ->
           comicDetailInteractor
             .getComicDetail(link, isDownloaded = isDownloaded)
@@ -109,7 +109,7 @@ class ComicDetailViewModel(
     ObservableTransformer<ComicDetailIntent.Refresh, ComicDetailPartialChange> { intentObservable ->
       intentObservable
         .withLatestFrom(stateS)
-        .filterNotNull { it.second.comicDetail?.link }
+        .mapNotNull { it.second.comicDetail?.link }
         .exhaustMap { link ->
           comicDetailInteractor
             .refreshPartialChanges(link, isDownloaded = isDownloaded)
@@ -154,7 +154,7 @@ class ComicDetailViewModel(
     filteredIntent
       .ofType<ComicDetailIntent.ToggleFavorite>()
       .withLatestFrom(stateS)
-      .filterNotNull { it.second.comicDetail }
+      .mapNotNull { it.second.comicDetail }
       .concatMap {
         comicDetailInteractor
           .toggleFavorite(it)
