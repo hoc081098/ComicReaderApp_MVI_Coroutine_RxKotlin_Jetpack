@@ -13,6 +13,16 @@ import io.reactivex.Observable
 import kotlinx.android.parcel.Parcelize
 import java.util.*
 
+/**
+ * Argument to pass to [ComicDetailFragment]
+ */
+@Parcelize
+data class ComicArg(
+  val link: String,
+  val thumbnail: String,
+  val title: String
+): Parcelable
+
 interface ComicDetailInteractor {
   fun getFavoriteChange(link: String): Observable<ComicDetailPartialChange>
 

@@ -16,7 +16,7 @@ import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.SingleEven
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.SortOrder
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.ViewIntent
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.ViewState.ComicItem
-import com.hoc.comicapp.ui.home.ComicArg
+import com.hoc.comicapp.ui.detail.ComicArg
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.itemSelections
 import com.hoc.comicapp.utils.observe
