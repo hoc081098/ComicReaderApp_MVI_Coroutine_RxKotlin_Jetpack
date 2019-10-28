@@ -12,4 +12,6 @@ interface FavoriteComicsDataSource {
   suspend fun removeFromFavorite(comic: _FavoriteComic)
 
   suspend fun toggle(comic: _FavoriteComic)
+
+  fun update(comics: List<_FavoriteComic>)
 }

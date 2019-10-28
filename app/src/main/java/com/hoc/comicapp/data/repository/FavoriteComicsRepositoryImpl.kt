@@ -1,6 +1,6 @@
 package com.hoc.comicapp.data.repository
 
-import com.hoc.comicapp.data.firebase.entity._FavoriteComic
+import com.hoc.comicapp.data.Mapper
 import com.hoc.comicapp.data.firebase.favorite_comics.FavoriteComicsDataSource
 import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.FavoriteComic
@@ -17,15 +17,6 @@ class FavoriteComicsRepositoryImpl(
   private val retrofit: Retrofit,
   private val favoriteComicsDataSource: FavoriteComicsDataSource
 ) : FavoriteComicsRepository {
-  private fun FavoriteComic.toEntity(): _FavoriteComic {
-    return _FavoriteComic(
-      url = url,
-      title = title,
-      thumbnail = thumbnail,
-      view = view,
-      createdAt = null
-    )
-  }
 
   override fun isFavorited(url: String): Observable<Either<ComicAppError, Boolean>> {
     return favoriteComicsDataSource
@@ -51,7 +42,7 @@ class FavoriteComicsRepositoryImpl(
 
   override suspend fun removeFromFavorite(comic: FavoriteComic): Either<ComicAppError, Unit> {
     return try {
-      favoriteComicsDataSource.removeFromFavorite(comic.toEntity())
+      favoriteComicsDataSource.removeFromFavorite(Mapper.domainToFirebaseEntity(comic))
       Unit.right()
     } catch (e: Throwable) {
       e.toError(retrofit).left()
@@ -60,7 +51,7 @@ class FavoriteComicsRepositoryImpl(
 
   override suspend fun toggle(comic: FavoriteComic): Either<ComicAppError, Unit> {
     return try {
-      favoriteComicsDataSource.toggle(comic.toEntity())
+      favoriteComicsDataSource.toggle(Mapper.domainToFirebaseEntity(comic))
       Unit.right()
     } catch (e: Throwable) {
       e.toError(retrofit).left()

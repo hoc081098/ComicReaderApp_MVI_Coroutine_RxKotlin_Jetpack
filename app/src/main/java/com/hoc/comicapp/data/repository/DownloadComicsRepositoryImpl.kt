@@ -88,7 +88,7 @@ class DownloadComicsRepositoryImpl(
   override suspend fun deleteComic(comic: DownloadedComic): Either<ComicAppError, Unit> {
     return runCatching {
       withContext(dispatcherProvider.ui) {
-        comicDao.delete(Mapper.domainToEntity(comic))
+        comicDao.delete(Mapper.domainToLocalEntity(comic))
       }
     }.fold(
       onSuccess = { Unit.right() },
@@ -109,7 +109,7 @@ class DownloadComicsRepositoryImpl(
   private suspend fun _deleteEntityAndImages(chapter: DownloadedChapter): Either<ComicAppError, Unit> {
     return runCatching {
       withContext(dispatcherProvider.io) {
-        chapterDao.delete(Mapper.domainToEntity(chapter))
+        chapterDao.delete(Mapper.domainToLocalEntity(chapter))
 
         val chaptersCount = chapterDao.getCountByComicLink(chapter.comicLink).firstOrNull() ?: 0
         if (chaptersCount == 0) {
@@ -212,26 +212,9 @@ class DownloadComicsRepositoryImpl(
 
       appDatabase.withTransaction {
         comicDao.upsert(
-          ComicEntity(
-            authors = comicDetail.authors.map {
-              ComicEntity.Author(
-                link = it.link,
-                name = it.name
-              )
-            },
-            categories = comicDetail.categories.map {
-              ComicEntity.Category(
-                link = it.link,
-                name = it.name
-              )
-            },
-            lastUpdated = comicDetail.lastUpdated,
-            comicLink = comicDetail.link,
-            shortenedContent = comicDetail.shortenedContent,
-            thumbnail = thumbnailPath,
-            title = comicDetail.title,
-            view = comicDetail.view
-          )
+          Mapper
+            .responseToLocalEntity(comicDetail)
+            .copy(thumbnail = thumbnailPath)
         )
 
         val currentIndex = comicDetail.chapters.indexOfFirst { it.chapterLink == chapterLink }

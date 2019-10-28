@@ -14,16 +14,29 @@ import com.hoc.comicapp.domain.repository.DownloadComicsRepository
 import com.hoc.comicapp.domain.repository.FavoriteComicsRepository
 import com.hoc.comicapp.domain.repository.UserRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.bind
 import org.koin.dsl.module
+import kotlin.time.ExperimentalTime
 
+@ObsoleteCoroutinesApi
+@ExperimentalTime
 @ExperimentalCoroutinesApi
 val dataModule = module {
   single { FavoriteComicsRepositoryImpl(get(), get()) } bind FavoriteComicsRepository::class
 
-  single { ComicRepositoryImpl(get(), get(), get()) } bind ComicRepository::class
+  single {
+    ComicRepositoryImpl(
+      get(),
+      get(),
+      get(),
+      get(),
+      get(),
+      get()
+    )
+  } bind ComicRepository::class
 
   single {
     DownloadComicsRepositoryImpl(
@@ -59,6 +72,7 @@ val dataModule = module {
 
   single {
     FavoriteComicsDataSourceImpl(
+      get(),
       get(),
       get(),
       get(),

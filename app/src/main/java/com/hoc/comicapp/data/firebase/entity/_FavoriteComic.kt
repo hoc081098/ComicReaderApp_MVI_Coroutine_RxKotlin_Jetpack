@@ -25,6 +25,12 @@ data class _FavoriteComic(
     )
   }
 
+  fun asMap() = mapOf(
+    "view" to view,
+    "thumbnail" to thumbnail,
+    "title" to title
+  )
+
   @Suppress("unused")
   constructor() : this(
     url = "",
