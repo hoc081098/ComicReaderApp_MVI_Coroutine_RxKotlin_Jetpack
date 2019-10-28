@@ -44,7 +44,8 @@ class PopularHorizontalAdapter(
               title = item.title,
               thumbnail = item.thumbnail,
               link = item.link,
-              view = ""
+              view = "",
+              remoteThumbnail = item.thumbnail
             )
           )
         }

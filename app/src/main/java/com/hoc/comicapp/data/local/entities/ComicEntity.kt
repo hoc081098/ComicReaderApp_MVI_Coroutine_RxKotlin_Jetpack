@@ -30,7 +30,10 @@ data class ComicEntity(
   val title: String, // Solo Leveling
 
   @ColumnInfo(name = "view")
-  val view: String // 76228
+  val view: String, // 76228
+
+  @ColumnInfo(name = "remote_thumbnail")
+  val remoteThumbnail: String
 ) {
   data class Category(
     @Json(name = "link")

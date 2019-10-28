@@ -21,7 +21,8 @@ data class ComicArg(
   val link: String,
   val thumbnail: String,
   val title: String,
-  val view: String
+  val view: String,
+  val remoteThumbnail: String
 ): Parcelable
 
 interface ComicDetailInteractor {
@@ -31,7 +32,8 @@ interface ComicDetailInteractor {
     link: String,
     name: String? = null,
     thumbnail: String? = null,
-    view: String?=null,
+    view: String? = null,
+    remoteThumbnail: String? = null,
     isDownloaded: Boolean
   ): Observable<ComicDetailPartialChange>
 
@@ -79,11 +81,12 @@ data class ComicDetailViewState(
     abstract val thumbnail: String
     abstract val title: String
     abstract val view: String
+    abstract val remoteThumbnail: String
 
     fun toDomain() = FavoriteComic(
       url = link,
       title = title,
-      thumbnail = thumbnail,
+      thumbnail = remoteThumbnail,
       view = view,
       createdAt = null
     )
@@ -93,6 +96,7 @@ data class ComicDetailViewState(
       override val thumbnail: String,
       override val title: String,
       override val view: String,
+      override val remoteThumbnail: String,
       val authors: List<Author>,
       val categories: List<Category>,
       val chapters: List<Chapter>,
@@ -105,7 +109,8 @@ data class ComicDetailViewState(
       override val link: String,
       override val thumbnail: String,
       override val title: String,
-      override val view: String
+      override val view: String,
+      override val remoteThumbnail: String
     ) : ComicDetail()
   }
 

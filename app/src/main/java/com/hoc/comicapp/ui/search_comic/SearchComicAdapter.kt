@@ -139,7 +139,8 @@ class SearchComicAdapter(
             title = it.title,
             thumbnail = it.thumbnail,
             link = it.link,
-            view = it.view
+            view = it.view,
+            remoteThumbnail = it.thumbnail
           )
         }
         .subscribe(clickComicS)

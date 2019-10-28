@@ -122,7 +122,8 @@ class DownloadComicsRepositoryImpl(
               thumbnail = "",
               title = "",
               lastUpdated = "",
-              shortenedContent = ""
+              shortenedContent = "",
+              remoteThumbnail = ""
             )
           )
         }

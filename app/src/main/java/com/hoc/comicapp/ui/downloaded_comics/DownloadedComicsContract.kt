@@ -60,7 +60,8 @@ interface DownloadedComicsContract {
       val comicLink: String,
       val thumbnail: File,
       val view: String,
-      val chapters: List<ChapterItem>
+      val chapters: List<ChapterItem>,
+      val remoteThumbnail: String
     ) {
       fun toDomain(): DownloadedComic {
         return DownloadedComic(
@@ -85,7 +86,8 @@ interface DownloadedComicsContract {
           lastUpdated = "",
           thumbnail = "",
           authors = emptyList(),
-          categories = emptyList()
+          categories = emptyList(),
+          remoteThumbnail = remoteThumbnail
         )
       }
 
@@ -103,7 +105,8 @@ interface DownloadedComicsContract {
                 downloadedAt = it.downloadedAt,
                 link = it.chapterLink
               )
-            }
+            },
+            remoteThumbnail = comic.remoteThumbnail
           )
         }
       }

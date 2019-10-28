@@ -81,7 +81,8 @@ class DownloadedComicsFragment : Fragment() {
             title = it.title,
             thumbnail = it.thumbnail.toRelativeString(requireContext().filesDir),
             link = it.comicLink,
-            view = it.view
+            view = it.view,
+            remoteThumbnail = it.remoteThumbnail
           ),
           title = it.title,
           isDownloaded = true

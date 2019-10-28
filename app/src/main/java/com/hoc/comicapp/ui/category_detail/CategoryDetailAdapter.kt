@@ -267,7 +267,8 @@ class CategoryDetailAdapter(
               title = item.title,
               link = item.link,
               thumbnail = item.thumbnail,
-              view = item.view
+              view = item.view,
+              remoteThumbnail = item.thumbnail
             )
           )
         }

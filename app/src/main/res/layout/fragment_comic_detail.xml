@@ -207,7 +207,6 @@
         android:focusable="true"
         android:padding="8dp"
         app:layout_constraintBottom_toTopOf="@id/switch_mode"
-        app:layout_constraintStart_toStartOf="@id/guideline"
-        app:srcCompat="@drawable/ic_favorite_white_24dp" />
+        app:layout_constraintStart_toStartOf="@id/guideline" />
 
 </androidx.constraintlayout.motion.widget.MotionLayout>

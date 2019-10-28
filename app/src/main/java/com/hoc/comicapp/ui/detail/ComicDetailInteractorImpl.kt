@@ -82,18 +82,20 @@ class ComicDetailInteractorImpl(
     name: String?,
     thumbnail: String?,
     view: String?,
+    remoteThumbnail: String?,
     isDownloaded: Boolean
   ): Observable<ComicDetailPartialChange> {
     return if (isDownloaded) {
       rxObservable<ComicDetailPartialChange>(dispatcherProvider.ui) {
-        if (thumbnail != null && name != null && view != null) {
+        if (thumbnail != null && name != null && view != null && remoteThumbnail != null) {
           send(
             InitialRetryPartialChange.InitialData(
               initialComic = Initial(
                 link = link,
                 thumbnail = thumbnail,
                 title = name,
-                view = view
+                view = view,
+                remoteThumbnail = remoteThumbnail
               )
             )
           )
@@ -112,14 +114,15 @@ class ComicDetailInteractorImpl(
     } else {
       rxObservable<ComicDetailPartialChange>(dispatcherProvider.ui) {
 
-        if (thumbnail != null && name != null && view != null) {
+        if (thumbnail != null && name != null && view != null && remoteThumbnail != null) {
           send(
             InitialRetryPartialChange.InitialData(
               initialComic = Initial(
                 link = link,
                 thumbnail = thumbnail,
                 title = name,
-                view = view
+                view = view,
+                remoteThumbnail = remoteThumbnail
               )
             )
           )
@@ -168,7 +171,8 @@ private fun DownloadedComic.toViewComicDetail(): Detail {
         link = it.link
       )
     },
-    relatedComics = emptyList()
+    relatedComics = emptyList(),
+    remoteThumbnail = remoteThumbnail
   )
 }
 
@@ -215,6 +219,7 @@ private fun ComicDetail.toViewComicDetail(): Detail {
         name = it.name,
         link = it.link
       )
-    }
+    },
+    remoteThumbnail = thumbnail
   )
 }

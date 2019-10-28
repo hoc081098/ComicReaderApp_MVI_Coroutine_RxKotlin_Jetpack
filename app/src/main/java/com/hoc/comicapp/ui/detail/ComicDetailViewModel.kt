@@ -74,6 +74,7 @@ class ComicDetailViewModel(
             name = comicArg.title,
             thumbnail = comicArg.thumbnail,
             view = comicArg.view,
+            remoteThumbnail = comicArg.remoteThumbnail,
             isDownloaded = isDownloaded
           )
           .mergeWith(comicDetailInteractor.getFavoriteChange(comicArg.link))

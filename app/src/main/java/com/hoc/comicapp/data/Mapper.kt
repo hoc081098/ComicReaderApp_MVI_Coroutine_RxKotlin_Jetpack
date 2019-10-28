@@ -66,7 +66,8 @@ object Mapper {
       thumbnail = domain.thumbnail,
       lastUpdated = domain.lastUpdated,
       shortenedContent = domain.shortenedContent,
-      title = domain.title
+      title = domain.title,
+      remoteThumbnail = domain.thumbnail
     )
   }
 
@@ -125,7 +126,8 @@ object Mapper {
           nextChapterLink = null,
           chapters = emptyList()
         )
-      }
+      },
+      remoteThumbnail = comic.remoteThumbnail
     )
   }
 
@@ -237,7 +239,8 @@ object Mapper {
       shortenedContent = response.shortenedContent,
       thumbnail = response.thumbnail,
       title = response.title,
-      view = response.view
+      view = response.view,
+      remoteThumbnail = response.thumbnail
     )
   }
 

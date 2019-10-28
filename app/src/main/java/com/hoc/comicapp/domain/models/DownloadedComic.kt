@@ -17,7 +17,9 @@ data class DownloadedComic(
 
   val view: String, // 76228
 
-  val chapters: List<DownloadedChapter>
+  val chapters: List<DownloadedChapter>,
+
+  val remoteThumbnail: String
 ) {
   data class Category(
     val link: String, // https://ww2.mangafox.online/category/webtoons
