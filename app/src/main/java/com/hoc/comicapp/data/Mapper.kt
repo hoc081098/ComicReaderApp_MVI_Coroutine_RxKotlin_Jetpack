@@ -1,13 +1,40 @@
 package com.hoc.comicapp.data
 
+import com.hoc.comicapp.data.firebase.entity._FavoriteComic
 import com.hoc.comicapp.data.local.entities.ChapterEntity
 import com.hoc.comicapp.data.local.entities.ComicAndChapters
 import com.hoc.comicapp.data.local.entities.ComicEntity
-import com.hoc.comicapp.data.remote.response.*
-import com.hoc.comicapp.domain.models.*
+import com.hoc.comicapp.data.remote.response.CategoryDetailPopularComicResponse
+import com.hoc.comicapp.data.remote.response.CategoryResponse
+import com.hoc.comicapp.data.remote.response.ChapterDetailResponse
+import com.hoc.comicapp.data.remote.response.ComicDetailResponse
+import com.hoc.comicapp.data.remote.response.ComicResponse
+import com.hoc.comicapp.domain.models.Category
+import com.hoc.comicapp.domain.models.CategoryDetailPopularComic
+import com.hoc.comicapp.domain.models.ChapterDetail
+import com.hoc.comicapp.domain.models.Comic
+import com.hoc.comicapp.domain.models.ComicDetail
+import com.hoc.comicapp.domain.models.DownloadedChapter
+import com.hoc.comicapp.domain.models.DownloadedComic
+import com.hoc.comicapp.domain.models.FavoriteComic
 
 object Mapper {
-  fun domainToEntity(domain: DownloadedChapter): ChapterEntity {
+
+  /**
+   *
+   */
+
+  fun domainToFirebaseEntity(comic: FavoriteComic): _FavoriteComic {
+    return _FavoriteComic(
+      url = comic.url,
+      title = comic.title,
+      thumbnail = comic.thumbnail,
+      view = comic.view,
+      createdAt = null
+    )
+  }
+
+  fun domainToLocalEntity(domain: DownloadedChapter): ChapterEntity {
     return ChapterEntity(
       chapterLink = domain.chapterLink,
       comicLink = domain.comicLink,
@@ -20,7 +47,7 @@ object Mapper {
     )
   }
 
-  fun domainToEntity(domain: DownloadedComic): ComicEntity {
+  fun domainToLocalEntity(domain: DownloadedComic): ComicEntity {
     return ComicEntity(
       comicLink = domain.comicLink,
       view = domain.view,
@@ -42,6 +69,10 @@ object Mapper {
       title = domain.title
     )
   }
+
+  /**
+   *
+   */
 
   fun entityToDomainModel(entity: ChapterEntity): DownloadedChapter {
     return DownloadedChapter(
@@ -97,6 +128,10 @@ object Mapper {
       }
     )
   }
+
+  /**
+   *
+   */
 
   fun responseToDomainModel(response: ComicResponse): Comic {
     return Comic(
@@ -180,6 +215,49 @@ object Mapper {
         chapterName = response.lastChapter.chapterName,
         chapterLink = response.lastChapter.chapterLink
       )
+    )
+  }
+
+  fun responseToLocalEntity(response: ComicDetailResponse): ComicEntity {
+    return ComicEntity(
+      authors = response.authors.map {
+        ComicEntity.Author(
+          link = it.link,
+          name = it.name
+        )
+      },
+      categories = response.categories.map {
+        ComicEntity.Category(
+          link = it.link,
+          name = it.name
+        )
+      },
+      lastUpdated = response.lastUpdated,
+      comicLink = response.link,
+      shortenedContent = response.shortenedContent,
+      thumbnail = response.thumbnail,
+      title = response.title,
+      view = response.view
+    )
+  }
+
+  fun responseToFirebaseEntity(response: ComicResponse): _FavoriteComic {
+    return _FavoriteComic(
+      url = response.link,
+      thumbnail = response.thumbnail,
+      createdAt = null,
+      view = response.view,
+      title = response.title
+    )
+  }
+
+  fun responseToFirebaseEntity(response: ComicDetailResponse): _FavoriteComic {
+    return _FavoriteComic(
+      url = response.link,
+      thumbnail = response.thumbnail,
+      createdAt = null,
+      view = response.view,
+      title = response.title
     )
   }
 }

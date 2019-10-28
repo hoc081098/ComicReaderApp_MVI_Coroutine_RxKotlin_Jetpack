@@ -12,6 +12,8 @@ import com.hoc.comicapp.domain.thread.RxSchedulerProviderImpl
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -32,6 +34,8 @@ val appModule = module {
   single { FirebaseStorage.getInstance() }
 
   single { FirebaseFirestore.getInstance() }
+
+  single { CoroutineScope(get<CoroutinesDispatcherProvider>().io + SupervisorJob()) }
 }
 
 private fun getChapterJsonAdapter(moshi: Moshi): JsonAdapter<ComicDetail.Chapter> {

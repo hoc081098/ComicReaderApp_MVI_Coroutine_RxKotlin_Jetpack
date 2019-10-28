@@ -16,17 +16,54 @@ import com.hoc.comicapp.utils.left
 import com.hoc.comicapp.utils.right
 import com.hoc.comicapp.utils.snapshots
 import io.reactivex.Observable
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
 
+@ExperimentalTime
+@ObsoleteCoroutinesApi
 class FavoriteComicsDataSourceImpl(
   private val firebaseAuth: FirebaseAuth,
   private val firebaseFirestore: FirebaseFirestore,
   private val rxSchedulerProvider: RxSchedulerProvider,
   private val dispatcherProvider: CoroutinesDispatcherProvider,
-  private val firebaseAuthUserDataSource: FirebaseAuthUserDataSource
+  private val firebaseAuthUserDataSource: FirebaseAuthUserDataSource,
+  appCoroutineScope: CoroutineScope
 ) : FavoriteComicsDataSource {
+  private val actor = appCoroutineScope.actor<List<_FavoriteComic>>(capacity = Channel.BUFFERED) {
+    for (comics in this) {
+      _updateComics(comics)
+    }
+  }
+
+  @Suppress("FunctionName")
+  private suspend fun _updateComics(comics: List<_FavoriteComic>) {
+    measureTime {
+      Timber.d("[UPDATE_COMICS] Start size=${comics.size}")
+
+      val collection = favoriteCollectionForCurrentUserOrNull ?: return@measureTime
+      val documents = collection.get().await().documents
+
+      firebaseFirestore
+        .runBatch { writeBatch ->
+          documents.fold(writeBatch) { batch, doc ->
+            when (val comic = comics.find { it.url == doc["url"] }) {
+              null -> batch
+              else -> batch.update(doc.reference, comic.asMap())
+            }
+          }
+        }
+        .await()
+
+    }.let { Timber.d("[UPDATE_COMICS] Done all $it") }
+  }
+
   override fun isFavorited(url: String): Observable<Either<Throwable, Boolean>> {
     return firebaseAuthUserDataSource
       .userObservable()
@@ -99,6 +136,10 @@ class FavoriteComicsDataSourceImpl(
         Timber.d("Insert to favorites: $comic")
       }
     }
+  }
+
+  override fun update(comics: List<_FavoriteComic>) {
+    actor.offer(comics)
   }
 
   private val favoriteCollectionForCurrentUserOrNull: CollectionReference?
