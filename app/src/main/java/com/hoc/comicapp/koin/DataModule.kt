@@ -1,5 +1,9 @@
 package com.hoc.comicapp.koin
 
+import com.hoc.comicapp.data.firebase.favorite_comics.FavoriteComicsDataSource
+import com.hoc.comicapp.data.firebase.favorite_comics.FavoriteComicsDataSourceImpl
+import com.hoc.comicapp.data.firebase.user.FirebaseAuthUserDataSource
+import com.hoc.comicapp.data.firebase.user.FirebaseAuthUserDataSourceImpl
 import com.hoc.comicapp.data.local.AppDatabase
 import com.hoc.comicapp.data.repository.ComicRepositoryImpl
 import com.hoc.comicapp.data.repository.DownloadComicsRepositoryImpl
@@ -17,7 +21,7 @@ import org.koin.dsl.module
 
 @ExperimentalCoroutinesApi
 val dataModule = module {
-  single { FavoriteComicsRepositoryImpl(get(), get(), get(), get(), get()) } bind FavoriteComicsRepository::class
+  single { FavoriteComicsRepositoryImpl(get(), get()) } bind FavoriteComicsRepository::class
 
   single { ComicRepositoryImpl(get(), get(), get()) } bind ComicRepository::class
 
@@ -35,11 +39,31 @@ val dataModule = module {
     )
   } bind DownloadComicsRepository::class
 
-  single { UserRepositoryImpl(get(), get(), get(), get(), get()) } bind UserRepository::class
+  single { UserRepositoryImpl(get(), get()) } bind UserRepository::class
 
   single { AppDatabase.getInstance(androidContext()) }
 
   single { get<AppDatabase>().chapterDao() }
 
   single { get<AppDatabase>().comicDao() }
+
+  single {
+    FirebaseAuthUserDataSourceImpl(
+      get(),
+      get(),
+      get(),
+      get(),
+      get()
+    )
+  } bind FirebaseAuthUserDataSource::class
+
+  single {
+    FavoriteComicsDataSourceImpl(
+      get(),
+      get(),
+      get(),
+      get(),
+      get()
+    )
+  } bind FavoriteComicsDataSource::class
 }
