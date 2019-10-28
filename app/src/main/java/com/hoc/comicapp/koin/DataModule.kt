@@ -1,5 +1,7 @@
 package com.hoc.comicapp.koin
 
+import com.hoc.comicapp.data.firebase.user.FirebaseAuthUserDataSource
+import com.hoc.comicapp.data.firebase.user.FirebaseAuthUserDataSourceImpl
 import com.hoc.comicapp.data.local.AppDatabase
 import com.hoc.comicapp.data.repository.ComicRepositoryImpl
 import com.hoc.comicapp.data.repository.DownloadComicsRepositoryImpl
@@ -35,11 +37,21 @@ val dataModule = module {
     )
   } bind DownloadComicsRepository::class
 
-  single { UserRepositoryImpl(get(), get(), get(), get(), get()) } bind UserRepository::class
+  single { UserRepositoryImpl(get(), get()) } bind UserRepository::class
 
   single { AppDatabase.getInstance(androidContext()) }
 
   single { get<AppDatabase>().chapterDao() }
 
   single { get<AppDatabase>().comicDao() }
+
+  single {
+    FirebaseAuthUserDataSourceImpl(
+      get(),
+      get(),
+      get(),
+      get(),
+      get()
+    )
+  } bind FirebaseAuthUserDataSource::class
 }

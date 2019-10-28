@@ -1,14 +1,11 @@
 package com.hoc.comicapp.data.repository
 
-import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.IgnoreExtraProperties
-import com.google.firebase.firestore.PropertyName
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QueryDocumentSnapshot
-import com.google.firebase.firestore.ServerTimestamp
+import com.hoc.comicapp.data.firebase.entity._FavoriteComic
 import com.hoc.comicapp.domain.models.AuthError
 import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.FavoriteComic
@@ -33,35 +30,6 @@ class FavoriteComicsRepositoryImpl(
   private val rxSchedulerProvider: RxSchedulerProvider,
   private val dispatcherProvider: CoroutinesDispatcherProvider
 ) : FavoriteComicsRepository {
-
-  @Suppress("ClassName")
-  @IgnoreExtraProperties
-  private data class _FavoriteComic(
-    @get:PropertyName("url") @set:PropertyName("url") var url: String,
-    @get:PropertyName("title") @set:PropertyName("title") var title: String,
-    @get:PropertyName("thumbnail") @set:PropertyName("thumbnail") var thumbnail: String,
-    @get:PropertyName("view") @set:PropertyName("view") var view: String,
-    @get:ServerTimestamp @get:PropertyName("created_at") @set:PropertyName("created_at") var createdAt: Timestamp?
-  ) {
-    fun toDomain(): FavoriteComic {
-      return FavoriteComic(
-        title = title,
-        thumbnail = thumbnail,
-        createdAt = createdAt?.toDate(),
-        url = url,
-        view = view
-      )
-    }
-
-    @Suppress("unused")
-    constructor() : this(
-      url = "",
-      createdAt = null,
-      thumbnail = "",
-      title = "",
-      view = ""
-    )
-  }
 
   override fun isFavorited(url: String): Observable<Either<ComicAppError, Boolean>> {
     val collection = favoriteCollectionForCurrentUserOrNull

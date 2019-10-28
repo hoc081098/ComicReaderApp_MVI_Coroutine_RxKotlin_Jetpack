@@ -26,3 +26,14 @@ inline fun <L, R, T> Either<L, R>.flatMap(f: (R) -> Either<L, T>): Either<L, T> 
 
 inline fun <L, R, T> Either<L, R>.map(f: (R) -> T): Either<L, T> =
   flatMap { Right(f(it)) }
+
+/**
+ * Map over Left and Right of this Either
+ */
+fun <L, R, C, D> Either<L, R>.bimap(
+  leftOperation: (L) -> C,
+  rightOperation: (R) -> D
+): Either<C, D> = fold(
+  { Left(leftOperation(it)) },
+  { Right(rightOperation(it)) }
+)
