@@ -24,7 +24,7 @@ class UserRepositoryImpl(
     return try {
       userDataSource.signOut()
       Unit.right()
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
       e.toError(retrofit).left()
     }
   }
@@ -52,7 +52,7 @@ class UserRepositoryImpl(
         avatar = avatar
       )
       Unit.right()
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
       Timber.d("register error $e")
       delay(1_000)
       e.toError(retrofit).left()
@@ -63,7 +63,7 @@ class UserRepositoryImpl(
     return try {
       userDataSource.login(email, password)
       Unit.right()
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
       delay(1_000)
       e.toError(retrofit).left()
     }

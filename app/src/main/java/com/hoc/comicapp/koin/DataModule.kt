@@ -1,5 +1,7 @@
 package com.hoc.comicapp.koin
 
+import com.hoc.comicapp.data.firebase.favorite_comics.FavoriteComicsDataSource
+import com.hoc.comicapp.data.firebase.favorite_comics.FavoriteComicsDataSourceImpl
 import com.hoc.comicapp.data.firebase.user.FirebaseAuthUserDataSource
 import com.hoc.comicapp.data.firebase.user.FirebaseAuthUserDataSourceImpl
 import com.hoc.comicapp.data.local.AppDatabase
@@ -19,7 +21,7 @@ import org.koin.dsl.module
 
 @ExperimentalCoroutinesApi
 val dataModule = module {
-  single { FavoriteComicsRepositoryImpl(get(), get(), get(), get(), get()) } bind FavoriteComicsRepository::class
+  single { FavoriteComicsRepositoryImpl(get(), get()) } bind FavoriteComicsRepository::class
 
   single { ComicRepositoryImpl(get(), get(), get()) } bind ComicRepository::class
 
@@ -54,4 +56,14 @@ val dataModule = module {
       get()
     )
   } bind FirebaseAuthUserDataSource::class
+
+  single {
+    FavoriteComicsDataSourceImpl(
+      get(),
+      get(),
+      get(),
+      get(),
+      get()
+    )
+  } bind FavoriteComicsDataSource::class
 }

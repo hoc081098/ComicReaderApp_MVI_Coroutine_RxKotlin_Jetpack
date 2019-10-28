@@ -12,5 +12,5 @@ interface FavoriteComicsRepository {
 
   suspend fun removeFromFavorite(comic: FavoriteComic): Either<ComicAppError, Unit>
 
-  suspend fun toggle(comic: FavoriteComic)
+  suspend fun toggle(comic: FavoriteComic): Either<ComicAppError, Unit>
 }
