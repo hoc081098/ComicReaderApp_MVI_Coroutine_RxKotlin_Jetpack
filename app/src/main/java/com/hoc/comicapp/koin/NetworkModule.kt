@@ -33,9 +33,9 @@ private fun getRetrofit(client: OkHttpClient, moshi: Moshi): Retrofit {
 
 private fun getOkHttpClient(): OkHttpClient {
   return OkHttpClient.Builder()
-    .connectTimeout(20, TimeUnit.SECONDS)
-    .readTimeout(20, TimeUnit.SECONDS)
-    .writeTimeout(20, TimeUnit.SECONDS)
+    .connectTimeout(15, TimeUnit.SECONDS)
+    .readTimeout(15, TimeUnit.SECONDS)
+    .writeTimeout(15, TimeUnit.SECONDS)
     .apply {
       if (BuildConfig.DEBUG) {
         HttpLoggingInterceptor()
