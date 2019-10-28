@@ -34,13 +34,15 @@ interface SearchComicContract {
         val title: String,
         val thumbnail: String,
         val link: String,
-        val lastChapters: List<ChapterItem>
+        val lastChapters: List<ChapterItem>,
+        val view: String
       ) : Item() {
         constructor(domain: Comic) : this(
           title = domain.title,
           thumbnail = domain.thumbnail,
           link = domain.link,
-          lastChapters = domain.lastChapters.map(::ChapterItem)
+          lastChapters = domain.lastChapters.map(::ChapterItem),
+          view = domain.view
         )
       }
 

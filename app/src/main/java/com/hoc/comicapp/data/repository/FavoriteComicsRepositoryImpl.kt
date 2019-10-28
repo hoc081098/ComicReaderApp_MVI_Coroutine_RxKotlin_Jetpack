@@ -24,6 +24,7 @@ import io.reactivex.Observable
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
+import timber.log.Timber
 
 class FavoriteComicsRepositoryImpl(
   private val firebaseAuth: FirebaseAuth,
@@ -133,6 +134,7 @@ class FavoriteComicsRepositoryImpl(
       } else {
         (favoriteCollectionForCurrentUserOrNull
           ?: throw AuthError.Unauthenticated).add(comic.toEntity()).await()
+        Timber.d("Insert to favorite $comic")
       }
       Unit
     }
