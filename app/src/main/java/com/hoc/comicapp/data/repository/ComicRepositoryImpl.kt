@@ -23,6 +23,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.actor
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import timber.log.Timber
@@ -72,6 +73,7 @@ class ComicRepositoryImpl(
       }
     } catch (throwable: Throwable) {
       Timber.d(throwable, "ComicRepositoryImpl::$tag $throwable", throwable)
+      delay(500)
       throwable.toError(retrofit).left()
     }
   }
