@@ -12,15 +12,12 @@ import androidx.work.workDataOf
 import com.hoc.comicapp.R
 import com.hoc.comicapp.activity.SplashActivity
 import com.hoc.comicapp.domain.models.ComicDetail.Chapter
-import com.hoc.comicapp.domain.models.getMessage
-import com.hoc.comicapp.domain.models.toError
 import com.hoc.comicapp.domain.repository.DownloadComicsRepository
 import com.squareup.moshi.JsonAdapter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import org.koin.core.KoinComponent
 import org.koin.core.inject
-import retrofit2.Retrofit
 import timber.log.Timber
 
 @ExperimentalCoroutinesApi
@@ -30,7 +27,6 @@ class DownloadComicWorker(
 ) : CoroutineWorker(appContext, params), KoinComponent {
   private val downloadComicsRepo by inject<DownloadComicsRepository>()
   private val chapterJsonAdapter by inject<JsonAdapter<Chapter>>()
-  private val retrofit by inject<Retrofit>()
 
   override suspend fun doWork(): Result {
     val chapterJson = inputData.getString(CHAPTER)
@@ -99,7 +95,7 @@ class DownloadComicWorker(
       notificationManagerCompat.notify(
         1,
         notificationBuilder
-          .setContentText("Download fail: ${e.toError(retrofit).getMessage()}")
+          .setContentText("Download fail")
           .setProgress(0, 0, false)
           .build()
       )

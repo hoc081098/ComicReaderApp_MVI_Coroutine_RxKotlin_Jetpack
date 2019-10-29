@@ -14,7 +14,9 @@ import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
 import rx_activity_result2.RxActivityResult
 import timber.log.Timber
+import kotlin.time.ExperimentalTime
 
+@ExperimentalTime
 @ExperimentalCoroutinesApi
 class App : Application() {
   override fun onCreate() {
