@@ -82,7 +82,9 @@ class CategoryFragment : Fragment() {
     viewModel.state.observe(owner = viewLifecycleOwner) { (isLoading, categories, errorMessage, refreshLoading) ->
       Timber.d("[STATE] categories.length=${categories.size} isLoading=$isLoading errorMessage=$errorMessage")
 
-      if (!refreshLoading) {
+      if (refreshLoading) {
+        swipe_refresh_layout.post { swipe_refresh_layout.isRefreshing = true }
+      } else {
         swipe_refresh_layout.isRefreshing = false
       }
 
