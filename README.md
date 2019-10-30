@@ -8,8 +8,9 @@ Comic reader app 📘. Learning MVVM / MVI with RxKotlin, Retrofit, Kotlin Corou
 
 # Screenshots
 
-|  |  |   | |
-| :---:                              | :---:                             | :---:                              | :---:     |
-|![](screenshots/1.jpeg) |![](screenshots/2.jpeg) | ![](screenshots/3.jpeg)|![](screenshots/4.jpeg) |
-|![](screenshots/5.jpeg) |![](screenshots/6.jpeg) | ![](screenshots/7.jpeg)|![](screenshots/8.jpeg) |
-|![](screenshots/9.jpeg) |![](screenshots/10.png) | ![](screenshots/11.png) |  |
+|                         |                         |                         |                         |
+|        :---:            |          :---:          |        :---:            |          :---:          |
+| ![](screenshots/1.jpeg) | ![](screenshots/2.jpeg) | ![](screenshots/3.jpeg) | ![](screenshots/4.jpeg) |
+| ![](screenshots/5.jpeg) | ![](screenshots/6.jpeg) | ![](screenshots/7.jpeg) | ![](screenshots/8.jpeg) |
+| ![](screenshots/9.jpeg) | ![](screenshots/10.png) | ![](screenshots/11.png) | ![](screenshots/12.png) |
+| ![](screenshots/13.png) | ![](screenshots/14.png) | ![](screenshots/15.png) |                         |
