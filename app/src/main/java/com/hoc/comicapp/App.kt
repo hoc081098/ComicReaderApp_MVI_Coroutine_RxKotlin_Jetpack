@@ -9,6 +9,7 @@ import com.hoc.comicapp.koin.dataModule
 import com.hoc.comicapp.koin.networkModule
 import com.hoc.comicapp.koin.viewModelModule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -16,6 +17,8 @@ import rx_activity_result2.RxActivityResult
 import timber.log.Timber
 import kotlin.time.ExperimentalTime
 
+@Suppress("unused")
+@ObsoleteCoroutinesApi
 @ExperimentalTime
 @ExperimentalCoroutinesApi
 class App : Application() {
