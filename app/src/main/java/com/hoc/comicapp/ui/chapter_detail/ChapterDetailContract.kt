@@ -5,6 +5,7 @@ import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.DownloadedChapter
 import com.hoc.comicapp.domain.models.getMessage
 import io.reactivex.Observable
+import timber.log.Timber
 
 interface ChapterDetailContract {
 
@@ -109,16 +110,35 @@ interface ChapterDetailContract {
         )
       }
     }
+
+    fun withChapter(chapter: Chapter): Detail {
+      val detail = detail
+        ?: return Detail.Initial(chapter = chapter)
+
+      // copy new state with previous chapters list
+
+      val chapters = detail.chapters
+      val index = chapters.indexOfFirst { it.link == chapter.link }
+      Timber.tag("LoadChapter###").d("::reducer $index $detail")
+
+      return Detail.Data(
+        chapter = chapter,
+        chapters = chapters,
+        images = emptyList(),
+        nextChapterLink = chapters.getOrNull(index + 1)?.link,
+        prevChapterLink = chapters.getOrNull(index - 1)?.link
+      )
+    }
   }
 
   sealed class PartialChange {
     abstract fun reducer(state: ViewState): ViewState
 
-    sealed class InitialRetryLoadChapterPartialChange : PartialChange() {
+    sealed class GetChapterDetail : PartialChange() {
       override fun reducer(state: ViewState): ViewState {
         return when (this) {
-          is InitialData -> {
-            state.copy(detail = this.initial)
+          is Initial -> {
+            state.copy(detail = state.withChapter(chapter))
           }
           is Data -> {
             state.copy(
@@ -131,7 +151,7 @@ interface ChapterDetailContract {
             state.copy(
               isLoading = false,
               errorMessage = this.error.getMessage(),
-              detail = this.data
+              detail = state.withChapter(chapter)
             )
           }
           Loading -> {
@@ -143,17 +163,18 @@ interface ChapterDetailContract {
         }
       }
 
-      data class InitialData(val initial: ViewState.Detail.Initial) :
-        InitialRetryLoadChapterPartialChange()
+      data class Initial(val chapter: ViewState.Chapter) : GetChapterDetail()
 
-      data class Data(val data: ViewState.Detail.Data) : InitialRetryLoadChapterPartialChange()
-      data class Error(val error: ComicAppError, val data: ViewState.Detail.Data) :
-        InitialRetryLoadChapterPartialChange()
+      data class Data(val data: ViewState.Detail.Data) : GetChapterDetail()
+      data class Error(
+        val error: ComicAppError,
+        val chapter: ViewState.Chapter
+      ) : GetChapterDetail()
 
-      object Loading : InitialRetryLoadChapterPartialChange()
+      object Loading : GetChapterDetail()
     }
 
-    sealed class RefreshPartialChange : PartialChange() {
+    sealed class Refresh : PartialChange() {
       override fun reducer(state: ViewState): ViewState {
         return when (this) {
           is Success -> {
@@ -175,9 +196,9 @@ interface ChapterDetailContract {
         }
       }
 
-      data class Success(val data: ViewState.Detail.Data) : RefreshPartialChange()
-      data class Error(val error: ComicAppError) : RefreshPartialChange()
-      object Loading : RefreshPartialChange()
+      data class Success(val data: ViewState.Detail.Data) : Refresh()
+      data class Error(val error: ComicAppError) : Refresh()
+      object Loading : Refresh()
     }
   }
 

@@ -87,8 +87,9 @@ class ChapterDetailFragment : Fragment() {
 
       val index = detail.chapters.indexOfFirst { it == detail.chapter }
       spinner_chapters.setSelection(index, false)
-    }
 
+      Timber.tag("LoadChapter###").d("::initView $index $detail")
+    }
   }
 
   private fun bind(
@@ -104,6 +105,7 @@ class ChapterDetailFragment : Fragment() {
     }
     viewModel.state.observe(owner = viewLifecycleOwner) { (isLoading, isRefreshing, errorMessage, detail, @ViewPager2.Orientation orientation) ->
       Timber.d("chapter_detail_state=[$isLoading, $isRefreshing, $errorMessage, $detail, $orientation]")
+
       shouldEmitSelectedItem = false
 
       (recycler_images.layoutManager as LinearLayoutManager).orientation = orientation
@@ -133,6 +135,10 @@ class ChapterDetailFragment : Fragment() {
         }
         is ViewState.Detail.Initial -> {
           imageAdapter.submitList(emptyList())
+
+          TransitionManager.beginDelayedTransition(bottom_nav, AutoTransition())
+          button_prev.isInvisible = true
+          button_next.isInvisible = true
         }
       }
 

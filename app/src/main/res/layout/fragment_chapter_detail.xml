@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:padding="0dp"
-        app:cardBackgroundColor="@color/colorBackground"
+        app:cardBackgroundColor="@color/colorPrimary"
         app:cardCornerRadius="2dp"
         app:cardElevation="2dp"
         app:cardPreventCornerOverlap="false"

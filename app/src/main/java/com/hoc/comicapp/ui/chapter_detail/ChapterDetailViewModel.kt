@@ -64,8 +64,8 @@ class ChapterDetailViewModel(
           .refresh(currentChapter, isDownloaded)
           .doOnNext {
             when (it) {
-              is PartialChange.RefreshPartialChange.Error -> sendMessageEvent(message = "Refresh error occurred: ${it.error.getMessage()}")
-              is PartialChange.RefreshPartialChange.Success -> sendMessageEvent(message = "Refresh success")
+              is PartialChange.Refresh.Error -> sendMessageEvent(message = "Refresh error occurred: ${it.error.getMessage()}")
+              is PartialChange.Refresh.Success -> sendMessageEvent(message = "Refresh success")
             }
           }
       }
@@ -77,7 +77,7 @@ class ChapterDetailViewModel(
         interactor
           .getChapterDetail(currentChapter, isDownloaded)
           .doOnNext {
-            if (it is PartialChange.InitialRetryLoadChapterPartialChange.Error) {
+            if (it is PartialChange.GetChapterDetail.Error) {
               sendMessageEvent(message = "Retry error occurred: ${it.error.getMessage()}")
             }
           }
@@ -91,7 +91,7 @@ class ChapterDetailViewModel(
           interactor
             .getChapterDetail(intent.chapter, isDownloaded)
             .doOnNext {
-              if (it is PartialChange.InitialRetryLoadChapterPartialChange.Error) {
+              if (it is PartialChange.GetChapterDetail.Error) {
                 sendMessageEvent("Load ${intent.chapter.name} error occurred: ${it.error.getMessage()}")
               }
             }
