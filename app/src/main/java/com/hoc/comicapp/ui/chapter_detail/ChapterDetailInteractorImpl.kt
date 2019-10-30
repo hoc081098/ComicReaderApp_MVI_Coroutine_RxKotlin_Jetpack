@@ -3,11 +3,10 @@ package com.hoc.comicapp.ui.chapter_detail
 import com.hoc.comicapp.domain.repository.ComicRepository
 import com.hoc.comicapp.domain.repository.DownloadComicsRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
-import com.hoc.comicapp.ui.chapter_detail.ChapterDetailPartialChange.InitialRetryLoadChapterPartialChange
-import com.hoc.comicapp.ui.chapter_detail.ChapterDetailPartialChange.RefreshPartialChange
-import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewState.Chapter
-import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewState.Detail
-import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewState.Detail.Companion.fromDomain
+import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract.Interactor
+import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract.PartialChange
+import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract.ViewState
+import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract.ViewState.Detail.Companion.fromDomain
 import com.hoc.comicapp.utils.fold
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emitAll
@@ -22,22 +21,33 @@ class ChapterDetailInteractorImpl(
   private val comicRepository: ComicRepository,
   private val dispatcherProvider: CoroutinesDispatcherProvider,
   private val downloadComicsRepository: DownloadComicsRepository
-) : ChapterDetailInteractor {
-  override fun getChapterDetail(chapter: Chapter, isDownloaded: Boolean) = flow<InitialRetryLoadChapterPartialChange> {
+) : Interactor {
+  override fun getChapterDetail(chapter: ViewState.Chapter, isDownloaded: Boolean) = flow<PartialChange> {
     Timber.tag("LoadChapter###").d("getChapterDetail ${chapter.debug}")
 
-    val initial = Detail.Initial(chapter)
-    emit(InitialRetryLoadChapterPartialChange.InitialData(initial))
+    val initial = ViewState.Detail.Initial(chapter)
+    emit(PartialChange.InitialRetryLoadChapterPartialChange.InitialData(initial))
 
-    emit(InitialRetryLoadChapterPartialChange.Loading)
+    emit(PartialChange.InitialRetryLoadChapterPartialChange.Loading)
 
     if (isDownloaded) {
       downloadComicsRepository
         .getDownloadedChapter(chapter.link)
         .map {
           it.fold(
-            left = { InitialRetryLoadChapterPartialChange.Error(it, initial) },
-            right = { InitialRetryLoadChapterPartialChange.Data(fromDomain(it)) }
+            left = {
+              PartialChange.InitialRetryLoadChapterPartialChange.Error(
+                it,
+                ViewState.Detail.Data(
+                  TODO(),
+                  TODO(),
+                  TODO(),
+                  TODO(),
+                  TODO()
+                )
+              )
+            },
+            right = { PartialChange.InitialRetryLoadChapterPartialChange.Data(fromDomain(it)) }
           )
         }
         .let { emitAll(it) }
@@ -46,21 +56,21 @@ class ChapterDetailInteractorImpl(
         .getChapterDetail(chapter.link)
         .fold(
           left = {
-            InitialRetryLoadChapterPartialChange.Error(
+            PartialChange.InitialRetryLoadChapterPartialChange.Error(
               it,
-              initial
+              TODO()
             )
           },
-          right = { InitialRetryLoadChapterPartialChange.Data(fromDomain(it)) }
+          right = { PartialChange.InitialRetryLoadChapterPartialChange.Data(fromDomain(it)) }
         )
         .let { emit(it) }
     }
   }.flowOn(dispatcherProvider.ui).asObservable()
 
-  override fun refresh(chapter: Chapter, isDownloaded: Boolean) = flow<ChapterDetailPartialChange> {
+  override fun refresh(chapter: ViewState.Chapter, isDownloaded: Boolean) = flow<PartialChange> {
     Timber.tag("LoadChapter###").d("refresh ${chapter.debug}")
 
-    emit(RefreshPartialChange.Loading)
+    emit(PartialChange.RefreshPartialChange.Loading)
 
     if (isDownloaded) {
       var isFirstEvent = true
@@ -69,14 +79,14 @@ class ChapterDetailInteractorImpl(
         .map {
           if (isFirstEvent) {
             it.fold(
-              left = { RefreshPartialChange.Error(it) },
-              right = { RefreshPartialChange.Success(fromDomain(it)) }
+              left = { PartialChange.RefreshPartialChange.Error(it) },
+              right = { PartialChange.RefreshPartialChange.Success(fromDomain(it)) }
             ).also { isFirstEvent = false }
           } else {
-            val initial = Detail.Initial(chapter)
+            val initial = ViewState.Detail.Initial(chapter)
             it.fold(
-              left = { InitialRetryLoadChapterPartialChange.Error(it, initial) },
-              right = { InitialRetryLoadChapterPartialChange.Data(fromDomain(it)) }
+              left = { PartialChange.InitialRetryLoadChapterPartialChange.Error(it, TODO()) },
+              right = { PartialChange.InitialRetryLoadChapterPartialChange.Data(fromDomain(it)) }
             )
           }
         }
@@ -85,8 +95,8 @@ class ChapterDetailInteractorImpl(
       comicRepository
         .getChapterDetail(chapter.link)
         .fold(
-          left = { RefreshPartialChange.Error(it) },
-          right = { RefreshPartialChange.Success(fromDomain(it)) }
+          left = { PartialChange.RefreshPartialChange.Error(it) },
+          right = { PartialChange.RefreshPartialChange.Success(fromDomain(it)) }
         )
         .let { emit(it) }
     }

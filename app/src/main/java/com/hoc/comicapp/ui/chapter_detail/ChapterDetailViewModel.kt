@@ -3,17 +3,12 @@ package com.hoc.comicapp.ui.chapter_detail
 import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
-import com.hoc.comicapp.ui.chapter_detail.ChapterDetailPartialChange.InitialRetryLoadChapterPartialChange
-import com.hoc.comicapp.ui.chapter_detail.ChapterDetailPartialChange.RefreshPartialChange.Error
-import com.hoc.comicapp.ui.chapter_detail.ChapterDetailPartialChange.RefreshPartialChange.Success
-import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewIntent.ChangeOrientation
-import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewIntent.Initial
-import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewIntent.LoadChapter
-import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewIntent.LoadNextChapter
-import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewIntent.LoadPrevChapter
-import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewIntent.Refresh
-import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewIntent.Retry
-import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewState.Chapter
+import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract.Interactor
+import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract.PartialChange
+import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract.SingleEvent
+import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract.ViewIntent
+import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract.ViewState
+import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract.ViewState.Chapter
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.mapNotNull
 import com.hoc.comicapp.utils.notOfType
@@ -22,26 +17,25 @@ import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.cast
 import io.reactivex.rxkotlin.ofType
 import io.reactivex.rxkotlin.subscribeBy
 
 class ChapterDetailViewModel(
-  private val interactor: ChapterDetailInteractor,
+  private val interactor: Interactor,
   rxSchedulerProvider: RxSchedulerProvider,
   private val isDownloaded: Boolean
 ) :
-  BaseViewModel<ChapterDetailViewIntent, ChapterDetailViewState, ChapterDetailSingleEvent>() {
-  override val initialState = ChapterDetailViewState.initial()
+  BaseViewModel<ViewIntent, ViewState, SingleEvent>() {
+  override val initialState = ViewState.initial()
 
-  private val intentS = PublishRelay.create<ChapterDetailViewIntent>()
+  private val intentS = PublishRelay.create<ViewIntent>()
 
   private val currentChapter
     get() = state.value.detail?.chapter ?: error("State is null")
 
   private val nextChapter: Chapter?
     get() {
-      val detail = (state.value.detail as? ChapterDetailViewState.Detail.Data) ?: return null
+      val detail = (state.value.detail as? ViewState.Detail.Data) ?: return null
       return detail.nextChapterLink?.let { nextChapterLink ->
         detail
           .chapters
@@ -53,7 +47,7 @@ class ChapterDetailViewModel(
 
   private val prevChapter: Chapter?
     get() {
-      val detail = (state.value.detail as? ChapterDetailViewState.Detail.Data) ?: return null
+      val detail = (state.value.detail as? ViewState.Detail.Data) ?: return null
       return detail.prevChapterLink?.let { prevChapterLink ->
         detail
           .chapters
@@ -64,41 +58,40 @@ class ChapterDetailViewModel(
     }
 
   private val refreshProcessor =
-    ObservableTransformer<Refresh, ChapterDetailPartialChange> { intents ->
+    ObservableTransformer<ViewIntent.Refresh, PartialChange> { intents ->
       intents.exhaustMap {
         interactor
           .refresh(currentChapter, isDownloaded)
           .doOnNext {
             when (it) {
-              is Error -> sendMessageEvent(message = "Refresh error occurred: ${it.error.getMessage()}")
-              is Success -> sendMessageEvent(message = "Refresh success")
+              is PartialChange.RefreshPartialChange.Error -> sendMessageEvent(message = "Refresh error occurred: ${it.error.getMessage()}")
+              is PartialChange.RefreshPartialChange.Success -> sendMessageEvent(message = "Refresh success")
             }
           }
       }
     }
 
   private val retryProcessor =
-    ObservableTransformer<Retry, ChapterDetailPartialChange> { intents ->
+    ObservableTransformer<ViewIntent.Retry, PartialChange> { intents ->
       intents.exhaustMap {
         interactor
           .getChapterDetail(currentChapter, isDownloaded)
           .doOnNext {
-            if (it is InitialRetryLoadChapterPartialChange.Error) {
+            if (it is PartialChange.InitialRetryLoadChapterPartialChange.Error) {
               sendMessageEvent(message = "Retry error occurred: ${it.error.getMessage()}")
             }
           }
-          .cast<ChapterDetailPartialChange>()
       }
     }
 
   private val loadChapterProcessor =
-    ObservableTransformer<LoadChapter, ChapterDetailPartialChange> { intents ->
+    ObservableTransformer<ViewIntent.LoadChapter, PartialChange> { intents ->
       intents
         .switchMap { intent ->
           interactor
             .getChapterDetail(intent.chapter, isDownloaded)
             .doOnNext {
-              if (it is InitialRetryLoadChapterPartialChange.Error) {
+              if (it is PartialChange.InitialRetryLoadChapterPartialChange.Error) {
                 sendMessageEvent("Load ${intent.chapter.name} error occurred: ${it.error.getMessage()}")
               }
             }
@@ -106,26 +99,26 @@ class ChapterDetailViewModel(
     }
 
   private val intentToChanges =
-    ObservableTransformer<ChapterDetailViewIntent, ChapterDetailPartialChange> { intents ->
+    ObservableTransformer<ViewIntent, PartialChange> { intents ->
       Observable.mergeArray(
         Observable.mergeArray(
           intents.ofType(),
-          intents.ofType<Initial>().map { LoadChapter(it.chapter) },
-          intents.ofType<LoadNextChapter>()
+          intents.ofType<ViewIntent.Initial>().map { ViewIntent.LoadChapter(it.chapter) },
+          intents.ofType<ViewIntent.LoadNextChapter>()
             .mapNotNull { nextChapter }
-            .map(::LoadChapter),
-          intents.ofType<LoadPrevChapter>()
+            .map { ViewIntent.LoadChapter(it) },
+          intents.ofType<ViewIntent.LoadPrevChapter>()
             .mapNotNull { prevChapter }
-            .map(::LoadChapter)
+            .map { ViewIntent.LoadChapter(it) }
         )
           .distinctUntilChanged()
           .compose(loadChapterProcessor),
-        intents.ofType<Refresh>().compose(refreshProcessor),
-        intents.ofType<Retry>().compose(retryProcessor)
+        intents.ofType<ViewIntent.Refresh>().compose(refreshProcessor),
+        intents.ofType<ViewIntent.Retry>().compose(retryProcessor)
       )
     }
 
-  override fun processIntents(intents: Observable<ChapterDetailViewIntent>) =
+  override fun processIntents(intents: Observable<ViewIntent>) =
     intents.subscribe(intentS)!!
 
   init {
@@ -137,7 +130,7 @@ class ChapterDetailViewModel(
             .compose(intentToChanges)
             .scan(initialState) { vs, change -> change.reducer(vs) },
           intents
-            .ofType<ChangeOrientation>()
+            .ofType<ViewIntent.ChangeOrientation>()
             .map { it.orientation }
         ) { state, orientation -> state.copy(orientation = orientation) }
       }
@@ -150,20 +143,20 @@ class ChapterDetailViewModel(
    * Send [message]
    */
   private fun sendMessageEvent(message: String) =
-    sendEvent(ChapterDetailSingleEvent.MessageEvent(message))
+    sendEvent(SingleEvent.MessageEvent(message))
 
   private companion object {
     /**
-     * Only take 1 [ChapterDetailViewIntent.Initial]
+     * Only take 1 [ViewIntent.Initial]
      */
     @JvmStatic
-    private val intentFilter = ObservableTransformer<ChapterDetailViewIntent, ChapterDetailViewIntent> {
+    private val intentFilter = ObservableTransformer<ViewIntent, ViewIntent> {
       it.publish { shared ->
         Observable.mergeArray(
           shared
-            .ofType<Initial>()
+            .ofType<ViewIntent.Initial>()
             .take(1),
-          shared.notOfType<Initial, ChapterDetailViewIntent>()
+          shared.notOfType<ViewIntent.Initial, ViewIntent>()
         )
       }
     }
