@@ -18,7 +18,9 @@ import androidx.viewpager2.widget.ViewPager2
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.activity.main.MainActivity
-import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewIntent.*
+import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract.SingleEvent
+import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract.ViewIntent
+import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract.ViewState
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.snack
@@ -55,7 +57,7 @@ class ChapterDetailFragment : Fragment() {
       requireContext(),
       android.R.layout.simple_spinner_dropdown_item,
       mutableListOf(
-        ChapterDetailViewState.Chapter(
+        ViewState.Chapter(
           link = navArgs.chapter.chapterLink,
           name = navArgs.chapter.chapterName
         )
@@ -68,7 +70,7 @@ class ChapterDetailFragment : Fragment() {
 
   private fun initView(
     chapterImageAdapter: ChapterImageAdapter,
-    allChaptersAdapter: ArrayAdapter<ChapterDetailViewState.Chapter>
+    allChaptersAdapter: ArrayAdapter<ViewState.Chapter>
   ) {
     recycler_images.run {
       setHasFixedSize(true)
@@ -78,22 +80,32 @@ class ChapterDetailFragment : Fragment() {
 
 
     spinner_chapters.adapter = allChaptersAdapter
-    spinner_chapters.setSelection(0, false)
+
+    viewModel.state.safeValue?.detail?.let { detail ->
+      allChaptersAdapter.clear()
+      allChaptersAdapter.addAll(detail.chapters)
+
+      val index = detail.chapters.indexOfFirst { it == detail.chapter }
+      spinner_chapters.setSelection(index, false)
+
+      Timber.tag("LoadChapter###").d("::initView $index $detail")
+    }
   }
 
   private fun bind(
     imageAdapter: ChapterImageAdapter,
-    allChaptersAdapter: ArrayAdapter<ChapterDetailViewState.Chapter>
+    allChaptersAdapter: ArrayAdapter<ViewState.Chapter>
   ) {
     viewModel.singleEvent.observeEvent(owner = viewLifecycleOwner) {
       when (it) {
-        is ChapterDetailSingleEvent.MessageEvent -> {
+        is SingleEvent.MessageEvent -> {
           view?.snack(it.message)
         }
       }
     }
     viewModel.state.observe(owner = viewLifecycleOwner) { (isLoading, isRefreshing, errorMessage, detail, @ViewPager2.Orientation orientation) ->
       Timber.d("chapter_detail_state=[$isLoading, $isRefreshing, $errorMessage, $detail, $orientation]")
+
       shouldEmitSelectedItem = false
 
       (recycler_images.layoutManager as LinearLayoutManager).orientation = orientation
@@ -106,37 +118,40 @@ class ChapterDetailFragment : Fragment() {
       detail ?: return@observe
       mainActivity.setToolbarTitle(detail.chapter.name)
 
+      allChaptersAdapter.clear()
+      allChaptersAdapter.addAll(detail.chapters)
+
+      val index = detail.chapters.indexOfFirst { it == detail.chapter }
+      spinner_chapters.setSelection(index, false)
+      Timber.tag("LoadChapter###").d("Index=$index, chapter=${detail.chapter.debug}")
+
       when (detail) {
-        is ChapterDetailViewState.Detail.Data -> {
+        is ViewState.Detail.Data -> {
           imageAdapter.submitList(detail.images)
-
-          allChaptersAdapter.clear()
-          allChaptersAdapter.addAll(detail.chapters)
-
-          val index = detail.chapters.indexOfFirst { it == detail.chapter }
-          spinner_chapters.setSelection(index, false)
-          Timber.tag("LoadChapter###").d("Index=$index, chapter=${detail.chapter.debug}")
-
 
           TransitionManager.beginDelayedTransition(bottom_nav, AutoTransition())
           button_prev.isInvisible = detail.prevChapterLink === null
           button_next.isInvisible = detail.nextChapterLink === null
         }
-        is ChapterDetailViewState.Detail.Initial -> {
+        is ViewState.Detail.Initial -> {
           imageAdapter.submitList(emptyList())
+
+          TransitionManager.beginDelayedTransition(bottom_nav, AutoTransition())
+          button_prev.isInvisible = true
+          button_next.isInvisible = true
         }
       }
 
       shouldEmitSelectedItem = true
     }
 
-    val chapterItemSelections = Observable.create<ChapterDetailViewState.Chapter> { emitter ->
+    val chapterItemSelections = Observable.create<ViewState.Chapter> { emitter ->
       spinner_chapters.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
         override fun onNothingSelected(parent: AdapterView<*>?) {}
 
         override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
           if (shouldEmitSelectedItem && !emitter.isDisposed) {
-            emitter.onNext(parent.getItemAtPosition(position) as ChapterDetailViewState.Chapter)
+            emitter.onNext(parent.getItemAtPosition(position) as ViewState.Chapter)
           }
         }
       }
@@ -146,8 +161,8 @@ class ChapterDetailFragment : Fragment() {
     viewModel.processIntents(
       Observable.mergeArray(
         Observable.just(
-          Initial(
-            ChapterDetailViewState.Chapter(
+          ViewIntent.Initial(
+            ViewState.Chapter(
               name = navArgs.chapter.chapterName,
               link = navArgs.chapter.chapterLink
             )
@@ -155,20 +170,19 @@ class ChapterDetailFragment : Fragment() {
         ),
         button_next
           .clicks()
-          .map { LoadNextChapter },
+          .map { ViewIntent.LoadNextChapter },
         button_prev
           .clicks()
-          .map { LoadPrevChapter },
+          .map { ViewIntent.LoadPrevChapter },
         button_retry
           .clicks()
-          .map { Retry },
+          .map { ViewIntent.Retry },
         chapterItemSelections
-          .map { LoadChapter(it) }
-          .doOnNext { Timber.tag("LoadChapter###").d("Load intent ${it.chapter.debug}") },
+          .map { ViewIntent.LoadChapter(it) },
         switch_orientation
           .checkedChanges()
-          .map { ChangeOrientation(if (it) RecyclerView.VERTICAL else RecyclerView.HORIZONTAL) }
-      )
+          .map { ViewIntent.ChangeOrientation(if (it) RecyclerView.VERTICAL else RecyclerView.HORIZONTAL) }
+      ).doOnNext { Timber.tag("LoadChapter###").d("Intent $it") }
     ).addTo(compositeDisposable)
   }
 

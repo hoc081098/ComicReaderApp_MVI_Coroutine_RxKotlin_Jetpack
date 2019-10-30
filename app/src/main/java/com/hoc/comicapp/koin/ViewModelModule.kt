@@ -9,7 +9,7 @@ import com.hoc.comicapp.ui.category.CategoryViewModel
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract
 import com.hoc.comicapp.ui.category_detail.CategoryDetailInteractorImpl
 import com.hoc.comicapp.ui.category_detail.CategoryDetailVM
-import com.hoc.comicapp.ui.chapter_detail.ChapterDetailInteractor
+import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailInteractorImpl
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewModel
 import com.hoc.comicapp.ui.detail.ComicDetailInteractor
@@ -62,7 +62,7 @@ val viewModelModule = module {
 
   single { CategoryInteractorImpl(get(), get()) } bind CategoryInteractor::class
 
-  single { ChapterDetailInteractorImpl(get(), get(), get()) } bind ChapterDetailInteractor::class
+  single { ChapterDetailInteractorImpl(get(), get(), get()) } bind ChapterDetailContract.Interactor::class
 
   single { DownloadedComicsInteractorImpl(get(), androidApplication()) } bind DownloadedComicsContract.Interactor::class
 
