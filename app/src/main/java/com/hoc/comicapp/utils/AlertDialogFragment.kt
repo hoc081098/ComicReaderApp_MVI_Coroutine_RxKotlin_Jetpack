@@ -46,10 +46,17 @@ fun FragmentActivity.showAlertDialogAsObservable(init: AlertDialogFragment.Build
  * Show alert dialog
  */
 fun FragmentActivity.showAlertDialog(init: AlertDialogFragment.Builder.() -> Unit): AlertDialogFragment {
+  val ft = supportFragmentManager.beginTransaction().apply {
+    supportFragmentManager
+      .findFragmentByTag(AlertDialogFragment::class.java.simpleName)
+      ?.let(::remove)
+    addToBackStack(null)
+  }
+
   return AlertDialogFragment.Builder()
     .apply(init)
     .build()
-    .apply { show(supportFragmentManager, AlertDialogFragment::class.java.simpleName) }
+    .apply { show(ft, AlertDialogFragment::class.java.simpleName) }
 }
 
 /**
