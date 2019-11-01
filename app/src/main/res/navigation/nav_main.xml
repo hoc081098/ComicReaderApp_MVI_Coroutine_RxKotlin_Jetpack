@@ -8,13 +8,6 @@
         android:id="@+id/home_fragment_dest"
         android:name="com.hoc.comicapp.ui.home.HomeFragment"
         android:label="Home page">
-        <action
-            android:id="@+id/action_home_fragment_dest_to_settings_fragment_dest"
-            app:destination="@id/settings_fragment_dest"
-            app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left"
-            app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right" />
 
         <action
             android:id="@+id/action_home_fragment_dest_to_comicDetailFragment"

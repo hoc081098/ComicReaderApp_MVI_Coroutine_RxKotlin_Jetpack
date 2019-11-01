@@ -210,7 +210,7 @@ class MainActivity : AppCompatActivity() {
   }
 
   override fun onSupportNavigateUp() =
-    findNavController(R.id.main_nav_fragment).navigateUp(appBarConfiguration)
+    findNavController(R.id.main_nav_fragment).navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
 
   override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
 

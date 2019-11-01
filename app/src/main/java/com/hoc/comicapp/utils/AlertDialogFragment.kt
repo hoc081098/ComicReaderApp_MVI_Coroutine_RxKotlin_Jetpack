@@ -39,6 +39,8 @@ fun FragmentActivity.showAlertDialogAsObservable(init: AlertDialogFragment.Build
         }
       }
     }
+
+    emitter.setCancellable { dismissAlertDialog() }
   }
 }
 
