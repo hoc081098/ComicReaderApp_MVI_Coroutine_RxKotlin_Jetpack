@@ -1,7 +1,7 @@
 package com.hoc.comicapp.ui.register
 
 import com.hoc.comicapp.domain.repository.UserRepository
-import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
+import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.ui.register.RegisterContract.Interactor
 import com.hoc.comicapp.ui.register.RegisterContract.PartialChange
 import com.hoc.comicapp.ui.register.RegisterContract.User
@@ -14,10 +14,10 @@ import timber.log.Timber
 @ExperimentalCoroutinesApi
 class RegisterInteractorImpl(
   private val userRepository: UserRepository,
-  private val dispatcherProvider: CoroutinesDispatcherProvider
+  private val dispatchersProvider: CoroutinesDispatchersProvider
 ) : Interactor {
   override fun register(user: User): Observable<PartialChange> {
-    return rxObservable(dispatcherProvider.ui) {
+    return rxObservable(dispatchersProvider.main) {
       Timber.d("Register $user")
 
       send(PartialChange.Loading)

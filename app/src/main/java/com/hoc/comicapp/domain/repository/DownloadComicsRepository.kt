@@ -32,7 +32,7 @@ interface DownloadComicsRepository {
    * Get all downloaded chapters
    * @return live data
    */
-  fun getDownloadedChapters() : LiveData<List<DownloadedChapter>>
+  fun getDownloadedChapters(): LiveData<List<DownloadedChapter>>
 
   /**
    * Delete downloaded [chapter]
@@ -46,5 +46,16 @@ interface DownloadComicsRepository {
    */
   suspend fun deleteComic(comic: DownloadedComic): Either<ComicAppError, Unit>
 
-  fun getDownloadedChapter(chapterLink: String) : Flow<Either<ComicAppError, DownloadedChapter>>
+  /**
+   * Enqueue download chapter worker
+   * @param chapter
+   * @param comicName
+   * @return either
+   */
+  suspend fun enqueueDownload(
+    chapter: DownloadedChapter,
+    comicName: String
+  ): Either<ComicAppError, Unit>
+
+  fun getDownloadedChapter(chapterLink: String): Flow<Either<ComicAppError, DownloadedChapter>>
 }

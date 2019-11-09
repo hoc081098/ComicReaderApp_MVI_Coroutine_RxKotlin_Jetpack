@@ -4,8 +4,12 @@ import android.app.Application
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
 import androidx.room.withTransaction
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.await
+import androidx.work.workDataOf
 import com.hoc.comicapp.data.Mapper
 import com.hoc.comicapp.data.local.AppDatabase
 import com.hoc.comicapp.data.local.dao.ChapterDao
@@ -15,18 +19,22 @@ import com.hoc.comicapp.data.local.entities.ComicAndChapters
 import com.hoc.comicapp.data.local.entities.ComicEntity
 import com.hoc.comicapp.data.remote.ComicApiService
 import com.hoc.comicapp.domain.models.ComicAppError
+import com.hoc.comicapp.domain.models.ComicDetail
 import com.hoc.comicapp.domain.models.DownloadedChapter
 import com.hoc.comicapp.domain.models.DownloadedComic
 import com.hoc.comicapp.domain.models.LocalStorageError
 import com.hoc.comicapp.domain.models.toError
 import com.hoc.comicapp.domain.repository.DownloadComicsRepository
-import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
+import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.utils.Either
 import com.hoc.comicapp.utils.copyTo
+import com.hoc.comicapp.utils.fold
 import com.hoc.comicapp.utils.left
 import com.hoc.comicapp.utils.retryIO
 import com.hoc.comicapp.utils.right
+import com.hoc.comicapp.worker.DownloadComicWorker
+import com.squareup.moshi.JsonAdapter
 import io.reactivex.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -47,13 +55,14 @@ import java.util.*
 class DownloadComicsRepositoryImpl(
   private val comicApiService: ComicApiService,
   private val application: Application,
-  private val dispatcherProvider: CoroutinesDispatcherProvider,
+  private val dispatchersProvider: CoroutinesDispatchersProvider,
   private val comicDao: ComicDao,
   private val chapterDao: ChapterDao,
   private val appDatabase: AppDatabase,
   private val rxSchedulerProvider: RxSchedulerProvider,
   private val retrofit: Retrofit,
-  private val workManager: WorkManager
+  private val workManager: WorkManager,
+  private val chapterJsonAdapter: JsonAdapter<ComicDetail.Chapter>
 ) : DownloadComicsRepository {
   override fun getDownloadedChapter(chapterLink: String): Flow<Either<ComicAppError, DownloadedChapter>> {
     val allChaptersF = chapterDao.getAllChaptersFlow().distinctUntilChanged()
@@ -71,7 +80,7 @@ class DownloadComicsRepositoryImpl(
       }
       .map { it.right() as Either<ComicAppError, DownloadedChapter> }
       .catch { emit(it.toError(retrofit).left()) }
-      .flowOn(dispatcherProvider.io)
+      .flowOn(dispatchersProvider.io)
   }
 
   override fun getDownloadedComic(link: String): Observable<Either<ComicAppError, DownloadedComic>> {
@@ -87,13 +96,55 @@ class DownloadComicsRepositoryImpl(
 
   override suspend fun deleteComic(comic: DownloadedComic): Either<ComicAppError, Unit> {
     return runCatching {
-      withContext(dispatcherProvider.ui) {
+      withContext(dispatchersProvider.main) {
         comicDao.delete(Mapper.domainToLocalEntity(comic))
       }
     }.fold(
       onSuccess = { Unit.right() },
       onFailure = { it.toError(retrofit).left() }
     )
+  }
+
+  override suspend fun enqueueDownload(
+    chapter: DownloadedChapter,
+    comicName: String
+  ): Either<ComicAppError, Unit> {
+    return try {
+      withContext(dispatchersProvider.io) {
+        val chapterJson = chapterJsonAdapter.toJson(
+          ComicDetail.Chapter(
+            chapterLink = chapter.chapterLink,
+            chapterName = chapter.chapterName,
+            time = chapter.time,
+            view = chapter.view
+          )
+        )
+
+        val workRequest = OneTimeWorkRequestBuilder<DownloadComicWorker>()
+          .setInputData(
+            workDataOf(
+              DownloadComicWorker.CHAPTER to chapterJson,
+              DownloadComicWorker.COMIC_NAME to comicName
+            )
+          )
+          .setConstraints(
+            Constraints.Builder()
+              .setRequiredNetworkType(NetworkType.CONNECTED)
+              .setRequiresStorageNotLow(true)
+              .build()
+          )
+          .addTag(DownloadComicWorker.TAG)
+          .addTag(chapter.chapterLink)
+          .build()
+
+        deleteDownloadedChapter(chapter).fold(left = { throw it }, right = { Unit })
+        workManager.enqueue(workRequest).await()
+
+        Unit.right()
+      }
+    } catch (e: Throwable) {
+      e.toError(retrofit).left()
+    }
   }
 
   override suspend fun deleteDownloadedChapter(chapter: DownloadedChapter): Either<ComicAppError, Unit> {
@@ -108,7 +159,7 @@ class DownloadComicsRepositoryImpl(
   @Suppress("FunctionName")
   private suspend fun _deleteEntityAndImages(chapter: DownloadedChapter): Either<ComicAppError, Unit> {
     return runCatching {
-      withContext(dispatcherProvider.io) {
+      withContext(dispatchersProvider.io) {
         chapterDao.delete(Mapper.domainToLocalEntity(chapter))
 
         val chaptersCount = chapterDao.getCountByComicLink(chapter.comicLink).firstOrNull() ?: 0
@@ -238,7 +289,7 @@ class DownloadComicsRepositoryImpl(
       emit(100)
 
       Timber.d("$tag Images = $imagePaths")
-    }.flowOn(dispatcherProvider.io)
+    }.flowOn(dispatchersProvider.io)
   }
 
   private suspend fun downloadComicThumbnail(thumbnailUrl: String, comicName: String): String {

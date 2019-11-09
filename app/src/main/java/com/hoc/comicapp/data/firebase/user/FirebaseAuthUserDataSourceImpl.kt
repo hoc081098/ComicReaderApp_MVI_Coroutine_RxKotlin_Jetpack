@@ -6,7 +6,7 @@ import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.hoc.comicapp.data.firebase.entity._User
-import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
+import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.utils.Either
 import com.hoc.comicapp.utils.Optional
@@ -30,7 +30,7 @@ class FirebaseAuthUserDataSourceImpl(
   private val firebaseStorage: FirebaseStorage,
   private val firebaseFirestore: FirebaseFirestore,
   private val rxSchedulerProvider: RxSchedulerProvider,
-  private val dispatcherProvider: CoroutinesDispatcherProvider
+  private val dispatchersProvider: CoroutinesDispatchersProvider
 ) : FirebaseAuthUserDataSource {
   override fun userObservable(): Observable<Either<Throwable, _User?>> {
     val uidObservable = Observable
@@ -71,11 +71,11 @@ class FirebaseAuthUserDataSourceImpl(
   }
 
   override suspend fun signOut() {
-    withContext(dispatcherProvider.io) { firebaseAuth.signOut() }
+    withContext(dispatchersProvider.io) { firebaseAuth.signOut() }
   }
 
   override suspend fun register(email: String, password: String, fullName: String, avatar: Uri?) {
-    withContext(dispatcherProvider.io) {
+    withContext(dispatchersProvider.io) {
 
       val authResult = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
       val user = authResult.user ?: throw IllegalStateException("User is null")
@@ -131,7 +131,7 @@ class FirebaseAuthUserDataSourceImpl(
   }
 
   override suspend fun login(email: String, password: String) {
-    withContext(dispatcherProvider.io) {
+    withContext(dispatchersProvider.io) {
       firebaseAuth.signInWithEmailAndPassword(email, password).await()
     }
   }

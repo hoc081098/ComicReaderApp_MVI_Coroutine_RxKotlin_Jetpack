@@ -23,7 +23,7 @@ data class ComicArg(
   val title: String,
   val view: String,
   val remoteThumbnail: String
-): Parcelable
+) : Parcelable
 
 interface ComicDetailInteractor {
   fun getFavoriteChange(link: String): Observable<ComicDetailPartialChange>
@@ -43,6 +43,13 @@ interface ComicDetailInteractor {
   ): Observable<ComicDetailPartialChange>
 
   fun toggleFavorite(comic: ComicDetail): Observable<Unit>
+
+  fun deleteOrCancelDownload(chapter: ComicDetailViewState.Chapter): Observable<ComicDetailSingleEvent>
+
+  fun enqueueDownloadComic(
+    chapter: ComicDetailViewState.Chapter,
+    comicName: String
+  ): Observable<ComicDetailSingleEvent>
 }
 
 sealed class ComicDetailIntent : Intent {
@@ -162,15 +169,6 @@ data class ComicDetailViewState(
         chapters = emptyList()
       )
     }
-
-    fun toComicDetailChapterDomain(): com.hoc.comicapp.domain.models.ComicDetail.Chapter{
-      return com.hoc.comicapp.domain.models.ComicDetail.Chapter(
-        chapterLink = chapterLink,
-        chapterName = chapterName,
-        time = time,
-        view = view
-      )
-    }
   }
 
   data class Category(
@@ -268,5 +266,18 @@ sealed class ComicDetailPartialChange {
 sealed class ComicDetailSingleEvent : SingleEvent {
   data class MessageEvent(val message: String) : ComicDetailSingleEvent()
 
-  data class EnqueuedDownloadSuccess(val chapter: ComicDetailViewState.Chapter) : ComicDetailSingleEvent()
+  data class EnqueuedDownloadSuccess(val chapter: ComicDetailViewState.Chapter) :
+    ComicDetailSingleEvent()
+
+  data class EnqueuedDownloadFailure(
+    val chapter: ComicDetailViewState.Chapter,
+    val error: ComicAppError
+  ) : ComicDetailSingleEvent()
+
+  data class DeletedChapter(val chapter: ComicDetailViewState.Chapter) : ComicDetailSingleEvent()
+
+  data class DeleteChapterError(
+    val chapter: ComicDetailViewState.Chapter,
+    val error: ComicAppError
+  ) : ComicDetailSingleEvent()
 }

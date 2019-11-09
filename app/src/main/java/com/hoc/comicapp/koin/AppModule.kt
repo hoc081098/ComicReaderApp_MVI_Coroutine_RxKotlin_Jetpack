@@ -5,8 +5,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.hoc.comicapp.domain.models.ComicDetail
-import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
-import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProviderImpl
+import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
+import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProviderImpl
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.domain.thread.RxSchedulerProviderImpl
 import com.squareup.moshi.JsonAdapter
@@ -21,7 +21,7 @@ import org.koin.dsl.module
 val appModule = module {
   single { RxSchedulerProviderImpl() } bind RxSchedulerProvider::class
 
-  single { CoroutinesDispatcherProviderImpl(get()) } bind CoroutinesDispatcherProvider::class
+  single { CoroutinesDispatchersProviderImpl(get()) } bind CoroutinesDispatchersProvider::class
 
   single { WorkManager.getInstance(androidContext()) }
 
@@ -35,7 +35,7 @@ val appModule = module {
 
   single { FirebaseFirestore.getInstance() }
 
-  single { CoroutineScope(get<CoroutinesDispatcherProvider>().io + SupervisorJob()) }
+  single { CoroutineScope(get<CoroutinesDispatchersProvider>().io + SupervisorJob()) }
 }
 
 private fun getChapterJsonAdapter(moshi: Moshi): JsonAdapter<ComicDetail.Chapter> {

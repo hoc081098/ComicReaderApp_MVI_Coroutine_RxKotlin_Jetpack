@@ -48,6 +48,7 @@ val dataModule = module {
       get(),
       get(),
       get(),
+      get(),
       get()
     )
   } bind DownloadComicsRepository::class

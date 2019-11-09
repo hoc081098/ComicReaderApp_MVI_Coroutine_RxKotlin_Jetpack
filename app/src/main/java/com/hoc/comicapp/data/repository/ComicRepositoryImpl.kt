@@ -15,7 +15,7 @@ import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.ComicDetail
 import com.hoc.comicapp.domain.models.toError
 import com.hoc.comicapp.domain.repository.ComicRepository
-import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
+import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.utils.Either
 import com.hoc.comicapp.utils.left
 import com.hoc.comicapp.utils.right
@@ -35,7 +35,7 @@ import kotlin.time.measureTime
 class ComicRepositoryImpl(
   private val retrofit: Retrofit,
   private val comicApiService: ComicApiService,
-  private val dispatcherProvider: CoroutinesDispatcherProvider,
+  private val dispatchersProvider: CoroutinesDispatchersProvider,
   private val favoriteComicsDataSource: FavoriteComicsDataSource,
   private val comicDao: ComicDao,
   appCoroutineScope: CoroutineScope
@@ -66,7 +66,7 @@ class ComicRepositoryImpl(
     request: suspend ComicApiService.() -> T
   ): Either<ComicAppError, T> {
     return try {
-      withContext(dispatcherProvider.io) {
+      withContext(dispatchersProvider.io) {
         comicApiService
           .request()
           .right()
