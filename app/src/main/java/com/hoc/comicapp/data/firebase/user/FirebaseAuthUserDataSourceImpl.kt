@@ -17,7 +17,6 @@ import com.hoc.comicapp.utils.right
 import com.hoc.comicapp.utils.snapshots
 import com.hoc.comicapp.utils.toOptional
 import io.reactivex.Observable
-import io.reactivex.ObservableEmitter
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -32,9 +31,10 @@ class FirebaseAuthUserDataSourceImpl(
   private val rxSchedulerProvider: RxSchedulerProvider,
   private val dispatchersProvider: CoroutinesDispatchersProvider
 ) : FirebaseAuthUserDataSource {
-  override fun userObservable(): Observable<Either<Throwable, _User?>> {
-    val uidObservable = Observable
-      .create { emitter: ObservableEmitter<Optional<String>> ->
+
+  private val userObservable: Observable<Either<Throwable, _User?>> by lazy {
+    Observable
+      .create<Optional<String>> { emitter ->
         val authStateListener = FirebaseAuth.AuthStateListener { auth ->
           if (!emitter.isDisposed) {
             val uid = auth.currentUser.toOptional().map { it.uid }
@@ -48,8 +48,6 @@ class FirebaseAuthUserDataSourceImpl(
           Timber.d("Remove auth state listener")
         }
       }
-
-    return uidObservable
       .distinctUntilChanged()
       .switchMap { uidOptional ->
         uidOptional.fold(
@@ -65,10 +63,13 @@ class FirebaseAuthUserDataSourceImpl(
         )
       }
       .subscribeOn(rxSchedulerProvider.io)
-      .doOnNext { Timber.d("User = $it") }
+      .doOnNext { Timber.d("User[1] = $it") }
       .replay(1)
       .refCount()
+      .doOnNext { Timber.d("User[2] = $it") }
   }
+
+  override fun userObservable() = userObservable
 
   override suspend fun signOut() {
     withContext(dispatchersProvider.io) { firebaseAuth.signOut() }
