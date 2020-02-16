@@ -72,7 +72,7 @@ class ComicRepositoryImpl(
           .right()
       }
     } catch (throwable: Throwable) {
-      Timber.d(throwable, "ComicRepositoryImpl::$tag $throwable", throwable)
+      Timber.d(throwable, "ComicRepositoryImpl::$tag $throwable")
       delay(500)
       throwable.toError(retrofit).left()
     }
