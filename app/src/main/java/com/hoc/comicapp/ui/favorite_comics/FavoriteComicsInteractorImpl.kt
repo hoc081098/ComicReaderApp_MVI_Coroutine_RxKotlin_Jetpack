@@ -1,7 +1,7 @@
 package com.hoc.comicapp.ui.favorite_comics
 
 import com.hoc.comicapp.domain.repository.FavoriteComicsRepository
-import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
+import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.ui.favorite_comics.FavoriteComicsContract.ComicItem
 import com.hoc.comicapp.ui.favorite_comics.FavoriteComicsContract.Interactor
@@ -15,10 +15,10 @@ import kotlinx.coroutines.rx2.rxObservable
 class FavoriteComicsInteractorImpl(
   private val favoriteComicsRepository: FavoriteComicsRepository,
   private val rxSchedulerProvider: RxSchedulerProvider,
-  private val dispatcherProvider: CoroutinesDispatcherProvider
+  private val dispatchersProvider: CoroutinesDispatchersProvider
 ) : Interactor {
   override fun remove(item: ComicItem): Observable<PartialChange> {
-    return rxObservable<PartialChange>(dispatcherProvider.ui) {
+    return rxObservable<PartialChange>(dispatchersProvider.main) {
       favoriteComicsRepository
         .removeFromFavorite(item.toDomain())
         .fold(

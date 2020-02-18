@@ -4,7 +4,7 @@ import com.hoc.comicapp.activity.main.MainContract.Interactor
 import com.hoc.comicapp.activity.main.MainContract.PartialChange
 import com.hoc.comicapp.activity.main.MainContract.ViewState.User
 import com.hoc.comicapp.domain.repository.UserRepository
-import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
+import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.utils.fold
 import io.reactivex.Observable
@@ -14,7 +14,7 @@ import kotlinx.coroutines.rx2.rxObservable
 @ExperimentalCoroutinesApi
 class MainInteractorImpl(
   private val userRepository: UserRepository,
-  private val dispatcherProvider: CoroutinesDispatcherProvider,
+  private val dispatchersProvider: CoroutinesDispatchersProvider,
   private val rxSchedulerProvider: RxSchedulerProvider
 ) : Interactor {
   override fun userChanges(): Observable<PartialChange> {
@@ -34,7 +34,7 @@ class MainInteractorImpl(
   }
 
   override fun signOut(): Observable<PartialChange> {
-    return rxObservable<PartialChange>(dispatcherProvider.ui) {
+    return rxObservable<PartialChange>(dispatchersProvider.main) {
       userRepository
         .signOut()
         .fold(

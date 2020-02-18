@@ -62,11 +62,27 @@ val viewModelModule = module {
 
   single { CategoryInteractorImpl(get(), get()) } bind CategoryInteractor::class
 
-  single { ChapterDetailInteractorImpl(get(), get(), get()) } bind ChapterDetailContract.Interactor::class
+  single {
+    ChapterDetailInteractorImpl(
+      get(),
+      get(),
+      get()
+    )
+  } bind ChapterDetailContract.Interactor::class
 
-  single { DownloadedComicsInteractorImpl(get(), androidApplication()) } bind DownloadedComicsContract.Interactor::class
+  single {
+    DownloadedComicsInteractorImpl(
+      get(),
+      androidApplication()
+    )
+  } bind DownloadedComicsContract.Interactor::class
 
-  single { CategoryDetailInteractorImpl(get(), get()) } bind CategoryDetailContract.Interactor::class
+  single {
+    CategoryDetailInteractorImpl(
+      get(),
+      get()
+    )
+  } bind CategoryDetailContract.Interactor::class
 
   single { LoginInteractorImpl(get(), get()) } bind LoginContract.Interactor::class
 
@@ -74,11 +90,25 @@ val viewModelModule = module {
 
   single { MainInteractorImpl(get(), get(), get()) } bind MainContract.Interactor::class
 
-  single { FavoriteComicsInteractorImpl(get(), get(), get()) } bind FavoriteComicsContract.Interactor::class
+  single {
+    FavoriteComicsInteractorImpl(
+      get(),
+      get(),
+      get()
+    )
+  } bind FavoriteComicsContract.Interactor::class
 
   viewModel { HomeViewModel(get(), get()) }
 
-  viewModel { (isDownloaded: Boolean) -> ComicDetailViewModel(get(), get(), get(), get(), get(), isDownloaded) }
+  viewModel { (isDownloaded: Boolean) ->
+    ComicDetailViewModel(
+      get(),
+      get(),
+      get(),
+      get(),
+      isDownloaded
+    )
+  }
 
   viewModel { SearchComicViewModel(get(), get()) }
 
@@ -90,7 +120,13 @@ val viewModelModule = module {
 
   viewModel { DownloadingChaptersViewModel(get(), get(), get(), get()) }
 
-  viewModel { (category: CategoryDetailContract.CategoryArg) -> CategoryDetailVM(get(), get(), category) }
+  viewModel { (category: CategoryDetailContract.CategoryArg) ->
+    CategoryDetailVM(
+      get(),
+      get(),
+      category
+    )
+  }
 
   viewModel { LoginVM(get(), get()) }
 

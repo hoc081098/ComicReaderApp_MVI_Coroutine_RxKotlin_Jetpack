@@ -2,17 +2,12 @@ package com.hoc.comicapp.ui.detail
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
-import androidx.work.Constraints
-import androidx.work.NetworkType
-import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkInfo.State.RUNNING
 import androidx.work.WorkManager
-import androidx.work.await
-import androidx.work.workDataOf
 import com.hoc.comicapp.base.BaseViewModel
-import com.hoc.comicapp.domain.models.ComicDetail
 import com.hoc.comicapp.domain.models.DownloadedChapter
+import com.hoc.comicapp.domain.models.UnexpectedError
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.domain.repository.DownloadComicsRepository
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
@@ -24,34 +19,30 @@ import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.NotYetDownl
 import com.hoc.comicapp.utils.combineLatest
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.mapNotNull
-import com.hoc.comicapp.utils.fold
 import com.hoc.comicapp.utils.notOfType
 import com.hoc.comicapp.worker.DownloadComicWorker
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import com.shopify.livedataktx.MutableLiveDataKtx
-import com.squareup.moshi.JsonAdapter
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
-import io.reactivex.Single
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.ofType
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.rxkotlin.withLatestFrom
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.rx2.rxSingle
 import timber.log.Timber
 
 @ExperimentalCoroutinesApi
 class ComicDetailViewModel(
   private val comicDetailInteractor: ComicDetailInteractor,
-  private val workManager: WorkManager,
   private val downloadComicsRepository: DownloadComicsRepository,
   private val rxSchedulerProvider: RxSchedulerProvider,
-  private val chapterJsonAdapter: JsonAdapter<ComicDetail.Chapter>,
+  private val workManager: WorkManager,
   private val isDownloaded: Boolean
-) :
-  BaseViewModel<ComicDetailIntent, ComicDetailViewState, ComicDetailSingleEvent>(), Observer<ComicDetailViewState> {
+) : BaseViewModel<ComicDetailIntent, ComicDetailViewState, ComicDetailSingleEvent>(),
+  Observer<ComicDetailViewState> {
+
   override fun onChanged(t: ComicDetailViewState?) {
     setNewState(t ?: return)
   }
@@ -103,7 +94,7 @@ class ComicDetailViewModel(
                   .getMessage()
               sendMessageEvent("Retry get detail comic error: $message")
             }
-      }
+        }
     }
 
   private val refreshProcessor =
@@ -183,7 +174,10 @@ class ComicDetailViewModel(
     val workInfosD = workManager.getWorkInfosByTagLiveData(DownloadComicWorker.TAG)
     val downloadedChaptersD = downloadComicsRepository.getDownloadedChapters()
 
-    return stateD.combineLatest(workInfosD, downloadedChaptersD) { state, workInfos, downloadedChapters ->
+    return stateD.combineLatest(
+      workInfosD,
+      downloadedChaptersD
+    ) { state, workInfos, downloadedChapters ->
       Timber.d("[combine] ${workInfos.size} ${downloadedChapters.size}")
 
       val comicDetail = state.comicDetail as? ComicDetailViewState.ComicDetail.Detail
@@ -214,22 +208,21 @@ class ComicDetailViewModel(
           .map { it.chapter to false }
       )
       .flatMap { (chapter, delete) ->
-        deleteDownloadedChapter(chapter)
-          .toObservable()
-          .map { Triple(it.first, it.second, delete) }
-          .onErrorReturn { Triple(chapter, null, delete) }
+        comicDetailInteractor
+          .deleteOrCancelDownload(chapter)
+          .map { it to delete }
       }
       .observeOn(rxSchedulerProvider.main)
       .subscribeBy {
-        val operation = if (it.third) "Delete download" else "Cancel download"
-        when {
-          it.second === null -> {
+        val operation = if (it.second) "Delete download" else "Cancel download"
+        when (val event = it.first) {
+          is ComicDetailSingleEvent.DeletedChapter -> {
             Timber.d("$operation success $it")
-            sendMessageEvent("$operation ${it.first.chapterName}")
+            sendMessageEvent("$operation ${event.chapter.chapterName}")
           }
-          else -> {
+          is ComicDetailSingleEvent.DeleteChapterError -> {
             Timber.d("$operation error $it")
-            sendMessageEvent("$operation error: ${it.first.chapterName}")
+            sendMessageEvent("$operation error: ${event.chapter.chapterName}")
           }
         }
       }
@@ -246,22 +239,26 @@ class ComicDetailViewModel(
       .ofType<ComicDetailIntent.DownloadChapter>()
       .map { it.chapter }
       .flatMap { chapter ->
-        enqueueDownloadComicWorker(chapter)
-          .toObservable()
-          .onErrorReturn { chapter to it }
+        Observable.defer {
+          val comicName = when (val detail = state.value.comicDetail) {
+            is ComicDetailViewState.ComicDetail.Detail -> detail.title
+            is ComicDetailViewState.ComicDetail.Initial -> detail.title
+            null -> return@defer Observable.just(
+              ComicDetailSingleEvent.EnqueuedDownloadFailure(
+                chapter, UnexpectedError(
+                  "State is null",
+                  IllegalStateException("State is null")
+                )
+              )
+            )
+          }
+          comicDetailInteractor.enqueueDownloadComic(chapter, comicName)
+        }
       }
       .observeOn(rxSchedulerProvider.main)
-      .subscribeBy {
-        when {
-          it.second === null -> {
-            Timber.d("Enqueue success $it")
-            sendEvent(ComicDetailSingleEvent.EnqueuedDownloadSuccess(it.first))
-          }
-          else -> {
-            Timber.d("Enqueue error $it")
-            sendMessageEvent("Enqueued error: ${it.first.chapterName}")
-          }
-        }
+      .subscribeBy { event ->
+        Timber.d("Enqueue result $event")
+        sendEvent(event)
       }
       .addTo(compositeDisposable)
   }
@@ -301,49 +298,6 @@ class ComicDetailViewModel(
           shared.notOfType<ComicDetailIntent.Initial, ComicDetailIntent>()
         )
       }
-    }
-  }
-
-  private fun enqueueDownloadComicWorker(chapter: Chapter): Single<Pair<Chapter, Throwable?>> {
-    return rxSingle {
-      downloadComicsRepository.deleteDownloadedChapter(chapter.toDownloadedChapterDomain())
-
-      val comicName = when (val detail = state.value.comicDetail) {
-        is ComicDetailViewState.ComicDetail.Detail -> detail.title
-        is ComicDetailViewState.ComicDetail.Initial -> detail.title
-        null -> return@rxSingle chapter to IllegalStateException("State is null")
-      }
-      val chapterJson = chapterJsonAdapter.toJson(chapter.toComicDetailChapterDomain())
-
-      val workRequest = OneTimeWorkRequestBuilder<DownloadComicWorker>()
-        .setInputData(
-          workDataOf(
-            DownloadComicWorker.CHAPTER to chapterJson,
-            DownloadComicWorker.COMIC_NAME to comicName
-          )
-        )
-        .setConstraints(
-          Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .setRequiresStorageNotLow(true)
-            .build()
-        )
-        .addTag(DownloadComicWorker.TAG)
-        .addTag(chapter.chapterLink)
-        .build()
-      workManager.enqueue(workRequest).await()
-      chapter to null
-    }
-  }
-
-  private fun deleteDownloadedChapter(chapter: Chapter): Single<Pair<Chapter, Throwable?>> {
-    return rxSingle {
-      downloadComicsRepository
-        .deleteDownloadedChapter(chapter = chapter.toDownloadedChapterDomain())
-        .fold(
-          { chapter to it },
-          { chapter to null }
-        )
     }
   }
 }

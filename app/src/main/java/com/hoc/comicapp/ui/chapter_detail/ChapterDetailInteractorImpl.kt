@@ -2,7 +2,7 @@ package com.hoc.comicapp.ui.chapter_detail
 
 import com.hoc.comicapp.domain.repository.ComicRepository
 import com.hoc.comicapp.domain.repository.DownloadComicsRepository
-import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
+import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract.Interactor
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract.PartialChange
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract.PartialChange.GetChapterDetail
@@ -21,7 +21,7 @@ import timber.log.Timber
 @ExperimentalCoroutinesApi
 class ChapterDetailInteractorImpl(
   private val comicRepository: ComicRepository,
-  private val dispatcherProvider: CoroutinesDispatcherProvider,
+  private val dispatchersProvider: CoroutinesDispatchersProvider,
   private val downloadComicsRepository: DownloadComicsRepository
 ) : Interactor {
   override fun getChapterDetail(chapter: ViewState.Chapter, isDownloaded: Boolean) = flow<PartialChange> {
@@ -50,7 +50,7 @@ class ChapterDetailInteractorImpl(
         )
         .let { emit(it) }
     }
-  }.flowOn(dispatcherProvider.ui).asObservable()
+  }.flowOn(dispatchersProvider.main).asObservable()
 
   override fun refresh(chapter: ViewState.Chapter, isDownloaded: Boolean) = flow<PartialChange> {
     Timber.tag("LoadChapter###").d("refresh ${chapter.debug}")
@@ -87,5 +87,5 @@ class ChapterDetailInteractorImpl(
         )
         .let { emit(it) }
     }
-  }.flowOn(dispatcherProvider.ui).asObservable()
+  }.flowOn(dispatchersProvider.main).asObservable()
 }

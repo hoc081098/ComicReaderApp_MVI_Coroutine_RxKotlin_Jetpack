@@ -1,7 +1,7 @@
 package com.hoc.comicapp.ui.category_detail
 
 import com.hoc.comicapp.domain.repository.ComicRepository
-import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
+import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.Interactor
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.PartialChange
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.PartialChange.ListComics
@@ -20,11 +20,11 @@ import kotlinx.coroutines.rx2.rxObservable
 
 @ExperimentalCoroutinesApi
 class CategoryDetailInteractorImpl(
-  private val dispatcherProvider: CoroutinesDispatcherProvider,
+  private val dispatchersProvider: CoroutinesDispatchersProvider,
   private val comicRepository: ComicRepository
 ) : Interactor {
   override fun refreshAll(categoryLink: String): Observable<PartialChange> {
-    return rxObservable<PartialChange>(dispatcherProvider.ui) {
+    return rxObservable<PartialChange>(dispatchersProvider.main) {
       coroutineScope {
         send(Loading)
 
@@ -53,7 +53,7 @@ class CategoryDetailInteractorImpl(
   }
 
   override fun getPopulars(categoryLink: String): Observable<PartialChange> {
-    return rxObservable<PartialChange>(dispatcherProvider.ui) {
+    return rxObservable<PartialChange>(dispatchersProvider.main) {
       send(Popular.Loading)
       comicRepository
         .getCategoryDetailPopular(categoryLink)
@@ -66,7 +66,7 @@ class CategoryDetailInteractorImpl(
   }
 
   override fun getComics(categoryLink: String, page: Int): Observable<PartialChange> {
-    return rxObservable<PartialChange>(dispatcherProvider.ui) {
+    return rxObservable<PartialChange>(dispatchersProvider.main) {
       send(ListComics.Loading)
       comicRepository
         .getCategoryDetail(

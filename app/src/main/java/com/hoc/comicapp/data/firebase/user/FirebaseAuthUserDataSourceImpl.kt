@@ -6,7 +6,7 @@ import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.hoc.comicapp.data.firebase.entity._User
-import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
+import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.utils.Either
 import com.hoc.comicapp.utils.Optional
@@ -17,7 +17,6 @@ import com.hoc.comicapp.utils.right
 import com.hoc.comicapp.utils.snapshots
 import com.hoc.comicapp.utils.toOptional
 import io.reactivex.Observable
-import io.reactivex.ObservableEmitter
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -30,11 +29,12 @@ class FirebaseAuthUserDataSourceImpl(
   private val firebaseStorage: FirebaseStorage,
   private val firebaseFirestore: FirebaseFirestore,
   private val rxSchedulerProvider: RxSchedulerProvider,
-  private val dispatcherProvider: CoroutinesDispatcherProvider
+  private val dispatchersProvider: CoroutinesDispatchersProvider
 ) : FirebaseAuthUserDataSource {
-  override fun userObservable(): Observable<Either<Throwable, _User?>> {
-    val uidObservable = Observable
-      .create { emitter: ObservableEmitter<Optional<String>> ->
+
+  private val userObservable: Observable<Either<Throwable, _User?>> by lazy {
+    Observable
+      .create<Optional<String>> { emitter ->
         val authStateListener = FirebaseAuth.AuthStateListener { auth ->
           if (!emitter.isDisposed) {
             val uid = auth.currentUser.toOptional().map { it.uid }
@@ -48,8 +48,6 @@ class FirebaseAuthUserDataSourceImpl(
           Timber.d("Remove auth state listener")
         }
       }
-
-    return uidObservable
       .distinctUntilChanged()
       .switchMap { uidOptional ->
         uidOptional.fold(
@@ -65,17 +63,20 @@ class FirebaseAuthUserDataSourceImpl(
         )
       }
       .subscribeOn(rxSchedulerProvider.io)
-      .doOnNext { Timber.d("User = $it") }
+      .doOnNext { Timber.d("User[1] = $it") }
       .replay(1)
       .refCount()
+      .doOnNext { Timber.d("User[2] = $it") }
   }
 
+  override fun userObservable() = userObservable
+
   override suspend fun signOut() {
-    withContext(dispatcherProvider.io) { firebaseAuth.signOut() }
+    withContext(dispatchersProvider.io) { firebaseAuth.signOut() }
   }
 
   override suspend fun register(email: String, password: String, fullName: String, avatar: Uri?) {
-    withContext(dispatcherProvider.io) {
+    withContext(dispatchersProvider.io) {
 
       val authResult = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
       val user = authResult.user ?: throw IllegalStateException("User is null")
@@ -131,7 +132,7 @@ class FirebaseAuthUserDataSourceImpl(
   }
 
   override suspend fun login(email: String, password: String) {
-    withContext(dispatcherProvider.io) {
+    withContext(dispatchersProvider.io) {
       firebaseAuth.signInWithEmailAndPassword(email, password).await()
     }
   }

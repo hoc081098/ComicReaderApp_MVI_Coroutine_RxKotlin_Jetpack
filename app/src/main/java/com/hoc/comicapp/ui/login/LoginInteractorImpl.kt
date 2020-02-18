@@ -1,7 +1,7 @@
 package com.hoc.comicapp.ui.login
 
 import com.hoc.comicapp.domain.repository.UserRepository
-import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
+import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.ui.login.LoginContract.Interactor
 import com.hoc.comicapp.ui.login.LoginContract.PartialChange
 import com.hoc.comicapp.utils.fold
@@ -12,10 +12,10 @@ import kotlinx.coroutines.rx2.rxObservable
 @ExperimentalCoroutinesApi
 class LoginInteractorImpl(
   private val userRepository: UserRepository,
-  private val dispatcherProvider: CoroutinesDispatcherProvider
+  private val dispatchersProvider: CoroutinesDispatchersProvider
 ) : Interactor {
   override fun login(email: String, password: String): Observable<PartialChange> {
-    return rxObservable(dispatcherProvider.ui) {
+    return rxObservable(dispatchersProvider.main) {
       send(PartialChange.Loading)
 
       userRepository
