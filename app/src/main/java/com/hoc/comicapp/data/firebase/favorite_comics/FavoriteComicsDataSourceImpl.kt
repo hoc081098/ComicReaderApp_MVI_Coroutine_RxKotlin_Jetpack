@@ -8,7 +8,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot
 import com.hoc.comicapp.data.firebase.entity._FavoriteComic
 import com.hoc.comicapp.data.firebase.user.FirebaseAuthUserDataSource
 import com.hoc.comicapp.domain.models.AuthError
-import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
+import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.utils.Either
 import com.hoc.comicapp.utils.fold
@@ -32,7 +32,7 @@ class FavoriteComicsDataSourceImpl(
   private val firebaseAuth: FirebaseAuth,
   private val firebaseFirestore: FirebaseFirestore,
   private val rxSchedulerProvider: RxSchedulerProvider,
-  private val dispatcherProvider: CoroutinesDispatcherProvider,
+  private val dispatchersProvider: CoroutinesDispatchersProvider,
   private val firebaseAuthUserDataSource: FirebaseAuthUserDataSource,
   appCoroutineScope: CoroutineScope
 ) : FavoriteComicsDataSource {
@@ -114,7 +114,7 @@ class FavoriteComicsDataSourceImpl(
   }
 
   override suspend fun removeFromFavorite(comic: _FavoriteComic) {
-    withContext(dispatcherProvider.io) {
+    withContext(dispatchersProvider.io) {
       val snapshot = findQueryDocumentSnapshotByUrl(comic.url)
       if (snapshot?.exists() == true) {
         snapshot.reference.delete().await()
@@ -125,7 +125,7 @@ class FavoriteComicsDataSourceImpl(
   }
 
   override suspend fun toggle(comic: _FavoriteComic) {
-    withContext(dispatcherProvider.io) {
+    withContext(dispatchersProvider.io) {
       val snapshot = findQueryDocumentSnapshotByUrl(comic.url)
       if (snapshot?.exists() == true) {
         snapshot.reference.delete().await()

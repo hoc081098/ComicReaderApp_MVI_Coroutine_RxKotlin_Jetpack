@@ -1,7 +1,7 @@
 package com.hoc.comicapp.ui.search_comic
 
 import com.hoc.comicapp.domain.repository.ComicRepository
-import com.hoc.comicapp.domain.thread.CoroutinesDispatcherProvider
+import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.Interactor
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.PartialChange
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewState.Item.ComicItem
@@ -14,10 +14,10 @@ import timber.log.Timber
 @ExperimentalCoroutinesApi
 class SearchComicInteractorImpl(
   private val comicRepository: ComicRepository,
-  private val dispatcherProvider: CoroutinesDispatcherProvider
+  private val dispatchersProvider: CoroutinesDispatchersProvider
 ) : Interactor {
   override fun searchComic(term: String, page: Int): Observable<PartialChange> {
-    return rxObservable(dispatcherProvider.ui) {
+    return rxObservable(dispatchersProvider.main) {
       Timber.d("[INTERACTOR] $term $page")
 
       if (page == 1) {

@@ -64,45 +64,56 @@ tasks.withType<KotlinCompile> {
 dependencies {
   implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
+  // Kotlin, Kotlin Coroutines
   implementation(kotlin("stdlib-jdk8", kotlinVersion))
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-rx2:$coroutinesVersion")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutinesVersion")
 
+  // AndroidX, Material
   implementation("androidx.appcompat:appcompat:1.1.0")
-  implementation("androidx.core:core-ktx:1.2.0-beta01")
-  implementation("androidx.activity:activity-ktx:1.1.0-rc01")
-  implementation("androidx.fragment:fragment-ktx:1.2.0-rc01")
-  implementation("androidx.constraintlayout:constraintlayout:2.0.0-beta3")
+  implementation("androidx.core:core-ktx:1.3.0-alpha01")
+  implementation("androidx.activity:activity-ktx:1.1.0")
+  implementation("androidx.fragment:fragment-ktx:1.2.1")
+  implementation("androidx.constraintlayout:constraintlayout:2.0.0-beta4")
+  implementation("com.google.android.material:material:$materialVersion")
 
+  // Navigation
   implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
   implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
 
+  // Paging
   implementation("androidx.paging:paging-runtime-ktx:$pagingVersion")
 
+  // Lifecycle, LiveData
   implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
   implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
   implementation("androidx.lifecycle:lifecycle-reactivestreams-ktx:$lifecycleVersion")
   implementation("com.shopify:livedata-ktx:3.0.0")
 
-  implementation("com.google.android.material:material:$materialVersion")
-
+  // Room
   implementation("androidx.room:room-runtime:$roomVersion")
   kapt("androidx.room:room-compiler:$roomVersion")
   implementation("androidx.room:room-ktx:$roomVersion")
   implementation("androidx.room:room-rxjava2:$roomVersion") // optional - RxJava support for Room
 
+  // Work manager
   implementation("androidx.work:work-runtime-ktx:$workVersion") // Kotlin + coroutines
 
+  // Koin
   implementation("org.koin:koin-androidx-viewmodel:$koinVersion")
 
+  // Moshi, Retrofit, OkHttp
   implementation("com.squareup.moshi:moshi-kotlin:1.8.0")
   implementation("com.squareup.retrofit2:retrofit:$retrofit2Version")
   implementation("com.squareup.retrofit2:converter-moshi:$retrofit2Version")
-  implementation("com.squareup.okhttp3:logging-interceptor:4.2.1")
+  implementation("com.squareup.okhttp3:logging-interceptor:4.3.1")
+
+  // Leak canary
   debugImplementation("com.squareup.leakcanary:leakcanary-android:2.0-alpha-2")
 
+  // RxRelay, RxBinding, Timber
   implementation("com.jakewharton.rxrelay2:rxrelay:$rxRelayVersion")
   implementation("com.jakewharton.threetenabp:threetenabp:$threetenabpVersion")
   implementation("com.jakewharton.rxbinding3:rxbinding:$rxBindingVersion")
@@ -112,17 +123,19 @@ dependencies {
   implementation("com.jakewharton.rxbinding3:rxbinding-recyclerview:$rxBindingVersion")
   implementation("com.jakewharton.timber:timber:$timberVersion")
 
+  // Rx
   implementation("io.reactivex.rxjava2:rxkotlin:2.4.0")
   implementation("io.reactivex.rxjava2:rxandroid:2.1.1")
-
   implementation("com.github.VictorAlbertos:RxActivityResult:0.5.0-2.x")
 
+  // Glide
   implementation("com.github.bumptech.glide:glide:$glideVersion")
   kapt("com.github.bumptech.glide:compiler:$glideVersion")
   implementation("com.github.bumptech.glide:okhttp3-integration:$glideVersion") {
     exclude(group = "glide-parent")
   }
 
+  // Views
   implementation("com.miguelcatalan:materialsearchview:1.4.0")
   implementation("com.ms-square:expandableTextView:0.1.4")
   implementation("com.jaredrummler:material-spinner:1.3.1")
@@ -132,13 +145,14 @@ dependencies {
   implementation("de.hdodenhof:circleimageview:3.0.1")
   implementation("com.amulyakhare:com.amulyakhare.textdrawable:1.0.1")
 
-  testImplementation("junit:junit:4.12")
-  androidTestImplementation("androidx.test:runner:1.1.2-alpha01")
-  androidTestImplementation("androidx.test.espresso:espresso-core:3.1.2-alpha01")
+  testImplementation("junit:junit:4.13")
+  androidTestImplementation("androidx.test:runner:1.3.0-alpha03")
+  androidTestImplementation("androidx.test.espresso:espresso-core:3.3.0-alpha03")
 
-  implementation("com.google.firebase:firebase-auth:19.1.0")
-  implementation("com.google.firebase:firebase-storage:19.1.0")
-  implementation("com.google.firebase:firebase-firestore:21.2.0")
+  // Firebase
+  implementation("com.google.firebase:firebase-auth:19.2.0")
+  implementation("com.google.firebase:firebase-storage:19.1.1")
+  implementation("com.google.firebase:firebase-firestore:21.4.0")
 }
 
 apply(plugin = "com.google.gms.google-services")

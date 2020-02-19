@@ -35,10 +35,12 @@ class App : Application() {
       androidContext(this@App)
 
       modules(
-        networkModule,
-        dataModule,
-        appModule,
-        viewModelModule
+        listOf(
+          networkModule,
+          dataModule,
+          appModule,
+          viewModelModule
+        )
       )
     }
     if (BuildConfig.DEBUG) {
