@@ -11,7 +11,10 @@ import antonkozyriatskyi.circularprogressindicator.CircularProgressIndicator
 import com.google.android.material.chip.Chip
 import com.hoc.comicapp.R
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.Category
-import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.*
+import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.Downloaded
+import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.Downloading
+import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.Loading
+import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.NotYetDownload
 import com.hoc.comicapp.utils.inflate
 import kotlinx.android.synthetic.main.item_recycler_chapter.view.*
 import kotlinx.android.synthetic.main.item_recycler_detail.view.*
@@ -75,13 +78,16 @@ class ChapterAdapter(
 
   override fun onBindViewHolder(holder: VH, position: Int) = holder.bind(getItem(position))
 
-  override fun onBindViewHolder(holder: VH, position: Int, payloads: MutableList<Any>) {
-    val downloadState =
-      payloads.firstOrNull() as? ComicDetailViewState.DownloadState ?: return onBindViewHolder(holder, position)
+  override fun onBindViewHolder(holder: VH, position: Int, payloads: List<Any>) {
+    if (payloads.isEmpty()) {
+      return onBindViewHolder(holder, position)
+    }
 
-    if (holder is ChapterVH) {
-      Timber.d("Bind...$downloadState")
-      holder.updateDownloadState(downloadState)
+    payloads.forEach {
+      if (it is ComicDetailViewState.DownloadState && holder is ChapterVH) {
+        Timber.d("Bind...$it")
+        holder.updateDownloadState(it)
+      }
     }
   }
 

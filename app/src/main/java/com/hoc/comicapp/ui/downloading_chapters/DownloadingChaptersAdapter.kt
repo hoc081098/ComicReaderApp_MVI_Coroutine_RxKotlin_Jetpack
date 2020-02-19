@@ -42,10 +42,17 @@ class DownloadingChaptersAdapter(
 
   override fun onBindViewHolder(holder: VH, position: Int) = holder.bind(getItem(position))
 
-  override fun onBindViewHolder(holder: VH, position: Int, payloads: MutableList<Any>) {
-    val progress = payloads.firstOrNull() as? Int? ?: return onBindViewHolder(holder, position)
-    Timber.d("onBindViewHolder progress=$progress")
-    holder.updateProgress(progress)
+  override fun onBindViewHolder(holder: VH, position: Int, payloads: List<Any>) {
+    if (payloads.isEmpty()) {
+      return onBindViewHolder(holder, position)
+    }
+
+    payloads.forEach {
+      if (it is Int) {
+        Timber.d("onBindViewHolder progress=$it")
+        holder.updateProgress(it)
+      }
+    }
   }
 
   inner class VH(itemView: View, parent: ViewGroup) : RecyclerView.ViewHolder(itemView) {
