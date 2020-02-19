@@ -1,10 +1,9 @@
 package com.hoc.comicapp.domain.repository
 
 import androidx.lifecycle.LiveData
-import com.hoc.comicapp.domain.models.ComicAppError
+import com.hoc.comicapp.domain.DomainResult
 import com.hoc.comicapp.domain.models.DownloadedChapter
 import com.hoc.comicapp.domain.models.DownloadedComic
-import com.hoc.comicapp.utils.Either
 import io.reactivex.Observable
 import kotlinx.coroutines.flow.Flow
 
@@ -20,13 +19,13 @@ interface DownloadComicsRepository {
    * Get all downloaded comics
    * @return observable
    */
-  fun getDownloadedComics(): Observable<Either<ComicAppError, List<DownloadedComic>>>
+  fun getDownloadedComics(): Observable<DomainResult<List<DownloadedComic>>>
 
   /**
    * Get downloaded comic by [link]
    * @return observable
    */
-  fun getDownloadedComic(link: String): Observable<Either<ComicAppError, DownloadedComic>>
+  fun getDownloadedComic(link: String): Observable<DomainResult<DownloadedComic>>
 
   /**
    * Get all downloaded chapters
@@ -38,13 +37,13 @@ interface DownloadComicsRepository {
    * Delete downloaded [chapter]
    * @return either
    */
-  suspend fun deleteDownloadedChapter(chapter: DownloadedChapter): Either<ComicAppError, Unit>
+  suspend fun deleteDownloadedChapter(chapter: DownloadedChapter): DomainResult<Unit>
 
   /**
    * Delete downloaded [comic]
    * @return either
    */
-  suspend fun deleteComic(comic: DownloadedComic): Either<ComicAppError, Unit>
+  suspend fun deleteComic(comic: DownloadedComic): DomainResult<Unit>
 
   /**
    * Enqueue download chapter worker
@@ -55,7 +54,7 @@ interface DownloadComicsRepository {
   suspend fun enqueueDownload(
     chapter: DownloadedChapter,
     comicName: String
-  ): Either<ComicAppError, Unit>
+  ): DomainResult<Unit>
 
-  fun getDownloadedChapter(chapterLink: String): Flow<Either<ComicAppError, DownloadedChapter>>
+  fun getDownloadedChapter(chapterLink: String): Flow<DomainResult<DownloadedChapter>>
 }

@@ -1,16 +1,15 @@
 package com.hoc.comicapp.domain.repository
 
-import com.hoc.comicapp.domain.models.ComicAppError
+import com.hoc.comicapp.domain.DomainResult
 import com.hoc.comicapp.domain.models.FavoriteComic
-import com.hoc.comicapp.utils.Either
 import io.reactivex.Observable
 
 interface FavoriteComicsRepository {
-  fun favoriteComics(): Observable<Either<ComicAppError, List<FavoriteComic>>>
+  fun favoriteComics(): Observable<DomainResult<List<FavoriteComic>>>
 
-  fun isFavorited(url: String) : Observable<Either<ComicAppError, Boolean>>
+  fun isFavorited(url: String): Observable<DomainResult<Boolean>>
 
-  suspend fun removeFromFavorite(comic: FavoriteComic): Either<ComicAppError, Unit>
+  suspend fun removeFromFavorite(comic: FavoriteComic): DomainResult<Unit>
 
-  suspend fun toggle(comic: FavoriteComic): Either<ComicAppError, Unit>
+  suspend fun toggle(comic: FavoriteComic): DomainResult<Unit>
 }
