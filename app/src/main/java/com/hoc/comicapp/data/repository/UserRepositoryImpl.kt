@@ -2,11 +2,10 @@ package com.hoc.comicapp.data.repository
 
 import android.net.Uri
 import com.hoc.comicapp.data.firebase.user.FirebaseAuthUserDataSource
-import com.hoc.comicapp.domain.models.ComicAppError
+import com.hoc.comicapp.domain.DomainResult
 import com.hoc.comicapp.domain.models.User
 import com.hoc.comicapp.domain.models.toError
 import com.hoc.comicapp.domain.repository.UserRepository
-import com.hoc.comicapp.utils.Either
 import com.hoc.comicapp.utils.bimap
 import com.hoc.comicapp.utils.left
 import com.hoc.comicapp.utils.right
@@ -20,7 +19,7 @@ class UserRepositoryImpl(
   private val userDataSource: FirebaseAuthUserDataSource
 ) : UserRepository {
 
-  override suspend fun signOut(): Either<ComicAppError, Unit> {
+  override suspend fun signOut(): DomainResult<Unit> {
     return try {
       userDataSource.signOut()
       Unit.right()
@@ -29,7 +28,7 @@ class UserRepositoryImpl(
     }
   }
 
-  override fun userObservable(): Observable<Either<ComicAppError, User?>> {
+  override fun userObservable(): Observable<DomainResult<User?>> {
     return userDataSource.userObservable().map { either ->
       either.bimap(
         { it.toError(retrofit) },
@@ -43,7 +42,7 @@ class UserRepositoryImpl(
     password: String,
     fullName: String,
     avatar: Uri?
-  ): Either<ComicAppError, Unit> {
+  ): DomainResult<Unit> {
     return try {
       userDataSource.register(
         email = email,
@@ -59,7 +58,7 @@ class UserRepositoryImpl(
     }
   }
 
-  override suspend fun login(email: String, password: String): Either<ComicAppError, Unit> {
+  override suspend fun login(email: String, password: String): DomainResult<Unit> {
     return try {
       userDataSource.login(email, password)
       Unit.right()

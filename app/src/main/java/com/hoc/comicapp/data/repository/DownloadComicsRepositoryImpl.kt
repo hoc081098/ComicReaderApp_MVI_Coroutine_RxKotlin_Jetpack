@@ -18,7 +18,7 @@ import com.hoc.comicapp.data.local.entities.ChapterEntity
 import com.hoc.comicapp.data.local.entities.ComicAndChapters
 import com.hoc.comicapp.data.local.entities.ComicEntity
 import com.hoc.comicapp.data.remote.ComicApiService
-import com.hoc.comicapp.domain.models.ComicAppError
+import com.hoc.comicapp.domain.DomainResult
 import com.hoc.comicapp.domain.models.ComicDetail
 import com.hoc.comicapp.domain.models.DownloadedChapter
 import com.hoc.comicapp.domain.models.DownloadedComic
@@ -27,7 +27,6 @@ import com.hoc.comicapp.domain.models.toError
 import com.hoc.comicapp.domain.repository.DownloadComicsRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
-import com.hoc.comicapp.utils.Either
 import com.hoc.comicapp.utils.copyTo
 import com.hoc.comicapp.utils.fold
 import com.hoc.comicapp.utils.left
@@ -64,7 +63,7 @@ class DownloadComicsRepositoryImpl(
   private val workManager: WorkManager,
   private val chapterJsonAdapter: JsonAdapter<ComicDetail.Chapter>
 ) : DownloadComicsRepository {
-  override fun getDownloadedChapter(chapterLink: String): Flow<Either<ComicAppError, DownloadedChapter>> {
+  override fun getDownloadedChapter(chapterLink: String): Flow<DomainResult<DownloadedChapter>> {
     val allChaptersF = chapterDao.getAllChaptersFlow().distinctUntilChanged()
     val chapterF = chapterDao.getByChapterLink(chapterLink).distinctUntilChanged()
 
@@ -78,15 +77,15 @@ class DownloadComicsRepositoryImpl(
             nextChapterLink = chapters.getOrNull(index + 1)?.chapterLink
           )
       }
-      .map { it.right() as Either<ComicAppError, DownloadedChapter> }
+      .map { it.right() as DomainResult<DownloadedChapter> }
       .catch { emit(it.toError(retrofit).left()) }
       .flowOn(dispatchersProvider.io)
   }
 
-  override fun getDownloadedComic(link: String): Observable<Either<ComicAppError, DownloadedComic>> {
+  override fun getDownloadedComic(link: String): Observable<DomainResult<DownloadedComic>> {
     return comicDao
       .getByComicLink(link)
-      .map<Either<ComicAppError, DownloadedComic>> {
+      .map<DomainResult<DownloadedComic>> {
         it.chapters = it.chapters.sortedByDescending { it.order }
         Mapper.entityToDomainModel(it).right()
       }
@@ -94,7 +93,7 @@ class DownloadComicsRepositoryImpl(
       .subscribeOn(rxSchedulerProvider.io)
   }
 
-  override suspend fun deleteComic(comic: DownloadedComic): Either<ComicAppError, Unit> {
+  override suspend fun deleteComic(comic: DownloadedComic): DomainResult<Unit> {
     return runCatching {
       withContext(dispatchersProvider.main) {
         comicDao.delete(Mapper.domainToLocalEntity(comic))
@@ -108,7 +107,7 @@ class DownloadComicsRepositoryImpl(
   override suspend fun enqueueDownload(
     chapter: DownloadedChapter,
     comicName: String
-  ): Either<ComicAppError, Unit> {
+  ): DomainResult<Unit> {
     return try {
       withContext(dispatchersProvider.io) {
         val chapterJson = chapterJsonAdapter.toJson(
@@ -147,7 +146,7 @@ class DownloadComicsRepositoryImpl(
     }
   }
 
-  override suspend fun deleteDownloadedChapter(chapter: DownloadedChapter): Either<ComicAppError, Unit> {
+  override suspend fun deleteDownloadedChapter(chapter: DownloadedChapter): DomainResult<Unit> {
     return try {
       workManager.cancelAllWorkByTag(chapter.chapterLink).await()
       _deleteEntityAndImages(chapter)
@@ -157,7 +156,7 @@ class DownloadComicsRepositoryImpl(
   }
 
   @Suppress("FunctionName")
-  private suspend fun _deleteEntityAndImages(chapter: DownloadedChapter): Either<ComicAppError, Unit> {
+  private suspend fun _deleteEntityAndImages(chapter: DownloadedChapter): DomainResult<Unit> {
     return runCatching {
       withContext(dispatchersProvider.io) {
         chapterDao.delete(Mapper.domainToLocalEntity(chapter))
@@ -202,10 +201,10 @@ class DownloadComicsRepositoryImpl(
     }
   }
 
-  override fun getDownloadedComics(): Observable<Either<ComicAppError, List<DownloadedComic>>> {
+  override fun getDownloadedComics(): Observable<DomainResult<List<DownloadedComic>>> {
     return chapterDao
       .getComicAndChapters()
-      .map<Either<ComicAppError, List<DownloadedComic>>> { list ->
+      .map<DomainResult<List<DownloadedComic>>> { list ->
         list
           .map { item ->
             val entity = ComicAndChapters().also { copied ->

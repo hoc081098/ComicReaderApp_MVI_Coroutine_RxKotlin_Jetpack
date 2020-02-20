@@ -7,16 +7,15 @@ import com.hoc.comicapp.data.local.entities.ComicEntity
 import com.hoc.comicapp.data.remote.ComicApiService
 import com.hoc.comicapp.data.remote.response.ComicDetailResponse
 import com.hoc.comicapp.data.remote.response.ComicResponse
+import com.hoc.comicapp.domain.DomainResult
 import com.hoc.comicapp.domain.models.Category
 import com.hoc.comicapp.domain.models.CategoryDetailPopularComic
 import com.hoc.comicapp.domain.models.ChapterDetail
 import com.hoc.comicapp.domain.models.Comic
-import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.ComicDetail
 import com.hoc.comicapp.domain.models.toError
 import com.hoc.comicapp.domain.repository.ComicRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
-import com.hoc.comicapp.utils.Either
 import com.hoc.comicapp.utils.left
 import com.hoc.comicapp.utils.right
 import kotlinx.coroutines.CoroutineScope
@@ -64,7 +63,7 @@ class ComicRepositoryImpl(
   private suspend fun <T> executeApiRequest(
     tag: String,
     request: suspend ComicApiService.() -> T
-  ): Either<ComicAppError, T> {
+  ): DomainResult<T> {
     return try {
       withContext(dispatchersProvider.io) {
         comicApiService
@@ -78,14 +77,17 @@ class ComicRepositoryImpl(
     }
   }
 
-  override suspend fun getCategoryDetailPopular(categoryLink: String): Either<ComicAppError, List<CategoryDetailPopularComic>> {
+  override suspend fun getCategoryDetailPopular(categoryLink: String): DomainResult<List<CategoryDetailPopularComic>> {
     return executeApiRequest("getCategoryDetailPopular") {
       getCategoryDetailPopular(categoryLink)
         .map(Mapper::responseToDomainModel)
     }
   }
 
-  override suspend fun getCategoryDetail(categoryLink: String, page: Int?): Either<ComicAppError, List<Comic>> {
+  override suspend fun getCategoryDetail(
+    categoryLink: String,
+    page: Int?
+  ): DomainResult<List<Comic>> {
     return executeApiRequest("getCategoryDetail") {
       getCategoryDetail(categoryLink, page)
         .also(::updateFavoritesAndDownloaded)
@@ -93,7 +95,7 @@ class ComicRepositoryImpl(
     }
   }
 
-  override suspend fun getMostViewedComics(page: Int?): Either<ComicAppError, List<Comic>> {
+  override suspend fun getMostViewedComics(page: Int?): DomainResult<List<Comic>> {
     return executeApiRequest("getMostViewedComics") {
       comicApiService
         .getMostViewedComics(page)
@@ -102,7 +104,7 @@ class ComicRepositoryImpl(
     }
   }
 
-  override suspend fun getUpdatedComics(page: Int?): Either<ComicAppError, List<Comic>> {
+  override suspend fun getUpdatedComics(page: Int?): DomainResult<List<Comic>> {
     return executeApiRequest("getUpdatedComics") {
       comicApiService
         .getUpdatedComics(page)
@@ -111,7 +113,7 @@ class ComicRepositoryImpl(
     }
   }
 
-  override suspend fun getNewestComics(page: Int?): Either<ComicAppError, List<Comic>> {
+  override suspend fun getNewestComics(page: Int?): DomainResult<List<Comic>> {
     return executeApiRequest("getNewestComics") {
       comicApiService
         .getNewestComics(page)
@@ -120,7 +122,7 @@ class ComicRepositoryImpl(
     }
   }
 
-  override suspend fun getComicDetail(comicLink: String): Either<ComicAppError, ComicDetail> {
+  override suspend fun getComicDetail(comicLink: String): DomainResult<ComicDetail> {
     return executeApiRequest("getComicDetail") {
       comicApiService
         .getComicDetail(comicLink)
@@ -129,7 +131,7 @@ class ComicRepositoryImpl(
     }
   }
 
-  override suspend fun getChapterDetail(chapterLink: String): Either<ComicAppError, ChapterDetail> {
+  override suspend fun getChapterDetail(chapterLink: String): DomainResult<ChapterDetail> {
     return executeApiRequest("chapterLink") {
       comicApiService
         .getChapterDetail(chapterLink)
@@ -137,7 +139,7 @@ class ComicRepositoryImpl(
     }
   }
 
-  override suspend fun getAllCategories(): Either<ComicAppError, List<Category>> {
+  override suspend fun getAllCategories(): DomainResult<List<Category>> {
     return executeApiRequest("getAllCategories") {
       comicApiService
         .getAllCategories()
@@ -145,7 +147,7 @@ class ComicRepositoryImpl(
     }
   }
 
-  override suspend fun searchComic(query: String, page: Int?): Either<ComicAppError, List<Comic>> {
+  override suspend fun searchComic(query: String, page: Int?): DomainResult<List<Comic>> {
     return executeApiRequest("searchComic") {
       comicApiService
         .searchComic(query, page)

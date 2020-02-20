@@ -2,11 +2,10 @@ package com.hoc.comicapp.data.repository
 
 import com.hoc.comicapp.data.Mapper
 import com.hoc.comicapp.data.firebase.favorite_comics.FavoriteComicsDataSource
-import com.hoc.comicapp.domain.models.ComicAppError
+import com.hoc.comicapp.domain.DomainResult
 import com.hoc.comicapp.domain.models.FavoriteComic
 import com.hoc.comicapp.domain.models.toError
 import com.hoc.comicapp.domain.repository.FavoriteComicsRepository
-import com.hoc.comicapp.utils.Either
 import com.hoc.comicapp.utils.bimap
 import com.hoc.comicapp.utils.left
 import com.hoc.comicapp.utils.right
@@ -18,7 +17,7 @@ class FavoriteComicsRepositoryImpl(
   private val favoriteComicsDataSource: FavoriteComicsDataSource
 ) : FavoriteComicsRepository {
 
-  override fun isFavorited(url: String): Observable<Either<ComicAppError, Boolean>> {
+  override fun isFavorited(url: String): Observable<DomainResult<Boolean>> {
     return favoriteComicsDataSource
       .isFavorited(url)
       .map { either ->
@@ -29,7 +28,7 @@ class FavoriteComicsRepositoryImpl(
       }
   }
 
-  override fun favoriteComics(): Observable<Either<ComicAppError, List<FavoriteComic>>> {
+  override fun favoriteComics(): Observable<DomainResult<List<FavoriteComic>>> {
     return favoriteComicsDataSource
       .favoriteComics()
       .map { either ->
@@ -40,7 +39,7 @@ class FavoriteComicsRepositoryImpl(
       }
   }
 
-  override suspend fun removeFromFavorite(comic: FavoriteComic): Either<ComicAppError, Unit> {
+  override suspend fun removeFromFavorite(comic: FavoriteComic): DomainResult<Unit> {
     return try {
       favoriteComicsDataSource.removeFromFavorite(Mapper.domainToFirebaseEntity(comic))
       Unit.right()
@@ -49,7 +48,7 @@ class FavoriteComicsRepositoryImpl(
     }
   }
 
-  override suspend fun toggle(comic: FavoriteComic): Either<ComicAppError, Unit> {
+  override suspend fun toggle(comic: FavoriteComic): DomainResult<Unit> {
     return try {
       favoriteComicsDataSource.toggle(Mapper.domainToFirebaseEntity(comic))
       Unit.right()
