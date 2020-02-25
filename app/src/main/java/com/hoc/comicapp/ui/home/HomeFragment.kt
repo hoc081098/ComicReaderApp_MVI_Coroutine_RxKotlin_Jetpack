@@ -138,11 +138,11 @@ class HomeFragment : Fragment() {
 
     homeAdapter
       .clickComicObservable
-      .subscribeBy {
+      .subscribeBy { (view, comicArg) ->
         val toComicDetailFragment =
           HomeFragmentDirections.actionHomeFragmentDestToComicDetailFragment(
-            comic = it,
-            title = it.title,
+            comic = comicArg,
+            title = comicArg.title,
             isDownloaded = false
           )
         findNavController().navigate(toComicDetailFragment)

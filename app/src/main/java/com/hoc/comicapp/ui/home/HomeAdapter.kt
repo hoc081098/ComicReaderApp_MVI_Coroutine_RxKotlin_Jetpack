@@ -24,6 +24,7 @@ import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.MOST_VIEWED
 import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.NEWEST
 import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.UPDATED
 import com.hoc.comicapp.utils.inflate
+import com.hoc.comicapp.utils.mapNotNull
 import com.jakewharton.rxbinding3.recyclerview.scrollStateChanges
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxbinding3.view.detaches
@@ -33,7 +34,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.ofType
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.item_recycler_home_header.view.*
 import kotlinx.android.synthetic.main.item_recycler_home_recycler.view.*
@@ -41,7 +41,6 @@ import kotlinx.android.synthetic.main.item_recyclerview_updated_comic.view.*
 import kotlinx.android.synthetic.main.item_recyclerview_updated_error.view.*
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
-
 
 class HomeAdapter(
   private val lifecycleOwner: LifecycleOwner,
@@ -58,37 +57,37 @@ class HomeAdapter(
   private val newestRetryS = PublishRelay.create<Unit>()
   private val mostViewedRetryS = PublishRelay.create<Unit>()
   private val updatedRetryS = PublishRelay.create<Unit>()
-  private val clickComicS = PublishRelay.create<Comic>()
+  private val clickComicS = PublishRelay.create<Pair<View, Comic>>()
 
   val newestRetryObservable = newestRetryS.throttleFirst(500, TimeUnit.MILLISECONDS)!!
   val mostViewedRetryObservable = mostViewedRetryS.throttleFirst(500, TimeUnit.MILLISECONDS)!!
   val updatedRetryObservable = updatedRetryS.throttleFirst(500, TimeUnit.MILLISECONDS)!!
   val clickComicObservable = Observable.mergeArray(
-    newestAdapter.clickComicObservable.map {
-      ComicArg(
-        link = it.link,
-        thumbnail = it.thumbnail,
-        title = it.title,
-        view = it.view,
-        remoteThumbnail = it.thumbnail
+    newestAdapter.clickComicObservable.map { (view, comic) ->
+      view to ComicArg(
+        link = comic.link,
+        thumbnail = comic.thumbnail,
+        title = comic.title,
+        view = comic.view,
+        remoteThumbnail = comic.thumbnail
       )
     },
-    mostViewedAdapter.clickComicObservable.map {
-      ComicArg(
-        link = it.link,
-        thumbnail = it.thumbnail,
-        title = it.title,
-        view = it.view,
-        remoteThumbnail = it.thumbnail
+    mostViewedAdapter.clickComicObservable.map { (view, comic) ->
+      view to ComicArg(
+        link = comic.link,
+        thumbnail = comic.thumbnail,
+        title = comic.title,
+        view = comic.view,
+        remoteThumbnail = comic.thumbnail
       )
     },
-    clickComicS.map {
-      ComicArg(
-        link = it.link,
-        thumbnail = it.thumbnail,
-        title = it.title,
-        view = it.view,
-        remoteThumbnail = it.thumbnail
+    clickComicS.map { (view, comic) ->
+      view to ComicArg(
+        link = comic.link,
+        thumbnail = comic.thumbnail,
+        title = comic.title,
+        view = comic.view,
+        remoteThumbnail = comic.thumbnail
       )
     }
   ).doOnNext { Timber.d("[*] Click comic $it") }!!
@@ -302,11 +301,16 @@ class HomeAdapter(
       itemView
         .clicks()
         .takeUntil(parent.detaches())
-        .map { adapterPosition }
-        .filter { it != RecyclerView.NO_POSITION }
-        .map { getItem(it) }
-        .ofType<HomeListItem.UpdatedItem.ComicItem>()
-        .map { it.comic }
+        .mapNotNull {
+          when (val position = adapterPosition) {
+            RecyclerView.NO_POSITION -> null
+            else -> when (val item = getItem(position)) {
+              is HomeListItem.UpdatedItem.ComicItem -> itemView to item.comic
+              else -> null
+            }
+          }
+
+        }
         .subscribe(clickComicS)
         .addTo(compositeDisposable)
     }

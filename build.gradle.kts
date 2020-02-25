@@ -8,7 +8,7 @@ buildscript {
     set("lifecycleVersion", "2.2.0")
     set("pagingVersion", "2.1.1")
     set("koinVersion", "2.0.1")
-    set("materialVersion", "1.2.0-alpha04")
+    set("materialVersion", "1.2.0-alpha05")
     set("glideVersion", "4.11.0")
     set("rxBindingVersion", "3.1.0")
     set("timberVersion", "4.7.1")
