@@ -5,7 +5,6 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
 import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersContract.ViewState.Chapter
 import com.hoc.comicapp.utils.asObservable
@@ -31,7 +30,6 @@ object DownloadingChapterItemDiffUtilItemCallback : DiffUtil.ItemCallback<Chapte
 }
 
 class DownloadingChaptersAdapter(
-  private val glide: GlideRequests,
   private val compositeDisposable: CompositeDisposable
 ) : ListAdapter<Chapter, DownloadingChaptersAdapter.VH>(DownloadingChapterItemDiffUtilItemCallback) {
   private val _clickCancel = PublishRelay.create<Chapter>()

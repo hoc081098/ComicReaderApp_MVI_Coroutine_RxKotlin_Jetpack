@@ -53,7 +53,7 @@ import com.hoc.comicapp.ui.detail.ComicDetailFragmentDirections.Companion.action
 
 @ExperimentalCoroutinesApi
 class ComicDetailFragment : Fragment() {
-  private val viewModel by viewModel<ComicDetailViewModel>() { parametersOf(args.isDownloaded) }
+  private val viewModel by viewModel<ComicDetailViewModel> { parametersOf(args.isDownloaded) }
   private val args by navArgs<ComicDetailFragmentArgs>()
 
   private val compositeDisposable = CompositeDisposable()

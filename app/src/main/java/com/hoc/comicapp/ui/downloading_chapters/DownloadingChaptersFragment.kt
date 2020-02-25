@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersContract.SingleEvent
@@ -40,7 +39,6 @@ class DownloadingChaptersFragment : Fragment() {
     Timber.d("DownloadingChaptersFragment::onViewCreated")
 
     val adapter = DownloadingChaptersAdapter(
-      GlideApp.with(this),
       compositeDisposable
     )
     initView(adapter)

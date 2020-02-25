@@ -13,9 +13,11 @@ import com.hoc.comicapp.R
 import com.hoc.comicapp.activity.SplashActivity
 import com.hoc.comicapp.domain.models.ComicDetail.Chapter
 import com.hoc.comicapp.domain.repository.DownloadComicsRepository
+import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.squareup.moshi.JsonAdapter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.withContext
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import timber.log.Timber
@@ -27,12 +29,17 @@ class DownloadComicWorker(
 ) : CoroutineWorker(appContext, params), KoinComponent {
   private val downloadComicsRepo by inject<DownloadComicsRepository>()
   private val chapterJsonAdapter by inject<JsonAdapter<Chapter>>()
+  private val dispatchers by inject<CoroutinesDispatchersProvider>()
 
   override suspend fun doWork(): Result {
     val chapterJson = inputData.getString(CHAPTER)
       ?: return Result.failure(workDataOf(ERROR to "chapterJson is null"))
 
-    val (chapterLink, chapterName) = chapterJsonAdapter.fromJson(chapterJson)
+    val (chapterLink, chapterName) = withContext(dispatchers.io) {
+      // TODO: Remove @Suppress("BlockingMethodInNonBlockingContext"). This seem to be a IntelliJ Idea's bug.
+      @Suppress("BlockingMethodInNonBlockingContext")
+      chapterJsonAdapter.fromJson(chapterJson)
+    }
       ?: return Result.failure(workDataOf(ERROR to "chapter is null"))
 
     val comicName = inputData.getString(COMIC_NAME)
@@ -90,7 +97,7 @@ class DownloadComicWorker(
 
       Result.success()
     } catch (e: Throwable) {
-      Timber.d("Exception: $e", e)
+      Timber.d(e, "Exception: $e")
 
       notificationManagerCompat.notify(
         1,

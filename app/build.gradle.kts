@@ -27,12 +27,12 @@ plugins {
 androidExtensions { isExperimental = true }
 
 android {
-  compileSdkVersion(28)
+  compileSdkVersion(29)
 
   defaultConfig {
     applicationId = "com.hoc.comicapp"
     minSdkVersion(21)
-    targetSdkVersion(28)
+    targetSdkVersion(29)
     versionCode = 1
     versionName = "1.0"
 

@@ -1,6 +1,5 @@
 package com.hoc.comicapp.ui.home
 
-import android.os.Parcelable
 import com.hoc.comicapp.base.Intent
 import com.hoc.comicapp.base.SingleEvent
 import com.hoc.comicapp.base.ViewState
@@ -8,7 +7,6 @@ import com.hoc.comicapp.domain.models.Comic
 import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.getMessage
 import io.reactivex.Observable
-import kotlinx.android.parcel.Parcelize
 
 interface HomeInteractor {
   fun newestComics(): Observable<HomePartialChange>

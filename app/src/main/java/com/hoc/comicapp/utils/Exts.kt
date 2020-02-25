@@ -89,7 +89,7 @@ inline fun Context.getDrawableBy(@DrawableRes id: Int) = ContextCompat.getDrawab
 
 /**
  * Get uri from any resource type
- * @param this@uriFromResourceId - Context
+ * @receiver Context
  * @param resId - Resource id
  * @return - Uri to resource by given id or null
  */

@@ -52,7 +52,7 @@ class ChapterDetailInteractorImpl(
     }
   }.flowOn(dispatchersProvider.main).asObservable()
 
-  override fun refresh(chapter: ViewState.Chapter, isDownloaded: Boolean) = flow<PartialChange> {
+  override fun refresh(chapter: ViewState.Chapter, isDownloaded: Boolean) = flow {
     Timber.tag("LoadChapter###").d("refresh ${chapter.debug}")
 
     emit(Refresh.Loading)

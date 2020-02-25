@@ -36,7 +36,7 @@ import timber.log.Timber
 
 class ChapterDetailFragment : Fragment() {
   private val navArgs by navArgs<ChapterDetailFragmentArgs>()
-  private val viewModel by viewModel<ChapterDetailViewModel>() { parametersOf(navArgs.isDownloaded) }
+  private val viewModel by viewModel<ChapterDetailViewModel> { parametersOf(navArgs.isDownloaded) }
 
   private val compositeDisposable = CompositeDisposable()
 

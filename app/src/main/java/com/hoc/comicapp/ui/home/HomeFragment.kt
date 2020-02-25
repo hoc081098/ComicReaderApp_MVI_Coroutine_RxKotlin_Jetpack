@@ -121,7 +121,7 @@ class HomeFragment : Fragment() {
 
     fab.setOnClickListener {
       object : LinearSmoothScroller(it.context) {
-        override fun getVerticalSnapPreference() = LinearSmoothScroller.SNAP_TO_START
+        override fun getVerticalSnapPreference() = SNAP_TO_START
       }.apply { targetPosition = 0 }.let { recycler_home.layoutManager!!.startSmoothScroll(it) }
     }
 
