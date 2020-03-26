@@ -4,6 +4,7 @@ import com.hoc.comicapp.BuildConfig
 import com.hoc.comicapp.data.remote.COMIC_BASE_URL
 import com.hoc.comicapp.data.remote.ComicApiService
 import com.squareup.moshi.Moshi
+import okhttp3.Cache
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.dsl.module

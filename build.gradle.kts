@@ -1,7 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-  val kotlinVersion by extra("1.3.61")
+  val kotlinVersion by extra("1.4-M1")
   val navVersion by extra("2.3.0-alpha01")
   extra.run {
     set("coroutinesVersion", "1.3.3")
@@ -23,9 +23,10 @@ buildscript {
   repositories {
     google()
     jcenter()
+    maven(url = "https://dl.bintray.com/kotlin/kotlin-eap")
   }
   dependencies {
-    classpath("com.android.tools.build:gradle:3.6.0")
+    classpath("com.android.tools.build:gradle:3.6.1")
     classpath(kotlin("gradle-plugin", kotlinVersion))
     classpath("androidx.navigation:navigation-safe-args-gradle-plugin:$navVersion")
     classpath("com.google.gms:google-services:4.3.3")
@@ -40,6 +41,7 @@ allprojects {
     maven(url = "https://oss.sonatype.org/content/repositories/snapshots")
     maven(url = "https://jitpack.io")
     maven(url = "http://dl.bintray.com/amulyakhare/maven")
+    maven(url = "https://dl.bintray.com/kotlin/kotlin-eap")
   }
 }
 

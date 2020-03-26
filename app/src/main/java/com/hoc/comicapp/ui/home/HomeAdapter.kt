@@ -317,6 +317,8 @@ class HomeAdapter(
 
     override fun bind(item: HomeListItem) =
       onlyBind<HomeListItem.UpdatedItem.ComicItem>(item) { (comic) ->
+        itemView.transitionName = comic.link
+
         glide
           .load(comic.thumbnail)
           .placeholder(R.drawable.splash_background)

@@ -12,19 +12,19 @@ interface ComicRepository {
    * Get most viewed comics
    * @param page number
    */
-  suspend fun getMostViewedComics(page: Int? = null): DomainResult<List<Comic>>
+  suspend fun getMostViewedComics(page: Int = 1): DomainResult<List<Comic>>
 
   /**
    * Get recent updated comics
    * @param page number
    */
-  suspend fun getUpdatedComics(page: Int? = null): DomainResult<List<Comic>>
+  suspend fun getUpdatedComics(page: Int = 1): DomainResult<List<Comic>>
 
   /**
    * Get newest comics
    * @param page number
    */
-  suspend fun getNewestComics(page: Int? = null): DomainResult<List<Comic>>
+  suspend fun getNewestComics(page: Int = 1): DomainResult<List<Comic>>
 
   /**
    * Get comic detail and all chapters
@@ -51,7 +51,7 @@ interface ComicRepository {
    */
   suspend fun getCategoryDetail(
     categoryLink: String,
-    page: Int? = null
+    page: Int = 1
   ): DomainResult<List<Comic>>
 
   /**
@@ -68,6 +68,6 @@ interface ComicRepository {
    */
   suspend fun searchComic(
     query: String,
-    page: Int? = null
+    page: Int = 1
   ): DomainResult<List<Comic>>
 }

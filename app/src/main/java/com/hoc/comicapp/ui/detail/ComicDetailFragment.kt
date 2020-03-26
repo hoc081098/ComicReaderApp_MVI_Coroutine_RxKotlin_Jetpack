@@ -14,6 +14,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.google.android.material.transition.MaterialContainerTransform
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract
@@ -61,6 +62,11 @@ class ComicDetailFragment : Fragment() {
 
   private val intentS = PublishRelay.create<ComicDetailIntent>()
 
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    prepareTransitions()
+  }
+
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
@@ -72,6 +78,9 @@ class ComicDetailFragment : Fragment() {
     super.onViewCreated(view, savedInstanceState)
     Timber.d("ComicDetailFragment::onViewCreated")
 
+    root_detail.transitionName = args.comic.link
+    startTransitions()
+
     val chapterAdapter = ChapterAdapter(
       ::onClickButtonRead,
       ::onClickChapter,
@@ -79,6 +88,26 @@ class ComicDetailFragment : Fragment() {
     )
     initView(chapterAdapter)
     bind(chapterAdapter)
+  }
+
+  private fun prepareTransitions() {
+    postponeEnterTransition()
+
+    sharedElementEnterTransition = MaterialContainerTransform(requireContext()).apply {
+      // Scope the transition to a view in the hierarchy so we know it will be added under
+      // the bottom app bar but over the Hold transition from the exiting HomeFragment.
+      drawingViewId = R.id.main_nav_fragment
+      duration = 500L
+    }
+    sharedElementReturnTransition = MaterialContainerTransform(requireContext()).apply {
+      // Again, scope the return transition so it is added below the bottom app bar.
+      drawingViewId = R.id.recycler_home
+      duration = 500L
+    }
+  }
+
+  private fun startTransitions() {
+    startPostponedEnterTransition()
   }
 
   private fun onClickDownload(chapter: Chapter) {

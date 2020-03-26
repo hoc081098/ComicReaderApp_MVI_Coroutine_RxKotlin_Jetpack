@@ -22,7 +22,7 @@ class HomeInteractorImpl1(
       kotlinx.coroutines.coroutineScope {
         send(Loading)
 
-        val newestAsync = async { comicRepository.getNewestComics(null) }
+        val newestAsync = async { comicRepository.getNewestComics() }
         val mostViewedAsync = async { comicRepository.getMostViewedComics() }
         val updatedAsync = async { comicRepository.getUpdatedComics() }
 

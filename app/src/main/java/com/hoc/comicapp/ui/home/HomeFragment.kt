@@ -5,11 +5,14 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.doOnPreDraw
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.transition.Hold
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.utils.isOrientationPortrait
@@ -42,6 +45,11 @@ class HomeFragment : Fragment() {
     )
   }
 
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    exitTransition = Hold()
+  }
+
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
@@ -52,6 +60,9 @@ class HomeFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
     Timber.d("HomeFragment::onViewCreated")
+
+    postponeEnterTransition()
+    view.doOnPreDraw { startPostponedEnterTransition() }
 
     initView(homeAdapter)
     bind(homeAdapter)
@@ -139,13 +150,16 @@ class HomeFragment : Fragment() {
     homeAdapter
       .clickComicObservable
       .subscribeBy { (view, comicArg) ->
+        view.transitionName = comicArg.link
+
         val toComicDetailFragment =
           HomeFragmentDirections.actionHomeFragmentDestToComicDetailFragment(
             comic = comicArg,
             title = comicArg.title,
             isDownloaded = false
           )
-        findNavController().navigate(toComicDetailFragment)
+        val extras = FragmentNavigatorExtras(view to view.transitionName)
+        findNavController().navigate(toComicDetailFragment, extras)
       }
       .addTo(compositeDisposable)
   }

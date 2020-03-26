@@ -27,7 +27,7 @@ class HomeInteractorImpl(
       /**
        * Get newest list
        */
-      val newestResult = comicRepository.getNewestComics(null)
+      val newestResult = comicRepository.getNewestComics()
 
       /**
        * Send success change
@@ -116,7 +116,7 @@ class HomeInteractorImpl(
 
   override fun refreshAll(): Observable<HomePartialChange> {
     return Observables.zip(
-      rxObservable(dispatchersProvider.main) { send(comicRepository.getNewestComics(null)) },
+      rxObservable(dispatchersProvider.main) { send(comicRepository.getNewestComics()) },
       rxObservable(dispatchersProvider.main) { send(comicRepository.getMostViewedComics()) },
       rxObservable(dispatchersProvider.main) { send(comicRepository.getUpdatedComics()) }
     ).map<HomePartialChange> { (newest, mostViewed, updated) ->
