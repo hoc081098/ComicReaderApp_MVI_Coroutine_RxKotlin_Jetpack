@@ -11,15 +11,13 @@ class Cache<K : Any, V : Any>(maxSize: Int, private val entryLifetime: Duration)
   private val timeSource = TimeSource.Monotonic
   private val cache = LruCache<K, Value<V>>(maxSize)
 
-  operator fun get(key: K): V? {
-    return synchronized(this) {
-      val value = cache[key] ?: return null
-      if (value.expiredTime.hasPassedNow()) {
-        remove(key)
-        null
-      } else {
-        value.value
-      }
+  operator fun get(key: K): V? = synchronized(this) {
+    val value = cache[key] ?: return null
+    if (value.expiredTime.hasPassedNow()) {
+      remove(key)
+      null
+    } else {
+      value.value
     }
   }
 

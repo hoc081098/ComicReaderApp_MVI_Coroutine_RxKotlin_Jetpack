@@ -47,7 +47,9 @@ class HomeFragment : Fragment() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    exitTransition = Hold()
+    exitTransition = Hold().apply {
+      duration = resources.getInteger(R.integer.reply_motion_default_large).toLong()
+    }
   }
 
   override fun onCreateView(

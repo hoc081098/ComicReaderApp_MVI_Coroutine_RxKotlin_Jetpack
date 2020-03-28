@@ -33,6 +33,7 @@ import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.showAlertDialog
 import com.hoc.comicapp.utils.snack
+import com.hoc.comicapp.utils.themeInterpolator
 import com.jakewharton.rxbinding3.recyclerview.scrollEvents
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxrelay2.PublishRelay
@@ -97,12 +98,14 @@ class ComicDetailFragment : Fragment() {
       // Scope the transition to a view in the hierarchy so we know it will be added under
       // the bottom app bar but over the Hold transition from the exiting HomeFragment.
       drawingViewId = R.id.main_nav_fragment
-      duration = 500L
+      duration = resources.getInteger(R.integer.reply_motion_default_large).toLong()
+      interpolator = requireContext().themeInterpolator(R.attr.motionInterpolatorPersistent)
     }
     sharedElementReturnTransition = MaterialContainerTransform(requireContext()).apply {
       // Again, scope the return transition so it is added below the bottom app bar.
       drawingViewId = R.id.recycler_home
-      duration = 500L
+      duration = resources.getInteger(R.integer.reply_motion_default_large).toLong()
+      interpolator = requireContext().themeInterpolator(R.attr.motionInterpolatorPersistent)
     }
   }
 
@@ -189,11 +192,12 @@ class ComicDetailFragment : Fragment() {
 
     switch_mode.isChecked = !args.isDownloaded
     switch_mode.setOnCheckedChangeListener { _, _ ->
-      val actionComicDetailFragmentSelf = ComicDetailFragmentDirections.actionComicDetailFragmentSelf(
-        comic = args.comic,
-        title = args.title,
-        isDownloaded = !args.isDownloaded
-      )
+      val actionComicDetailFragmentSelf =
+        ComicDetailFragmentDirections.actionComicDetailFragmentSelf(
+          comic = args.comic,
+          title = args.title,
+          isDownloaded = !args.isDownloaded
+        )
       findNavController().navigate(actionComicDetailFragmentSelf)
     }
   }
