@@ -46,7 +46,7 @@ class ChapterDetailFragment : Fragment() {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View = inflater.inflate(R.layout.fragment_chapter_detail, container, false)
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -70,7 +70,7 @@ class ChapterDetailFragment : Fragment() {
 
   private fun initView(
     chapterImageAdapter: ChapterImageAdapter,
-    allChaptersAdapter: ArrayAdapter<ViewState.Chapter>
+    allChaptersAdapter: ArrayAdapter<ViewState.Chapter>,
   ) {
     recycler_images.run {
       setHasFixedSize(true)
@@ -94,7 +94,7 @@ class ChapterDetailFragment : Fragment() {
 
   private fun bind(
     imageAdapter: ChapterImageAdapter,
-    allChaptersAdapter: ArrayAdapter<ViewState.Chapter>
+    allChaptersAdapter: ArrayAdapter<ViewState.Chapter>,
   ) {
     viewModel.singleEvent.observeEvent(owner = viewLifecycleOwner) {
       when (it) {

@@ -38,7 +38,11 @@ class DownloadedComicsFragment : Fragment() {
 
   private val viewBinderHelper = ViewBinderHelper()
 
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+  override fun onCreateView(
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?,
+  ): View? {
     return inflater.inflate(R.layout.fragment_downloaded_comics, container, false)
   }
 
@@ -72,7 +76,8 @@ class DownloadedComicsFragment : Fragment() {
     }
 
     spinner_sort.setItems(SortOrder.values().toList())
-    spinner_sort.selectedIndex = viewModel.state.safeValue?.sortOrder?.let { SortOrder.values().indexOf(it) } ?: 0
+    spinner_sort.selectedIndex =
+      viewModel.state.safeValue?.sortOrder?.let { SortOrder.values().indexOf(it) } ?: 0
 
     downloadedComicsAdapter.clickItem.subscribeBy {
       findNavController().navigate(

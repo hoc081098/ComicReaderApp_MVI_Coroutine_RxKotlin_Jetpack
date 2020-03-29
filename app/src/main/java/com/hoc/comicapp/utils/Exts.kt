@@ -118,13 +118,13 @@ fun Context.dpToPx(dp: Int): Int {
 @Suppress("nothing_to_inline")
 inline fun Context.toast(
   @StringRes messageRes: Int,
-  short: Boolean = true
+  short: Boolean = true,
 ) = this.toast(getString(messageRes), short)
 
 @Suppress("nothing_to_inline")
 inline fun Context.toast(
   message: String,
-  short: Boolean = true
+  short: Boolean = true,
 ) =
   Toast.makeText(
     this,
@@ -161,13 +161,13 @@ fun Context.themeInterpolator(@AttrRes attr: Int): Interpolator {
 inline fun View.snack(
   @StringRes messageRes: Int,
   length: SnackbarLength = SnackbarLength.SHORT,
-  crossinline f: Snackbar.() -> Unit = {}
+  crossinline f: Snackbar.() -> Unit = {},
 ) = snack(resources.getString(messageRes), length, f)
 
 inline fun View.snack(
   message: String,
   length: SnackbarLength = SnackbarLength.SHORT,
-  crossinline f: Snackbar.() -> Unit = {}
+  crossinline f: Snackbar.() -> Unit = {},
 ) = Snackbar.make(this, message, length.length).apply {
   f()
   show()
@@ -176,13 +176,13 @@ inline fun View.snack(
 fun Snackbar.action(
   @StringRes actionRes: Int,
   color: Int? = null,
-  listener: (View) -> Unit
+  listener: (View) -> Unit,
 ) = action(view.resources.getString(actionRes), color, listener)
 
 fun Snackbar.action(
   action: String,
   color: Int? = null,
-  listener: (View) -> Unit
+  listener: (View) -> Unit,
 ) = apply {
   setAction(action, listener)
   color?.let { setActionTextColor(color) }
@@ -201,7 +201,7 @@ fun Snackbar.onDismissed(f: () -> Unit) {
 
 inline fun <T> LiveDataKtx<T>.observe(
   owner: LifecycleOwner,
-  crossinline observer: (T) -> Unit
+  crossinline observer: (T) -> Unit,
 ) = Observer<T?> { it?.let { observer(it) } }.also { observe(owner, it) }
 
 fun <T> LiveData<T>.toObservable(fallbackNullValue: (() -> T)? = null): Observable<T> {
@@ -219,7 +219,7 @@ fun <T> LiveData<T>.toObservable(fallbackNullValue: (() -> T)? = null): Observab
 
 inline fun <T> LiveData<Event<T>>.observeEvent(
   owner: LifecycleOwner,
-  crossinline observer: (T) -> Unit
+  crossinline observer: (T) -> Unit,
 ) = Observer { event: Event<T>? ->
   event?.getContentIfNotHandled()?.let(observer)
 }.also { observe(owner, it) }
@@ -265,7 +265,7 @@ internal class MaterialSpinnerSelectionObservable<T : Any>(private val view: Mat
 
   private class Listener<T : Any>(
     private val view: MaterialSpinner,
-    private val observer: RxObserver<in T>
+    private val observer: RxObserver<in T>,
   ) : MaterialSpinner.OnItemSelectedListener<T>, MainThreadDisposable() {
     override fun onDispose() = view.setOnItemSelectedListener(null)
 
@@ -291,7 +291,7 @@ internal class MaterialSearchViewObservable(private val view: MaterialSearchView
 
   private class Listener(
     private val view: MaterialSearchView,
-    private val observer: RxObserver<in String>
+    private val observer: RxObserver<in String>,
   ) : MainThreadDisposable(), MaterialSearchView.OnQueryTextListener {
     override fun onQueryTextChange(newText: String?): Boolean {
       return newText?.let {
@@ -316,7 +316,11 @@ internal class MaterialSearchViewObservable(private val view: MaterialSearchView
 }
 
 
-fun InputStream.copyTo(target: File, overwrite: Boolean = false, bufferSize: Int = DEFAULT_BUFFER_SIZE): File {
+fun InputStream.copyTo(
+  target: File,
+  overwrite: Boolean = false,
+  bufferSize: Int = DEFAULT_BUFFER_SIZE,
+): File {
   if (target.exists()) {
     val stillExists = if (!overwrite) true else !target.delete()
 
@@ -336,7 +340,11 @@ fun InputStream.copyTo(target: File, overwrite: Boolean = false, bufferSize: Int
   return target
 }
 
-fun <A, B, C, R> LiveData<A>.combineLatest(b: LiveData<B>, c: LiveData<C>, combine: (A, B, C) -> R): LiveData<R> {
+fun <A, B, C, R> LiveData<A>.combineLatest(
+  b: LiveData<B>,
+  c: LiveData<C>,
+  combine: (A, B, C) -> R,
+): LiveData<R> {
   return MediatorLiveData<R>().apply {
     var lastA: A? = null
     var lastB: B? = null
@@ -382,8 +390,8 @@ suspend fun <T> retryIO(
   initialDelay: Long,
   factor: Double,
   maxDelay: Long = Long.MAX_VALUE,
-  block: suspend () -> T): T
-{
+  block: suspend () -> T,
+): T {
   var currentDelay = initialDelay
   repeat(times - 1) {
     try {

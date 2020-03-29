@@ -46,13 +46,15 @@ class HomeAdapter(
   private val lifecycleOwner: LifecycleOwner,
   private val glide: GlideRequests,
   private val viewPool: RecyclerView.RecycledViewPool,
-  private val compositeDisposable: CompositeDisposable
+  private val compositeDisposable: CompositeDisposable,
 ) :
   ListAdapter<HomeListItem, HomeAdapter.VH>(HomeListItemDiffUtilItemCallback) {
   private var outLayoutManagerSavedState: Parcelable? = null
 
-  private val newestAdapter = NewestAdapter(glide, compositeDisposable).apply { submitList(emptyList()) }
-  private val mostViewedAdapter = MostViewedAdapter(glide, compositeDisposable).apply { submitList(emptyList()) }
+  private val newestAdapter =
+    NewestAdapter(glide, compositeDisposable).apply { submitList(emptyList()) }
+  private val mostViewedAdapter =
+    MostViewedAdapter(glide, compositeDisposable).apply { submitList(emptyList()) }
 
   private val newestRetryS = PublishRelay.create<Unit>()
   private val mostViewedRetryS = PublishRelay.create<Unit>()
@@ -96,7 +98,8 @@ class HomeAdapter(
     return when (viewType) {
       NEWEST_LIST_VIEW_TYPE -> SuggestListVH(parent inflate R.layout.item_recycler_home_recycler)
       MOST_VIEWED_LIST_VIEW_TYPE -> TopMonthListVH(parent inflate R.layout.item_recycler_home_recycler)
-      COMIC_ITEM_VIEW_TYPE -> ComicItemVH(parent inflate R.layout.item_recyclerview_updated_comic, parent)
+      COMIC_ITEM_VIEW_TYPE -> ComicItemVH(parent inflate R.layout.item_recyclerview_updated_comic,
+        parent)
       ERROR_ITEM_VIEW_TYPE -> ErrorVH(parent inflate R.layout.item_recyclerview_updated_error)
       LOADING_ITEM_VIEW_TYPE -> LoadingVH(parent inflate R.layout.item_recyclerview_updated_loading)
       HEADER_VIEW_TYPE -> HeaderVH(parent inflate R.layout.item_recycler_home_header)
@@ -123,7 +126,8 @@ class HomeAdapter(
   }
 
   private abstract inner class HorizontalRecyclerVH(itemView: View) : VH(itemView) {
-    protected val recycler = itemView.home_recycler_horizontal!!.apply { setRecycledViewPool(viewPool) }
+    protected val recycler =
+      itemView.home_recycler_horizontal!!.apply { setRecycledViewPool(viewPool) }
     protected val progressBar = itemView.home_progress_bar!!
     protected val textErrorMessage = itemView.home_error_message!!
     protected val buttonRetry = itemView.button_home_horizontal_retry!!
@@ -281,7 +285,7 @@ class HomeAdapter(
   }
 
   private inner class ComicItemVH(itemView: View, parent: View) : VH(itemView) {
-    internal val imageComic = itemView.image_comic!!
+    val imageComic = itemView.image_comic!!
     private val textView = itemView.text_view!!
     private val textComicName = itemView.text_comic_name!!
     private val textChapterName3 = itemView.text_chapter_name_3!!
@@ -405,7 +409,7 @@ class HomeAdapter(
      */
     private inline fun <reified T : HomeListItem> VH.onlyBind(
       item: HomeListItem,
-      crossinline bind: (T) -> Unit
+      crossinline bind: (T) -> Unit,
     ) {
       check(item is T) { "${this::class.java.simpleName}::bind only accept ${T::class.java.simpleName}, but item=$item" }
       bind(item)

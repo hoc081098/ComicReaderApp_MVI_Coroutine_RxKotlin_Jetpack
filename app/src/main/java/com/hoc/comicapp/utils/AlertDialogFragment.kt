@@ -173,7 +173,7 @@ class AlertDialogFragment : DialogFragment() {
 
     fun negativeAction(
       text: String,
-      listener: (dialog: DialogInterface, which: Int) -> Unit
+      listener: (dialog: DialogInterface, which: Int) -> Unit,
     ) = apply {
       this.negativeButtonText = text
       this.negativeButtonClickListener = DialogInterface.OnClickListener(listener)
@@ -181,7 +181,7 @@ class AlertDialogFragment : DialogFragment() {
 
     fun positiveAction(
       text: String,
-      listener: (dialog: DialogInterface, which: Int) -> Unit
+      listener: (dialog: DialogInterface, which: Int) -> Unit,
     ) = apply {
       this.positiveButtonText = text
       this.positiveButtonClickListener = DialogInterface.OnClickListener(listener)
@@ -189,7 +189,7 @@ class AlertDialogFragment : DialogFragment() {
 
     fun neutralAction(
       text: String,
-      listener: (dialog: DialogInterface, which: Int) -> Unit
+      listener: (dialog: DialogInterface, which: Int) -> Unit,
     ) = apply {
       this.neutralButtonText = text
       this.neutralButtonClickListener = DialogInterface.OnClickListener(listener)

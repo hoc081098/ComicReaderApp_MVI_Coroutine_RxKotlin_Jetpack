@@ -32,7 +32,7 @@ inline fun <L, R, T> Either<L, R>.map(f: (R) -> T): Either<L, T> =
  */
 fun <L, R, C, D> Either<L, R>.bimap(
   leftOperation: (L) -> C,
-  rightOperation: (R) -> D
+  rightOperation: (R) -> D,
 ): Either<C, D> = fold(
   { Left(leftOperation(it)) },
   { Right(rightOperation(it)) }

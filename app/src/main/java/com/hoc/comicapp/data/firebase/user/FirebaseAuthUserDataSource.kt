@@ -14,7 +14,7 @@ interface FirebaseAuthUserDataSource {
     email: String,
     password: String,
     fullName: String,
-    avatar: Uri?
+    avatar: Uri?,
   )
 
   suspend fun login(email: String, password: String)

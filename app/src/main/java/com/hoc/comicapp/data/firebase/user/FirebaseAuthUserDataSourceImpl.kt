@@ -29,7 +29,7 @@ class FirebaseAuthUserDataSourceImpl(
   private val firebaseStorage: FirebaseStorage,
   private val firebaseFirestore: FirebaseFirestore,
   private val rxSchedulerProvider: RxSchedulerProvider,
-  private val dispatchersProvider: CoroutinesDispatchersProvider
+  private val dispatchersProvider: CoroutinesDispatchersProvider,
 ) : FirebaseAuthUserDataSource {
 
   private val userObservable: Observable<Either<Throwable, _User?>> by lazy {

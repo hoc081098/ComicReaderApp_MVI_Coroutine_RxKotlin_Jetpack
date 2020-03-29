@@ -10,6 +10,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.await
 import androidx.work.workDataOf
+import com.hoc.comicapp.data.JsonAdaptersContainer
 import com.hoc.comicapp.data.Mapper
 import com.hoc.comicapp.data.local.AppDatabase
 import com.hoc.comicapp.data.local.dao.ChapterDao
@@ -33,7 +34,6 @@ import com.hoc.comicapp.utils.left
 import com.hoc.comicapp.utils.retryIO
 import com.hoc.comicapp.utils.right
 import com.hoc.comicapp.worker.DownloadComicWorker
-import com.squareup.moshi.JsonAdapter
 import io.reactivex.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -50,7 +50,6 @@ import timber.log.Timber
 import java.io.File
 import java.util.*
 
-@ExperimentalCoroutinesApi
 class DownloadComicsRepositoryImpl(
   private val comicApiService: ComicApiService,
   private val application: Application,
@@ -61,8 +60,14 @@ class DownloadComicsRepositoryImpl(
   private val rxSchedulerProvider: RxSchedulerProvider,
   private val retrofit: Retrofit,
   private val workManager: WorkManager,
-  private val chapterJsonAdapter: JsonAdapter<ComicDetail.Chapter>
+  private val jsonAdapterConstraints: JsonAdaptersContainer,
 ) : DownloadComicsRepository {
+
+  /*
+   * Implement DownloadComicsRepository
+   */
+
+  @ExperimentalCoroutinesApi
   override fun getDownloadedChapter(chapterLink: String): Flow<DomainResult<DownloadedChapter>> {
     val allChaptersF = chapterDao.getAllChaptersFlow().distinctUntilChanged()
     val chapterF = chapterDao.getByChapterLink(chapterLink).distinctUntilChanged()
@@ -77,7 +82,10 @@ class DownloadComicsRepositoryImpl(
             nextChapterLink = chapters.getOrNull(index + 1)?.chapterLink
           )
       }
-      .map { it.right() as DomainResult<DownloadedChapter> }
+      .map {
+        @Suppress("USELESS_CAST")
+        it.right() as DomainResult<DownloadedChapter>
+      }
       .catch { emit(it.toError(retrofit).left()) }
       .flowOn(dispatchersProvider.io)
   }
@@ -85,9 +93,12 @@ class DownloadComicsRepositoryImpl(
   override fun getDownloadedComic(link: String): Observable<DomainResult<DownloadedComic>> {
     return comicDao
       .getByComicLink(link)
-      .map<DomainResult<DownloadedComic>> {
-        it.chapters = it.chapters.sortedByDescending { it.order }
-        Mapper.entityToDomainModel(it).right()
+      .map<DomainResult<DownloadedComic>> { comicAndChapters ->
+        Mapper.entityToDomainModel(
+          comicAndChapters.apply {
+            chapters = chapters.sortedByDescending { it.order }
+          }
+        ).right()
       }
       .onErrorReturn { t: Throwable -> t.toError(retrofit).left() }
       .subscribeOn(rxSchedulerProvider.io)
@@ -106,11 +117,11 @@ class DownloadComicsRepositoryImpl(
 
   override suspend fun enqueueDownload(
     chapter: DownloadedChapter,
-    comicName: String
+    comicName: String,
   ): DomainResult<Unit> {
     return try {
       withContext(dispatchersProvider.io) {
-        val chapterJson = chapterJsonAdapter.toJson(
+        val chapterJson = jsonAdapterConstraints.comicDetailChapterAdapter.toJson(
           ComicDetail.Chapter(
             chapterLink = chapter.chapterLink,
             chapterName = chapter.chapterName,
@@ -149,50 +160,10 @@ class DownloadComicsRepositoryImpl(
   override suspend fun deleteDownloadedChapter(chapter: DownloadedChapter): DomainResult<Unit> {
     return try {
       workManager.cancelAllWorkByTag(chapter.chapterLink).await()
-      _deleteEntityAndImages(chapter)
+      deleteEntityAndImages(chapter)
     } catch (e: Exception) {
       e.toError(retrofit).left()
     }
-  }
-
-  @Suppress("FunctionName")
-  private suspend fun _deleteEntityAndImages(chapter: DownloadedChapter): DomainResult<Unit> {
-    return runCatching {
-      withContext(dispatchersProvider.io) {
-        chapterDao.delete(Mapper.domainToLocalEntity(chapter))
-
-        val chaptersCount = chapterDao.getCountByComicLink(chapter.comicLink).firstOrNull() ?: 0
-        if (chaptersCount == 0) {
-          comicDao.delete(
-            ComicEntity(
-              comicLink = chapter.comicLink,
-              view = "",
-              categories = emptyList(),
-              authors = emptyList(),
-              thumbnail = "",
-              title = "",
-              lastUpdated = "",
-              shortenedContent = "",
-              remoteThumbnail = ""
-            )
-          )
-        }
-
-        chapter
-          .images
-          .map { File(application.filesDir, it) }
-          .all(File::delete)
-      }
-    }.fold(
-      {
-        if (it) {
-          Unit.right()
-        } else {
-          LocalStorageError.DeleteFileError.left()
-        }
-      },
-      { it.toError(retrofit).left() }
-    )
   }
 
   override fun getDownloadedChapters(): LiveData<List<DownloadedChapter>> {
@@ -221,8 +192,7 @@ class DownloadComicsRepositoryImpl(
       .subscribeOn(rxSchedulerProvider.io)
   }
 
-  @ExperimentalCoroutinesApi
-  override fun downloadChapter(chapterLink: String): Flow<Int> {
+  @ExperimentalCoroutinesApi override fun downloadChapter(chapterLink: String): Flow<Int> {
     return flow {
       Timber.d("$tag Begin")
 
@@ -291,6 +261,58 @@ class DownloadComicsRepositoryImpl(
     }.flowOn(dispatchersProvider.io)
   }
 
+  /*
+   * Private helper methods
+   */
+
+  /**
+   * Delete chapter entity and delete comic entity if comic's chapters is empty
+   */
+  private suspend fun deleteEntityAndImages(chapter: DownloadedChapter): DomainResult<Unit> {
+    return runCatching {
+      withContext(dispatchersProvider.io) {
+        chapterDao.delete(Mapper.domainToLocalEntity(chapter))
+
+        val chaptersCount = chapterDao.getCountByComicLink(chapter.comicLink).firstOrNull() ?: 0
+        if (chaptersCount == 0) {
+          comicDao.delete(
+            ComicEntity(
+              comicLink = chapter.comicLink,
+              view = "",
+              categories = emptyList(),
+              authors = emptyList(),
+              thumbnail = "",
+              title = "",
+              lastUpdated = "",
+              shortenedContent = "",
+              remoteThumbnail = ""
+            )
+          )
+        }
+
+        chapter
+          .images
+          .map { File(application.filesDir, it) }
+          .all(File::delete)
+      }
+    }.fold(
+      {
+        if (it) {
+          Unit.right()
+        } else {
+          LocalStorageError.DeleteFileError.left()
+        }
+      },
+      { it.toError(retrofit).left() }
+    )
+  }
+
+  /**
+   * Download comic thumbnail
+   * @param thumbnailUrl image url
+   * @param comicName comic name
+   * @return image path
+   */
   private suspend fun downloadComicThumbnail(thumbnailUrl: String, comicName: String): String {
     return retryIO(
       times = 3,
@@ -322,7 +344,7 @@ class DownloadComicsRepositoryImpl(
   private fun downloadAndSaveImages(
     images: List<String>,
     comicName: String,
-    chapterName: String
+    chapterName: String,
   ): Flow<List<String>> {
     return flow {
       val imagePaths = mutableListOf<String>()
@@ -362,6 +384,9 @@ class DownloadComicsRepositoryImpl(
     }
   }
 
+  /**
+   * Escape file name: only allow letters, numbers, dots and dashes
+   */
   private fun String.escapeFileName(): String {
     return replace(
       "[^a-zA-Z0-9.\\-]".toRegex(),

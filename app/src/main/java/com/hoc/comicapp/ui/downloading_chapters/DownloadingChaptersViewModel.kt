@@ -3,20 +3,22 @@ package com.hoc.comicapp.ui.downloading_chapters
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.hoc.comicapp.base.BaseViewModel
+import com.hoc.comicapp.data.JsonAdaptersContainer
 import com.hoc.comicapp.domain.models.ComicAppError
-import com.hoc.comicapp.domain.models.ComicDetail
 import com.hoc.comicapp.domain.models.UnexpectedError
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.domain.repository.DownloadComicsRepository
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
-import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersContract.*
+import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersContract.PartialChange
+import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersContract.SingleEvent
+import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersContract.ViewIntent
+import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersContract.ViewState
 import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersContract.ViewState.Chapter
 import com.hoc.comicapp.utils.fold
 import com.hoc.comicapp.utils.notOfType
 import com.hoc.comicapp.utils.toObservable
 import com.hoc.comicapp.worker.DownloadComicWorker
 import com.jakewharton.rxrelay2.PublishRelay
-import com.squareup.moshi.JsonAdapter
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
 import io.reactivex.functions.BiFunction
@@ -31,8 +33,8 @@ import timber.log.Timber
 class DownloadingChaptersViewModel(
   private val rxSchedulerProvider: RxSchedulerProvider,
   private val workManager: WorkManager,
-  private val chapterJsonAdapter: JsonAdapter<ComicDetail.Chapter>,
-  private val downloadComicsRepository: DownloadComicsRepository
+  private val jsonAdaptersContainer: JsonAdaptersContainer,
+  private val downloadComicsRepository: DownloadComicsRepository,
 ) : BaseViewModel<ViewIntent, ViewState, SingleEvent>() {
 
   override val initialState = ViewState.initial()
@@ -45,35 +47,39 @@ class DownloadingChaptersViewModel(
     )
   }
 
-  private val initialProcessor = ObservableTransformer<ViewIntent.Initial, PartialChange> { intents ->
-    intents.flatMap {
-      workManager
-        .getWorkInfosByTagLiveData(DownloadComicWorker.TAG)
-        .toObservable { emptyList() }
-        .observeOn(rxSchedulerProvider.io)
-        .map { workInfos ->
-          workInfos.mapNotNull {
-            if (it.state != WorkInfo.State.RUNNING) return@mapNotNull null
+  private val initialProcessor =
+    ObservableTransformer<ViewIntent.Initial, PartialChange> { intents ->
+      intents.flatMap {
+        workManager
+          .getWorkInfosByTagLiveData(DownloadComicWorker.TAG)
+          .toObservable { emptyList() }
+          .observeOn(rxSchedulerProvider.io)
+          .map { workInfos ->
+            workInfos.mapNotNull {
+              if (it.state != WorkInfo.State.RUNNING) return@mapNotNull null
 
-            val comicName = it.progress.getString(DownloadComicWorker.COMIC_NAME) ?: return@mapNotNull null
-            val chapterJson = it.progress.getString(DownloadComicWorker.CHAPTER) ?: return@mapNotNull null
-            val (chapterLink, chapterName) = chapterJsonAdapter.fromJson(chapterJson)
-              ?: return@mapNotNull null
+              val comicName =
+                it.progress.getString(DownloadComicWorker.COMIC_NAME) ?: return@mapNotNull null
+              val chapterJson =
+                it.progress.getString(DownloadComicWorker.CHAPTER) ?: return@mapNotNull null
+              val (chapterLink, chapterName) =
+                jsonAdaptersContainer.comicDetailChapterAdapter.fromJson(chapterJson)
+                  ?: return@mapNotNull null
 
-            Chapter(
-              title = chapterName,
-              link = chapterLink,
-              progress = it.progress.getInt(DownloadComicWorker.PROGRESS, 0),
-              comicTitle = comicName
-            )
+              Chapter(
+                title = chapterName,
+                link = chapterLink,
+                progress = it.progress.getInt(DownloadComicWorker.PROGRESS, 0),
+                comicTitle = comicName
+              )
+            }
           }
-        }
-        .map<PartialChange> { PartialChange.Data(it) }
-        .onErrorReturn { t: Throwable -> PartialChange.Error(UnexpectedError("", t)) }
-        .observeOn(rxSchedulerProvider.main)
-        .startWith(PartialChange.Loading)
+          .map<PartialChange> { PartialChange.Data(it) }
+          .onErrorReturn { t: Throwable -> PartialChange.Error(UnexpectedError("", t)) }
+          .observeOn(rxSchedulerProvider.main)
+          .startWith(PartialChange.Loading)
+      }
     }
-  }
 
   override fun processIntents(intents: Observable<ViewIntent>) = intents.subscribe(intentS)!!
 

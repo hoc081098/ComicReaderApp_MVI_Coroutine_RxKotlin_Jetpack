@@ -71,7 +71,7 @@ class ComicDetailFragment : Fragment() {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View = inflater.inflate(R.layout.fragment_comic_detail, container, false)
     .also { Timber.d("ComicDetailFragment::onCreateView") }
 
@@ -224,7 +224,7 @@ class ComicDetailFragment : Fragment() {
         motionLayout: MotionLayout?,
         startId: Int,
         endId: Int,
-        progress: Float
+        progress: Float,
       ) {
         if (progress - lastProgress > 0) {
           // from start to end
@@ -326,7 +326,7 @@ class ComicDetailFragment : Fragment() {
 
   private fun render(
     viewState: ComicDetailViewState,
-    chapterAdapter: ChapterAdapter
+    chapterAdapter: ChapterAdapter,
   ) {
     Timber.d("state=$viewState")
     Timber.d("isFavorited=${viewState.isFavorited}")

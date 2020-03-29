@@ -17,7 +17,7 @@ interface FavoriteComicsContract {
     val isLoading: Boolean,
     val error: ComicAppError?,
     val comics: List<ComicItem>,
-    val sortOrder: SortOrder
+    val sortOrder: SortOrder,
   ) : com.hoc.comicapp.base.ViewState {
     companion object {
       fun initial() = ViewState(
@@ -55,7 +55,7 @@ interface FavoriteComicsContract {
     val title: String,
     val thumbnail: String,
     val view: String,
-    val createdAt: Date?
+    val createdAt: Date?,
   ) {
     fun toDomain() = FavoriteComic(
       url = url,
@@ -89,7 +89,7 @@ interface FavoriteComicsContract {
       data class Success(val item: ComicItem) : Remove()
       data class Failure(
         val item: ComicItem,
-        val comicAppError: ComicAppError
+        val comicAppError: ComicAppError,
       ) : Remove()
     }
   }

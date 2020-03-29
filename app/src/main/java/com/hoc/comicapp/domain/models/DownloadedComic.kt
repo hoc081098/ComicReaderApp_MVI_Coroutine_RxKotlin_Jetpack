@@ -19,15 +19,15 @@ data class DownloadedComic(
 
   val chapters: List<DownloadedChapter>,
 
-  val remoteThumbnail: String
+  val remoteThumbnail: String,
 ) {
   data class Category(
     val link: String, // https://ww2.mangafox.online/category/webtoons
-    val name: String // Webtoons
+    val name: String, // Webtoons
   )
 
   data class Author(
     val link: String, // https://ww2.mangafox.online/author/sung-lak-jang
-    val name: String // Sung-Lak Jang
+    val name: String, // Sung-Lak Jang
   )
 }

@@ -22,13 +22,13 @@ sealed class HomeListItem {
   data class NewestListState(
     val comics: List<Comic>,
     val errorMessage: String?,
-    val isLoading: Boolean
+    val isLoading: Boolean,
   ) : HomeListItem()
 
   data class MostViewedListState(
     val comics: List<Comic>,
     val errorMessage: String?,
-    val isLoading: Boolean
+    val isLoading: Boolean,
   ) : HomeListItem()
 
   sealed class UpdatedItem : HomeListItem() {
@@ -45,7 +45,7 @@ sealed class HomeListItem {
 data class HomeViewState(
   val items: List<HomeListItem>,
   val refreshLoading: Boolean,
-  val updatedPage: Int
+  val updatedPage: Int,
 ) : ViewState {
   companion object {
     @JvmStatic
@@ -258,7 +258,7 @@ sealed class HomePartialChange {
     data class RefreshSuccess(
       val newestComics: List<Comic>,
       val mostViewedComics: List<Comic>,
-      val updatedComics: List<Comic>
+      val updatedComics: List<Comic>,
     ) : RefreshPartialChange()
 
     object Loading : RefreshPartialChange()

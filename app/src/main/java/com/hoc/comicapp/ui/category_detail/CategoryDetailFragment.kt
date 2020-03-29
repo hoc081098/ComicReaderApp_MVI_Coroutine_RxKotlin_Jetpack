@@ -51,7 +51,7 @@ class CategoryDetailFragment : Fragment() {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) = inflater.inflate(R.layout.fragment_category_detail, container, false)!!
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -115,7 +115,8 @@ class CategoryDetailFragment : Fragment() {
     fab.setOnClickListener {
       object : LinearSmoothScroller(it.context) {
         override fun getVerticalSnapPreference() = SNAP_TO_START
-      }.apply { targetPosition = 0 }.let { recycler_category_detail.layoutManager!!.startSmoothScroll(it) }
+      }.apply { targetPosition = 0 }
+        .let { recycler_category_detail.layoutManager!!.startSmoothScroll(it) }
     }
 
     recycler_category_detail

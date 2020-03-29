@@ -39,7 +39,7 @@ class Cache<K : Any, V : Any>(maxSize: Int, private val entryLifetime: Duration)
   private companion object {
     data class Value<V : Any>(
       val value: V,
-      val expiredTime: TimeMark
+      val expiredTime: TimeMark,
     )
   }
 }

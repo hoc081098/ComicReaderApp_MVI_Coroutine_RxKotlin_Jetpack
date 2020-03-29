@@ -2,7 +2,9 @@ package com.hoc.comicapp.ui.home
 
 import com.hoc.comicapp.domain.repository.ComicRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
-import com.hoc.comicapp.ui.home.HomePartialChange.RefreshPartialChange.*
+import com.hoc.comicapp.ui.home.HomePartialChange.RefreshPartialChange.Loading
+import com.hoc.comicapp.ui.home.HomePartialChange.RefreshPartialChange.RefreshFailure
+import com.hoc.comicapp.ui.home.HomePartialChange.RefreshPartialChange.RefreshSuccess
 import com.hoc.comicapp.utils.flatMap
 import com.hoc.comicapp.utils.fold
 import com.hoc.comicapp.utils.map
@@ -15,7 +17,7 @@ import kotlinx.coroutines.rx2.rxObservable
 class HomeInteractorImpl1(
   private val comicRepository: ComicRepository,
   private val homeInteractorImpl: HomeInteractorImpl,
-  private val dispatchersProvider: CoroutinesDispatchersProvider
+  private val dispatchersProvider: CoroutinesDispatchersProvider,
 ) : HomeInteractor by homeInteractorImpl {
   override fun refreshAll(): Observable<HomePartialChange> {
     return rxObservable<HomePartialChange>(dispatchersProvider.main) {

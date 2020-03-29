@@ -51,7 +51,7 @@ class RegisterFragment : Fragment() {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) = inflater.inflate(R.layout.fragment_register, container, false)!!
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -157,7 +157,7 @@ class RegisterFragment : Fragment() {
 
   private fun beginTransition(
     button: Button,
-    progressBar: ProgressBar
+    progressBar: ProgressBar,
   ) {
     TransitionManager.beginDelayedTransition(
       root_register_frag,
@@ -190,7 +190,7 @@ class RegisterFragment : Fragment() {
 
   private fun onComplete(
     button: Button,
-    progressBar: ProgressBar
+    progressBar: ProgressBar,
   ) {
     val transition = TransitionSet()
       .addTransition(

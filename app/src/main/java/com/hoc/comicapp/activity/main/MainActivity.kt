@@ -97,7 +97,8 @@ class MainActivity : AppCompatActivity() {
 
     val loginMenuItem = nav_view.menu.findItem(R.id.action_home_fragment_dest_to_loginFragment)!!
     val logoutMenuItem = nav_view.menu.findItem(R.id.action_logout)!!
-    val favoriteMenuItem = nav_view.menu.findItem(R.id.action_home_fragment_dest_to_favoriteComicsFragment)!!
+    val favoriteMenuItem =
+      nav_view.menu.findItem(R.id.action_home_fragment_dest_to_favoriteComicsFragment)!!
 
     var prevUser: User? = null
     mainVM.state.observe(owner = this) { (user, isLoading, error) ->

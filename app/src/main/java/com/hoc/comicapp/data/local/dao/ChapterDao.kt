@@ -1,8 +1,13 @@
 package com.hoc.comicapp.data.local.dao
 
 import androidx.lifecycle.LiveData
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
 import androidx.room.OnConflictStrategy.IGNORE
+import androidx.room.Query
+import androidx.room.Transaction
+import androidx.room.Update
 import com.hoc.comicapp.data.local.entities.ChapterEntity
 import com.hoc.comicapp.data.local.entities.ComicAndChapters
 import io.reactivex.Observable

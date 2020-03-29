@@ -14,7 +14,7 @@ import retrofit2.Retrofit
 
 class FavoriteComicsRepositoryImpl(
   private val retrofit: Retrofit,
-  private val favoriteComicsDataSource: FavoriteComicsDataSource
+  private val favoriteComicsDataSource: FavoriteComicsDataSource,
 ) : FavoriteComicsRepository {
 
   override fun isFavorited(url: String): Observable<DomainResult<Boolean>> {

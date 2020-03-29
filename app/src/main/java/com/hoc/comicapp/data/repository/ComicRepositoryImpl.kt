@@ -4,7 +4,6 @@ import com.hoc.comicapp.data.Mapper
 import com.hoc.comicapp.data.firebase.favorite_comics.FavoriteComicsDataSource
 import com.hoc.comicapp.data.local.dao.ComicDao
 import com.hoc.comicapp.data.local.entities.ComicEntity
-import com.hoc.comicapp.data.remote.COMIC_BASE_URL
 import com.hoc.comicapp.data.remote.ComicApiService
 import com.hoc.comicapp.data.remote.response.ComicDetailResponse
 import com.hoc.comicapp.data.remote.response.ComicResponse
@@ -40,7 +39,7 @@ class ComicRepositoryImpl(
   private val dispatchersProvider: CoroutinesDispatchersProvider,
   private val favoriteComicsDataSource: FavoriteComicsDataSource,
   private val comicDao: ComicDao,
-  appCoroutineScope: CoroutineScope
+  appCoroutineScope: CoroutineScope,
 ) : ComicRepository {
   private val cache = Cache<RequestCacheKey, Any>(
     maxSize = 8,
@@ -70,7 +69,7 @@ class ComicRepositoryImpl(
   private suspend inline fun <reified T : Any> executeApiRequest(
     path: String,
     queryItems: Map<String, Any?> = emptyMap(),
-    crossinline request: suspend ComicApiService.() -> T
+    crossinline request: suspend ComicApiService.() -> T,
   ): DomainResult<T> {
     val cacheKey = buildKey(path, queryItems)
 
@@ -101,6 +100,10 @@ class ComicRepositoryImpl(
     }
   }
 
+  /*
+   * Implement ComicRepository
+   */
+
   override suspend fun getCategoryDetailPopular(categoryLink: String): DomainResult<List<CategoryDetailPopularComic>> {
     return executeApiRequest(
       "getCategoryDetailPopular",
@@ -113,7 +116,7 @@ class ComicRepositoryImpl(
 
   override suspend fun getCategoryDetail(
     categoryLink: String,
-    page: Int
+    page: Int,
   ): DomainResult<List<Comic>> {
     return executeApiRequest(
       "getCategoryDetail",
@@ -211,7 +214,7 @@ class ComicRepositoryImpl(
   }
 
   /*
-   * Private helpers
+   * Private helper methods
    */
 
   private fun updateFavoritesAndDownloaded(comics: List<ComicResponse>) {
@@ -232,7 +235,7 @@ class ComicRepositoryImpl(
   private companion object {
     data class RequestCacheKey(
       val path: String,
-      val queryItems: Map<String, String>
+      val queryItems: Map<String, String>,
     )
 
     private fun buildKey(path: String, queryItems: Map<String, Any?>): RequestCacheKey {

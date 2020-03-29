@@ -30,7 +30,11 @@ class DownloadingChaptersFragment : Fragment() {
   private val viewModel by viewModel<DownloadingChaptersViewModel>()
   private val compositeDisposable = CompositeDisposable()
 
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+  override fun onCreateView(
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?,
+  ): View? {
     return inflater.inflate(R.layout.fragment_downloading_chapters, container, false)
   }
 

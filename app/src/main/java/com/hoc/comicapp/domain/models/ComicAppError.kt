@@ -24,12 +24,12 @@ sealed class LocalStorageError : ComicAppError() {
 
 data class ServerError(
   override val message: String,
-  val statusCode: Int
+  val statusCode: Int,
 ) : ComicAppError()
 
 data class UnexpectedError(
   override val message: String,
-  override val cause: Throwable?
+  override val cause: Throwable?,
 ) : ComicAppError()
 
 sealed class AuthError : ComicAppError() {
@@ -50,9 +50,9 @@ sealed class AuthError : ComicAppError() {
   object OperationNotAllowed : AuthError()
   object WeakPassword : AuthError()
 
-  object UploadFile: AuthError()
+  object UploadFile : AuthError()
 
-  object Unauthenticated: AuthError()
+  object Unauthenticated : AuthError()
 }
 
 fun Throwable.toError(retrofit: Retrofit): ComicAppError {

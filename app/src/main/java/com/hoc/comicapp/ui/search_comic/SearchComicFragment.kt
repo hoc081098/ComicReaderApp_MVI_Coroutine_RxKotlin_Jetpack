@@ -31,7 +31,11 @@ class SearchComicFragment : Fragment() {
   private val compositeDisposable = CompositeDisposable()
   private val mainActivity get() = requireActivity() as MainActivity
 
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
+  override fun onCreateView(
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?,
+  ): View =
     inflater.inflate(R.layout.fragment_search_comic, container, false)
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

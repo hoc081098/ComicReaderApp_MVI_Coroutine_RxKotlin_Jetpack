@@ -26,7 +26,7 @@ object CategoryDiffUtilItemCallback : DiffUtil.ItemCallback<Category>() {
 
 class CategoryAdapter(
   private val glide: GlideRequests,
-  private val compositeDisposable: CompositeDisposable
+  private val compositeDisposable: CompositeDisposable,
 ) : ListAdapter<Category, CategoryAdapter.VH>(CategoryDiffUtilItemCallback) {
   private val collapsedStatus = SparseBooleanArray()
   private val clickCategoryS = PublishRelay.create<Category>()
@@ -45,10 +45,10 @@ class CategoryAdapter(
 
     init {
       Observable.mergeArray(
-        itemView.image_navigation_next.clicks(),
-        itemView.text_go_to_detail.clicks(),
-        itemView.clicks()
-      ).takeUntil(parent.detaches())
+          itemView.image_navigation_next.clicks(),
+          itemView.text_go_to_detail.clicks(),
+          itemView.clicks()
+        ).takeUntil(parent.detaches())
         .map { adapterPosition }
         .filter { it != RecyclerView.NO_POSITION }
         .map { getItem(it) }

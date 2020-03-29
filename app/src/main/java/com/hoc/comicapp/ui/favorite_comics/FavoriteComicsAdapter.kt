@@ -31,7 +31,7 @@ object FavoriteComicItemDiffUtilItemCallback : DiffUtil.ItemCallback<ComicItem>(
 class FavoriteComicsAdapter(
   private val glide: GlideRequests,
   private val viewBinderHelper: ViewBinderHelper,
-  private val compositeDisposable: CompositeDisposable
+  private val compositeDisposable: CompositeDisposable,
 ) :
   ListAdapter<ComicItem, FavoriteComicsAdapter.VH>(FavoriteComicItemDiffUtilItemCallback) {
   private val dateFormatter = SimpleDateFormat("hh:mm, dd/MM/yyyy", Locale.getDefault())

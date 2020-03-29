@@ -4,12 +4,11 @@ import androidx.work.WorkManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
-import com.hoc.comicapp.domain.models.ComicDetail
+import com.hoc.comicapp.data.JsonAdaptersContainer
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProviderImpl
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.domain.thread.RxSchedulerProviderImpl
-import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.CoroutineScope
@@ -27,7 +26,7 @@ val appModule = module {
 
   single { getMoshi() }
 
-  single { getChapterJsonAdapter(get()) }
+  single { provideJsonAdaptersContainer(get()) }
 
   single { FirebaseAuth.getInstance() }
 
@@ -38,8 +37,8 @@ val appModule = module {
   single { CoroutineScope(get<CoroutinesDispatchersProvider>().io + SupervisorJob()) }
 }
 
-private fun getChapterJsonAdapter(moshi: Moshi): JsonAdapter<ComicDetail.Chapter> {
-  return moshi.adapter<ComicDetail.Chapter>(ComicDetail.Chapter::class.java)
+private fun provideJsonAdaptersContainer(moshi: Moshi): JsonAdaptersContainer {
+  return JsonAdaptersContainer(moshi)
 }
 
 private fun getMoshi(): Moshi {

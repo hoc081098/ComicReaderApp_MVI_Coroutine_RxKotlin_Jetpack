@@ -13,7 +13,7 @@ interface MainContract {
   data class ViewState(
     val user: User?,
     val isLoading: Boolean,
-    val error: ComicAppError?
+    val error: ComicAppError?,
   ) : com.hoc.comicapp.base.ViewState {
     companion object {
       fun initial(): ViewState {
@@ -29,7 +29,7 @@ interface MainContract {
       val uid: String,
       val displayName: String,
       val photoURL: String,
-      val email: String
+      val email: String,
     ) {
       constructor(domain: com.hoc.comicapp.domain.models.User) : this(
         uid = domain.uid,

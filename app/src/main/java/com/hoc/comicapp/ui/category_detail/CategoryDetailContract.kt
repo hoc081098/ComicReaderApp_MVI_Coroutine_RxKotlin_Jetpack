@@ -21,7 +21,7 @@ interface CategoryDetailContract {
     val description: String,
     val link: String,
     val name: String,
-    val thumbnail: String
+    val thumbnail: String,
   ) : Parcelable
 
   /**
@@ -42,7 +42,7 @@ interface CategoryDetailContract {
     val items: List<Item>,
     val isRefreshing: Boolean,
     val page: Int,
-    val category: CategoryArg
+    val category: CategoryArg,
   ) : com.hoc.comicapp.base.ViewState {
     companion object {
       @JvmStatic
@@ -71,7 +71,7 @@ interface CategoryDetailContract {
       data class PopularVS(
         val comics: List<PopularItem>,
         val error: ComicAppError?,
-        val isLoading: Boolean
+        val isLoading: Boolean,
       ) : Item()
 
       data class Comic(
@@ -79,7 +79,7 @@ interface CategoryDetailContract {
         val link: String,
         val thumbnail: String,
         val title: String,
-        val view: String
+        val view: String,
       ) : Item() {
         constructor(domain: com.hoc.comicapp.domain.models.Comic) : this(
           title = domain.title,
@@ -101,7 +101,7 @@ interface CategoryDetailContract {
       val lastChapter: LastChapter,
       val link: String,
       val thumbnail: String,
-      val title: String
+      val title: String,
     ) {
       constructor(domain: CategoryDetailPopularComic) : this(
         title = domain.title,
@@ -114,7 +114,7 @@ interface CategoryDetailContract {
     data class LastChapter(
       val chapterLink: String,
       val chapterName: String,
-      val time: String?
+      val time: String?,
     ) {
       constructor(domain: CategoryDetailPopularComic.LastChapter) : this(
         time = null,
@@ -238,7 +238,7 @@ interface CategoryDetailContract {
       data class Error(val error: ComicAppError) : Refresh()
       data class Data(
         val comics: List<Item.Comic>,
-        val popularComics: List<ViewState.PopularItem>
+        val popularComics: List<ViewState.PopularItem>,
       ) : Refresh()
 
       override fun reducer(state: ViewState): ViewState {

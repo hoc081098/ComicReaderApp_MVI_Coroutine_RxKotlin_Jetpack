@@ -3,7 +3,11 @@ package com.hoc.comicapp.ui.downloaded_comics
 import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
-import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.*
+import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.Interactor
+import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.PartialChange
+import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.SingleEvent
+import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.ViewIntent
+import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.ViewState
 import com.hoc.comicapp.utils.notOfType
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
@@ -17,7 +21,7 @@ import timber.log.Timber
 
 class DownloadedComicsViewModel(
   private val rxSchedulerProvider: RxSchedulerProvider,
-  private val interactor: Interactor
+  private val interactor: Interactor,
 ) : BaseViewModel<ViewIntent, ViewState, SingleEvent>() {
   override val initialState = ViewState.initial()
 

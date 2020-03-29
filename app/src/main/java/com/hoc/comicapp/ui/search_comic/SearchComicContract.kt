@@ -17,7 +17,7 @@ interface SearchComicContract {
     val isLoading: Boolean,
     val comics: List<Item>,
     val errorMessage: String?,
-    val page: Int
+    val page: Int,
   ) : com.hoc.comicapp.base.ViewState {
     companion object {
       @JvmStatic
@@ -35,7 +35,7 @@ interface SearchComicContract {
         val thumbnail: String,
         val link: String,
         val lastChapters: List<ChapterItem>,
-        val view: String
+        val view: String,
       ) : Item() {
         constructor(domain: Comic) : this(
           title = domain.title,
@@ -53,7 +53,7 @@ interface SearchComicContract {
 
     data class ChapterItem(
       val chapterName: String,
-      val time: String
+      val time: String,
     ) {
       constructor(domain: Comic.LastChapter) : this(
         time = domain.time,

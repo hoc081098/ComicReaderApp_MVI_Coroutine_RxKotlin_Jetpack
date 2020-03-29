@@ -40,7 +40,7 @@ class LoginFragment : Fragment() {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) = inflater.inflate(R.layout.fragment_login, container, false)!!
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -108,7 +108,7 @@ class LoginFragment : Fragment() {
 
   private fun beginTransition(
     button: Button,
-    progressBar: ProgressBar
+    progressBar: ProgressBar,
   ) {
     TransitionManager.beginDelayedTransition(
       root_login_frag,
@@ -141,7 +141,7 @@ class LoginFragment : Fragment() {
 
   private fun onComplete(
     button: Button,
-    progressBar: ProgressBar
+    progressBar: ProgressBar,
   ) {
     val transition = TransitionSet()
       .addTransition(

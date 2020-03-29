@@ -51,7 +51,7 @@ interface ComicRepository {
    */
   suspend fun getCategoryDetail(
     categoryLink: String,
-    page: Int = 1
+    page: Int = 1,
   ): DomainResult<List<Comic>>
 
   /**
@@ -68,6 +68,6 @@ interface ComicRepository {
    */
   suspend fun searchComic(
     query: String,
-    page: Int = 1
+    page: Int = 1,
   ): DomainResult<List<Comic>>
 }

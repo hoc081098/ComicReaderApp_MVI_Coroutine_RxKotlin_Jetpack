@@ -7,5 +7,5 @@ data class FavoriteComic(
   val title: String,
   val thumbnail: String,
   val view: String,
-  val createdAt: Date?
+  val createdAt: Date?,
 )

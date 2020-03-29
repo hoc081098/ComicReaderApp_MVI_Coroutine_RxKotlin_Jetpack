@@ -12,7 +12,7 @@ data class ComicResponse(
   @Json(name = "title")
   val title: String, // Volcanic Age
   @Json(name = "view")
-  val view: String // 1.1k
+  val view: String, // 1.1k
 ) {
   data class LastChapter(
     @Json(name = "chapter_link")
@@ -20,6 +20,6 @@ data class ComicResponse(
     @Json(name = "chapter_name")
     val chapterName: String, // Chapter 90
     @Json(name = "time")
-    val time: String // 2 days ago
+    val time: String, // 2 days ago
   )
 }

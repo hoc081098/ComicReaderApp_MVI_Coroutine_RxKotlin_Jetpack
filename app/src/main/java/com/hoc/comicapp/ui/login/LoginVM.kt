@@ -14,11 +14,10 @@ import io.reactivex.Observable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.ofType
 import io.reactivex.rxkotlin.subscribeBy
-import io.reactivex.rxkotlin.withLatestFrom
 
 class LoginVM(
   private val interactor: Interactor,
-  private val rxSchedulerProvider: RxSchedulerProvider
+  private val rxSchedulerProvider: RxSchedulerProvider,
 ) : BaseViewModel<Intent, ViewState, SingleEvent>() {
   override val initialState = ViewState.initial()
 
@@ -35,7 +34,8 @@ class LoginVM(
       .share()
 
     val emailErrorChanges = emailObservable.map { PartialChange.EmailError(getEmailError(it)) }
-    val passwordErrorChange = passwordObservable.map { PartialChange.PasswordError(getPasswordError(it)) }
+    val passwordErrorChange =
+      passwordObservable.map { PartialChange.PasswordError(getPasswordError(it)) }
 
     val submit = intentS
       .ofType<Intent.SubmitLogin>()
@@ -63,12 +63,12 @@ class LoginVM(
     val passwordChange = passwordObservable.map { PartialChange.PasswordChanged(it) }
 
     Observable.mergeArray(
-      emailErrorChanges,
-      passwordErrorChange,
-      loginChanges,
-      emailChange,
-      passwordChange
-    ).scan(initialState) { state, change -> change.reducer(state) }
+        emailErrorChanges,
+        passwordErrorChange,
+        loginChanges,
+        emailChange,
+        passwordChange
+      ).scan(initialState) { state, change -> change.reducer(state) }
       .observeOn(rxSchedulerProvider.main)
       .subscribeBy(onNext = ::setNewState)
       .addTo(compositeDisposable)

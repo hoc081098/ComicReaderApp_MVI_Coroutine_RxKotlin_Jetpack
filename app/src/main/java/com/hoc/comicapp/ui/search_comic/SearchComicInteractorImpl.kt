@@ -14,7 +14,7 @@ import timber.log.Timber
 @ExperimentalCoroutinesApi
 class SearchComicInteractorImpl(
   private val comicRepository: ComicRepository,
-  private val dispatchersProvider: CoroutinesDispatchersProvider
+  private val dispatchersProvider: CoroutinesDispatchersProvider,
 ) : Interactor {
   override fun searchComic(term: String, page: Int): Observable<PartialChange> {
     return rxObservable(dispatchersProvider.main) {

@@ -15,7 +15,7 @@ import kotlinx.coroutines.rx2.rxObservable
 class MainInteractorImpl(
   private val userRepository: UserRepository,
   private val dispatchersProvider: CoroutinesDispatchersProvider,
-  private val rxSchedulerProvider: RxSchedulerProvider
+  private val rxSchedulerProvider: RxSchedulerProvider,
 ) : Interactor {
   override fun userChanges(): Observable<PartialChange> {
     return userRepository

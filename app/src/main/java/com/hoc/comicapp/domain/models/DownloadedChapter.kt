@@ -21,5 +21,5 @@ data class DownloadedChapter(
 
   val prevChapterLink: String?, // https://ww2.mangafox.online/solo-leveling/chapter-64-1137969534934196
 
-  val nextChapterLink: String?
+  val nextChapterLink: String?,
 )

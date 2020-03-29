@@ -23,7 +23,7 @@ import timber.log.Timber
 sealed class ChapterAdapterItem {
   data class Header(
     val shortenedContent: String,
-    val categories: List<Category>
+    val categories: List<Category>,
   ) : ChapterAdapterItem()
 
   data class Chapter(val chapter: ComicDetailViewState.Chapter) : ChapterAdapterItem()
@@ -39,7 +39,8 @@ object ChapterDiffUtilItemCallback : DiffUtil.ItemCallback<ChapterAdapterItem>()
     else -> oldItem == newItem
   }
 
-  override fun areContentsTheSame(oldItem: ChapterAdapterItem, newItem: ChapterAdapterItem) = oldItem == newItem
+  override fun areContentsTheSame(oldItem: ChapterAdapterItem, newItem: ChapterAdapterItem) =
+    oldItem == newItem
 
   override fun getChangePayload(oldItem: ChapterAdapterItem, newItem: ChapterAdapterItem): Any? {
     return when {
@@ -54,7 +55,7 @@ object ChapterDiffUtilItemCallback : DiffUtil.ItemCallback<ChapterAdapterItem>()
 class ChapterAdapter(
   private val onClickReadButton: (readFirst: Boolean) -> Unit,
   private val onClickChapter: (ComicDetailViewState.Chapter, View) -> Unit,
-  private val onClickChapterChip: (Category) -> Unit
+  private val onClickChapterChip: (Category) -> Unit,
 ) :
   ListAdapter<ChapterAdapterItem, ChapterAdapter.VH>(ChapterDiffUtilItemCallback) {
 
@@ -95,7 +96,8 @@ class ChapterAdapter(
     abstract fun bind(item: ChapterAdapterItem)
   }
 
-  private inner class ChapterVH(itemView: View) : ChapterAdapter.VH(itemView), View.OnClickListener {
+  private inner class ChapterVH(itemView: View) : ChapterAdapter.VH(itemView),
+    View.OnClickListener {
     private val textChapterTitle = itemView.text_chapter_title!!
     private val textChapterTime = itemView.text_chapter_time!!
     private val textChapterView = itemView.text_chapter_view!!

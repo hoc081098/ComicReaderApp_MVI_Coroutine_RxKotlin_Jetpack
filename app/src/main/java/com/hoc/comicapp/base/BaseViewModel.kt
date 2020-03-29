@@ -16,6 +16,7 @@ abstract class BaseViewModel<I : Intent, S : ViewState, E : SingleEvent> : ViewM
   protected val compositeDisposable = CompositeDisposable()
 
   protected abstract val initialState: S
+
   /**
    * ViewState
    */

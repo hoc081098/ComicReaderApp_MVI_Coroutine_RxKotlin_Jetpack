@@ -34,7 +34,7 @@ class FavoriteComicsDataSourceImpl(
   private val rxSchedulerProvider: RxSchedulerProvider,
   private val dispatchersProvider: CoroutinesDispatchersProvider,
   private val firebaseAuthUserDataSource: FirebaseAuthUserDataSource,
-  appCoroutineScope: CoroutineScope
+  appCoroutineScope: CoroutineScope,
 ) : FavoriteComicsDataSource {
   private val actor = appCoroutineScope.actor<List<_FavoriteComic>>(capacity = Channel.BUFFERED) {
     for (comics in this) {
@@ -78,7 +78,10 @@ class FavoriteComicsDataSourceImpl(
               .whereEqualTo("url", url)
               .limit(1)
               .snapshots()
-              .map { it.documents.isNotEmpty().right() as Either<Throwable, Boolean> }
+              .map {
+                @Suppress("USELESS_CAST")
+                it.documents.isNotEmpty().right() as Either<Throwable, Boolean>
+              }
               .onErrorReturn { it.left() }
               .subscribeOn(rxSchedulerProvider.io)
           }
@@ -100,6 +103,7 @@ class FavoriteComicsDataSourceImpl(
               .orderBy("created_at", Query.Direction.DESCENDING)
               .snapshots()
               .map { querySnapshot ->
+                @Suppress("USELESS_CAST")
                 querySnapshot
                   .documents
                   .mapNotNull { it.toObject(_FavoriteComic::class.java) }

@@ -18,12 +18,11 @@ import io.reactivex.ObservableTransformer
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.ofType
 import io.reactivex.rxkotlin.subscribeBy
-import io.reactivex.rxkotlin.withLatestFrom
 
 class CategoryDetailVM(
   rxSchedulerProvider: RxSchedulerProvider,
   private val interactor: Interactor,
-  category: CategoryArg
+  category: CategoryArg,
 ) : BaseViewModel<ViewIntent, ViewState, SingleEvent>() {
   override val initialState = ViewState.initial(category)
   private val intentS = PublishRelay.create<ViewIntent>()
@@ -31,41 +30,45 @@ class CategoryDetailVM(
 
   override fun processIntents(intents: Observable<ViewIntent>) = intents.subscribe(intentS)!!
 
-  private val initialProcessor = ObservableTransformer<ViewIntent.Initial, PartialChange> { intent ->
-    intent.flatMap { (arg) ->
-      mergeArray(
-        interactor.getPopulars(categoryLink = arg.link),
-        interactor.getComics(categoryLink = arg.link, page = 1)
-      )
-    }
-  }
-
-  private val loadNextPageProcessor = ObservableTransformer<ViewIntent.LoadNextPage, PartialChange> { intent ->
-    intent
-      .withLatestFrom(stateS) { _, state -> state }
-      .filter { !it.items.any(ViewState.Item::isLoadingOrError) }
-      .map { it.category.link to it.page + 1 }
-      .exhaustMap { (link, page) ->
-        interactor.getComics(
-          categoryLink = link,
-          page = page
+  private val initialProcessor =
+    ObservableTransformer<ViewIntent.Initial, PartialChange> { intent ->
+      intent.flatMap { (arg) ->
+        mergeArray(
+          interactor.getPopulars(categoryLink = arg.link),
+          interactor.getComics(categoryLink = arg.link, page = 1)
         )
       }
-  }
+    }
 
-  private val refreshProcessor = ObservableTransformer<ViewIntent.Refresh, PartialChange> { intent ->
-    intent
-      .withLatestFrom(stateS) { _, state -> state.category.link }
-      .exhaustMap {
-        interactor.refreshAll(categoryLink = it)
-      }
-  }
+  private val loadNextPageProcessor =
+    ObservableTransformer<ViewIntent.LoadNextPage, PartialChange> { intent ->
+      intent
+        .withLatestFrom(stateS) { _, state -> state }
+        .filter { !it.items.any(ViewState.Item::isLoadingOrError) }
+        .map { it.category.link to it.page + 1 }
+        .exhaustMap { (link, page) ->
+          interactor.getComics(
+            categoryLink = link,
+            page = page
+          )
+        }
+    }
 
-  private val retryPopularProcessor = ObservableTransformer<ViewIntent.RetryPopular, PartialChange> { intent ->
-    intent
-      .withLatestFrom(stateS) { _, state -> state.category.link }
-      .exhaustMap { interactor.getPopulars(categoryLink = it) }
-  }
+  private val refreshProcessor =
+    ObservableTransformer<ViewIntent.Refresh, PartialChange> { intent ->
+      intent
+        .withLatestFrom(stateS) { _, state -> state.category.link }
+        .exhaustMap {
+          interactor.refreshAll(categoryLink = it)
+        }
+    }
+
+  private val retryPopularProcessor =
+    ObservableTransformer<ViewIntent.RetryPopular, PartialChange> { intent ->
+      intent
+        .withLatestFrom(stateS) { _, state -> state.category.link }
+        .exhaustMap { interactor.getPopulars(categoryLink = it) }
+    }
 
   private val retryProcessor = ObservableTransformer<ViewIntent.Retry, PartialChange> { intent ->
     intent

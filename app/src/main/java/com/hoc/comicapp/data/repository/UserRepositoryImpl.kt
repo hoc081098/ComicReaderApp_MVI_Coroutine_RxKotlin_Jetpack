@@ -16,7 +16,7 @@ import timber.log.Timber
 
 class UserRepositoryImpl(
   private val retrofit: Retrofit,
-  private val userDataSource: FirebaseAuthUserDataSource
+  private val userDataSource: FirebaseAuthUserDataSource,
 ) : UserRepository {
 
   override suspend fun signOut(): DomainResult<Unit> {
@@ -41,7 +41,7 @@ class UserRepositoryImpl(
     email: String,
     password: String,
     fullName: String,
-    avatar: Uri?
+    avatar: Uri?,
   ): DomainResult<Unit> {
     return try {
       userDataSource.register(

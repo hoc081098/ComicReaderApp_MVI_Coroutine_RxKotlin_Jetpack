@@ -14,13 +14,15 @@ import com.hoc.comicapp.utils.inflate
 import kotlinx.android.synthetic.main.item_recycler_category_detail_popular_comic.view.*
 
 private object PopularItemDiffCallback : DiffUtil.ItemCallback<PopularItem>() {
-  override fun areItemsTheSame(oldItem: PopularItem, newItem: PopularItem) = oldItem.link == newItem.link
+  override fun areItemsTheSame(oldItem: PopularItem, newItem: PopularItem) =
+    oldItem.link == newItem.link
+
   override fun areContentsTheSame(oldItem: PopularItem, newItem: PopularItem) = oldItem == newItem
 }
 
 class PopularHorizontalAdapter(
   private val glide: GlideRequests,
-  private val onClickComic: (ComicArg) -> Unit
+  private val onClickComic: (ComicArg) -> Unit,
 ) :
   ListAdapter<PopularItem, PopularHorizontalAdapter.VH>(PopularItemDiffCallback) {
 

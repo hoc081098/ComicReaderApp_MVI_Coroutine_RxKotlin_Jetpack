@@ -6,5 +6,5 @@ import io.reactivex.schedulers.Schedulers
 
 class RxSchedulerProviderImpl(
   override val main: Scheduler = AndroidSchedulers.mainThread(),
-  override val io: Scheduler = Schedulers.io()
+  override val io: Scheduler = Schedulers.io(),
 ) : RxSchedulerProvider

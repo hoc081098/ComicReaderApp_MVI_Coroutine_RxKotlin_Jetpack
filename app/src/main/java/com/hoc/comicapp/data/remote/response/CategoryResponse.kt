@@ -10,5 +10,5 @@ data class CategoryResponse(
   @Json(name = "name")
   val name: String, // Isekai
   @Json(name = "thumbnail")
-  val thumbnail: String // https://cdn1.mangafox.online/542/954/495/674/357/the-duchess-50-tea-recipes.jpg
+  val thumbnail: String, // https://cdn1.mangafox.online/542/954/495/674/357/the-duchess-50-tea-recipes.jpg
 )

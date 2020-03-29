@@ -27,7 +27,7 @@ object StringDiffUtilItemCallback : DiffUtil.ItemCallback<String>() {
 }
 
 class ChapterImageAdapter(
-  private val glide: GlideRequests
+  private val glide: GlideRequests,
 ) :
   ListAdapter<String, ChapterImageAdapter.VH>(StringDiffUtilItemCallback) {
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
@@ -66,7 +66,7 @@ class ChapterImageAdapter(
             e: GlideException?,
             model: Any?,
             target: Target<Drawable?>?,
-            isFirstResource: Boolean
+            isFirstResource: Boolean,
           ): Boolean {
             // show error, hide progressBar
             groupError.isVisible = true
@@ -80,7 +80,7 @@ class ChapterImageAdapter(
             model: Any?,
             target: Target<Drawable?>?,
             dataSource: DataSource?,
-            isFirstResource: Boolean
+            isFirstResource: Boolean,
           ): Boolean {
             // hide progressBar, hide error
             progressBar.isVisible = false

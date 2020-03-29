@@ -33,19 +33,19 @@ data class ComicEntity(
   val view: String, // 76228
 
   @ColumnInfo(name = "remote_thumbnail")
-  val remoteThumbnail: String
+  val remoteThumbnail: String,
 ) {
   data class Category(
     @Json(name = "link")
     val link: String, // https://ww2.mangafox.online/category/webtoons
     @Json(name = "name")
-    val name: String // Webtoons
+    val name: String, // Webtoons
   )
 
   data class Author(
     @Json(name = "link")
     val link: String, // https://ww2.mangafox.online/author/sung-lak-jang
     @Json(name = "name")
-    val name: String // Sung-Lak Jang
+    val name: String, // Sung-Lak Jang
   )
 }

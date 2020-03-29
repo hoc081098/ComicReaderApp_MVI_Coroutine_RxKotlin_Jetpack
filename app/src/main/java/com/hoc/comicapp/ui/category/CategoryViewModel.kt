@@ -17,7 +17,7 @@ import io.reactivex.rxkotlin.subscribeBy
 
 class CategoryViewModel(
   private val categoryInteractor: CategoryInteractor,
-  rxSchedulerProvider: RxSchedulerProvider
+  rxSchedulerProvider: RxSchedulerProvider,
 ) :
   BaseViewModel<CategoryViewIntent, CategoryViewState, CategorySingleEvent>() {
   override val initialState = CategoryViewState.initialState()

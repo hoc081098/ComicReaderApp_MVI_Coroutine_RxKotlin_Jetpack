@@ -20,7 +20,7 @@ import kotlinx.android.synthetic.main.item_recyclerview_top_month_comic_or_recom
 
 class MostViewedAdapter(
   private val glide: GlideRequests,
-  private val compositeDisposable: CompositeDisposable
+  private val compositeDisposable: CompositeDisposable,
 ) :
   ListAdapter<Comic, MostViewedAdapter.VH>(MostViewedComicDiffUtilItemCallback) {
   private val clickComicS = PublishRelay.create<Pair<View, Comic>>()
