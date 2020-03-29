@@ -58,7 +58,7 @@ class App : Application() {
         NotificationManager.IMPORTANCE_DEFAULT
       ).apply { description = getString(R.string.notification_channel_description) }
 
-      getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
+      getSystemService(NotificationManager::class.java)?.createNotificationChannel(channel)
     }
   }
 }
