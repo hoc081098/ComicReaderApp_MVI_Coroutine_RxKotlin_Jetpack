@@ -16,7 +16,7 @@ import timber.log.Timber
  * @return an [Observable] emit [Unit] when select OK button, otherwise return an empty [Observable]
  */
 fun FragmentActivity.showAlertDialogAsObservable(init: AlertDialogFragment.Builder.() -> Unit): Observable<Unit> {
-  return Observable.create<Unit> { emitter ->
+  return Observable.create { emitter ->
     showAlertDialog {
       init()
 
@@ -125,6 +125,7 @@ class AlertDialogFragment : DialogFragment() {
     }
   }
 
+  @Suppress("unused")
   class Builder {
     var titleText: String? = null
       private set
