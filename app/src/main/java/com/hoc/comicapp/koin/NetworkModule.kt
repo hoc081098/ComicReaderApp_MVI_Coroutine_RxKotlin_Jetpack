@@ -12,18 +12,18 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
 
 val networkModule = module {
-  single { getOkHttpClient() }
+  single { provideOkHttpClient() }
 
-  single { getRetrofit(get(), get()) }
+  single { provideRetrofit(get(), get()) }
 
-  single { getComicApiService(get()) }
+  single { provideComicApiService(get()) }
 }
 
-private fun getComicApiService(retrofit: Retrofit): ComicApiService {
+private fun provideComicApiService(retrofit: Retrofit): ComicApiService {
   return ComicApiService(retrofit)
 }
 
-private fun getRetrofit(client: OkHttpClient, moshi: Moshi): Retrofit {
+private fun provideRetrofit(client: OkHttpClient, moshi: Moshi): Retrofit {
   return Retrofit.Builder()
     .baseUrl(COMIC_BASE_URL)
     .client(client)
@@ -31,7 +31,7 @@ private fun getRetrofit(client: OkHttpClient, moshi: Moshi): Retrofit {
     .build()
 }
 
-private fun getOkHttpClient(): OkHttpClient {
+private fun provideOkHttpClient(): OkHttpClient {
   return OkHttpClient.Builder()
     .connectTimeout(15, TimeUnit.SECONDS)
     .readTimeout(15, TimeUnit.SECONDS)

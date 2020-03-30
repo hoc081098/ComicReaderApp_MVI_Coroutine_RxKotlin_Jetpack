@@ -23,15 +23,20 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.fragment_search_comic.*
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.androidx.scope.lifecycleScope
+import org.koin.androidx.viewmodel.scope.viewModel
 import timber.log.Timber
 
 class SearchComicFragment : Fragment() {
-  private val viewModel by viewModel<SearchComicViewModel>()
+  private val viewModel by lifecycleScope.viewModel<SearchComicViewModel>(owner = this)
   private val compositeDisposable = CompositeDisposable()
   private val mainActivity get() = requireActivity() as MainActivity
 
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
+  override fun onCreateView(
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?,
+  ): View =
     inflater.inflate(R.layout.fragment_search_comic, container, false)
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

@@ -21,11 +21,10 @@ import io.reactivex.Observable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.ofType
 import io.reactivex.rxkotlin.subscribeBy
-import io.reactivex.rxkotlin.withLatestFrom
 
 class RegisterVM(
   private val interactor: Interactor,
-  private val rxSchedulerProvider: RxSchedulerProvider
+  private val rxSchedulerProvider: RxSchedulerProvider,
 ) : BaseViewModel<Intent, ViewState, SingleEvent>() {
   override val initialState = ViewState.initial()
 
@@ -94,15 +93,15 @@ class RegisterVM(
     val avatarChange = avatarObservable.map { PartialChange.AvatarChanged(it) }
 
     Observable.mergeArray(
-      emailErrorChange,
-      passwordErrorChange,
-      fullNameErrorChange,
-      avatarChange,
-      registerChange,
-      emailChange,
-      passwordChange,
-      fullNameChange
-    ).scan(initialState) { state, change -> change.reducer(state) }
+        emailErrorChange,
+        passwordErrorChange,
+        fullNameErrorChange,
+        avatarChange,
+        registerChange,
+        emailChange,
+        passwordChange,
+        fullNameChange
+      ).scan(initialState) { state, change -> change.reducer(state) }
       .observeOn(rxSchedulerProvider.main)
       .subscribeBy(onNext = ::setNewState)
       .addTo(compositeDisposable)

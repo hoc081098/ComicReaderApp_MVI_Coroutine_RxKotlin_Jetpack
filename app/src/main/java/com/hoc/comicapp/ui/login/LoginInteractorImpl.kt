@@ -12,7 +12,7 @@ import kotlinx.coroutines.rx2.rxObservable
 @ExperimentalCoroutinesApi
 class LoginInteractorImpl(
   private val userRepository: UserRepository,
-  private val dispatchersProvider: CoroutinesDispatchersProvider
+  private val dispatchersProvider: CoroutinesDispatchersProvider,
 ) : Interactor {
   override fun login(email: String, password: String): Observable<PartialChange> {
     return rxObservable(dispatchersProvider.main) {

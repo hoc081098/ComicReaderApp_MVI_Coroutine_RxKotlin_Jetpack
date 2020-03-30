@@ -13,7 +13,7 @@ data class _FavoriteComic(
   @get:PropertyName("title") @set:PropertyName("title") var title: String,
   @get:PropertyName("thumbnail") @set:PropertyName("thumbnail") var thumbnail: String,
   @get:PropertyName("view") @set:PropertyName("view") var view: String,
-  @get:ServerTimestamp @get:PropertyName("created_at") @set:PropertyName("created_at") var createdAt: Timestamp?
+  @get:ServerTimestamp @get:PropertyName("created_at") @set:PropertyName("created_at") var createdAt: Timestamp?,
 ) {
   fun toDomain(): FavoriteComic {
     return FavoriteComic(

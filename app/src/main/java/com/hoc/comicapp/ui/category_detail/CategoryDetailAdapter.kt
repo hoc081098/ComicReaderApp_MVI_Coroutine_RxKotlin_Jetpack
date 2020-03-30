@@ -63,8 +63,8 @@ class CategoryDetailAdapter(
   private val glide: GlideRequests,
   private val lifecycleOwner: LifecycleOwner,
   private val compositeDisposable: CompositeDisposable,
-  private val onClickComic: (ComicArg) -> Unit
-  ) :
+  private val onClickComic: (ComicArg) -> Unit,
+) :
   ListAdapter<Item, CategoryDetailAdapter.VH>(ItemDiffCallback) {
   private var outLayoutManagerSavedState: Parcelable? = null
 
@@ -114,7 +114,8 @@ class CategoryDetailAdapter(
     abstract fun bind(item: Item)
   }
 
-  private inner class PopularHorizontalRecyclerVH(itemView: View, parent: ViewGroup) : VH(itemView) {
+  private inner class PopularHorizontalRecyclerVH(itemView: View, parent: ViewGroup) :
+    VH(itemView) {
     private val recycler = itemView.popular_recycler_horizontal!!
     private val progressBar = itemView.popular_progress_bar!!
     private val textError = itemView.popular_error_message!!
@@ -333,7 +334,7 @@ class CategoryDetailAdapter(
      */
     inline fun <reified T : Item> VH.onlyBind(
       item: Item,
-      crossinline bind: (T) -> Unit
+      crossinline bind: (T) -> Unit,
     ) {
       check(item is T) { "${this::class.java.simpleName}::bind only accept ${T::class.java.simpleName}, but item=$item" }
       bind(item)

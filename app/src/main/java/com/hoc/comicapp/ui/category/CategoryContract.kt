@@ -20,7 +20,7 @@ data class CategoryViewState(
   val categories: List<Category>,
   val errorMessage: String?,
   val refreshLoading: Boolean,
-  @SortOrder val sortOrder: String
+  @SortOrder val sortOrder: String,
 ) : ViewState {
   companion object {
     @JvmStatic

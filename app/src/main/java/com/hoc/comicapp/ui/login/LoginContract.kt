@@ -10,7 +10,7 @@ interface LoginContract {
     val isLoading: Boolean,
     // keep latest state when replace fragment
     val email: String?,
-    val password: String?
+    val password: String?,
   ) : com.hoc.comicapp.base.ViewState {
     companion object {
       @JvmStatic

@@ -14,7 +14,7 @@ interface RegisterContract {
     // keep latest state when replace fragment
     val email: String?,
     val password: String?,
-    val fullName: String?
+    val fullName: String?,
   ) : com.hoc.comicapp.base.ViewState {
     companion object {
       @JvmStatic
@@ -78,7 +78,7 @@ interface RegisterContract {
     val email: String,
     val password: String,
     val fullName: String,
-    val avatar: Uri?
+    val avatar: Uri?,
   )
 
   interface Interactor {

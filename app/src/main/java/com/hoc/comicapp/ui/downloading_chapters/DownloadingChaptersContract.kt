@@ -17,7 +17,7 @@ interface DownloadingChaptersContract {
   data class ViewState(
     val isLoading: Boolean,
     val error: String?,
-    val chapters: List<Chapter>
+    val chapters: List<Chapter>,
   ) : BaseViewState {
 
     companion object {
@@ -34,7 +34,7 @@ interface DownloadingChaptersContract {
       val title: String,
       val link: String,
       val comicTitle: String,
-      val progress: Int
+      val progress: Int,
     ) {
       fun isSameExceptProgress(other: Chapter): Boolean {
         if (this === other) return true
@@ -76,7 +76,7 @@ interface DownloadingChaptersContract {
 
     data class DeleteError(
       val chapter: ViewState.Chapter,
-      val error: ComicAppError
+      val error: ComicAppError,
     ) : SingleEvent()
   }
 }

@@ -14,7 +14,7 @@ interface UserRepository {
     email: String,
     password: String,
     fullName: String,
-    avatar: Uri?
+    avatar: Uri?,
   ): DomainResult<Unit>
 
   fun userObservable(): Observable<DomainResult<User?>>

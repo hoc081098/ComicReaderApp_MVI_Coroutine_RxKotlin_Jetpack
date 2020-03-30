@@ -14,7 +14,7 @@ import kotlinx.coroutines.rx2.rxSingle
 
 class DownloadedComicsInteractorImpl(
   private val downloadComicsRepository: DownloadComicsRepository,
-  private val application: Application
+  private val application: Application,
 ) : DownloadedComicsContract.Interactor {
   override fun deleteComic(comicItem: ComicItem): Single<Pair<ComicItem, ComicAppError?>> {
     return rxSingle {

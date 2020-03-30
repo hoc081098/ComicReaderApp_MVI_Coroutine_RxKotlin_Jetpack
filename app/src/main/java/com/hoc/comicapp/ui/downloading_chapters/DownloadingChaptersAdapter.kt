@@ -30,8 +30,9 @@ object DownloadingChapterItemDiffUtilItemCallback : DiffUtil.ItemCallback<Chapte
 }
 
 class DownloadingChaptersAdapter(
-  private val compositeDisposable: CompositeDisposable
-) : ListAdapter<Chapter, DownloadingChaptersAdapter.VH>(DownloadingChapterItemDiffUtilItemCallback) {
+  private val compositeDisposable: CompositeDisposable,
+) :
+  ListAdapter<Chapter, DownloadingChaptersAdapter.VH>(DownloadingChapterItemDiffUtilItemCallback) {
   private val _clickCancel = PublishRelay.create<Chapter>()
   val clickCancel get() = _clickCancel.asObservable()
 

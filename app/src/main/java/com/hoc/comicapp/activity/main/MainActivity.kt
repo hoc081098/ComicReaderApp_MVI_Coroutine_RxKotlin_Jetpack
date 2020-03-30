@@ -38,12 +38,13 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.nav_header_main.view.*
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.androidx.scope.lifecycleScope
+import org.koin.androidx.viewmodel.scope.viewModel
 import timber.log.Timber
 import kotlin.LazyThreadSafetyMode.NONE
 
 class MainActivity : AppCompatActivity() {
-  private val mainVM by viewModel<MainVM>()
+  private val mainVM by lifecycleScope.viewModel<MainVM>(owner = this)
   private val compositeDisposable = CompositeDisposable()
 
   private val glide by lazy(NONE) { GlideApp.with(this) }
@@ -97,7 +98,8 @@ class MainActivity : AppCompatActivity() {
 
     val loginMenuItem = nav_view.menu.findItem(R.id.action_home_fragment_dest_to_loginFragment)!!
     val logoutMenuItem = nav_view.menu.findItem(R.id.action_logout)!!
-    val favoriteMenuItem = nav_view.menu.findItem(R.id.action_home_fragment_dest_to_favoriteComicsFragment)!!
+    val favoriteMenuItem =
+      nav_view.menu.findItem(R.id.action_home_fragment_dest_to_favoriteComicsFragment)!!
 
     var prevUser: User? = null
     mainVM.state.observe(owner = this) { (user, isLoading, error) ->

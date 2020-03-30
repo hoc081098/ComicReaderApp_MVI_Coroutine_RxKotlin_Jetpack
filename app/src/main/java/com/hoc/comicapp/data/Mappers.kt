@@ -1,24 +1,43 @@
 package com.hoc.comicapp.data
 
+import android.database.sqlite.SQLiteException
+import com.google.firebase.FirebaseException
+import com.google.firebase.FirebaseNetworkException
+import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.storage.StorageException
 import com.hoc.comicapp.data.firebase.entity._FavoriteComic
 import com.hoc.comicapp.data.local.entities.ChapterEntity
 import com.hoc.comicapp.data.local.entities.ComicAndChapters
 import com.hoc.comicapp.data.local.entities.ComicEntity
+import com.hoc.comicapp.data.remote.ErrorResponseParser
 import com.hoc.comicapp.data.remote.response.CategoryDetailPopularComicResponse
 import com.hoc.comicapp.data.remote.response.CategoryResponse
 import com.hoc.comicapp.data.remote.response.ChapterDetailResponse
 import com.hoc.comicapp.data.remote.response.ComicDetailResponse
 import com.hoc.comicapp.data.remote.response.ComicResponse
+import com.hoc.comicapp.domain.DomainResult
+import com.hoc.comicapp.domain.models.AuthError
 import com.hoc.comicapp.domain.models.Category
 import com.hoc.comicapp.domain.models.CategoryDetailPopularComic
 import com.hoc.comicapp.domain.models.ChapterDetail
 import com.hoc.comicapp.domain.models.Comic
+import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.ComicDetail
 import com.hoc.comicapp.domain.models.DownloadedChapter
 import com.hoc.comicapp.domain.models.DownloadedComic
 import com.hoc.comicapp.domain.models.FavoriteComic
+import com.hoc.comicapp.domain.models.LocalStorageError
+import com.hoc.comicapp.domain.models.NetworkError
+import com.hoc.comicapp.domain.models.ServerError
+import com.hoc.comicapp.domain.models.UnexpectedError
+import com.hoc.comicapp.utils.left
+import retrofit2.HttpException
+import retrofit2.Retrofit
+import java.io.IOException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 
-object Mapper {
+object Mappers {
 
   /**
    *
@@ -263,4 +282,87 @@ object Mapper {
       title = response.title
     )
   }
+}
+
+class ErrorMapper(private val retrofit: Retrofit) {
+  /**
+   * Transform [throwable] to [ComicAppError]
+   */
+  fun map(throwable: Throwable): ComicAppError {
+    return when (throwable) {
+      is ComicAppError -> throwable
+      is FirebaseException -> {
+        when (throwable) {
+          is FirebaseNetworkException -> NetworkError
+          is FirebaseAuthException -> {
+            when (throwable.errorCode) {
+              "ERROR_INVALID_CUSTOM_TOKEN" -> AuthError.InvalidCustomToken
+              "ERROR_CUSTOM_TOKEN_MISMATCH" -> AuthError.CustomTokenMismatch
+              "ERROR_INVALID_CREDENTIAL" -> AuthError.InvalidCredential
+              "ERROR_INVALID_EMAIL" -> AuthError.InvalidEmail
+              "ERROR_WRONG_PASSWORD" -> AuthError.WrongPassword
+              "ERROR_USER_MISMATCH" -> AuthError.UserMismatch
+              "ERROR_REQUIRES_RECENT_LOGIN" -> AuthError.RequiresRecentLogin
+              "ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL" -> AuthError.AccountExistsWithDifferenceCredential
+              "ERROR_EMAIL_ALREADY_IN_USE" -> AuthError.EmailAlreadyInUse
+              "ERROR_CREDENTIAL_ALREADY_IN_USE" -> AuthError.CredentialAlreadyInUse
+              "ERROR_USER_DISABLED" -> AuthError.UserDisabled
+              "ERROR_USER_TOKEN_EXPIRED" -> AuthError.TokenExpired
+              "ERROR_USER_NOT_FOUND" -> AuthError.UserNotFound
+              "ERROR_INVALID_USER_TOKEN" -> AuthError.InvalidUserToken
+              "ERROR_OPERATION_NOT_ALLOWED" -> AuthError.OperationNotAllowed
+              "ERROR_WEAK_PASSWORD" -> AuthError.WeakPassword
+              else -> UnexpectedError(
+                cause = throwable,
+                message = "Unknown throwable $this"
+              )
+            }
+          }
+          is StorageException -> AuthError.UploadFile
+          else -> UnexpectedError(
+            cause = throwable,
+            message = "Unknown throwable $throwable"
+          )
+        }
+      }
+      is SQLiteException -> {
+        LocalStorageError.DatabaseError(throwable)
+      }
+      is IOException -> {
+        when (throwable) {
+          is UnknownHostException -> NetworkError
+          is SocketTimeoutException -> NetworkError
+          else -> UnexpectedError(
+            cause = throwable,
+            message = "Unknown IOException $this"
+          )
+        }
+      }
+      is HttpException -> {
+        ErrorResponseParser
+          .getError(
+            throwable.response() ?: return ServerError("Response is null", -1),
+            retrofit
+          )
+          ?.let {
+            ServerError(
+              message = it.message,
+              statusCode = it.statusCode
+            )
+          }
+          ?: ServerError("", -1)
+      }
+      else -> {
+        UnexpectedError(
+          cause = throwable,
+          message = "Unknown throwable $this"
+        )
+      }
+    }
+  }
+
+  /**
+   * Transform [throwable] to left branch of [DomainResult]
+   */
+  fun <T> mapAsLeft(throwable: Throwable): DomainResult<T> = map(throwable).left()
 }

@@ -73,9 +73,9 @@ dependencies {
 
   // AndroidX, Material
   implementation("androidx.appcompat:appcompat:1.1.0")
-  implementation("androidx.core:core-ktx:1.3.0-alpha01")
+  implementation("androidx.core:core-ktx:1.3.0-alpha02")
   implementation("androidx.activity:activity-ktx:1.1.0")
-  implementation("androidx.fragment:fragment-ktx:1.2.1")
+  implementation("androidx.fragment:fragment-ktx:1.2.3")
   implementation("androidx.constraintlayout:constraintlayout:2.0.0-beta4")
   implementation("com.google.android.material:material:$materialVersion")
 
@@ -103,6 +103,7 @@ dependencies {
 
   // Koin
   implementation("org.koin:koin-androidx-viewmodel:$koinVersion")
+  implementation("org.koin:koin-androidx-scope:$koinVersion")
 
   // Moshi, Retrofit, OkHttp
   implementation("com.squareup.moshi:moshi-kotlin:1.8.0")
@@ -146,13 +147,15 @@ dependencies {
   implementation("com.amulyakhare:com.amulyakhare.textdrawable:1.0.1")
 
   testImplementation("junit:junit:4.13")
-  androidTestImplementation("androidx.test:runner:1.3.0-alpha03")
-  androidTestImplementation("androidx.test.espresso:espresso-core:3.3.0-alpha03")
+  androidTestImplementation("androidx.test:runner:1.3.0-alpha05")
+  androidTestImplementation("androidx.test.espresso:espresso-core:3.3.0-alpha05")
 
   // Firebase
-  implementation("com.google.firebase:firebase-auth:19.2.0")
+  implementation("com.google.firebase:firebase-auth:19.3.0")
   implementation("com.google.firebase:firebase-storage:19.1.1")
-  implementation("com.google.firebase:firebase-firestore:21.4.0")
+  implementation("com.google.firebase:firebase-firestore:21.4.1")
+
+  implementation("com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava")
 }
 
 apply(plugin = "com.google.gms.google-services")

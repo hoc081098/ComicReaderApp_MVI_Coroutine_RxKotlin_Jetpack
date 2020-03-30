@@ -22,7 +22,7 @@ data class ComicArg(
   val thumbnail: String,
   val title: String,
   val view: String,
-  val remoteThumbnail: String
+  val remoteThumbnail: String,
 ) : Parcelable
 
 interface ComicDetailInteractor {
@@ -34,12 +34,12 @@ interface ComicDetailInteractor {
     thumbnail: String? = null,
     view: String? = null,
     remoteThumbnail: String? = null,
-    isDownloaded: Boolean
+    isDownloaded: Boolean,
   ): Observable<ComicDetailPartialChange>
 
   fun refreshPartialChanges(
     link: String,
-    isDownloaded: Boolean
+    isDownloaded: Boolean,
   ): Observable<ComicDetailPartialChange>
 
   fun toggleFavorite(comic: ComicDetail): Observable<Unit>
@@ -48,7 +48,7 @@ interface ComicDetailInteractor {
 
   fun enqueueDownloadComic(
     chapter: ComicDetailViewState.Chapter,
-    comicName: String
+    comicName: String,
   ): Observable<ComicDetailSingleEvent>
 }
 
@@ -69,7 +69,7 @@ data class ComicDetailViewState(
   val errorMessage: String?,
   val isLoading: Boolean,
   val isRefreshing: Boolean,
-  val isFavorited: Boolean?
+  val isFavorited: Boolean?,
 ) : ViewState {
   companion object {
     @JvmStatic
@@ -109,7 +109,7 @@ data class ComicDetailViewState(
       val chapters: List<Chapter>,
       val lastUpdated: String,
       val relatedComics: List<Comic>,
-      val shortenedContent: String
+      val shortenedContent: String,
     ) : ComicDetail()
 
     data class Initial(
@@ -117,7 +117,7 @@ data class ComicDetailViewState(
       override val thumbnail: String,
       override val title: String,
       override val view: String,
-      override val remoteThumbnail: String
+      override val remoteThumbnail: String,
     ) : ComicDetail()
   }
 
@@ -142,7 +142,7 @@ data class ComicDetailViewState(
     val time: String,
     val view: String,
     val downloadState: DownloadState = DownloadState.Loading,
-    val comicLink: String
+    val comicLink: String,
   ) : Parcelable {
 
     fun isSameExceptDownloadState(other: Chapter): Boolean {
@@ -173,24 +173,24 @@ data class ComicDetailViewState(
 
   data class Category(
     val link: String,
-    val name: String
+    val name: String,
   )
 
   data class Author(
     val link: String,
-    val name: String
+    val name: String,
   )
 
   data class Comic(
     val lastChapters: List<LastChapter>,
     val link: String,
     val thumbnail: String, val title: String,
-    val view: String
+    val view: String,
   ) {
     data class LastChapter(
       val chapterLink: String,
       val chapterName: String,
-      val time: String
+      val time: String,
     )
   }
 }
@@ -271,13 +271,13 @@ sealed class ComicDetailSingleEvent : SingleEvent {
 
   data class EnqueuedDownloadFailure(
     val chapter: ComicDetailViewState.Chapter,
-    val error: ComicAppError
+    val error: ComicAppError,
   ) : ComicDetailSingleEvent()
 
   data class DeletedChapter(val chapter: ComicDetailViewState.Chapter) : ComicDetailSingleEvent()
 
   data class DeleteChapterError(
     val chapter: ComicDetailViewState.Chapter,
-    val error: ComicAppError
+    val error: ComicAppError,
   ) : ComicDetailSingleEvent()
 }

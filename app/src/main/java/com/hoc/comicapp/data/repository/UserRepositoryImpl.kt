@@ -1,22 +1,20 @@
 package com.hoc.comicapp.data.repository
 
 import android.net.Uri
+import com.hoc.comicapp.data.ErrorMapper
 import com.hoc.comicapp.data.firebase.user.FirebaseAuthUserDataSource
 import com.hoc.comicapp.domain.DomainResult
 import com.hoc.comicapp.domain.models.User
-import com.hoc.comicapp.domain.models.toError
 import com.hoc.comicapp.domain.repository.UserRepository
 import com.hoc.comicapp.utils.bimap
-import com.hoc.comicapp.utils.left
 import com.hoc.comicapp.utils.right
 import io.reactivex.Observable
 import kotlinx.coroutines.delay
-import retrofit2.Retrofit
 import timber.log.Timber
 
 class UserRepositoryImpl(
-  private val retrofit: Retrofit,
-  private val userDataSource: FirebaseAuthUserDataSource
+  private val errorMapper: ErrorMapper,
+  private val userDataSource: FirebaseAuthUserDataSource,
 ) : UserRepository {
 
   override suspend fun signOut(): DomainResult<Unit> {
@@ -24,16 +22,13 @@ class UserRepositoryImpl(
       userDataSource.signOut()
       Unit.right()
     } catch (e: Throwable) {
-      e.toError(retrofit).left()
+      errorMapper.mapAsLeft(e)
     }
   }
 
   override fun userObservable(): Observable<DomainResult<User?>> {
     return userDataSource.userObservable().map { either ->
-      either.bimap(
-        { it.toError(retrofit) },
-        { it?.toDomain() }
-      )
+      either.bimap(errorMapper::map) { it?.toDomain() }
     }
   }
 
@@ -41,7 +36,7 @@ class UserRepositoryImpl(
     email: String,
     password: String,
     fullName: String,
-    avatar: Uri?
+    avatar: Uri?,
   ): DomainResult<Unit> {
     return try {
       userDataSource.register(
@@ -54,7 +49,7 @@ class UserRepositoryImpl(
     } catch (e: Throwable) {
       Timber.d("register error $e")
       delay(1_000)
-      e.toError(retrofit).left()
+      errorMapper.mapAsLeft(e)
     }
   }
 
@@ -64,7 +59,7 @@ class UserRepositoryImpl(
       Unit.right()
     } catch (e: Throwable) {
       delay(1_000)
-      e.toError(retrofit).left()
+      errorMapper.mapAsLeft(e)
     }
   }
 }

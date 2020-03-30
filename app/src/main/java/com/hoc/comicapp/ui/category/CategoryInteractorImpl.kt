@@ -10,7 +10,7 @@ import kotlinx.coroutines.rx2.rxObservable
 @ExperimentalCoroutinesApi
 class CategoryInteractorImpl(
   private val comicRepository: ComicRepository,
-  private val dispatchersProvider: CoroutinesDispatchersProvider
+  private val dispatchersProvider: CoroutinesDispatchersProvider,
 ) : CategoryInteractor {
   override fun refresh(): Observable<CategoryPartialChange.RefreshPartialChange> {
     return rxObservable(dispatchersProvider.main) {

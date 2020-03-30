@@ -39,7 +39,7 @@ class ComicDetailViewModel(
   private val downloadComicsRepository: DownloadComicsRepository,
   private val rxSchedulerProvider: RxSchedulerProvider,
   private val workManager: WorkManager,
-  private val isDownloaded: Boolean
+  private val isDownloaded: Boolean,
 ) : BaseViewModel<ComicDetailIntent, ComicDetailViewState, ComicDetailSingleEvent>(),
   Observer<ComicDetailViewState> {
 
@@ -119,12 +119,12 @@ class ComicDetailViewModel(
 
   private val intentToViewState = ObservableTransformer<ComicDetailIntent, ComicDetailViewState> {
     it.publish { shared ->
-      Observable.mergeArray(
-        shared.ofType<ComicDetailIntent.Initial>().compose(initialProcessor),
-        shared.ofType<ComicDetailIntent.Refresh>().compose(refreshProcessor),
-        shared.ofType<ComicDetailIntent.Retry>().compose(retryProcessor)
-      )
-    }.doOnNext { Timber.d("partial_change=$it") }
+        Observable.mergeArray(
+          shared.ofType<ComicDetailIntent.Initial>().compose(initialProcessor),
+          shared.ofType<ComicDetailIntent.Refresh>().compose(refreshProcessor),
+          shared.ofType<ComicDetailIntent.Retry>().compose(retryProcessor)
+        )
+      }.doOnNext { Timber.d("partial_change=$it") }
       .scan(initialState) { state, change -> change.reducer(state) }
       .distinctUntilChanged()
       .observeOn(rxSchedulerProvider.main)
@@ -266,7 +266,7 @@ class ComicDetailViewModel(
   private fun getDownloadState(
     workInfos: List<WorkInfo>,
     chapter: Chapter,
-    downloadedChapters: List<DownloadedChapter>
+    downloadedChapters: List<DownloadedChapter>,
   ): DownloadState {
     return when {
       downloadedChapters.any { it.chapterLink == chapter.chapterLink } -> Downloaded

@@ -14,6 +14,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.google.android.material.transition.MaterialContainerTransform
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract
@@ -32,6 +33,7 @@ import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.showAlertDialog
 import com.hoc.comicapp.utils.snack
+import com.hoc.comicapp.utils.themeInterpolator
 import com.jakewharton.rxbinding3.recyclerview.scrollEvents
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxrelay2.PublishRelay
@@ -42,7 +44,8 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.rxkotlin.withLatestFrom
 import kotlinx.android.synthetic.main.fragment_comic_detail.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.androidx.scope.lifecycleScope
+import org.koin.androidx.viewmodel.scope.viewModel
 import org.koin.core.parameter.parametersOf
 import timber.log.Timber
 import java.io.File
@@ -53,7 +56,9 @@ import com.hoc.comicapp.ui.detail.ComicDetailFragmentDirections.Companion.action
 
 @ExperimentalCoroutinesApi
 class ComicDetailFragment : Fragment() {
-  private val viewModel by viewModel<ComicDetailViewModel> { parametersOf(args.isDownloaded) }
+  private val viewModel by lifecycleScope.viewModel<ComicDetailViewModel>(owner = this) {
+    parametersOf(args.isDownloaded)
+  }
   private val args by navArgs<ComicDetailFragmentArgs>()
 
   private val compositeDisposable = CompositeDisposable()
@@ -61,16 +66,24 @@ class ComicDetailFragment : Fragment() {
 
   private val intentS = PublishRelay.create<ComicDetailIntent>()
 
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    prepareTransitions()
+  }
+
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View = inflater.inflate(R.layout.fragment_comic_detail, container, false)
     .also { Timber.d("ComicDetailFragment::onCreateView") }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
     Timber.d("ComicDetailFragment::onViewCreated")
+
+    root_detail.transitionName = args.comic.link
+    startTransitions()
 
     val chapterAdapter = ChapterAdapter(
       ::onClickButtonRead,
@@ -79,6 +92,28 @@ class ComicDetailFragment : Fragment() {
     )
     initView(chapterAdapter)
     bind(chapterAdapter)
+  }
+
+  private fun prepareTransitions() {
+    postponeEnterTransition()
+
+    sharedElementEnterTransition = MaterialContainerTransform(requireContext()).apply {
+      // Scope the transition to a view in the hierarchy so we know it will be added under
+      // the bottom app bar but over the Hold transition from the exiting HomeFragment.
+      drawingViewId = R.id.main_nav_fragment
+      duration = resources.getInteger(R.integer.reply_motion_default_large).toLong()
+      interpolator = requireContext().themeInterpolator(R.attr.motionInterpolatorPersistent)
+    }
+    sharedElementReturnTransition = MaterialContainerTransform(requireContext()).apply {
+      // Again, scope the return transition so it is added below the bottom app bar.
+      drawingViewId = R.id.recycler_home
+      duration = resources.getInteger(R.integer.reply_motion_default_large).toLong()
+      interpolator = requireContext().themeInterpolator(R.attr.motionInterpolatorPersistent)
+    }
+  }
+
+  private fun startTransitions() {
+    startPostponedEnterTransition()
   }
 
   private fun onClickDownload(chapter: Chapter) {
@@ -160,11 +195,12 @@ class ComicDetailFragment : Fragment() {
 
     switch_mode.isChecked = !args.isDownloaded
     switch_mode.setOnCheckedChangeListener { _, _ ->
-      val actionComicDetailFragmentSelf = ComicDetailFragmentDirections.actionComicDetailFragmentSelf(
-        comic = args.comic,
-        title = args.title,
-        isDownloaded = !args.isDownloaded
-      )
+      val actionComicDetailFragmentSelf =
+        ComicDetailFragmentDirections.actionComicDetailFragmentSelf(
+          comic = args.comic,
+          title = args.title,
+          isDownloaded = !args.isDownloaded
+        )
       findNavController().navigate(actionComicDetailFragmentSelf)
     }
   }
@@ -191,7 +227,7 @@ class ComicDetailFragment : Fragment() {
         motionLayout: MotionLayout?,
         startId: Int,
         endId: Int,
-        progress: Float
+        progress: Float,
       ) {
         if (progress - lastProgress > 0) {
           // from start to end
@@ -293,7 +329,7 @@ class ComicDetailFragment : Fragment() {
 
   private fun render(
     viewState: ComicDetailViewState,
-    chapterAdapter: ChapterAdapter
+    chapterAdapter: ChapterAdapter,
   ) {
     Timber.d("state=$viewState")
     Timber.d("isFavorited=${viewState.isFavorited}")

@@ -1,6 +1,10 @@
 package com.hoc.comicapp.data.remote
 
-import com.hoc.comicapp.data.remote.response.*
+import com.hoc.comicapp.data.remote.response.CategoryDetailPopularComicResponse
+import com.hoc.comicapp.data.remote.response.CategoryResponse
+import com.hoc.comicapp.data.remote.response.ChapterDetailResponse
+import com.hoc.comicapp.data.remote.response.ComicDetailResponse
+import com.hoc.comicapp.data.remote.response.ComicResponse
 import okhttp3.ResponseBody
 import retrofit2.Retrofit
 import retrofit2.create
@@ -45,7 +49,7 @@ interface ComicApiService {
   @GET("category_detail")
   suspend fun getCategoryDetail(
     @Query("link") categoryLink: String,
-    @Query("page") page: Int?
+    @Query("page") page: Int?,
   ): List<ComicResponse>
 
   @GET("category_detail/popular")
@@ -54,7 +58,7 @@ interface ComicApiService {
   @GET("search_comic")
   suspend fun searchComic(
     @Query("query") query: String,
-    @Query("page") page: Int?
+    @Query("page") page: Int?,
   ): List<ComicResponse>
 
   /**

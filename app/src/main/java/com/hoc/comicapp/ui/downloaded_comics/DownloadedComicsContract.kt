@@ -27,12 +27,13 @@ interface DownloadedComicsContract {
 
   enum class SortOrder(
     private val description: String,
-    val comparator: Comparator<ComicItem>
+    val comparator: Comparator<ComicItem>,
   ) {
     ComicTitleAsc("Comic title ascending", compareBy { it.title }),
     ComicTitleDesc("Comic title descending", compareByDescending { it.title }),
     LatestChapterAsc("Latest chapter first", compareBy { it.chapters.first().downloadedAt }),
-    LatestChapterDesc("Latest chapter last", compareByDescending { it.chapters.first().downloadedAt });
+    LatestChapterDesc("Latest chapter last",
+      compareByDescending { it.chapters.first().downloadedAt });
 
     override fun toString() = description
   }
@@ -41,7 +42,7 @@ interface DownloadedComicsContract {
     val isLoading: Boolean,
     val error: String?,
     val comics: List<ComicItem>,
-    val sortOrder: SortOrder
+    val sortOrder: SortOrder,
   ) : BaseViewState {
 
     companion object {
@@ -61,7 +62,7 @@ interface DownloadedComicsContract {
       val thumbnail: File,
       val view: String,
       val chapters: List<ChapterItem>,
-      val remoteThumbnail: String
+      val remoteThumbnail: String,
     ) {
       fun toDomain(): DownloadedComic {
         return DownloadedComic(
@@ -115,7 +116,7 @@ interface DownloadedComicsContract {
     data class ChapterItem(
       val link: String,
       val chapterName: String,
-      val downloadedAt: Date
+      val downloadedAt: Date,
     )
   }
 

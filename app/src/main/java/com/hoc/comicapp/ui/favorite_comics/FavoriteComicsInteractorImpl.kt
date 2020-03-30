@@ -15,7 +15,7 @@ import kotlinx.coroutines.rx2.rxObservable
 class FavoriteComicsInteractorImpl(
   private val favoriteComicsRepository: FavoriteComicsRepository,
   private val rxSchedulerProvider: RxSchedulerProvider,
-  private val dispatchersProvider: CoroutinesDispatchersProvider
+  private val dispatchersProvider: CoroutinesDispatchersProvider,
 ) : Interactor {
   override fun remove(item: ComicItem): Observable<PartialChange> {
     return rxObservable<PartialChange>(dispatchersProvider.main) {

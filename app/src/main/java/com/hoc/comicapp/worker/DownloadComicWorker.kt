@@ -11,67 +11,49 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.hoc.comicapp.R
 import com.hoc.comicapp.activity.SplashActivity
-import com.hoc.comicapp.domain.models.ComicDetail.Chapter
+import com.hoc.comicapp.data.JsonAdaptersContainer
 import com.hoc.comicapp.domain.repository.DownloadComicsRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
-import com.squareup.moshi.JsonAdapter
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.withContext
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import timber.log.Timber
 
-@ExperimentalCoroutinesApi
 class DownloadComicWorker(
   appContext: Context,
-  params: WorkerParameters
+  params: WorkerParameters,
 ) : CoroutineWorker(appContext, params), KoinComponent {
   private val downloadComicsRepo by inject<DownloadComicsRepository>()
-  private val chapterJsonAdapter by inject<JsonAdapter<Chapter>>()
+  private val jsonAdaptersContainer by inject<JsonAdaptersContainer>()
   private val dispatchers by inject<CoroutinesDispatchersProvider>()
 
   override suspend fun doWork(): Result {
+    // Extract arguments
     val chapterJson = inputData.getString(CHAPTER)
       ?: return Result.failure(workDataOf(ERROR to "chapterJson is null"))
 
     val (chapterLink, chapterName) = withContext(dispatchers.io) {
       // TODO: Remove @Suppress("BlockingMethodInNonBlockingContext"). This seem to be a IntelliJ Idea's bug.
       @Suppress("BlockingMethodInNonBlockingContext")
-      chapterJsonAdapter.fromJson(chapterJson)
-    }
-      ?: return Result.failure(workDataOf(ERROR to "chapter is null"))
+      jsonAdaptersContainer.comicDetailChapterAdapter.fromJson(chapterJson)
+    } ?: return Result.failure(workDataOf(ERROR to "chapter is null"))
 
     val comicName = inputData.getString(COMIC_NAME)
     val chapterComicName = listOfNotNull(chapterName, comicName).joinToString(" - ")
 
-    val notificationBuilder =
-      NotificationCompat.Builder(applicationContext, applicationContext.getString(R.string.notification_channel_id))
-        .setSmallIcon(R.mipmap.ic_launcher_round)
-        .setContentTitle("Download $chapterComicName")
-        .setContentText("Downloading...")
-        .setProgress(100, 0, false)
-        .setAutoCancel(true)
-        .setOngoing(false)
-        .setPriority(PRIORITY_HIGH)
-        .setWhen(System.currentTimeMillis())
-        .setContentIntent(
-          PendingIntent.getActivity(
-            applicationContext,
-            0,
-            Intent(applicationContext, SplashActivity::class.java),
-            PendingIntent.FLAG_UPDATE_CURRENT
-          )
-        )
+    // Show notification
+    val notificationBuilder = createNotificationBuilder(chapterComicName)
     val notificationManagerCompat = NotificationManagerCompat.from(applicationContext)
-    notificationManagerCompat.notify(1, notificationBuilder.build())
+    val notificationId = 1 // TODO: Change notification id
+    notificationManagerCompat.notify(notificationId, notificationBuilder.build())
 
     return try {
       downloadComicsRepo
         .downloadChapter(chapterLink)
         .collect {
           notificationManagerCompat.notify(
-            1,
+            notificationId,
             notificationBuilder
               .setProgress(100, it, false)
               .setContentText("$it %")
@@ -88,7 +70,7 @@ class DownloadComicWorker(
         }
 
       notificationManagerCompat.notify(
-        1,
+        notificationId,
         notificationBuilder
           .setContentText("Download complete. Click to see all downloaded chapter")
           .setProgress(0, 0, false)
@@ -100,15 +82,36 @@ class DownloadComicWorker(
       Timber.d(e, "Exception: $e")
 
       notificationManagerCompat.notify(
-        1,
+        notificationId,
         notificationBuilder
-          .setContentText("Download fail")
+          .setContentText("Download failed")
           .setProgress(0, 0, false)
           .build()
       )
 
       Result.failure()
     }
+  }
+
+  private fun createNotificationBuilder(chapterComicName: String): NotificationCompat.Builder {
+    return NotificationCompat.Builder(applicationContext,
+        applicationContext.getString(R.string.notification_channel_id))
+      .setSmallIcon(R.mipmap.ic_launcher_round)
+      .setContentTitle("Download $chapterComicName")
+      .setContentText("Downloading...")
+      .setProgress(100, 0, false)
+      .setAutoCancel(true)
+      .setOngoing(false)
+      .setPriority(PRIORITY_HIGH)
+      .setWhen(System.currentTimeMillis())
+      .setContentIntent(
+        PendingIntent.getActivity(
+          applicationContext,
+          0,
+          Intent(applicationContext, SplashActivity::class.java),
+          PendingIntent.FLAG_UPDATE_CURRENT
+        )
+      )
   }
 
   companion object {

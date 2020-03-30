@@ -3,7 +3,11 @@ package com.hoc.comicapp.ui.search_comic
 import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
-import com.hoc.comicapp.ui.search_comic.SearchComicContract.*
+import com.hoc.comicapp.ui.search_comic.SearchComicContract.Interactor
+import com.hoc.comicapp.ui.search_comic.SearchComicContract.PartialChange
+import com.hoc.comicapp.ui.search_comic.SearchComicContract.SingleEvent
+import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewIntent
+import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewState
 import com.hoc.comicapp.utils.exhaustMap
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
@@ -17,7 +21,7 @@ import java.util.concurrent.TimeUnit
 
 class SearchComicViewModel(
   private val interactor: Interactor,
-  rxSchedulerProvider: RxSchedulerProvider
+  rxSchedulerProvider: RxSchedulerProvider,
 ) :
   BaseViewModel<ViewIntent, ViewState, SingleEvent>() {
   private val intentS = PublishRelay.create<ViewIntent>()
@@ -118,11 +122,11 @@ class SearchComicViewModel(
      */
 
     Observable.mergeArray(
-      searchPartialChange,
-      retryPartialChange,
-      loadNextPagePartialChange,
-      retryNextPagePartialChange
-    )
+        searchPartialChange,
+        retryPartialChange,
+        loadNextPagePartialChange,
+        retryNextPagePartialChange
+      )
       .scan(initialState) { state, change -> change.reducer(state) }
       .distinctUntilChanged()
       .observeOn(rxSchedulerProvider.main)

@@ -2,7 +2,11 @@ package com.hoc.comicapp.ui.home
 
 import com.hoc.comicapp.domain.repository.ComicRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
-import com.hoc.comicapp.utils.*
+import com.hoc.comicapp.utils.Left
+import com.hoc.comicapp.utils.flatMap
+import com.hoc.comicapp.utils.fold
+import com.hoc.comicapp.utils.getOrNull
+import com.hoc.comicapp.utils.map
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.cast
@@ -12,7 +16,7 @@ import kotlinx.coroutines.rx2.rxObservable
 @ExperimentalCoroutinesApi
 class HomeInteractorImpl(
   private val comicRepository: ComicRepository,
-  private val dispatchersProvider: CoroutinesDispatchersProvider
+  private val dispatchersProvider: CoroutinesDispatchersProvider,
 ) : HomeInteractor {
   /**
    * Newest list
@@ -27,7 +31,7 @@ class HomeInteractorImpl(
       /**
        * Get newest list
        */
-      val newestResult = comicRepository.getNewestComics(null)
+      val newestResult = comicRepository.getNewestComics()
 
       /**
        * Send success change
@@ -90,7 +94,7 @@ class HomeInteractorImpl(
    * Updated list
    */
   override fun updatedComics(
-    page: Int
+    page: Int,
   ): Observable<HomePartialChange> {
     return rxObservable(dispatchersProvider.main) {
       /**
@@ -116,7 +120,7 @@ class HomeInteractorImpl(
 
   override fun refreshAll(): Observable<HomePartialChange> {
     return Observables.zip(
-      rxObservable(dispatchersProvider.main) { send(comicRepository.getNewestComics(null)) },
+      rxObservable(dispatchersProvider.main) { send(comicRepository.getNewestComics()) },
       rxObservable(dispatchersProvider.main) { send(comicRepository.getMostViewedComics()) },
       rxObservable(dispatchersProvider.main) { send(comicRepository.getUpdatedComics()) }
     ).map<HomePartialChange> { (newest, mostViewed, updated) ->

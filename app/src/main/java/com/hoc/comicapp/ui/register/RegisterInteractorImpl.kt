@@ -14,7 +14,7 @@ import timber.log.Timber
 @ExperimentalCoroutinesApi
 class RegisterInteractorImpl(
   private val userRepository: UserRepository,
-  private val dispatchersProvider: CoroutinesDispatchersProvider
+  private val dispatchersProvider: CoroutinesDispatchersProvider,
 ) : Interactor {
   override fun register(user: User): Observable<PartialChange> {
     return rxObservable(dispatchersProvider.main) {

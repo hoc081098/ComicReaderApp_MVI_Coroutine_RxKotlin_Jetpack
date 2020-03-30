@@ -21,7 +21,7 @@ import io.reactivex.rxkotlin.subscribeBy
 
 class FavoriteComicsVM(
   private val interactor: Interactor,
-  rxSchedulerProvider: RxSchedulerProvider
+  rxSchedulerProvider: RxSchedulerProvider,
 ) : BaseViewModel<ViewIntent, ViewState, SingleEvent>() {
   override val initialState = ViewState.initial()
 

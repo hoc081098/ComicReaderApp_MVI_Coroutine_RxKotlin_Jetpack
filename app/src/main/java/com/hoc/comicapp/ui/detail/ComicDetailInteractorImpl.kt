@@ -23,7 +23,7 @@ class ComicDetailInteractorImpl(
   private val dispatchersProvider: CoroutinesDispatchersProvider,
   private val downloadedComicRepository: DownloadComicsRepository,
   private val favoriteComicsRepository: FavoriteComicsRepository,
-  private val rxSchedulerProvider: RxSchedulerProvider
+  private val rxSchedulerProvider: RxSchedulerProvider,
 ) : ComicDetailInteractor {
   override fun deleteOrCancelDownload(chapter: ComicDetailViewState.Chapter): Observable<ComicDetailSingleEvent> {
     return rxObservable(dispatchersProvider.main) {
@@ -39,7 +39,7 @@ class ComicDetailInteractorImpl(
 
   override fun enqueueDownloadComic(
     chapter: ComicDetailViewState.Chapter,
-    comicName: String
+    comicName: String,
   ): Observable<ComicDetailSingleEvent> {
     return rxObservable(dispatchersProvider.main) {
       downloadedComicRepository
@@ -76,7 +76,7 @@ class ComicDetailInteractorImpl(
 
   override fun refreshPartialChanges(
     link: String,
-    isDownloaded: Boolean
+    isDownloaded: Boolean,
   ): Observable<ComicDetailPartialChange> {
     return if (isDownloaded) {
       rxObservable<ComicDetailPartialChange>(dispatchersProvider.main) {
@@ -113,7 +113,7 @@ class ComicDetailInteractorImpl(
     thumbnail: String?,
     view: String?,
     remoteThumbnail: String?,
-    isDownloaded: Boolean
+    isDownloaded: Boolean,
   ) = if (isDownloaded) {
     _getDownloadedComicDetail(thumbnail, name, view, remoteThumbnail, link)
   } else {
@@ -126,7 +126,7 @@ class ComicDetailInteractorImpl(
     name: String?,
     view: String?,
     remoteThumbnail: String?,
-    link: String
+    link: String,
   ): Observable<ComicDetailPartialChange> {
     return rxObservable<ComicDetailPartialChange>(dispatchersProvider.main) {
 
@@ -161,7 +161,7 @@ class ComicDetailInteractorImpl(
     name: String?,
     view: String?,
     remoteThumbnail: String?,
-    link: String
+    link: String,
   ): Observable<ComicDetailPartialChange> {
     return rxObservable<ComicDetailPartialChange>(dispatchersProvider.main) {
       if (thumbnail != null && name != null && view != null && remoteThumbnail != null) {

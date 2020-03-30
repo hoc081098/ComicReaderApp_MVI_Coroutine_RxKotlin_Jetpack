@@ -30,13 +30,16 @@ import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.fragment_chapter_detail.*
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.androidx.scope.lifecycleScope
+import org.koin.androidx.viewmodel.scope.viewModel
 import org.koin.core.parameter.parametersOf
 import timber.log.Timber
 
 class ChapterDetailFragment : Fragment() {
   private val navArgs by navArgs<ChapterDetailFragmentArgs>()
-  private val viewModel by viewModel<ChapterDetailViewModel> { parametersOf(navArgs.isDownloaded) }
+  private val viewModel by lifecycleScope.viewModel<ChapterDetailViewModel>(owner = this) {
+    parametersOf(navArgs.isDownloaded)
+  }
 
   private val compositeDisposable = CompositeDisposable()
 
@@ -46,7 +49,7 @@ class ChapterDetailFragment : Fragment() {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View = inflater.inflate(R.layout.fragment_chapter_detail, container, false)
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -70,7 +73,7 @@ class ChapterDetailFragment : Fragment() {
 
   private fun initView(
     chapterImageAdapter: ChapterImageAdapter,
-    allChaptersAdapter: ArrayAdapter<ViewState.Chapter>
+    allChaptersAdapter: ArrayAdapter<ViewState.Chapter>,
   ) {
     recycler_images.run {
       setHasFixedSize(true)
@@ -94,7 +97,7 @@ class ChapterDetailFragment : Fragment() {
 
   private fun bind(
     imageAdapter: ChapterImageAdapter,
-    allChaptersAdapter: ArrayAdapter<ViewState.Chapter>
+    allChaptersAdapter: ArrayAdapter<ViewState.Chapter>,
   ) {
     viewModel.singleEvent.observeEvent(owner = viewLifecycleOwner) {
       when (it) {

@@ -22,7 +22,7 @@ data class ComicDetailResponse(
   @Json(name = "title")
   val title: String, // Solo Leveling
   @Json(name = "view")
-  val view: String // 76228
+  val view: String, // 76228
 ) {
   data class Chapter(
     @Json(name = "chapter_link")
@@ -32,20 +32,20 @@ data class ComicDetailResponse(
     @Json(name = "time")
     val time: String, // December 2018
     @Json(name = "view")
-    val view: String // 9592
+    val view: String, // 9592
   )
 
   data class Category(
     @Json(name = "link")
     val link: String, // https://ww2.mangafox.online/category/webtoons
     @Json(name = "name")
-    val name: String // Webtoons
+    val name: String, // Webtoons
   )
 
   data class Author(
     @Json(name = "link")
     val link: String, // https://ww2.mangafox.online/author/sung-lak-jang
     @Json(name = "name")
-    val name: String // Sung-Lak Jang
+    val name: String, // Sung-Lak Jang
   )
 }

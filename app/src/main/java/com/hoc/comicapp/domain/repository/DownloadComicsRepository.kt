@@ -53,7 +53,7 @@ interface DownloadComicsRepository {
    */
   suspend fun enqueueDownload(
     chapter: DownloadedChapter,
-    comicName: String
+    comicName: String,
   ): DomainResult<Unit>
 
   fun getDownloadedChapter(chapterLink: String): Flow<DomainResult<DownloadedChapter>>

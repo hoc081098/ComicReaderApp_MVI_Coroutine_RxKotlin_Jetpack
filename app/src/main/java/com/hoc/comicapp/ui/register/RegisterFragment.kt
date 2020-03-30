@@ -36,7 +36,8 @@ import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.fragment_register.*
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.androidx.scope.lifecycleScope
+import org.koin.androidx.viewmodel.scope.viewModel
 import rx_activity_result2.RxActivityResult
 import timber.log.Timber
 import kotlin.LazyThreadSafetyMode.NONE
@@ -44,14 +45,14 @@ import android.content.Intent as AndroidIntent
 
 class RegisterFragment : Fragment() {
 
-  private val vm by viewModel<RegisterVM>()
+  private val vm by lifecycleScope.viewModel<RegisterVM>(owner = this)
   private val compositeDisposable = CompositeDisposable()
   private val glide by lazy(NONE) { GlideApp.with(this) }
 
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) = inflater.inflate(R.layout.fragment_register, container, false)!!
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -157,7 +158,7 @@ class RegisterFragment : Fragment() {
 
   private fun beginTransition(
     button: Button,
-    progressBar: ProgressBar
+    progressBar: ProgressBar,
   ) {
     TransitionManager.beginDelayedTransition(
       root_register_frag,
@@ -190,7 +191,7 @@ class RegisterFragment : Fragment() {
 
   private fun onComplete(
     button: Button,
-    progressBar: ProgressBar
+    progressBar: ProgressBar,
   ) {
     val transition = TransitionSet()
       .addTransition(

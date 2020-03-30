@@ -1,6 +1,7 @@
 package com.hoc.comicapp.data.repository
 
-import com.hoc.comicapp.data.Mapper
+import com.hoc.comicapp.data.ErrorMapper
+import com.hoc.comicapp.data.Mappers
 import com.hoc.comicapp.data.firebase.favorite_comics.FavoriteComicsDataSource
 import com.hoc.comicapp.data.local.dao.ComicDao
 import com.hoc.comicapp.data.local.entities.ComicEntity
@@ -13,10 +14,9 @@ import com.hoc.comicapp.domain.models.CategoryDetailPopularComic
 import com.hoc.comicapp.domain.models.ChapterDetail
 import com.hoc.comicapp.domain.models.Comic
 import com.hoc.comicapp.domain.models.ComicDetail
-import com.hoc.comicapp.domain.models.toError
 import com.hoc.comicapp.domain.repository.ComicRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
-import com.hoc.comicapp.utils.left
+import com.hoc.comicapp.utils.Cache
 import com.hoc.comicapp.utils.right
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ObsoleteCoroutinesApi
@@ -24,21 +24,25 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import retrofit2.Retrofit
 import timber.log.Timber
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
+import kotlin.time.seconds
 
 @ExperimentalTime
 @ObsoleteCoroutinesApi
 class ComicRepositoryImpl(
-  private val retrofit: Retrofit,
+  private val errorMapper: ErrorMapper,
   private val comicApiService: ComicApiService,
   private val dispatchersProvider: CoroutinesDispatchersProvider,
   private val favoriteComicsDataSource: FavoriteComicsDataSource,
   private val comicDao: ComicDao,
-  appCoroutineScope: CoroutineScope
+  appCoroutineScope: CoroutineScope,
 ) : ComicRepository {
+  private val cache = Cache<RequestCacheKey, Any>(
+    maxSize = 8,
+    entryLifetime = 60.seconds
+  )
   private val actor = appCoroutineScope.actor<ComicEntity>(capacity = Channel.BUFFERED) {
     for (entity in this) {
       _updateDownloadedComic(entity)
@@ -60,82 +64,127 @@ class ComicRepositoryImpl(
     }.let { Timber.d("[UPDATE_COMICS] [3] Time = $it ${entity.title}") }
   }
 
-  private suspend fun <T> executeApiRequest(
-    tag: String,
-    request: suspend ComicApiService.() -> T
+  private suspend inline fun <reified T : Any> executeApiRequest(
+    path: String,
+    queryItems: Map<String, Any?> = emptyMap(),
+    crossinline request: suspend ComicApiService.() -> T,
   ): DomainResult<T> {
+    val cacheKey = buildKey(path, queryItems)
+
     return try {
-      withContext(dispatchersProvider.io) {
-        comicApiService
-          .request()
-          .right()
+      when (val cachedResponse = cache[cacheKey] as? T) {
+        null -> {
+          Timber.d("ComicRepositoryImpl::$cacheKey [MISS] request...")
+
+          withContext(dispatchersProvider.io) {
+            comicApiService
+              .request()
+              .also { cache[cacheKey] = it }
+              .right()
+          }
+        }
+        else -> {
+          Timber.d("ComicRepositoryImpl::$cacheKey [HIT] cached")
+
+          delay(250)
+          cachedResponse.right()
+        }
       }
     } catch (throwable: Throwable) {
-      Timber.d(throwable, "ComicRepositoryImpl::$tag $throwable")
+      Timber.d(throwable, "ComicRepositoryImpl::$cacheKey [ERROR] $throwable")
+
       delay(500)
-      throwable.toError(retrofit).left()
+      errorMapper.mapAsLeft(throwable)
     }
   }
 
+  /*
+   * Implement ComicRepository
+   */
+
   override suspend fun getCategoryDetailPopular(categoryLink: String): DomainResult<List<CategoryDetailPopularComic>> {
-    return executeApiRequest("getCategoryDetailPopular") {
+    return executeApiRequest(
+      "getCategoryDetailPopular",
+      mapOf("categoryLink" to categoryLink)
+    ) {
       getCategoryDetailPopular(categoryLink)
-        .map(Mapper::responseToDomainModel)
+        .map(Mappers::responseToDomainModel)
     }
   }
 
   override suspend fun getCategoryDetail(
     categoryLink: String,
-    page: Int?
+    page: Int,
   ): DomainResult<List<Comic>> {
-    return executeApiRequest("getCategoryDetail") {
+    return executeApiRequest(
+      "getCategoryDetail",
+      mapOf(
+        "categoryLink" to categoryLink,
+        "page" to page
+      )
+    ) {
       getCategoryDetail(categoryLink, page)
         .also(::updateFavoritesAndDownloaded)
-        .map(Mapper::responseToDomainModel)
+        .map(Mappers::responseToDomainModel)
     }
   }
 
-  override suspend fun getMostViewedComics(page: Int?): DomainResult<List<Comic>> {
-    return executeApiRequest("getMostViewedComics") {
+  override suspend fun getMostViewedComics(page: Int): DomainResult<List<Comic>> {
+    return executeApiRequest(
+      "getMostViewedComics",
+      mapOf("page" to page)
+    ) {
       comicApiService
         .getMostViewedComics(page)
         .also(::updateFavoritesAndDownloaded)
-        .map(Mapper::responseToDomainModel)
+        .map(Mappers::responseToDomainModel)
     }
   }
 
-  override suspend fun getUpdatedComics(page: Int?): DomainResult<List<Comic>> {
-    return executeApiRequest("getUpdatedComics") {
+  override suspend fun getUpdatedComics(page: Int): DomainResult<List<Comic>> {
+    return executeApiRequest(
+      "getUpdatedComics",
+      mapOf("page" to page)
+    ) {
       comicApiService
         .getUpdatedComics(page)
         .also(::updateFavoritesAndDownloaded)
-        .map(Mapper::responseToDomainModel)
+        .map(Mappers::responseToDomainModel)
     }
   }
 
-  override suspend fun getNewestComics(page: Int?): DomainResult<List<Comic>> {
-    return executeApiRequest("getNewestComics") {
+  override suspend fun getNewestComics(page: Int): DomainResult<List<Comic>> {
+    return executeApiRequest(
+      "getNewestComics",
+      mapOf("page" to page)
+    ) {
       comicApiService
         .getNewestComics(page)
         .also(::updateFavoritesAndDownloaded)
-        .map(Mapper::responseToDomainModel)
+        .map(Mappers::responseToDomainModel)
     }
   }
 
   override suspend fun getComicDetail(comicLink: String): DomainResult<ComicDetail> {
-    return executeApiRequest("getComicDetail") {
+    return executeApiRequest(
+      "getComicDetail",
+      mapOf("comicLink" to comicLink)
+    ) {
       comicApiService
         .getComicDetail(comicLink)
         .also(::updateFavoritesAndDownloaded)
-        .let(Mapper::responseToDomainModel)
+        .let(Mappers::responseToDomainModel)
     }
   }
 
   override suspend fun getChapterDetail(chapterLink: String): DomainResult<ChapterDetail> {
-    return executeApiRequest("chapterLink") {
+    return executeApiRequest(
+      "getChapterDetail",
+      mapOf("chapterLink" to chapterLink)
+    ) {
       comicApiService
         .getChapterDetail(chapterLink)
-        .let(Mapper::responseToDomainModel)
+        .let(Mappers::responseToDomainModel)
     }
   }
 
@@ -143,31 +192,60 @@ class ComicRepositoryImpl(
     return executeApiRequest("getAllCategories") {
       comicApiService
         .getAllCategories()
-        .map(Mapper::responseToDomainModel)
+        .map(Mappers::responseToDomainModel)
     }
   }
 
-  override suspend fun searchComic(query: String, page: Int?): DomainResult<List<Comic>> {
-    return executeApiRequest("searchComic") {
+  override suspend fun searchComic(query: String, page: Int): DomainResult<List<Comic>> {
+    return executeApiRequest(
+      "searchComic",
+      mapOf(
+        "query" to query,
+        "page" to page
+      )
+    ) {
       comicApiService
         .searchComic(query, page)
         .also(::updateFavoritesAndDownloaded)
-        .map(Mapper::responseToDomainModel)
+        .map(Mappers::responseToDomainModel)
     }
   }
 
+  /*
+   * Private helper methods
+   */
+
   private fun updateFavoritesAndDownloaded(comics: List<ComicResponse>) {
     comics
-      .map { Mapper.responseToFirebaseEntity(it) }
+      .map { Mappers.responseToFirebaseEntity(it) }
       .let { favoriteComicsDataSource.update(it) }
   }
 
   private fun updateFavoritesAndDownloaded(comicDetail: ComicDetailResponse) {
     // update favorite
-    val entity = Mapper.responseToFirebaseEntity(comicDetail)
+    val entity = Mappers.responseToFirebaseEntity(comicDetail)
     favoriteComicsDataSource.update(listOf(entity))
 
     // update downloaded
-    actor.offer(Mapper.responseToLocalEntity(comicDetail))
+    actor.offer(Mappers.responseToLocalEntity(comicDetail))
+  }
+
+  private companion object {
+    data class RequestCacheKey(
+      val path: String,
+      val queryItems: Map<String, String>,
+    )
+
+    private fun buildKey(path: String, queryItems: Map<String, Any?>): RequestCacheKey {
+      return RequestCacheKey(
+        path = path,
+        queryItems = queryItems.entries
+          .mapNotNull { (k, v) ->
+            if (v == null) null
+            else k to v.toString()
+          }
+          .toMap()
+      )
+    }
   }
 }

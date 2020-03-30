@@ -22,14 +22,19 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.fragment_category.*
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.androidx.scope.lifecycleScope
+import org.koin.androidx.viewmodel.scope.viewModel
 import timber.log.Timber
 
 class CategoryFragment : Fragment() {
-  private val viewModel by viewModel<CategoryViewModel>()
+  private val viewModel by lifecycleScope.viewModel<CategoryViewModel>(owner = this)
   private val compositeDisposable = CompositeDisposable()
 
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
+  override fun onCreateView(
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?,
+  ): View =
     inflater.inflate(R.layout.fragment_category, container, false)
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -125,7 +130,7 @@ class CategoryFragment : Fragment() {
     compositeDisposable.clear()
   }
 
-  private companion object{
+  private companion object {
     val orders = listOf(CATEGORY_NAME_ASC, CATEGORY_NAME_DESC)
   }
 }

@@ -19,7 +19,7 @@ import timber.log.Timber
 @ExperimentalCoroutinesApi
 class HomeViewModel(
   private val homeInteractor: HomeInteractor,
-  rxSchedulerProvider: RxSchedulerProvider
+  rxSchedulerProvider: RxSchedulerProvider,
 ) :
   BaseViewModel<HomeViewIntent, HomeViewState, HomeSingleEvent>() {
   override val initialState = HomeViewState.initialState()
@@ -164,27 +164,27 @@ class HomeViewModel(
    */
   private val intentToViewState = ObservableTransformer<HomeViewIntent, HomeViewState> {
     it.publish { shared ->
-      Observable.mergeArray(
-        shared
-          .ofType<HomeViewIntent.Initial>()
-          .compose(initialProcessor),
-        shared
-          .ofType<HomeViewIntent.Refresh>()
-          .compose(refreshProcessor),
-        shared
-          .ofType<HomeViewIntent.LoadNextPageUpdatedComic>()
-          .compose(loadNextPageProcessor),
-        shared
-          .ofType<HomeViewIntent.RetryUpdate>()
-          .compose(retryUpdateProcessor),
-        shared
-          .ofType<HomeViewIntent.RetryNewest>()
-          .compose(retryNewestProcessor),
-        shared
-          .ofType<HomeViewIntent.RetryMostViewed>()
-          .compose(retryMostViewedProcessor)
-      )
-    }.doOnNext { Timber.d("partial_change=$it") }
+        Observable.mergeArray(
+          shared
+            .ofType<HomeViewIntent.Initial>()
+            .compose(initialProcessor),
+          shared
+            .ofType<HomeViewIntent.Refresh>()
+            .compose(refreshProcessor),
+          shared
+            .ofType<HomeViewIntent.LoadNextPageUpdatedComic>()
+            .compose(loadNextPageProcessor),
+          shared
+            .ofType<HomeViewIntent.RetryUpdate>()
+            .compose(retryUpdateProcessor),
+          shared
+            .ofType<HomeViewIntent.RetryNewest>()
+            .compose(retryNewestProcessor),
+          shared
+            .ofType<HomeViewIntent.RetryMostViewed>()
+            .compose(retryMostViewedProcessor)
+        )
+      }.doOnNext { Timber.d("partial_change=$it") }
       .scan(initialState) { state, change -> change.reducer(state) }
       .distinctUntilChanged()
       .observeOn(rxSchedulerProvider.main)

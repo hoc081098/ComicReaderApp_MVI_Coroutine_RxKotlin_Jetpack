@@ -6,7 +6,9 @@ import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.Interactor
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.PartialChange
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.PartialChange.ListComics
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.PartialChange.Popular
-import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.PartialChange.Refresh.*
+import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.PartialChange.Refresh.Data
+import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.PartialChange.Refresh.Error
+import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.PartialChange.Refresh.Loading
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.Item.Comic
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.PopularItem
 import com.hoc.comicapp.utils.flatMap
@@ -21,7 +23,7 @@ import kotlinx.coroutines.rx2.rxObservable
 @ExperimentalCoroutinesApi
 class CategoryDetailInteractorImpl(
   private val dispatchersProvider: CoroutinesDispatchersProvider,
-  private val comicRepository: ComicRepository
+  private val comicRepository: ComicRepository,
 ) : Interactor {
   override fun refreshAll(categoryLink: String): Observable<PartialChange> {
     return rxObservable<PartialChange>(dispatchersProvider.main) {

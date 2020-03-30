@@ -22,35 +22,36 @@ import timber.log.Timber
 class ChapterDetailInteractorImpl(
   private val comicRepository: ComicRepository,
   private val dispatchersProvider: CoroutinesDispatchersProvider,
-  private val downloadComicsRepository: DownloadComicsRepository
+  private val downloadComicsRepository: DownloadComicsRepository,
 ) : Interactor {
-  override fun getChapterDetail(chapter: ViewState.Chapter, isDownloaded: Boolean) = flow<PartialChange> {
-    Timber.tag("LoadChapter###").d("getChapterDetail ${chapter.debug}")
+  override fun getChapterDetail(chapter: ViewState.Chapter, isDownloaded: Boolean) =
+    flow<PartialChange> {
+      Timber.tag("LoadChapter###").d("getChapterDetail ${chapter.debug}")
 
-    emit(GetChapterDetail.Initial(chapter))
+      emit(GetChapterDetail.Initial(chapter))
 
-    emit(GetChapterDetail.Loading)
+      emit(GetChapterDetail.Loading)
 
-    if (isDownloaded) {
-      downloadComicsRepository
-        .getDownloadedChapter(chapter.link)
-        .map { either ->
-          either.fold(
+      if (isDownloaded) {
+        downloadComicsRepository
+          .getDownloadedChapter(chapter.link)
+          .map { either ->
+            either.fold(
+              left = { GetChapterDetail.Error(it, chapter) },
+              right = { GetChapterDetail.Data(fromDomain(it)) }
+            )
+          }
+          .let { emitAll(it) }
+      } else {
+        comicRepository
+          .getChapterDetail(chapter.link)
+          .fold(
             left = { GetChapterDetail.Error(it, chapter) },
             right = { GetChapterDetail.Data(fromDomain(it)) }
           )
-        }
-        .let { emitAll(it) }
-    } else {
-      comicRepository
-        .getChapterDetail(chapter.link)
-        .fold(
-          left = { GetChapterDetail.Error(it, chapter) },
-          right = { GetChapterDetail.Data(fromDomain(it)) }
-        )
-        .let { emit(it) }
-    }
-  }.flowOn(dispatchersProvider.main).asObservable()
+          .let { emit(it) }
+      }
+    }.flowOn(dispatchersProvider.main).asObservable()
 
   override fun refresh(chapter: ViewState.Chapter, isDownloaded: Boolean) = flow {
     Timber.tag("LoadChapter###").d("refresh ${chapter.debug}")

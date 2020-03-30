@@ -29,18 +29,19 @@ import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.fragment_login.*
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.androidx.scope.lifecycleScope
+import org.koin.androidx.viewmodel.scope.viewModel
 import timber.log.Timber
 
 class LoginFragment : Fragment() {
 
-  private val vm by viewModel<LoginVM>()
+  private val vm by lifecycleScope.viewModel<LoginVM>(owner = this)
   private val compositeDisposable = CompositeDisposable()
 
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) = inflater.inflate(R.layout.fragment_login, container, false)!!
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -108,7 +109,7 @@ class LoginFragment : Fragment() {
 
   private fun beginTransition(
     button: Button,
-    progressBar: ProgressBar
+    progressBar: ProgressBar,
   ) {
     TransitionManager.beginDelayedTransition(
       root_login_frag,
@@ -141,7 +142,7 @@ class LoginFragment : Fragment() {
 
   private fun onComplete(
     button: Button,
-    progressBar: ProgressBar
+    progressBar: ProgressBar,
   ) {
     val transition = TransitionSet()
       .addTransition(

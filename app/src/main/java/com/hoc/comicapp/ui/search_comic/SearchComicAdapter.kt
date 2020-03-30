@@ -27,7 +27,7 @@ import kotlinx.android.synthetic.main.item_recycler_search_comic_load_more.view.
 object SearchComicDiffUtilItemCallback : DiffUtil.ItemCallback<Item>() {
   override fun areItemsTheSame(
     oldItem: Item,
-    newItem: Item
+    newItem: Item,
   ) = when {
     oldItem is Item.ComicItem && newItem is Item.ComicItem -> oldItem.link == newItem.link
     else -> oldItem == newItem
@@ -35,13 +35,13 @@ object SearchComicDiffUtilItemCallback : DiffUtil.ItemCallback<Item>() {
 
   override fun areContentsTheSame(
     oldItem: Item,
-    newItem: Item
+    newItem: Item,
   ) = oldItem == newItem
 }
 
 class SearchComicAdapter(
   private val glide: GlideRequests,
-  private val compositeDisposable: CompositeDisposable
+  private val compositeDisposable: CompositeDisposable,
 ) : ListAdapter<Item, SearchComicAdapter.VH>(SearchComicDiffUtilItemCallback) {
   private val clickComicS = PublishRelay.create<ComicArg>()
   val clickComicObservable get() = clickComicS.asObservable()

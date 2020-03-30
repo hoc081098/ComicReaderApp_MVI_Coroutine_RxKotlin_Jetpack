@@ -16,7 +16,7 @@ import timber.log.Timber
  * @return an [Observable] emit [Unit] when select OK button, otherwise return an empty [Observable]
  */
 fun FragmentActivity.showAlertDialogAsObservable(init: AlertDialogFragment.Builder.() -> Unit): Observable<Unit> {
-  return Observable.create<Unit> { emitter ->
+  return Observable.create { emitter ->
     showAlertDialog {
       init()
 
@@ -125,6 +125,7 @@ class AlertDialogFragment : DialogFragment() {
     }
   }
 
+  @Suppress("unused")
   class Builder {
     var titleText: String? = null
       private set
@@ -173,7 +174,7 @@ class AlertDialogFragment : DialogFragment() {
 
     fun negativeAction(
       text: String,
-      listener: (dialog: DialogInterface, which: Int) -> Unit
+      listener: (dialog: DialogInterface, which: Int) -> Unit,
     ) = apply {
       this.negativeButtonText = text
       this.negativeButtonClickListener = DialogInterface.OnClickListener(listener)
@@ -181,7 +182,7 @@ class AlertDialogFragment : DialogFragment() {
 
     fun positiveAction(
       text: String,
-      listener: (dialog: DialogInterface, which: Int) -> Unit
+      listener: (dialog: DialogInterface, which: Int) -> Unit,
     ) = apply {
       this.positiveButtonText = text
       this.positiveButtonClickListener = DialogInterface.OnClickListener(listener)
@@ -189,7 +190,7 @@ class AlertDialogFragment : DialogFragment() {
 
     fun neutralAction(
       text: String,
-      listener: (dialog: DialogInterface, which: Int) -> Unit
+      listener: (dialog: DialogInterface, which: Int) -> Unit,
     ) = apply {
       this.neutralButtonText = text
       this.neutralButtonClickListener = DialogInterface.OnClickListener(listener)

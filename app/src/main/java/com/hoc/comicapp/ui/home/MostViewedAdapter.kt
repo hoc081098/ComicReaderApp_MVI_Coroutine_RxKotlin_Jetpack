@@ -11,6 +11,7 @@ import com.hoc.comicapp.domain.models.Comic
 import com.hoc.comicapp.ui.home.HomeAdapter.Companion.MOST_VIEW_COMIC_ITEM_VIEW_TYPE
 import com.hoc.comicapp.utils.asObservable
 import com.hoc.comicapp.utils.inflate
+import com.hoc.comicapp.utils.mapNotNull
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.disposables.CompositeDisposable
@@ -19,10 +20,10 @@ import kotlinx.android.synthetic.main.item_recyclerview_top_month_comic_or_recom
 
 class MostViewedAdapter(
   private val glide: GlideRequests,
-  private val compositeDisposable: CompositeDisposable
+  private val compositeDisposable: CompositeDisposable,
 ) :
   ListAdapter<Comic, MostViewedAdapter.VH>(MostViewedComicDiffUtilItemCallback) {
-  private val clickComicS = PublishRelay.create<Comic>()
+  private val clickComicS = PublishRelay.create<Pair<View, Comic>>()
   val clickComicObservable get() = clickComicS.asObservable()
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
@@ -45,9 +46,12 @@ class MostViewedAdapter(
     init {
       itemView
         .clicks()
-        .map { adapterPosition }
-        .filter { it != RecyclerView.NO_POSITION }
-        .map { getItem(it) }
+        .mapNotNull {
+          when (val position = adapterPosition) {
+            RecyclerView.NO_POSITION -> null
+            else -> itemView to getItem(position)
+          }
+        }
         .subscribe(clickComicS)
         .addTo(compositeDisposable)
     }

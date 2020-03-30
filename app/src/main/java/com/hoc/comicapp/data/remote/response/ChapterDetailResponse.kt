@@ -18,12 +18,12 @@ data class ChapterDetailResponse(
   @Json(name = "prev_chapter_link")
   val prevChapterLink: String?, // https://ww2.mangafox.online/solo-leveling/chapter-64-1137969534934196
   @Json(name = "next_chapter_link")
-  val nextChapterLink: String?
+  val nextChapterLink: String?,
 ) {
   data class Chapter(
     @Json(name = "chapter_link")
     val chapterLink: String, // https://ww2.mangafox.online/solo-leveling/chapter-0-275968490470920
     @Json(name = "chapter_name")
-    val chapterName: String // Chapter 0
+    val chapterName: String, // Chapter 0
   )
 }

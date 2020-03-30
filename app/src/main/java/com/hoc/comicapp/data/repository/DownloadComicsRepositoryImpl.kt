@@ -10,7 +10,9 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.await
 import androidx.work.workDataOf
-import com.hoc.comicapp.data.Mapper
+import com.hoc.comicapp.data.ErrorMapper
+import com.hoc.comicapp.data.JsonAdaptersContainer
+import com.hoc.comicapp.data.Mappers
 import com.hoc.comicapp.data.local.AppDatabase
 import com.hoc.comicapp.data.local.dao.ChapterDao
 import com.hoc.comicapp.data.local.dao.ComicDao
@@ -23,7 +25,6 @@ import com.hoc.comicapp.domain.models.ComicDetail
 import com.hoc.comicapp.domain.models.DownloadedChapter
 import com.hoc.comicapp.domain.models.DownloadedComic
 import com.hoc.comicapp.domain.models.LocalStorageError
-import com.hoc.comicapp.domain.models.toError
 import com.hoc.comicapp.domain.repository.DownloadComicsRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
@@ -33,7 +34,6 @@ import com.hoc.comicapp.utils.left
 import com.hoc.comicapp.utils.retryIO
 import com.hoc.comicapp.utils.right
 import com.hoc.comicapp.worker.DownloadComicWorker
-import com.squareup.moshi.JsonAdapter
 import io.reactivex.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -45,12 +45,10 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import retrofit2.Retrofit
 import timber.log.Timber
 import java.io.File
 import java.util.*
 
-@ExperimentalCoroutinesApi
 class DownloadComicsRepositoryImpl(
   private val comicApiService: ComicApiService,
   private val application: Application,
@@ -59,10 +57,16 @@ class DownloadComicsRepositoryImpl(
   private val chapterDao: ChapterDao,
   private val appDatabase: AppDatabase,
   private val rxSchedulerProvider: RxSchedulerProvider,
-  private val retrofit: Retrofit,
+  private val errorMapper: ErrorMapper,
   private val workManager: WorkManager,
-  private val chapterJsonAdapter: JsonAdapter<ComicDetail.Chapter>
+  private val jsonAdapterConstraints: JsonAdaptersContainer,
 ) : DownloadComicsRepository {
+
+  /*
+   * Implement DownloadComicsRepository
+   */
+
+  @ExperimentalCoroutinesApi
   override fun getDownloadedChapter(chapterLink: String): Flow<DomainResult<DownloadedChapter>> {
     val allChaptersF = chapterDao.getAllChaptersFlow().distinctUntilChanged()
     val chapterF = chapterDao.getByChapterLink(chapterLink).distinctUntilChanged()
@@ -70,47 +74,53 @@ class DownloadComicsRepositoryImpl(
     return chapterF
       .combine(allChaptersF) { chapter, chapters ->
         val index = chapters.indexOfFirst { it.chapterLink == chapterLink }
-        Mapper.entityToDomainModel(chapter)
+        Mappers.entityToDomainModel(chapter)
           .copy(
-            chapters = chapters.map(Mapper::entityToDomainModel),
+            chapters = chapters.map(Mappers::entityToDomainModel),
             prevChapterLink = chapters.getOrNull(index - 1)?.chapterLink,
             nextChapterLink = chapters.getOrNull(index + 1)?.chapterLink
           )
       }
-      .map { it.right() as DomainResult<DownloadedChapter> }
-      .catch { emit(it.toError(retrofit).left()) }
+      .map {
+        @Suppress("USELESS_CAST")
+        it.right() as DomainResult<DownloadedChapter>
+      }
+      .catch { emit(errorMapper.mapAsLeft(it)) }
       .flowOn(dispatchersProvider.io)
   }
 
   override fun getDownloadedComic(link: String): Observable<DomainResult<DownloadedComic>> {
     return comicDao
       .getByComicLink(link)
-      .map<DomainResult<DownloadedComic>> {
-        it.chapters = it.chapters.sortedByDescending { it.order }
-        Mapper.entityToDomainModel(it).right()
+      .map<DomainResult<DownloadedComic>> { comicAndChapters ->
+        Mappers.entityToDomainModel(
+          comicAndChapters.apply {
+            chapters = chapters.sortedByDescending { it.order }
+          }
+        ).right()
       }
-      .onErrorReturn { t: Throwable -> t.toError(retrofit).left() }
+      .onErrorReturn { errorMapper.mapAsLeft(it) }
       .subscribeOn(rxSchedulerProvider.io)
   }
 
   override suspend fun deleteComic(comic: DownloadedComic): DomainResult<Unit> {
     return runCatching {
       withContext(dispatchersProvider.main) {
-        comicDao.delete(Mapper.domainToLocalEntity(comic))
+        comicDao.delete(Mappers.domainToLocalEntity(comic))
       }
     }.fold(
       onSuccess = { Unit.right() },
-      onFailure = { it.toError(retrofit).left() }
+      onFailure = { errorMapper.mapAsLeft(it) }
     )
   }
 
   override suspend fun enqueueDownload(
     chapter: DownloadedChapter,
-    comicName: String
+    comicName: String,
   ): DomainResult<Unit> {
     return try {
       withContext(dispatchersProvider.io) {
-        val chapterJson = chapterJsonAdapter.toJson(
+        val chapterJson = jsonAdapterConstraints.comicDetailChapterAdapter.toJson(
           ComicDetail.Chapter(
             chapterLink = chapter.chapterLink,
             chapterName = chapter.chapterName,
@@ -142,62 +152,22 @@ class DownloadComicsRepositoryImpl(
         Unit.right()
       }
     } catch (e: Throwable) {
-      e.toError(retrofit).left()
+      errorMapper.mapAsLeft(e)
     }
   }
 
   override suspend fun deleteDownloadedChapter(chapter: DownloadedChapter): DomainResult<Unit> {
     return try {
       workManager.cancelAllWorkByTag(chapter.chapterLink).await()
-      _deleteEntityAndImages(chapter)
+      deleteEntityAndImages(chapter)
     } catch (e: Exception) {
-      e.toError(retrofit).left()
+      errorMapper.mapAsLeft(e)
     }
-  }
-
-  @Suppress("FunctionName")
-  private suspend fun _deleteEntityAndImages(chapter: DownloadedChapter): DomainResult<Unit> {
-    return runCatching {
-      withContext(dispatchersProvider.io) {
-        chapterDao.delete(Mapper.domainToLocalEntity(chapter))
-
-        val chaptersCount = chapterDao.getCountByComicLink(chapter.comicLink).firstOrNull() ?: 0
-        if (chaptersCount == 0) {
-          comicDao.delete(
-            ComicEntity(
-              comicLink = chapter.comicLink,
-              view = "",
-              categories = emptyList(),
-              authors = emptyList(),
-              thumbnail = "",
-              title = "",
-              lastUpdated = "",
-              shortenedContent = "",
-              remoteThumbnail = ""
-            )
-          )
-        }
-
-        chapter
-          .images
-          .map { File(application.filesDir, it) }
-          .all(File::delete)
-      }
-    }.fold(
-      {
-        if (it) {
-          Unit.right()
-        } else {
-          LocalStorageError.DeleteFileError.left()
-        }
-      },
-      { it.toError(retrofit).left() }
-    )
   }
 
   override fun getDownloadedChapters(): LiveData<List<DownloadedChapter>> {
     return chapterDao.getAllChaptersLiveData().map { chapters ->
-      chapters.map { Mapper.entityToDomainModel(it) }
+      chapters.map { Mappers.entityToDomainModel(it) }
     }
   }
 
@@ -213,16 +183,15 @@ class DownloadComicsRepositoryImpl(
                 .sortedByDescending { it.downloadedAt }
                 .take(3)
             }
-            Mapper.entityToDomainModel(entity)
+            Mappers.entityToDomainModel(entity)
           }
           .right()
       }
-      .onErrorReturn { t: Throwable -> t.toError(retrofit).left() }
+      .onErrorReturn { errorMapper.mapAsLeft(it) }
       .subscribeOn(rxSchedulerProvider.io)
   }
 
-  @ExperimentalCoroutinesApi
-  override fun downloadChapter(chapterLink: String): Flow<Int> {
+  @ExperimentalCoroutinesApi override fun downloadChapter(chapterLink: String): Flow<Int> {
     return flow {
       Timber.d("$tag Begin")
 
@@ -263,7 +232,7 @@ class DownloadComicsRepositoryImpl(
 
       appDatabase.withTransaction {
         comicDao.upsert(
-          Mapper
+          Mappers
             .responseToLocalEntity(comicDetail)
             .copy(thumbnail = thumbnailPath)
         )
@@ -291,6 +260,58 @@ class DownloadComicsRepositoryImpl(
     }.flowOn(dispatchersProvider.io)
   }
 
+  /*
+   * Private helper methods
+   */
+
+  /**
+   * Delete chapter entity and delete comic entity if comic's chapters is empty
+   */
+  private suspend fun deleteEntityAndImages(chapter: DownloadedChapter): DomainResult<Unit> {
+    return runCatching {
+      withContext(dispatchersProvider.io) {
+        chapterDao.delete(Mappers.domainToLocalEntity(chapter))
+
+        val chaptersCount = chapterDao.getCountByComicLink(chapter.comicLink).firstOrNull() ?: 0
+        if (chaptersCount == 0) {
+          comicDao.delete(
+            ComicEntity(
+              comicLink = chapter.comicLink,
+              view = "",
+              categories = emptyList(),
+              authors = emptyList(),
+              thumbnail = "",
+              title = "",
+              lastUpdated = "",
+              shortenedContent = "",
+              remoteThumbnail = ""
+            )
+          )
+        }
+
+        chapter
+          .images
+          .map { File(application.filesDir, it) }
+          .all(File::delete)
+      }
+    }.fold(
+      {
+        if (it) {
+          Unit.right()
+        } else {
+          LocalStorageError.DeleteFileError.left()
+        }
+      },
+      { errorMapper.mapAsLeft(it) }
+    )
+  }
+
+  /**
+   * Download comic thumbnail
+   * @param thumbnailUrl image url
+   * @param comicName comic name
+   * @return image path
+   */
   private suspend fun downloadComicThumbnail(thumbnailUrl: String, comicName: String): String {
     return retryIO(
       times = 3,
@@ -322,7 +343,7 @@ class DownloadComicsRepositoryImpl(
   private fun downloadAndSaveImages(
     images: List<String>,
     comicName: String,
-    chapterName: String
+    chapterName: String,
   ): Flow<List<String>> {
     return flow {
       val imagePaths = mutableListOf<String>()
@@ -362,6 +383,9 @@ class DownloadComicsRepositoryImpl(
     }
   }
 
+  /**
+   * Escape file name: only allow letters, numbers, dots and dashes
+   */
   private fun String.escapeFileName(): String {
     return replace(
       "[^a-zA-Z0-9.\\-]".toRegex(),

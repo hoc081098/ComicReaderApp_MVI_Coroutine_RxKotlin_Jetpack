@@ -24,14 +24,16 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 object DownloadedComicItemDiffUtilItemCallback : DiffUtil.ItemCallback<ComicItem>() {
-  override fun areItemsTheSame(oldItem: ComicItem, newItem: ComicItem) = oldItem.comicLink == newItem.comicLink
+  override fun areItemsTheSame(oldItem: ComicItem, newItem: ComicItem) =
+    oldItem.comicLink == newItem.comicLink
+
   override fun areContentsTheSame(oldItem: ComicItem, newItem: ComicItem) = oldItem == newItem
 }
 
 class DownloadedComicsAdapter(
   private val glide: GlideRequests,
   private val viewBinderHelper: ViewBinderHelper,
-  private val compositeDisposable: CompositeDisposable
+  private val compositeDisposable: CompositeDisposable,
 ) :
   ListAdapter<ComicItem, DownloadedComicsAdapter.VH>(DownloadedComicItemDiffUtilItemCallback) {
   private val dateFormatter = SimpleDateFormat("hh:mm, dd/MM/yyyy", Locale.getDefault())
@@ -95,7 +97,7 @@ class DownloadedComicsAdapter(
     }
 
     fun bind(comic: ComicItem) {
-      viewBinderHelper.bind(swipeRevealLayout ,comic.comicLink)
+      viewBinderHelper.bind(swipeRevealLayout, comic.comicLink)
 
       glide
         .load(comic.thumbnail)

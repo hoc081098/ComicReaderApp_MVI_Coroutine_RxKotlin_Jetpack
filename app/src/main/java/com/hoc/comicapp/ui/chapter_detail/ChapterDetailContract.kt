@@ -12,7 +12,7 @@ interface ChapterDetailContract {
   interface Interactor {
     fun getChapterDetail(
       chapter: ViewState.Chapter,
-      isDownloaded: Boolean
+      isDownloaded: Boolean,
     ): Observable<PartialChange>
 
     fun refresh(chapter: ViewState.Chapter, isDownloaded: Boolean): Observable<PartialChange>
@@ -34,7 +34,7 @@ interface ChapterDetailContract {
     val isRefreshing: Boolean,
     val errorMessage: String?,
     val detail: Detail?,
-    @RecyclerView.Orientation val orientation: Int
+    @RecyclerView.Orientation val orientation: Int,
   ) : com.hoc.comicapp.base.ViewState {
 
     data class Chapter(val name: String, val link: String) {
@@ -48,7 +48,7 @@ interface ChapterDetailContract {
 
       data class Initial(
         override val chapter: Chapter,
-        override val chapters: List<Chapter> = listOf(chapter)
+        override val chapters: List<Chapter> = listOf(chapter),
       ) : Detail()
 
       data class Data(
@@ -56,7 +56,7 @@ interface ChapterDetailContract {
         val images: List<String>,
         val prevChapterLink: String?,
         val nextChapterLink: String?,
-        override val chapters: List<Chapter>
+        override val chapters: List<Chapter>,
       ) : Detail()
 
       companion object {
@@ -168,7 +168,7 @@ interface ChapterDetailContract {
       data class Data(val data: ViewState.Detail.Data) : GetChapterDetail()
       data class Error(
         val error: ComicAppError,
-        val chapter: ViewState.Chapter
+        val chapter: ViewState.Chapter,
       ) : GetChapterDetail()
 
       object Loading : GetChapterDetail()
