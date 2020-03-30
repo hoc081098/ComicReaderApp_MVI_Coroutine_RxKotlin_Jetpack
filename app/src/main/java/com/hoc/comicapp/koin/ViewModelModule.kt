@@ -12,6 +12,7 @@ import com.hoc.comicapp.ui.category_detail.CategoryDetailVM
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailInteractorImpl
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailViewModel
+import com.hoc.comicapp.ui.detail.ComicDetailFragment
 import com.hoc.comicapp.ui.detail.ComicDetailInteractor
 import com.hoc.comicapp.ui.detail.ComicDetailInteractorImpl
 import com.hoc.comicapp.ui.detail.ComicDetailViewModel
@@ -48,15 +49,26 @@ val viewModelModule = module {
 
   single { HomeInteractorImpl1(get(), get(), get()) } bind HomeInteractor::class
 
-  single {
-    ComicDetailInteractorImpl(
-      get(),
-      get(),
-      get(),
-      get(),
-      get()
-    )
-  } bind ComicDetailInteractor::class
+  scope<ComicDetailFragment> {
+    scoped<ComicDetailInteractor> {
+      ComicDetailInteractorImpl(
+        get(),
+        get(),
+        get(),
+        get(),
+        get()
+      )
+    }
+    viewModel { (isDownloaded: Boolean) ->
+      ComicDetailViewModel(
+        get(),
+        get(),
+        get(),
+        get(),
+        isDownloaded
+      )
+    }
+  }
 
   single { SearchComicInteractorImpl(get(), get()) } bind SearchComicContract.Interactor::class
 
@@ -100,15 +112,6 @@ val viewModelModule = module {
 
   viewModel { HomeViewModel(get(), get()) }
 
-  viewModel { (isDownloaded: Boolean) ->
-    ComicDetailViewModel(
-      get(),
-      get(),
-      get(),
-      get(),
-      isDownloaded
-    )
-  }
 
   viewModel { SearchComicViewModel(get(), get()) }
 

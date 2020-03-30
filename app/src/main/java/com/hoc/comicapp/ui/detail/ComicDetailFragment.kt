@@ -44,7 +44,8 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.rxkotlin.withLatestFrom
 import kotlinx.android.synthetic.main.fragment_comic_detail.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.androidx.scope.lifecycleScope
+import org.koin.androidx.viewmodel.scope.viewModel
 import org.koin.core.parameter.parametersOf
 import timber.log.Timber
 import java.io.File
@@ -55,7 +56,9 @@ import com.hoc.comicapp.ui.detail.ComicDetailFragmentDirections.Companion.action
 
 @ExperimentalCoroutinesApi
 class ComicDetailFragment : Fragment() {
-  private val viewModel by viewModel<ComicDetailViewModel> { parametersOf(args.isDownloaded) }
+  private val viewModel by lifecycleScope.viewModel<ComicDetailViewModel>(owner = this) {
+    parametersOf(args.isDownloaded)
+  }
   private val args by navArgs<ComicDetailFragmentArgs>()
 
   private val compositeDisposable = CompositeDisposable()

@@ -31,6 +31,11 @@ abstract class BaseViewModel<I : Intent, S : ViewState, E : SingleEvent> : ViewM
   private val singleEventD = MutableLiveData<Event<E>>()
   override val singleEvent: LiveData<Event<E>> get() = singleEventD
 
+  init {
+    @Suppress("LeakingThis")
+    Timber.d("$this::init")
+  }
+
   protected fun setNewState(state: S) {
     stateD.value = state
   }
@@ -42,6 +47,6 @@ abstract class BaseViewModel<I : Intent, S : ViewState, E : SingleEvent> : ViewM
   @CallSuper
   override fun onCleared() {
     compositeDisposable.dispose()
-    Timber.d("${this::class.java}::onCleared")
+    Timber.d("$this::onCleared")
   }
 }

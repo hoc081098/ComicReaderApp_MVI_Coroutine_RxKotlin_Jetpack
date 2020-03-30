@@ -103,6 +103,7 @@ dependencies {
 
   // Koin
   implementation("org.koin:koin-androidx-viewmodel:$koinVersion")
+  implementation("org.koin:koin-androidx-scope:$koinVersion")
 
   // Moshi, Retrofit, OkHttp
   implementation("com.squareup.moshi:moshi-kotlin:1.8.0")

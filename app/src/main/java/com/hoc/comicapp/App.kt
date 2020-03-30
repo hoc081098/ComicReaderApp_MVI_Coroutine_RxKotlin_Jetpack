@@ -13,6 +13,7 @@ import kotlinx.coroutines.ObsoleteCoroutinesApi
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
+import org.koin.core.logger.Level
 import rx_activity_result2.RxActivityResult
 import timber.log.Timber
 import kotlin.time.ExperimentalTime
@@ -28,8 +29,8 @@ class App : Application() {
     RxActivityResult.register(this)
 
     startKoin {
-      // use AndroidLogger as Koin Logger - default Level.INFO
-      androidLogger()
+      // use AndroidLogger as Koin Logger
+      androidLogger(level = if (BuildConfig.DEBUG) Level.DEBUG else Level.NONE)
 
       // use the Android context given there
       androidContext(this@App)
