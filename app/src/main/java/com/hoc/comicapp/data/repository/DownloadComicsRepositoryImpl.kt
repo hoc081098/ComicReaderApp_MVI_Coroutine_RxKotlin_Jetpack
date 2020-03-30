@@ -10,8 +10,9 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.await
 import androidx.work.workDataOf
+import com.hoc.comicapp.data.ErrorMapper
 import com.hoc.comicapp.data.JsonAdaptersContainer
-import com.hoc.comicapp.data.Mapper
+import com.hoc.comicapp.data.Mappers
 import com.hoc.comicapp.data.local.AppDatabase
 import com.hoc.comicapp.data.local.dao.ChapterDao
 import com.hoc.comicapp.data.local.dao.ComicDao
@@ -24,7 +25,6 @@ import com.hoc.comicapp.domain.models.ComicDetail
 import com.hoc.comicapp.domain.models.DownloadedChapter
 import com.hoc.comicapp.domain.models.DownloadedComic
 import com.hoc.comicapp.domain.models.LocalStorageError
-import com.hoc.comicapp.domain.models.toError
 import com.hoc.comicapp.domain.repository.DownloadComicsRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
@@ -45,7 +45,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import retrofit2.Retrofit
 import timber.log.Timber
 import java.io.File
 import java.util.*
@@ -58,7 +57,7 @@ class DownloadComicsRepositoryImpl(
   private val chapterDao: ChapterDao,
   private val appDatabase: AppDatabase,
   private val rxSchedulerProvider: RxSchedulerProvider,
-  private val retrofit: Retrofit,
+  private val errorMapper: ErrorMapper,
   private val workManager: WorkManager,
   private val jsonAdapterConstraints: JsonAdaptersContainer,
 ) : DownloadComicsRepository {
@@ -75,9 +74,9 @@ class DownloadComicsRepositoryImpl(
     return chapterF
       .combine(allChaptersF) { chapter, chapters ->
         val index = chapters.indexOfFirst { it.chapterLink == chapterLink }
-        Mapper.entityToDomainModel(chapter)
+        Mappers.entityToDomainModel(chapter)
           .copy(
-            chapters = chapters.map(Mapper::entityToDomainModel),
+            chapters = chapters.map(Mappers::entityToDomainModel),
             prevChapterLink = chapters.getOrNull(index - 1)?.chapterLink,
             nextChapterLink = chapters.getOrNull(index + 1)?.chapterLink
           )
@@ -86,7 +85,7 @@ class DownloadComicsRepositoryImpl(
         @Suppress("USELESS_CAST")
         it.right() as DomainResult<DownloadedChapter>
       }
-      .catch { emit(it.toError(retrofit).left()) }
+      .catch { emit(errorMapper.mapAsLeft(it)) }
       .flowOn(dispatchersProvider.io)
   }
 
@@ -94,24 +93,24 @@ class DownloadComicsRepositoryImpl(
     return comicDao
       .getByComicLink(link)
       .map<DomainResult<DownloadedComic>> { comicAndChapters ->
-        Mapper.entityToDomainModel(
+        Mappers.entityToDomainModel(
           comicAndChapters.apply {
             chapters = chapters.sortedByDescending { it.order }
           }
         ).right()
       }
-      .onErrorReturn { t: Throwable -> t.toError(retrofit).left() }
+      .onErrorReturn { errorMapper.mapAsLeft(it) }
       .subscribeOn(rxSchedulerProvider.io)
   }
 
   override suspend fun deleteComic(comic: DownloadedComic): DomainResult<Unit> {
     return runCatching {
       withContext(dispatchersProvider.main) {
-        comicDao.delete(Mapper.domainToLocalEntity(comic))
+        comicDao.delete(Mappers.domainToLocalEntity(comic))
       }
     }.fold(
       onSuccess = { Unit.right() },
-      onFailure = { it.toError(retrofit).left() }
+      onFailure = { errorMapper.mapAsLeft(it) }
     )
   }
 
@@ -153,7 +152,7 @@ class DownloadComicsRepositoryImpl(
         Unit.right()
       }
     } catch (e: Throwable) {
-      e.toError(retrofit).left()
+      errorMapper.mapAsLeft(e)
     }
   }
 
@@ -162,13 +161,13 @@ class DownloadComicsRepositoryImpl(
       workManager.cancelAllWorkByTag(chapter.chapterLink).await()
       deleteEntityAndImages(chapter)
     } catch (e: Exception) {
-      e.toError(retrofit).left()
+      errorMapper.mapAsLeft(e)
     }
   }
 
   override fun getDownloadedChapters(): LiveData<List<DownloadedChapter>> {
     return chapterDao.getAllChaptersLiveData().map { chapters ->
-      chapters.map { Mapper.entityToDomainModel(it) }
+      chapters.map { Mappers.entityToDomainModel(it) }
     }
   }
 
@@ -184,11 +183,11 @@ class DownloadComicsRepositoryImpl(
                 .sortedByDescending { it.downloadedAt }
                 .take(3)
             }
-            Mapper.entityToDomainModel(entity)
+            Mappers.entityToDomainModel(entity)
           }
           .right()
       }
-      .onErrorReturn { t: Throwable -> t.toError(retrofit).left() }
+      .onErrorReturn { errorMapper.mapAsLeft(it) }
       .subscribeOn(rxSchedulerProvider.io)
   }
 
@@ -233,7 +232,7 @@ class DownloadComicsRepositoryImpl(
 
       appDatabase.withTransaction {
         comicDao.upsert(
-          Mapper
+          Mappers
             .responseToLocalEntity(comicDetail)
             .copy(thumbnail = thumbnailPath)
         )
@@ -271,7 +270,7 @@ class DownloadComicsRepositoryImpl(
   private suspend fun deleteEntityAndImages(chapter: DownloadedChapter): DomainResult<Unit> {
     return runCatching {
       withContext(dispatchersProvider.io) {
-        chapterDao.delete(Mapper.domainToLocalEntity(chapter))
+        chapterDao.delete(Mappers.domainToLocalEntity(chapter))
 
         val chaptersCount = chapterDao.getCountByComicLink(chapter.comicLink).firstOrNull() ?: 0
         if (chaptersCount == 0) {
@@ -303,7 +302,7 @@ class DownloadComicsRepositoryImpl(
           LocalStorageError.DeleteFileError.left()
         }
       },
-      { it.toError(retrofit).left() }
+      { errorMapper.mapAsLeft(it) }
     )
   }
 

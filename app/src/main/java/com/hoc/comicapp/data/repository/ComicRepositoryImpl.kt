@@ -1,6 +1,7 @@
 package com.hoc.comicapp.data.repository
 
-import com.hoc.comicapp.data.Mapper
+import com.hoc.comicapp.data.ErrorMapper
+import com.hoc.comicapp.data.Mappers
 import com.hoc.comicapp.data.firebase.favorite_comics.FavoriteComicsDataSource
 import com.hoc.comicapp.data.local.dao.ComicDao
 import com.hoc.comicapp.data.local.entities.ComicEntity
@@ -13,11 +14,9 @@ import com.hoc.comicapp.domain.models.CategoryDetailPopularComic
 import com.hoc.comicapp.domain.models.ChapterDetail
 import com.hoc.comicapp.domain.models.Comic
 import com.hoc.comicapp.domain.models.ComicDetail
-import com.hoc.comicapp.domain.models.toError
 import com.hoc.comicapp.domain.repository.ComicRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.utils.Cache
-import com.hoc.comicapp.utils.left
 import com.hoc.comicapp.utils.right
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ObsoleteCoroutinesApi
@@ -25,7 +24,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import retrofit2.Retrofit
 import timber.log.Timber
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
@@ -34,7 +32,7 @@ import kotlin.time.seconds
 @ExperimentalTime
 @ObsoleteCoroutinesApi
 class ComicRepositoryImpl(
-  private val retrofit: Retrofit,
+  private val errorMapper: ErrorMapper,
   private val comicApiService: ComicApiService,
   private val dispatchersProvider: CoroutinesDispatchersProvider,
   private val favoriteComicsDataSource: FavoriteComicsDataSource,
@@ -88,7 +86,7 @@ class ComicRepositoryImpl(
         else -> {
           Timber.d("ComicRepositoryImpl::$cacheKey [HIT] cached")
 
-          delay(500)
+          delay(250)
           cachedResponse.right()
         }
       }
@@ -96,7 +94,7 @@ class ComicRepositoryImpl(
       Timber.d(throwable, "ComicRepositoryImpl::$cacheKey [ERROR] $throwable")
 
       delay(500)
-      throwable.toError(retrofit).left()
+      errorMapper.mapAsLeft(throwable)
     }
   }
 
@@ -110,7 +108,7 @@ class ComicRepositoryImpl(
       mapOf("categoryLink" to categoryLink)
     ) {
       getCategoryDetailPopular(categoryLink)
-        .map(Mapper::responseToDomainModel)
+        .map(Mappers::responseToDomainModel)
     }
   }
 
@@ -127,7 +125,7 @@ class ComicRepositoryImpl(
     ) {
       getCategoryDetail(categoryLink, page)
         .also(::updateFavoritesAndDownloaded)
-        .map(Mapper::responseToDomainModel)
+        .map(Mappers::responseToDomainModel)
     }
   }
 
@@ -139,7 +137,7 @@ class ComicRepositoryImpl(
       comicApiService
         .getMostViewedComics(page)
         .also(::updateFavoritesAndDownloaded)
-        .map(Mapper::responseToDomainModel)
+        .map(Mappers::responseToDomainModel)
     }
   }
 
@@ -151,7 +149,7 @@ class ComicRepositoryImpl(
       comicApiService
         .getUpdatedComics(page)
         .also(::updateFavoritesAndDownloaded)
-        .map(Mapper::responseToDomainModel)
+        .map(Mappers::responseToDomainModel)
     }
   }
 
@@ -163,7 +161,7 @@ class ComicRepositoryImpl(
       comicApiService
         .getNewestComics(page)
         .also(::updateFavoritesAndDownloaded)
-        .map(Mapper::responseToDomainModel)
+        .map(Mappers::responseToDomainModel)
     }
   }
 
@@ -175,7 +173,7 @@ class ComicRepositoryImpl(
       comicApiService
         .getComicDetail(comicLink)
         .also(::updateFavoritesAndDownloaded)
-        .let(Mapper::responseToDomainModel)
+        .let(Mappers::responseToDomainModel)
     }
   }
 
@@ -186,7 +184,7 @@ class ComicRepositoryImpl(
     ) {
       comicApiService
         .getChapterDetail(chapterLink)
-        .let(Mapper::responseToDomainModel)
+        .let(Mappers::responseToDomainModel)
     }
   }
 
@@ -194,7 +192,7 @@ class ComicRepositoryImpl(
     return executeApiRequest("getAllCategories") {
       comicApiService
         .getAllCategories()
-        .map(Mapper::responseToDomainModel)
+        .map(Mappers::responseToDomainModel)
     }
   }
 
@@ -209,7 +207,7 @@ class ComicRepositoryImpl(
       comicApiService
         .searchComic(query, page)
         .also(::updateFavoritesAndDownloaded)
-        .map(Mapper::responseToDomainModel)
+        .map(Mappers::responseToDomainModel)
     }
   }
 
@@ -219,17 +217,17 @@ class ComicRepositoryImpl(
 
   private fun updateFavoritesAndDownloaded(comics: List<ComicResponse>) {
     comics
-      .map { Mapper.responseToFirebaseEntity(it) }
+      .map { Mappers.responseToFirebaseEntity(it) }
       .let { favoriteComicsDataSource.update(it) }
   }
 
   private fun updateFavoritesAndDownloaded(comicDetail: ComicDetailResponse) {
     // update favorite
-    val entity = Mapper.responseToFirebaseEntity(comicDetail)
+    val entity = Mappers.responseToFirebaseEntity(comicDetail)
     favoriteComicsDataSource.update(listOf(entity))
 
     // update downloaded
-    actor.offer(Mapper.responseToLocalEntity(comicDetail))
+    actor.offer(Mappers.responseToLocalEntity(comicDetail))
   }
 
   private companion object {

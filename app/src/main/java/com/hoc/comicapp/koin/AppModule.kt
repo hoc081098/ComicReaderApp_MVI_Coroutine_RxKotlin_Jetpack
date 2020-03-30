@@ -1,5 +1,6 @@
 package com.hoc.comicapp.koin
 
+import android.content.Context
 import androidx.work.WorkManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -14,34 +15,73 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import org.koin.android.ext.koin.androidContext
-import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val appModule = module {
-  single { RxSchedulerProviderImpl() } bind RxSchedulerProvider::class
+  /*
+   * Rx Schedulers + CoroutinesDispatchers + App CoroutineScope
+   */
 
-  single { CoroutinesDispatchersProviderImpl(get()) } bind CoroutinesDispatchersProvider::class
+  single { provideRxSchedulerProvider() }
 
-  single { WorkManager.getInstance(androidContext()) }
+  single { provideCoroutinesDispatchersProvider(get()) }
 
-  single { getMoshi() }
+  single { provideAppCoroutineScope(get()) }
+
+  /*
+   * WorkManager + Moshi + JsonAdaptersContainer
+   */
+
+  single { provideWorkManager(androidContext()) }
+
+  single { provideMoshi() }
 
   single { provideJsonAdaptersContainer(get()) }
 
-  single { FirebaseAuth.getInstance() }
+  /*
+   * FirebaseAuth + FirebaseStorage + FirebaseFirestore
+   */
 
-  single { FirebaseStorage.getInstance() }
+  single { provideFirebaseAuth() }
 
-  single { FirebaseFirestore.getInstance() }
+  single { provideFirebaseStorage() }
 
-  single { CoroutineScope(get<CoroutinesDispatchersProvider>().io + SupervisorJob()) }
+  single { provideFirebaseFirestore() }
+}
+
+private fun provideAppCoroutineScope(dispatchersProvider: CoroutinesDispatchersProvider): CoroutineScope {
+  return CoroutineScope(dispatchersProvider.io + SupervisorJob())
+}
+
+private fun provideFirebaseAuth(): FirebaseAuth {
+  return FirebaseAuth.getInstance()
+}
+
+private fun provideFirebaseStorage(): FirebaseStorage {
+  return FirebaseStorage.getInstance()
+}
+
+private fun provideFirebaseFirestore(): FirebaseFirestore {
+  return FirebaseFirestore.getInstance()
+}
+
+private fun provideWorkManager(context: Context): WorkManager {
+  return WorkManager.getInstance(context)
+}
+
+private fun provideRxSchedulerProvider(): RxSchedulerProvider {
+  return RxSchedulerProviderImpl()
+}
+
+private fun provideCoroutinesDispatchersProvider(rxSchedulerProvider: RxSchedulerProvider): CoroutinesDispatchersProvider {
+  return CoroutinesDispatchersProviderImpl(rxSchedulerProvider)
 }
 
 private fun provideJsonAdaptersContainer(moshi: Moshi): JsonAdaptersContainer {
   return JsonAdaptersContainer(moshi)
 }
 
-private fun getMoshi(): Moshi {
+private fun provideMoshi(): Moshi {
   return Moshi
     .Builder()
     .add(KotlinJsonAdapterFactory())
