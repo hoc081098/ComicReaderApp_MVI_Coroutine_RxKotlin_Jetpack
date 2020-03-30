@@ -28,12 +28,13 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.fragment_downloaded_comics.*
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.androidx.scope.lifecycleScope
+import org.koin.androidx.viewmodel.scope.viewModel
 import timber.log.Timber
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsFragmentDirections.Companion.actionDownloadedComicsFragmentToComicDetailFragment as toComicDetailFragment
 
 class DownloadedComicsFragment : Fragment() {
-  private val viewModel by viewModel<DownloadedComicsViewModel>()
+  private val viewModel by lifecycleScope.viewModel<DownloadedComicsViewModel>(owner = this)
   private val compositeDisposable = CompositeDisposable()
 
   private val viewBinderHelper = ViewBinderHelper()

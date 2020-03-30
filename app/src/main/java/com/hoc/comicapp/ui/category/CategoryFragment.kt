@@ -22,11 +22,12 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.fragment_category.*
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.androidx.scope.lifecycleScope
+import org.koin.androidx.viewmodel.scope.viewModel
 import timber.log.Timber
 
 class CategoryFragment : Fragment() {
-  private val viewModel by viewModel<CategoryViewModel>()
+  private val viewModel by lifecycleScope.viewModel<CategoryViewModel>(owner = this)
   private val compositeDisposable = CompositeDisposable()
 
   override fun onCreateView(

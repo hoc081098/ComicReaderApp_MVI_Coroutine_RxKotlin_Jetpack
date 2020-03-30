@@ -30,13 +30,16 @@ import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.fragment_chapter_detail.*
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.androidx.scope.lifecycleScope
+import org.koin.androidx.viewmodel.scope.viewModel
 import org.koin.core.parameter.parametersOf
 import timber.log.Timber
 
 class ChapterDetailFragment : Fragment() {
   private val navArgs by navArgs<ChapterDetailFragmentArgs>()
-  private val viewModel by viewModel<ChapterDetailViewModel> { parametersOf(navArgs.isDownloaded) }
+  private val viewModel by lifecycleScope.viewModel<ChapterDetailViewModel>(owner = this) {
+    parametersOf(navArgs.isDownloaded)
+  }
 
   private val compositeDisposable = CompositeDisposable()
 

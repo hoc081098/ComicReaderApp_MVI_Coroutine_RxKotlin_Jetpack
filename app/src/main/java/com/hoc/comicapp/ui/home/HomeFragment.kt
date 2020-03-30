@@ -27,13 +27,14 @@ import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.androidx.scope.lifecycleScope
+import org.koin.androidx.viewmodel.scope.viewModel
 import timber.log.Timber
 import kotlin.LazyThreadSafetyMode.NONE
 
 @ExperimentalCoroutinesApi
 class HomeFragment : Fragment() {
-  private val homeViewModel by viewModel<HomeViewModel>()
+  private val homeViewModel by lifecycleScope.viewModel<HomeViewModel>(owner = this)
   private val compositeDisposable = CompositeDisposable()
 
   private val homeAdapter by lazy(NONE) {

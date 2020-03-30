@@ -22,12 +22,13 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.fragment_downloading_chapters.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.androidx.scope.lifecycleScope
+import org.koin.androidx.viewmodel.scope.viewModel
 import timber.log.Timber
 
 @ExperimentalCoroutinesApi
 class DownloadingChaptersFragment : Fragment() {
-  private val viewModel by viewModel<DownloadingChaptersViewModel>()
+  private val viewModel by lifecycleScope.viewModel<DownloadingChaptersViewModel>(owner = this)
   private val compositeDisposable = CompositeDisposable()
 
   override fun onCreateView(

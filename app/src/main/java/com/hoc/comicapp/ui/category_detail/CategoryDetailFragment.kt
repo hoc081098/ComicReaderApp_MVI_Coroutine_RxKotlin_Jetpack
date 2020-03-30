@@ -27,7 +27,8 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.fragment_category_detail.*
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.androidx.scope.lifecycleScope
+import org.koin.androidx.viewmodel.scope.viewModel
 import org.koin.core.parameter.parametersOf
 import timber.log.Timber
 import kotlin.LazyThreadSafetyMode.NONE
@@ -35,7 +36,7 @@ import kotlin.LazyThreadSafetyMode.NONE
 class CategoryDetailFragment : Fragment() {
   private val args by navArgs<CategoryDetailFragmentArgs>()
 
-  private val vm by viewModel<CategoryDetailVM> { parametersOf(args.category) }
+  private val vm by lifecycleScope.viewModel<CategoryDetailVM>(owner = this) { parametersOf(args.category) }
   private val compositeDisposable = CompositeDisposable()
 
   private val categoryDetailAdapter by lazy(NONE) {
