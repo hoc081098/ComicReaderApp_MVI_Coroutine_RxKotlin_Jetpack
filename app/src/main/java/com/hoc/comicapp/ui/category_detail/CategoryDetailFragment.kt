@@ -113,10 +113,11 @@ class CategoryDetailFragment : Fragment() {
       })
     }
 
-    fab.setOnClickListener {
-      object : LinearSmoothScroller(it.context) {
+    fab.setOnClickListener { view ->
+      object : LinearSmoothScroller(view.context) {
         override fun getVerticalSnapPreference() = SNAP_TO_START
-      }.apply { targetPosition = 0 }
+      }
+        .apply { targetPosition = 0 }
         .let { recycler_category_detail.layoutManager!!.startSmoothScroll(it) }
     }
 

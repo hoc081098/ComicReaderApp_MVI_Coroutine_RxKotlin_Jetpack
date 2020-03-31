@@ -51,7 +51,7 @@ class ComicDetailViewModel(
   override val initialState = ComicDetailViewState.initialState()
 
   private val intentS = PublishRelay.create<ComicDetailIntent>()
-  private val stateS = BehaviorRelay.createDefault<ComicDetailViewState>(initialState)
+  private val stateS = BehaviorRelay.createDefault(initialState)
 
   override fun processIntents(intents: Observable<ComicDetailIntent>) =
     intents.subscribe(intentS)!!
@@ -117,14 +117,15 @@ class ComicDetailViewModel(
         }
     }
 
-  private val intentToViewState = ObservableTransformer<ComicDetailIntent, ComicDetailViewState> {
-    it.publish { shared ->
+  private val intentToViewState = ObservableTransformer<ComicDetailIntent, ComicDetailViewState> { intent ->
+    intent.publish { shared ->
         Observable.mergeArray(
           shared.ofType<ComicDetailIntent.Initial>().compose(initialProcessor),
           shared.ofType<ComicDetailIntent.Refresh>().compose(refreshProcessor),
           shared.ofType<ComicDetailIntent.Retry>().compose(retryProcessor)
         )
-      }.doOnNext { Timber.d("partial_change=$it") }
+      }
+      .doOnNext { Timber.d("partial_change=$it") }
       .scan(initialState) { state, change -> change.reducer(state) }
       .distinctUntilChanged()
       .observeOn(rxSchedulerProvider.main)

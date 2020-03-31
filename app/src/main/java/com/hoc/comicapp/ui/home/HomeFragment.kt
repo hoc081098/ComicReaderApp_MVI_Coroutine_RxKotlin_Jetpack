@@ -133,10 +133,12 @@ class HomeFragment : Fragment() {
       })
     }
 
-    fab.setOnClickListener {
-      object : LinearSmoothScroller(it.context) {
+    fab.setOnClickListener { view ->
+      object : LinearSmoothScroller(view.context) {
         override fun getVerticalSnapPreference() = SNAP_TO_START
-      }.apply { targetPosition = 0 }.let { recycler_home.layoutManager!!.startSmoothScroll(it) }
+      }
+        .apply { targetPosition = 0 }
+        .let { recycler_home.layoutManager!!.startSmoothScroll(it) }
     }
 
     recycler_home

@@ -7,6 +7,7 @@ import java.util.*
 import com.hoc.comicapp.base.SingleEvent as BaseSingleEvent
 import com.hoc.comicapp.base.ViewState as BaseViewState
 
+@Suppress("unused")
 interface DownloadingChaptersContract {
 
   sealed class ViewIntent : Intent {

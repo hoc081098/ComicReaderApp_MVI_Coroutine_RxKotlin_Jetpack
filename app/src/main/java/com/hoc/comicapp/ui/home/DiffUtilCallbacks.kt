@@ -2,15 +2,19 @@ package com.hoc.comicapp.ui.home
 
 import androidx.recyclerview.widget.DiffUtil
 import com.hoc.comicapp.domain.models.Comic
+import com.hoc.comicapp.ui.home.HomeListItem.Header
+import com.hoc.comicapp.ui.home.HomeListItem.MostViewedListState
+import com.hoc.comicapp.ui.home.HomeListItem.NewestListState
+import com.hoc.comicapp.ui.home.HomeListItem.UpdatedItem
 
 object HomeListItemDiffUtilItemCallback : DiffUtil.ItemCallback<HomeListItem>() {
   override fun areItemsTheSame(oldItem: HomeListItem, newItem: HomeListItem) = when {
-    oldItem is HomeListItem.NewestListState && newItem is HomeListItem.NewestListState -> true
-    oldItem is HomeListItem.MostViewedListState && newItem is HomeListItem.MostViewedListState -> true
-    oldItem is HomeListItem.UpdatedItem.ComicItem && newItem is HomeListItem.UpdatedItem.ComicItem -> oldItem.comic.link == newItem.comic.link
-    oldItem is HomeListItem.UpdatedItem.Error && newItem is HomeListItem.UpdatedItem.Error -> true
-    oldItem is HomeListItem.UpdatedItem.Loading && newItem is HomeListItem.UpdatedItem.Loading -> true
-    oldItem is HomeListItem.Header && newItem is HomeListItem.Header -> oldItem.type == newItem.type
+    oldItem is NewestListState && newItem is NewestListState -> true
+    oldItem is MostViewedListState && newItem is MostViewedListState -> true
+    oldItem is UpdatedItem.ComicItem && newItem is UpdatedItem.ComicItem -> oldItem.comic.link == newItem.comic.link
+    oldItem is UpdatedItem.Error && newItem is UpdatedItem.Error -> true
+    oldItem is UpdatedItem.Loading && newItem is UpdatedItem.Loading -> true
+    oldItem is Header && newItem is Header -> oldItem.type == newItem.type
     else -> oldItem == newItem
   }
 

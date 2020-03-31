@@ -25,7 +25,7 @@ class HomeViewModel(
   override val initialState = HomeViewState.initialState()
 
   private val intentS = PublishRelay.create<HomeViewIntent>()
-  private val stateS = BehaviorRelay.createDefault<HomeViewState>(initialState)
+  private val stateS = BehaviorRelay.createDefault(initialState)
 
   /**
    * Transform [HomeViewIntent.Initial]s to [HomePartialChange]s
@@ -112,13 +112,12 @@ class HomeViewModel(
         .withLatestFrom(stateS)
         .map { it.second.updatedPage + 1 }
         .doOnNext { Timber.d("[~~~] refresh_page=$it") }
-        .exhaustMap {
+        .exhaustMap { page ->
           homeInteractor
-            .updatedComics(page = it)
+            .updatedComics(page = page)
             .doOnNext {
-              val messageFromError =
-                (it as? HomePartialChange.UpdatedPartialChange.Error
-                  ?: return@doOnNext).error.getMessage()
+              val messageFromError = (it as? HomePartialChange.UpdatedPartialChange.Error
+                ?: return@doOnNext).error.getMessage()
               sendMessageEvent("Error when retry get updated list: $messageFromError")
             }
         }
@@ -128,14 +127,13 @@ class HomeViewModel(
    * Transform [HomeViewIntent.RetryNewest]s to [HomePartialChange]s
    */
   private val retryNewestProcessor =
-    ObservableTransformer<HomeViewIntent.RetryNewest, HomePartialChange> {
-      it.exhaustMap {
+    ObservableTransformer<HomeViewIntent.RetryNewest, HomePartialChange> { intentObservable ->
+      intentObservable.exhaustMap {
         homeInteractor
           .newestComics()
           .doOnNext {
-            val messageFromError =
-              (it as? HomePartialChange.NewestHomePartialChange.Error
-                ?: return@doOnNext).error.getMessage()
+            val messageFromError = (it as? HomePartialChange.NewestHomePartialChange.Error
+              ?: return@doOnNext).error.getMessage()
             sendMessageEvent("Error when retry get newest list: $messageFromError")
           }
       }
@@ -145,14 +143,13 @@ class HomeViewModel(
    * Transform [HomeViewIntent.RetryMostViewed]s to [HomePartialChange]s
    */
   private val retryMostViewedProcessor =
-    ObservableTransformer<HomeViewIntent.RetryMostViewed, HomePartialChange> {
-      it.exhaustMap {
+    ObservableTransformer<HomeViewIntent.RetryMostViewed, HomePartialChange> { intentObservable ->
+      intentObservable.exhaustMap {
         homeInteractor
           .mostViewedComics()
           .doOnNext {
-            val messageFromError =
-              (it as? HomePartialChange.MostViewedHomePartialChange.Error
-                ?: return@doOnNext).error.getMessage()
+            val messageFromError = (it as? HomePartialChange.MostViewedHomePartialChange.Error
+              ?: return@doOnNext).error.getMessage()
             sendMessageEvent("Error when retry get most viewed list: $messageFromError")
           }
       }
@@ -162,33 +159,35 @@ class HomeViewModel(
    * Filters intent by type, then compose with [ObservableTransformer] to transform [HomeViewIntent] to [HomePartialChange].
    * Then using [Observable.scan] operator with reducer to transform [HomePartialChange] [HomeViewState]
    */
-  private val intentToViewState = ObservableTransformer<HomeViewIntent, HomeViewState> {
-    it.publish { shared ->
-        Observable.mergeArray(
-          shared
-            .ofType<HomeViewIntent.Initial>()
-            .compose(initialProcessor),
-          shared
-            .ofType<HomeViewIntent.Refresh>()
-            .compose(refreshProcessor),
-          shared
-            .ofType<HomeViewIntent.LoadNextPageUpdatedComic>()
-            .compose(loadNextPageProcessor),
-          shared
-            .ofType<HomeViewIntent.RetryUpdate>()
-            .compose(retryUpdateProcessor),
-          shared
-            .ofType<HomeViewIntent.RetryNewest>()
-            .compose(retryNewestProcessor),
-          shared
-            .ofType<HomeViewIntent.RetryMostViewed>()
-            .compose(retryMostViewedProcessor)
-        )
-      }.doOnNext { Timber.d("partial_change=$it") }
-      .scan(initialState) { state, change -> change.reducer(state) }
-      .distinctUntilChanged()
-      .observeOn(rxSchedulerProvider.main)
-  }
+  private val intentToViewState =
+    ObservableTransformer<HomeViewIntent, HomeViewState> { intentObservable ->
+      intentObservable.publish { shared ->
+          Observable.mergeArray(
+            shared
+              .ofType<HomeViewIntent.Initial>()
+              .compose(initialProcessor),
+            shared
+              .ofType<HomeViewIntent.Refresh>()
+              .compose(refreshProcessor),
+            shared
+              .ofType<HomeViewIntent.LoadNextPageUpdatedComic>()
+              .compose(loadNextPageProcessor),
+            shared
+              .ofType<HomeViewIntent.RetryUpdate>()
+              .compose(retryUpdateProcessor),
+            shared
+              .ofType<HomeViewIntent.RetryNewest>()
+              .compose(retryNewestProcessor),
+            shared
+              .ofType<HomeViewIntent.RetryMostViewed>()
+              .compose(retryMostViewedProcessor)
+          )
+        }
+        .doOnNext { Timber.d("partial_change=$it") }
+        .scan(initialState) { state, change -> change.reducer(state) }
+        .distinctUntilChanged()
+        .observeOn(rxSchedulerProvider.main)
+    }
 
   override fun processIntents(intents: Observable<HomeViewIntent>) =
     intents.subscribe(intentS)!!

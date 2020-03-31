@@ -75,9 +75,9 @@ class RegisterVM(
         )
       }
       .filter(::isValidUser)
-      .exhaustMap {
+      .exhaustMap { user ->
         interactor
-          .register(it)
+          .register(user)
           .observeOn(rxSchedulerProvider.main)
           .doOnNext {
             when (it) {

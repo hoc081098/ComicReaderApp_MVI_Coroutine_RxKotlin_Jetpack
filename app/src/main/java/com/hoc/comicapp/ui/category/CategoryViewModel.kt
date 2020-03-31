@@ -73,7 +73,7 @@ class CategoryViewModel(
               sendMessageEvent(message = "Error occurred: ${it.error.getMessage()}")
             }
           }
-          .cast<CategoryPartialChange>()
+          .cast()
       }
     }
 

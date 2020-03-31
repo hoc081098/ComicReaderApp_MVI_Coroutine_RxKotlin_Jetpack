@@ -18,7 +18,7 @@ class FavoriteComicsInteractorImpl(
   private val dispatchersProvider: CoroutinesDispatchersProvider,
 ) : Interactor {
   override fun remove(item: ComicItem): Observable<PartialChange> {
-    return rxObservable<PartialChange>(dispatchersProvider.main) {
+    return rxObservable(dispatchersProvider.main) {
       favoriteComicsRepository
         .removeFromFavorite(item.toDomain())
         .fold(

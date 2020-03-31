@@ -11,6 +11,7 @@ import com.hoc.comicapp.utils.map
 import io.reactivex.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.rx2.rxObservable
 
 @ExperimentalCoroutinesApi
@@ -20,8 +21,8 @@ class HomeInteractorImpl1(
   private val dispatchersProvider: CoroutinesDispatchersProvider,
 ) : HomeInteractor by homeInteractorImpl {
   override fun refreshAll(): Observable<HomePartialChange> {
-    return rxObservable<HomePartialChange>(dispatchersProvider.main) {
-      kotlinx.coroutines.coroutineScope {
+    return rxObservable(dispatchersProvider.main) {
+      coroutineScope {
         send(Loading)
 
         val newestAsync = async { comicRepository.getNewestComics() }
@@ -33,16 +34,21 @@ class HomeInteractorImpl1(
         val updated = updatedAsync.await()
 
         newest.flatMap { newestComics ->
-          mostViewed.flatMap { mostViewedComics ->
-            updated.map { updatedComics ->
-              RefreshSuccess(
-                newestComics = newestComics,
-                mostViewedComics = mostViewedComics,
-                updatedComics = updatedComics
-              )
+            mostViewed.flatMap { mostViewedComics ->
+              updated.map { updatedComics ->
+                RefreshSuccess(
+                  newestComics = newestComics,
+                  mostViewedComics = mostViewedComics,
+                  updatedComics = updatedComics
+                )
+              }
             }
           }
-        }.fold({ RefreshFailure(it) }, { it }).let { send(it) }
+          .fold(
+            { RefreshFailure(it) },
+            { it }
+          )
+          .let { send(it) }
       }
     }
   }

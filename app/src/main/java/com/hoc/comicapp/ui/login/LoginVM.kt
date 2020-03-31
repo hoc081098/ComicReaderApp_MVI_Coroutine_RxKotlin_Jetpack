@@ -68,7 +68,8 @@ class LoginVM(
         loginChanges,
         emailChange,
         passwordChange
-      ).scan(initialState) { state, change -> change.reducer(state) }
+      )
+      .scan(initialState) { state, change -> change.reducer(state) }
       .observeOn(rxSchedulerProvider.main)
       .subscribeBy(onNext = ::setNewState)
       .addTo(compositeDisposable)

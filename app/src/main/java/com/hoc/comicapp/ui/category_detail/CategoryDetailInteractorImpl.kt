@@ -26,7 +26,7 @@ class CategoryDetailInteractorImpl(
   private val comicRepository: ComicRepository,
 ) : Interactor {
   override fun refreshAll(categoryLink: String): Observable<PartialChange> {
-    return rxObservable<PartialChange>(dispatchersProvider.main) {
+    return rxObservable(dispatchersProvider.main) {
       coroutineScope {
         send(Loading)
 
@@ -55,7 +55,7 @@ class CategoryDetailInteractorImpl(
   }
 
   override fun getPopulars(categoryLink: String): Observable<PartialChange> {
-    return rxObservable<PartialChange>(dispatchersProvider.main) {
+    return rxObservable(dispatchersProvider.main) {
       send(Popular.Loading)
       comicRepository
         .getCategoryDetailPopular(categoryLink)
@@ -68,7 +68,7 @@ class CategoryDetailInteractorImpl(
   }
 
   override fun getComics(categoryLink: String, page: Int): Observable<PartialChange> {
-    return rxObservable<PartialChange>(dispatchersProvider.main) {
+    return rxObservable(dispatchersProvider.main) {
       send(ListComics.Loading)
       comicRepository
         .getCategoryDetail(

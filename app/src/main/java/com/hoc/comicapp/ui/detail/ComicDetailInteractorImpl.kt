@@ -84,8 +84,8 @@ class ComicDetailInteractorImpl(
 
         downloadedComicRepository
           .getDownloadedComic(link)
-          .map {
-            it.fold(
+          .map { result ->
+            result.fold(
               { RefreshPartialChange.Error(it) },
               { RefreshPartialChange.Success(it.toViewComicDetail()) }
             )
@@ -128,7 +128,7 @@ class ComicDetailInteractorImpl(
     remoteThumbnail: String?,
     link: String,
   ): Observable<ComicDetailPartialChange> {
-    return rxObservable<ComicDetailPartialChange>(dispatchersProvider.main) {
+    return rxObservable(dispatchersProvider.main) {
 
       if (thumbnail != null && name != null && view != null && remoteThumbnail != null) {
         send(
@@ -163,7 +163,7 @@ class ComicDetailInteractorImpl(
     remoteThumbnail: String?,
     link: String,
   ): Observable<ComicDetailPartialChange> {
-    return rxObservable<ComicDetailPartialChange>(dispatchersProvider.main) {
+    return rxObservable(dispatchersProvider.main) {
       if (thumbnail != null && name != null && view != null && remoteThumbnail != null) {
         send(
           InitialRetryPartialChange.InitialData(
@@ -180,8 +180,8 @@ class ComicDetailInteractorImpl(
       send(InitialRetryPartialChange.Loading)
       downloadedComicRepository
         .getDownloadedComic(link)
-        .map {
-          it.fold(
+        .map { result ->
+          result.fold(
             { InitialRetryPartialChange.Error(it) },
             { InitialRetryPartialChange.Data(it.toViewComicDetail()) }
           )
@@ -234,13 +234,13 @@ private fun ComicDetail.toViewComicDetail(): Detail {
     thumbnail = thumbnail,
     shortenedContent = shortenedContent,
     lastUpdated = lastUpdated,
-    relatedComics = relatedComics.map {
+    relatedComics = relatedComics.map { comic ->
       ComicDetailViewState.Comic(
-        title = it.title,
-        thumbnail = it.thumbnail,
-        link = it.link,
-        view = it.view,
-        lastChapters = it.lastChapters.map {
+        title = comic.title,
+        thumbnail = comic.thumbnail,
+        link = comic.link,
+        view = comic.view,
+        lastChapters = comic.lastChapters.map {
           ComicDetailViewState.Comic.LastChapter(
             chapterName = it.chapterName,
             time = it.time,
