@@ -82,7 +82,6 @@ class ComicDetailFragment : Fragment() {
     super.onViewCreated(view, savedInstanceState)
     Timber.d("ComicDetailFragment::onViewCreated")
 
-    root_detail.transitionName = args.comic.link
     startTransitions()
 
     val chapterAdapter = ChapterAdapter(
@@ -113,6 +112,8 @@ class ComicDetailFragment : Fragment() {
   }
 
   private fun startTransitions() {
+    Timber.d("transitionName: ${args.transitionName}")
+    root_detail.transitionName = args.transitionName
     startPostponedEnterTransition()
   }
 

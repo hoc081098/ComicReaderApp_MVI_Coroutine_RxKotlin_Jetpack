@@ -56,6 +56,12 @@
             app:argType="boolean"
             app:nullable="false" />
 
+        <argument
+            android:name="transitionName"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+
         <action
             android:id="@+id/action_comicDetailFragment_to_chapterDetailFragment"
             app:destination="@id/chapterDetailFragment"

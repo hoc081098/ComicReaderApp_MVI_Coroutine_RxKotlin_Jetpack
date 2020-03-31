@@ -22,7 +22,7 @@ class NewestAdapter(
   private val glide: GlideRequests,
   private val compositeDisposable: CompositeDisposable,
 ) : ListAdapter<Comic, NewestAdapter.VH>(NewestComicDiffUtilItemCallback) {
-  private val clickComicS = PublishRelay.create<Pair<View, Comic>>()
+  private val clickComicS = PublishRelay.create<_HomeClickEvent>()
   val clickComicObservable get() = clickComicS.asObservable()
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
@@ -50,7 +50,13 @@ class NewestAdapter(
         .mapNotNull {
           when (val position = adapterPosition) {
             RecyclerView.NO_POSITION -> null
-            else -> itemView to getItem(position)
+            else -> getItem(position).let {
+              Triple(
+                itemView,
+                it,
+                "newest#${it.link}",
+              )
+            }
           }
         }
         .subscribe(clickComicS)
@@ -58,6 +64,8 @@ class NewestAdapter(
     }
 
     fun bind(item: Comic) {
+      itemView.transitionName = "newest#${item.link}"
+
       textComicName.text = item.title
       textChapter.text = item.lastChapters.lastOrNull()?.chapterName
       textLastUpdatedTime.text = item.lastChapters.lastOrNull()?.time

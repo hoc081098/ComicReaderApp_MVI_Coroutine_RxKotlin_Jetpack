@@ -152,16 +152,18 @@ class HomeFragment : Fragment() {
 
     homeAdapter
       .clickComicObservable
-      .subscribeBy { (view, comicArg) ->
-        view.transitionName = comicArg.link
-
+      .subscribeBy { (view, comicArg, transitionName) ->
         val toComicDetailFragment =
           HomeFragmentDirections.actionHomeFragmentDestToComicDetailFragment(
             comic = comicArg,
             title = comicArg.title,
-            isDownloaded = false
+            isDownloaded = false,
+            transitionName = transitionName
           )
+
+        view.transitionName = transitionName
         val extras = FragmentNavigatorExtras(view to view.transitionName)
+
         findNavController().navigate(toComicDetailFragment, extras)
       }
       .addTo(compositeDisposable)

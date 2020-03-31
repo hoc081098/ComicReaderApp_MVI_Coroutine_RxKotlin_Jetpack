@@ -42,6 +42,25 @@ import kotlinx.android.synthetic.main.item_recyclerview_updated_error.view.*
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
+typealias HomeClickEvent = Triple<View, ComicArg, String>
+typealias _HomeClickEvent = Triple<View, Comic, String>
+
+private fun toHomeClickEvent(event: _HomeClickEvent): HomeClickEvent {
+  return Triple(
+    event.first,
+    event.second.let { comic ->
+      ComicArg(
+        link = comic.link,
+        thumbnail = comic.thumbnail,
+        title = comic.title,
+        view = comic.view,
+        remoteThumbnail = comic.thumbnail
+      )
+    },
+    event.third
+  )
+}
+
 class HomeAdapter(
   private val lifecycleOwner: LifecycleOwner,
   private val glide: GlideRequests,
@@ -49,61 +68,50 @@ class HomeAdapter(
   private val compositeDisposable: CompositeDisposable,
 ) :
   ListAdapter<HomeListItem, HomeAdapter.VH>(HomeListItemDiffUtilItemCallback) {
-  private var outLayoutManagerSavedState: Parcelable? = null
+  // Layout manager saved states
+  private var newestLayoutManagerSavedState: Parcelable? = null
+  private var mostViewedLayoutManagerSavedState: Parcelable? = null
 
+  // Adapters
   private val newestAdapter =
     NewestAdapter(glide, compositeDisposable).apply { submitList(emptyList()) }
   private val mostViewedAdapter =
     MostViewedAdapter(glide, compositeDisposable).apply { submitList(emptyList()) }
 
+  // Retry relays
   private val newestRetryS = PublishRelay.create<Unit>()
   private val mostViewedRetryS = PublishRelay.create<Unit>()
   private val updatedRetryS = PublishRelay.create<Unit>()
-  private val clickComicS = PublishRelay.create<Pair<View, Comic>>()
 
+  // Click relay
+  private val clickComicS = PublishRelay.create<_HomeClickEvent>()
+
+  // Retry observables
   val newestRetryObservable = newestRetryS.throttleFirst(500, TimeUnit.MILLISECONDS)!!
   val mostViewedRetryObservable = mostViewedRetryS.throttleFirst(500, TimeUnit.MILLISECONDS)!!
   val updatedRetryObservable = updatedRetryS.throttleFirst(500, TimeUnit.MILLISECONDS)!!
-  val clickComicObservable = Observable.mergeArray(
-    newestAdapter.clickComicObservable.map { (view, comic) ->
-      view to ComicArg(
-        link = comic.link,
-        thumbnail = comic.thumbnail,
-        title = comic.title,
-        view = comic.view,
-        remoteThumbnail = comic.thumbnail
-      )
-    },
-    mostViewedAdapter.clickComicObservable.map { (view, comic) ->
-      view to ComicArg(
-        link = comic.link,
-        thumbnail = comic.thumbnail,
-        title = comic.title,
-        view = comic.view,
-        remoteThumbnail = comic.thumbnail
-      )
-    },
-    clickComicS.map { (view, comic) ->
-      view to ComicArg(
-        link = comic.link,
-        thumbnail = comic.thumbnail,
-        title = comic.title,
-        view = comic.view,
-        remoteThumbnail = comic.thumbnail
-      )
-    }
-  ).doOnNext { Timber.d("[*] Click comic $it") }!!
+
+  // Click observables
+  val clickComicObservable: Observable<HomeClickEvent> = Observable.mergeArray(
+      newestAdapter.clickComicObservable,
+      mostViewedAdapter.clickComicObservable,
+      clickComicS,
+    )
+    .map(::toHomeClickEvent)
+    .doOnNext { Timber.d("[*] Click comic $it") }!!
 
   override fun onCreateViewHolder(parent: ViewGroup, @ViewType viewType: Int): VH {
     return when (viewType) {
-      NEWEST_LIST_VIEW_TYPE -> SuggestListVH(parent inflate R.layout.item_recycler_home_recycler)
-      MOST_VIEWED_LIST_VIEW_TYPE -> TopMonthListVH(parent inflate R.layout.item_recycler_home_recycler)
-      COMIC_ITEM_VIEW_TYPE -> ComicItemVH(parent inflate R.layout.item_recyclerview_updated_comic,
-        parent)
+      NEWEST_LIST_VIEW_TYPE -> NewestComicsListVH(parent inflate R.layout.item_recycler_home_recycler)
+      MOST_VIEWED_LIST_VIEW_TYPE -> MostViewedComicsListVH(parent inflate R.layout.item_recycler_home_recycler)
+      COMIC_ITEM_VIEW_TYPE -> ComicItemVH(
+        parent inflate R.layout.item_recyclerview_updated_comic,
+        parent,
+      )
       ERROR_ITEM_VIEW_TYPE -> ErrorVH(parent inflate R.layout.item_recyclerview_updated_error)
       LOADING_ITEM_VIEW_TYPE -> LoadingVH(parent inflate R.layout.item_recyclerview_updated_loading)
       HEADER_VIEW_TYPE -> HeaderVH(parent inflate R.layout.item_recycler_home_header)
-      else -> throw IllegalStateException("Unknown view type: $viewType")
+      else -> error("Unknown view type: $viewType")
     }
   }
 
@@ -134,8 +142,9 @@ class HomeAdapter(
     protected val errorGroup = itemView.error_group!!
   }
 
-  private inner class SuggestListVH(itemView: View) : HorizontalRecyclerVH(itemView) {
+  private inner class NewestComicsListVH(itemView: View) : HorizontalRecyclerVH(itemView) {
     private var currentList = emptyList<Comic>()
+    val linearLayoutManager: LinearLayoutManager
 
     private val startStopAutoScrollS = PublishRelay.create<Boolean>()
     private val intervalInMillis = 1_500L
@@ -147,10 +156,12 @@ class HomeAdapter(
 
       recycler.run {
         setHasFixedSize(true)
-        val linearLayoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
-        layoutManager = linearLayoutManager
+        linearLayoutManager = LinearLayoutManager(
+          context,
+          RecyclerView.HORIZONTAL,
+          false,
+        ).also { layoutManager = it }
         adapter = newestAdapter
-
         LinearSnapHelper().attachToRecyclerView(this)
       }
 
@@ -242,10 +253,16 @@ class HomeAdapter(
           }
           currentList = comics
         }
+
+        newestLayoutManagerSavedState?.let {
+          Timber.tag("[preserve]").d("[bind] [1] $it")
+          linearLayoutManager.onRestoreInstanceState(it)
+          newestLayoutManagerSavedState = null
+        }
       }
   }
 
-  private inner class TopMonthListVH(itemView: View) : HorizontalRecyclerVH(itemView) {
+  private inner class MostViewedComicsListVH(itemView: View) : HorizontalRecyclerVH(itemView) {
     private var currentList = emptyList<Comic>()
 
     val linearLayoutManager: LinearLayoutManager
@@ -276,10 +293,10 @@ class HomeAdapter(
           currentList = comics
         }
 
-        outLayoutManagerSavedState?.let {
-          Timber.tag("@@@").d("onRestoreInstanceState $it")
+        mostViewedLayoutManagerSavedState?.let {
+          Timber.tag("[preserve]").d("[bind] [2] $it")
           linearLayoutManager.onRestoreInstanceState(it)
-          outLayoutManagerSavedState = null
+          mostViewedLayoutManagerSavedState = null
         }
       }
   }
@@ -309,7 +326,11 @@ class HomeAdapter(
           when (val position = adapterPosition) {
             RecyclerView.NO_POSITION -> null
             else -> when (val item = getItem(position)) {
-              is HomeListItem.UpdatedItem.ComicItem -> itemView to item.comic
+              is HomeListItem.UpdatedItem.ComicItem -> Triple(
+                itemView,
+                item.comic,
+                "updated#${item.comic.link}",
+              )
               else -> null
             }
           }
@@ -321,7 +342,7 @@ class HomeAdapter(
 
     override fun bind(item: HomeListItem) =
       onlyBind<HomeListItem.UpdatedItem.ComicItem>(item) { (comic) ->
-        itemView.transitionName = comic.link
+        itemView.transitionName = "updated#${comic.link}"
 
         glide
           .load(comic.thumbnail)
@@ -375,9 +396,18 @@ class HomeAdapter(
 
   override fun onViewRecycled(holder: VH) {
     super.onViewRecycled(holder)
-    if (holder is TopMonthListVH) {
-      outLayoutManagerSavedState = holder.linearLayoutManager.onSaveInstanceState()
-      Timber.tag("@@@").d("onViewRecycled $outLayoutManagerSavedState")
+
+    when (holder) {
+      is NewestComicsListVH -> {
+        newestLayoutManagerSavedState = holder.linearLayoutManager.onSaveInstanceState().also {
+          Timber.tag("[preserve]").d("[onViewRecycled] [1] $it")
+        }
+      }
+      is MostViewedComicsListVH -> {
+        mostViewedLayoutManagerSavedState = holder.linearLayoutManager.onSaveInstanceState().also {
+          Timber.tag("[preserve]").d("[onViewRecycled] [2] $it")
+        }
+      }
     }
   }
 

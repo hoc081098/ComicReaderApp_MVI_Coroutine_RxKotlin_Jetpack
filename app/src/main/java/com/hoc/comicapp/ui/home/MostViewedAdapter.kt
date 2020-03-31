@@ -23,7 +23,7 @@ class MostViewedAdapter(
   private val compositeDisposable: CompositeDisposable,
 ) :
   ListAdapter<Comic, MostViewedAdapter.VH>(MostViewedComicDiffUtilItemCallback) {
-  private val clickComicS = PublishRelay.create<Pair<View, Comic>>()
+  private val clickComicS = PublishRelay.create<_HomeClickEvent>()
   val clickComicObservable get() = clickComicS.asObservable()
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
@@ -49,7 +49,13 @@ class MostViewedAdapter(
         .mapNotNull {
           when (val position = adapterPosition) {
             RecyclerView.NO_POSITION -> null
-            else -> itemView to getItem(position)
+            else -> getItem(position).let {
+              Triple(
+                itemView,
+                it,
+                "most_viewed#${it.link}",
+              )
+            }
           }
         }
         .subscribe(clickComicS)
@@ -57,6 +63,8 @@ class MostViewedAdapter(
     }
 
     fun bind(item: Comic) {
+      itemView.transitionName ="most_viewed#${item.link}"
+
       textComicName.text = item.title
       textChapter.text = item.lastChapters.lastOrNull()?.chapterName
       textView.text = item.view
