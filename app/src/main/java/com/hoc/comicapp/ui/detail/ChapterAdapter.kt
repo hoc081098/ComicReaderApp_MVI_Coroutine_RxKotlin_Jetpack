@@ -113,7 +113,7 @@ class ChapterAdapter(
     }
 
     override fun onClick(v: View) {
-      val position = adapterPosition
+      val position = bindingAdapterPosition
       if (position == NO_POSITION) return
 
       val item = getItem(position) as? ChapterAdapterItem.Chapter ?: return

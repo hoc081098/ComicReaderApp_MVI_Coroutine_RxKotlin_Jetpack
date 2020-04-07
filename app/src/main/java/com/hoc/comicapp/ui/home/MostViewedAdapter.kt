@@ -47,7 +47,7 @@ class MostViewedAdapter(
       itemView
         .clicks()
         .mapNotNull {
-          when (val position = adapterPosition) {
+          when (val position = bindingAdapterPosition) {
             RecyclerView.NO_POSITION -> null
             else -> getItem(position).let {
               Triple(

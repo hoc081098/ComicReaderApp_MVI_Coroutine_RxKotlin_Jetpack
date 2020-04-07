@@ -43,7 +43,7 @@ class ChapterImageAdapter(
 
     init {
       buttonRetry.setOnClickListener {
-        val position = adapterPosition
+        val position = bindingAdapterPosition
         if (position != RecyclerView.NO_POSITION) {
           loadImage(imageUrl = getItem(position))
         }

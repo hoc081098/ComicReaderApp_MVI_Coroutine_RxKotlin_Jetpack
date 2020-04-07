@@ -65,7 +65,7 @@ class DownloadingChaptersAdapter(
       imageCancelDownload
         .clicks()
         .takeUntil(parent.detaches())
-        .map { adapterPosition }
+        .map { bindingAdapterPosition }
         .map { getItem(it) }
         .subscribe(_clickCancel)
         .addTo(compositeDisposable)

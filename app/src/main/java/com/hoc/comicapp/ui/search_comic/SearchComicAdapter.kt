@@ -81,7 +81,7 @@ class SearchComicAdapter(
       buttonRetryOrLoadMore
         .clicks()
         .takeUntil(parent.detaches())
-        .map { adapterPosition }
+        .map { bindingAdapterPosition }
         .filter { it != RecyclerView.NO_POSITION }
         .mapNotNull {
           when (getItem(it)) {
@@ -130,7 +130,7 @@ class SearchComicAdapter(
       itemView
         .clicks()
         .takeUntil(parent.detaches())
-        .map { adapterPosition }
+        .map { bindingAdapterPosition }
         .filter { it != RecyclerView.NO_POSITION }
         .map { getItem(it) }
         .ofType<Item.ComicItem>()

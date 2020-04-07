@@ -73,7 +73,7 @@ class DownloadedComicsAdapter(
 
 
     private fun <T> Observable<T>.getItemAtPosition(): Observable<ComicItem> {
-      return map { adapterPosition }
+      return map { bindingAdapterPosition }
         .filter { it != NO_POSITION }
         .map { getItem(it) }
     }

@@ -323,7 +323,7 @@ class HomeAdapter(
         .clicks()
         .takeUntil(parent.detaches())
         .mapNotNull {
-          when (val position = adapterPosition) {
+          when (val position = bindingAdapterPosition) {
             RecyclerView.NO_POSITION -> null
             else -> when (val item = getItem(position)) {
               is HomeListItem.UpdatedItem.ComicItem -> Triple(

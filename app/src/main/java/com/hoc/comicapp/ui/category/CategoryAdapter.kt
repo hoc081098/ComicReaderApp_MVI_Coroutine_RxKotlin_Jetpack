@@ -49,7 +49,7 @@ class CategoryAdapter(
           itemView.text_go_to_detail.clicks(),
           itemView.clicks()
         ).takeUntil(parent.detaches())
-        .map { adapterPosition }
+        .map { bindingAdapterPosition }
         .filter { it != RecyclerView.NO_POSITION }
         .map { getItem(it) }
         .subscribe(clickCategoryS)

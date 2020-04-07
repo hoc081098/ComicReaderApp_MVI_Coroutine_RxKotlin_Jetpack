@@ -38,7 +38,7 @@ class PopularHorizontalAdapter(
 
     init {
       itemView.setOnClickListener {
-        val position = adapterPosition
+        val position = bindingAdapterPosition
         if (position != RecyclerView.NO_POSITION) {
           val item = getItem(position)
           onClickComic(
