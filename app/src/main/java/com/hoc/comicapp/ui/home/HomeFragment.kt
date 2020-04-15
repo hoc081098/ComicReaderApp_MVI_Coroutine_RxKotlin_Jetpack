@@ -118,7 +118,7 @@ class HomeFragment : Fragment() {
           }
         }
       }
-      adapter = homeAdapter
+      adapter = homeAdapter.apply { lifecycleOwner = viewLifecycleOwner }
 
       addOnItemTouchListener(object : RecyclerView.SimpleOnItemTouchListener() {
         override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {

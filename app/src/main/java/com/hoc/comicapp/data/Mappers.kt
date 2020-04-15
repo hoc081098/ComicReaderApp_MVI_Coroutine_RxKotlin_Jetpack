@@ -355,7 +355,7 @@ class ErrorMapper(private val retrofit: Retrofit) {
       else -> {
         UnexpectedError(
           cause = throwable,
-          message = "Unknown throwable $this"
+          message = "Unknown throwable $throwable"
         )
       }
     }
