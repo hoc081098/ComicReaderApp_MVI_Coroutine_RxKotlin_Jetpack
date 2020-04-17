@@ -7,6 +7,8 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.PRIORITY_HIGH
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.CoroutineWorker
+import androidx.work.ListenableWorker.Result.failure
+import androidx.work.ListenableWorker.Result.success
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.hoc.comicapp.R
@@ -14,6 +16,10 @@ import com.hoc.comicapp.activity.SplashActivity
 import com.hoc.comicapp.data.JsonAdaptersContainer
 import com.hoc.comicapp.domain.repository.DownloadComicsRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
+import com.hoc.comicapp.utils.Either
+import com.hoc.comicapp.utils.fold
+import com.hoc.comicapp.utils.left
+import com.hoc.comicapp.utils.right
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.withContext
 import org.koin.core.KoinComponent
@@ -29,31 +35,25 @@ class DownloadComicWorker(
   private val dispatchers by inject<CoroutinesDispatchersProvider>()
 
   override suspend fun doWork(): Result {
-    // Extract arguments
-    val chapterJson = inputData.getString(CHAPTER)
-      ?: return Result.failure(workDataOf(ERROR to "chapterJson is null"))
+    val (chapterLink, chapterJson, comicName, chapterComicName) = extractArgument()
+      .fold(left = { return failure(workDataOf(it)) }, right = { it })
 
-    val (chapterLink, chapterName) = withContext(dispatchers.io) {
-      // TODO: Remove @Suppress("BlockingMethodInNonBlockingContext"). This seem to be a IntelliJ Idea's bug.
-      @Suppress("BlockingMethodInNonBlockingContext")
-      jsonAdaptersContainer.comicDetailChapterAdapter.fromJson(chapterJson)
-    } ?: return Result.failure(workDataOf(ERROR to "chapter is null"))
-
-    val comicName = inputData.getString(COMIC_NAME)
-    val chapterComicName = listOfNotNull(chapterName, comicName).joinToString(" - ")
-
-    // Show notification
+    val notificationManager = NotificationManagerCompat.from(applicationContext)
     val notificationBuilder = createNotificationBuilder(chapterComicName)
-    val notificationManagerCompat = NotificationManagerCompat.from(applicationContext)
-    val notificationId = 1 // TODO: Change notification id
-    notificationManagerCompat.notify(notificationId, notificationBuilder.build())
 
     return try {
+      notificationManager.notify(
+        chapterComicName,
+        0,
+        notificationBuilder.build()
+      )
+
       downloadComicsRepo
         .downloadChapter(chapterLink)
         .collect {
-          notificationManagerCompat.notify(
-            notificationId,
+          notificationManager.notify(
+            chapterComicName,
+            0,
             notificationBuilder
               .setProgress(100, it, false)
               .setContentText("$it %")
@@ -69,28 +69,60 @@ class DownloadComicWorker(
           )
         }
 
-      notificationManagerCompat.notify(
-        notificationId,
+      notificationManager.notify(
+        chapterComicName,
+        0,
         notificationBuilder
           .setContentText("Download complete. Click to see all downloaded chapter")
           .setProgress(0, 0, false)
           .build()
       )
 
-      Result.success()
+      success()
     } catch (e: Throwable) {
       Timber.d(e, "Exception: $e")
 
-      notificationManagerCompat.notify(
-        notificationId,
+      notificationManager.notify(
+        chapterComicName,
+        0,
         notificationBuilder
           .setContentText("Download failed")
           .setProgress(0, 0, false)
           .build()
       )
 
-      Result.failure()
+      failure()
     }
+  }
+
+  private data class WorkerArgument(
+    val chapterLink: String,
+    val chapterJson: String,
+    val comicName: String?,
+    val chapterComicName: String,
+  )
+
+  private suspend fun extractArgument(): Either<Pair<String, String>, WorkerArgument> {
+    // Extract arguments
+    val chapterJson = inputData.getString(CHAPTER)
+      ?: return (ERROR to "chapterJson is null").left()
+
+    val (chapterLink, chapterName) = kotlin.runCatching {
+      withContext(dispatchers.io) {
+        // TODO: Remove @Suppress("BlockingMethodInNonBlockingContext"). This seem to be a IntelliJ Idea's bug.
+        @Suppress("BlockingMethodInNonBlockingContext")
+        jsonAdaptersContainer.comicDetailChapterAdapter.fromJson(chapterJson)
+      }
+    }.getOrNull() ?: return (ERROR to "chapter is null").left()
+
+    val comicName = inputData.getString(COMIC_NAME)
+    val chapterComicName = listOfNotNull(chapterName, comicName).joinToString(" - ")
+    return WorkerArgument(
+      chapterLink = chapterLink,
+      chapterJson = chapterJson,
+      comicName = comicName,
+      chapterComicName = chapterComicName,
+    ).right()
   }
 
   private fun createNotificationBuilder(chapterComicName: String): NotificationCompat.Builder {
