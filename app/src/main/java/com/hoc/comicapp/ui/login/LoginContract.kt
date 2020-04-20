@@ -11,7 +11,7 @@ interface LoginContract {
     // keep latest state when replace fragment
     val email: String?,
     val password: String?,
-  ) : com.hoc.comicapp.base.ViewState {
+  ) : com.hoc.comicapp.base.MviViewState {
     companion object {
       @JvmStatic
       fun initial() = ViewState(
@@ -24,13 +24,13 @@ interface LoginContract {
     }
   }
 
-  sealed class Intent : com.hoc.comicapp.base.Intent {
+  sealed class Intent : com.hoc.comicapp.base.MviIntent {
     data class EmailChanged(val email: String) : Intent()
     data class PasswordChange(val password: String) : Intent()
     object SubmitLogin : Intent()
   }
 
-  sealed class SingleEvent : com.hoc.comicapp.base.SingleEvent {
+  sealed class SingleEvent : com.hoc.comicapp.base.MviSingleEvent {
     object LoginSuccess : SingleEvent()
     data class LoginFailure(val error: ComicAppError) : SingleEvent()
   }

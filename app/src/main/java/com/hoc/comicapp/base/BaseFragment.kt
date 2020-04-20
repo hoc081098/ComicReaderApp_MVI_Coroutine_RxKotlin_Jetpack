@@ -14,9 +14,9 @@ import io.reactivex.rxkotlin.addTo
 import timber.log.Timber
 
 abstract class BaseFragment<
-    I : Intent,
-    S : ViewState,
-    E : SingleEvent,
+    I : MviIntent,
+    S : MviViewState,
+    E : MviSingleEvent,
     VM : MviViewModel<I, S, E>,
     >(
   @LayoutRes contentLayoutId: Int

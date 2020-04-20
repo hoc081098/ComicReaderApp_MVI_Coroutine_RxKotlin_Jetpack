@@ -1,8 +1,8 @@
 package com.hoc.comicapp.ui.home
 
-import com.hoc.comicapp.base.Intent
-import com.hoc.comicapp.base.SingleEvent
-import com.hoc.comicapp.base.ViewState
+import com.hoc.comicapp.base.MviIntent
+import com.hoc.comicapp.base.MviSingleEvent
+import com.hoc.comicapp.base.MviViewState
 import com.hoc.comicapp.domain.models.Comic
 import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.getMessage
@@ -46,7 +46,7 @@ data class HomeViewState(
   val items: List<HomeListItem>,
   val refreshLoading: Boolean,
   val updatedPage: Int,
-) : ViewState {
+) : MviViewState {
   companion object {
     @JvmStatic
     fun initialState() = HomeViewState(
@@ -72,7 +72,7 @@ data class HomeViewState(
   }
 }
 
-sealed class HomeViewIntent : Intent {
+sealed class HomeViewIntent : MviIntent {
   object Initial : HomeViewIntent()
   object Refresh : HomeViewIntent()
   object LoadNextPageUpdatedComic : HomeViewIntent()
@@ -266,7 +266,7 @@ sealed class HomePartialChange {
   }
 }
 
-sealed class HomeSingleEvent : SingleEvent {
+sealed class HomeSingleEvent : MviSingleEvent {
   data class MessageEvent(val message: String) : HomeSingleEvent()
 }
 

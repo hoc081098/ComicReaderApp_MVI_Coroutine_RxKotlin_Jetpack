@@ -1,16 +1,16 @@
 package com.hoc.comicapp.ui.downloading_chapters
 
-import com.hoc.comicapp.base.Intent
+import com.hoc.comicapp.base.MviIntent
 import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.DownloadedChapter
 import java.util.*
-import com.hoc.comicapp.base.SingleEvent as BaseSingleEvent
-import com.hoc.comicapp.base.ViewState as BaseViewState
+import com.hoc.comicapp.base.MviSingleEvent as BaseSingleEvent
+import com.hoc.comicapp.base.MviViewState as BaseViewState
 
 @Suppress("unused")
 interface DownloadingChaptersContract {
 
-  sealed class ViewIntent : Intent {
+  sealed class ViewIntent : MviIntent {
     object Initial : ViewIntent()
     data class CancelDownload(val chapter: ViewState.Chapter) : ViewIntent()
   }

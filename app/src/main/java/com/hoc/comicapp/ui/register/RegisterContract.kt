@@ -15,7 +15,7 @@ interface RegisterContract {
     val email: String?,
     val password: String?,
     val fullName: String?,
-  ) : com.hoc.comicapp.base.ViewState {
+  ) : com.hoc.comicapp.base.MviViewState {
     companion object {
       @JvmStatic
       fun initial() = ViewState(
@@ -31,7 +31,7 @@ interface RegisterContract {
     }
   }
 
-  sealed class Intent : com.hoc.comicapp.base.Intent {
+  sealed class Intent : com.hoc.comicapp.base.MviIntent {
     data class AvatarChanged(val uri: Uri) : Intent()
     data class EmailChanged(val email: String) : Intent()
     data class PasswordChanged(val password: String) : Intent()
@@ -39,7 +39,7 @@ interface RegisterContract {
     object SubmitRegister : Intent()
   }
 
-  sealed class SingleEvent : com.hoc.comicapp.base.SingleEvent {
+  sealed class SingleEvent : com.hoc.comicapp.base.MviSingleEvent {
     object RegisterSuccess : SingleEvent()
     data class RegisterFailure(val error: ComicAppError) : SingleEvent()
   }

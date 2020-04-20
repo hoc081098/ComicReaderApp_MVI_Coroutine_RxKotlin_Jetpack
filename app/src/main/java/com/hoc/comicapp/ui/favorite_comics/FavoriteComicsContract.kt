@@ -1,13 +1,13 @@
 package com.hoc.comicapp.ui.favorite_comics
 
-import com.hoc.comicapp.base.Intent
+import com.hoc.comicapp.base.MviIntent
 import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.FavoriteComic
 import io.reactivex.Observable
 import java.util.*
 
 interface FavoriteComicsContract {
-  sealed class ViewIntent : Intent {
+  sealed class ViewIntent : MviIntent {
     object Initial : ViewIntent()
     data class Remove(val item: ComicItem) : ViewIntent()
     data class ChangeSortOrder(val sortOrder: SortOrder) : ViewIntent()
@@ -18,7 +18,7 @@ interface FavoriteComicsContract {
     val error: ComicAppError?,
     val comics: List<ComicItem>,
     val sortOrder: SortOrder,
-  ) : com.hoc.comicapp.base.ViewState {
+  ) : com.hoc.comicapp.base.MviViewState {
     companion object {
       fun initial() = ViewState(
         isLoading = true,
@@ -74,7 +74,7 @@ interface FavoriteComicsContract {
     )
   }
 
-  sealed class SingleEvent : com.hoc.comicapp.base.SingleEvent {
+  sealed class SingleEvent : com.hoc.comicapp.base.MviSingleEvent {
     data class Message(val message: String) : SingleEvent()
   }
 

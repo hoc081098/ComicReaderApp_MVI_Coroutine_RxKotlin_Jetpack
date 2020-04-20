@@ -1,9 +1,9 @@
 package com.hoc.comicapp.ui.detail
 
 import android.os.Parcelable
-import com.hoc.comicapp.base.Intent
-import com.hoc.comicapp.base.SingleEvent
-import com.hoc.comicapp.base.ViewState
+import com.hoc.comicapp.base.MviIntent
+import com.hoc.comicapp.base.MviSingleEvent
+import com.hoc.comicapp.base.MviViewState
 import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.DownloadedChapter
 import com.hoc.comicapp.domain.models.FavoriteComic
@@ -52,7 +52,7 @@ interface ComicDetailInteractor {
   ): Observable<ComicDetailSingleEvent>
 }
 
-sealed class ComicDetailIntent : Intent {
+sealed class ComicDetailIntent : MviIntent {
   data class Initial(val arg: ComicArg) : ComicDetailIntent()
 
   object Refresh : ComicDetailIntent()
@@ -70,7 +70,7 @@ data class ComicDetailViewState(
   val isLoading: Boolean,
   val isRefreshing: Boolean,
   val isFavorited: Boolean?,
-) : ViewState {
+) : MviViewState {
   companion object {
     @JvmStatic
     fun initialState(): ComicDetailViewState = ComicDetailViewState(
@@ -263,7 +263,7 @@ sealed class ComicDetailPartialChange {
   }
 }
 
-sealed class ComicDetailSingleEvent : SingleEvent {
+sealed class ComicDetailSingleEvent : MviSingleEvent {
   data class MessageEvent(val message: String) : ComicDetailSingleEvent()
 
   data class EnqueuedDownloadSuccess(val chapter: ComicDetailViewState.Chapter) :

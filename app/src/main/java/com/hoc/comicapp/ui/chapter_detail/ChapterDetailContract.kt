@@ -18,7 +18,7 @@ interface ChapterDetailContract {
     fun refresh(chapter: ViewState.Chapter, isDownloaded: Boolean): Observable<PartialChange>
   }
 
-  sealed class ViewIntent : com.hoc.comicapp.base.Intent {
+  sealed class ViewIntent : com.hoc.comicapp.base.MviIntent {
     data class Initial(val chapter: ViewState.Chapter) : ViewIntent()
     object Refresh : ViewIntent()
     object Retry : ViewIntent()
@@ -35,7 +35,7 @@ interface ChapterDetailContract {
     val errorMessage: String?,
     val detail: Detail?,
     @RecyclerView.Orientation val orientation: Int,
-  ) : com.hoc.comicapp.base.ViewState {
+  ) : com.hoc.comicapp.base.MviViewState {
 
     data class Chapter(val name: String, val link: String) {
       override fun toString() = name
@@ -202,7 +202,7 @@ interface ChapterDetailContract {
     }
   }
 
-  sealed class SingleEvent : com.hoc.comicapp.base.SingleEvent {
+  sealed class SingleEvent : com.hoc.comicapp.base.MviSingleEvent {
     data class MessageEvent(val message: String) : SingleEvent()
   }
 }

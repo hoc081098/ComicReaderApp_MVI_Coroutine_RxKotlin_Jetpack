@@ -1,9 +1,9 @@
 package com.hoc.comicapp.ui.category
 
 import androidx.annotation.StringDef
-import com.hoc.comicapp.base.Intent
-import com.hoc.comicapp.base.SingleEvent
-import com.hoc.comicapp.base.ViewState
+import com.hoc.comicapp.base.MviIntent
+import com.hoc.comicapp.base.MviSingleEvent
+import com.hoc.comicapp.base.MviViewState
 import com.hoc.comicapp.domain.models.Category
 import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.getMessage
@@ -21,7 +21,7 @@ data class CategoryViewState(
   val errorMessage: String?,
   val refreshLoading: Boolean,
   @SortOrder val sortOrder: String,
-) : ViewState {
+) : MviViewState {
   companion object {
     @JvmStatic
     fun initialState() = CategoryViewState(
@@ -93,13 +93,13 @@ sealed class CategoryPartialChange {
   }
 }
 
-sealed class CategoryViewIntent : Intent {
+sealed class CategoryViewIntent : MviIntent {
   object Initial : CategoryViewIntent()
   object Refresh : CategoryViewIntent()
   object Retry : CategoryViewIntent()
   data class ChangeSortOrder(@SortOrder val sortOrder: String) : CategoryViewIntent()
 }
 
-sealed class CategorySingleEvent : SingleEvent {
+sealed class CategorySingleEvent : MviSingleEvent {
   data class MessageEvent(val message: String) : CategorySingleEvent()
 }

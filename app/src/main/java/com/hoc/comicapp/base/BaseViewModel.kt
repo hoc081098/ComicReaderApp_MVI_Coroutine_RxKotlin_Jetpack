@@ -11,7 +11,7 @@ import com.shopify.livedataktx.toKtx
 import io.reactivex.disposables.CompositeDisposable
 import timber.log.Timber
 
-abstract class BaseViewModel<I : Intent, S : ViewState, E : SingleEvent> : ViewModel(),
+abstract class BaseViewModel<I : MviIntent, S : MviViewState, E : MviSingleEvent> : ViewModel(),
   MviViewModel<I, S, E> {
   protected val compositeDisposable = CompositeDisposable()
 

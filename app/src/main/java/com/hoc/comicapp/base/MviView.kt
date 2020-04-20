@@ -1,24 +1,36 @@
 package com.hoc.comicapp.base
 
+import androidx.annotation.CheckResult
 import io.reactivex.Observable
 
 /**
- * Object that will render view state,
- * handle single event from [MviViewModel]
- * and provide view intents to view model.
+ * Object representing a UI that will
+ * a) emit its intents to a view model,
+ * b) subscribes to a view model for rendering its UI.
+ * c) subscribes to a view model for handling single UI event.
  *
- * @param I Top class of the [Intent] that the [MviView] will be provide
- * @param S Top class of the [ViewState] that the [MviView] will render.
- * @param E Top class of the [SingleEvent] that the [MviView] will handle.
+ * @param I Top class of the [MviIntent] that the [MviView] will be emitting.
+ * @param S Top class of the [MviViewState] the [MviView] will be subscribing to.
+ * @param E Top class of the [MviSingleEvent] the [MviView] will be subscribing to.
  */
 interface MviView<
-    I : Intent,
-    S : ViewState,
-    E : SingleEvent,
+    I : MviIntent,
+    S : MviViewState,
+    E : MviSingleEvent,
     > {
+  /**
+   * Entry point for the [MviView] to render itself based on a [MviViewState].
+   */
   fun render(viewState: S)
 
+  /**
+   * Entry point for the [MviView] to handle single event.
+   */
   fun handleEvent(event: E)
 
-  fun viewIntents(): Observable<I>
+  /**
+   * Unique [Observable] used by the [MviViewModel] to listen to the [MviView].
+   * All the [MviView]'s [MviIntent]s must go through this [Observable].
+   */
+  @CheckResult fun viewIntents(): Observable<I>
 }
