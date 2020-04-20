@@ -199,7 +199,7 @@ fun Snackbar.onDismissed(f: () -> Unit) {
   })
 }
 
-inline fun <T> LiveDataKtx<T>.observe(
+inline fun <T : Any> LiveDataKtx<T>.observe(
   owner: LifecycleOwner,
   crossinline observer: (T) -> Unit,
 ) = Observer<T?> { it?.let { observer(it) } }.also { observe(owner, it) }
@@ -217,7 +217,7 @@ fun <T> LiveData<T>.toObservable(fallbackNullValue: (() -> T)? = null): Observab
   }
 }
 
-inline fun <T> LiveData<Event<T>>.observeEvent(
+inline fun <T : Any> LiveData<Event<T>>.observeEvent(
   owner: LifecycleOwner,
   crossinline observer: (T) -> Unit,
 ) = Observer { event: Event<T>? ->
