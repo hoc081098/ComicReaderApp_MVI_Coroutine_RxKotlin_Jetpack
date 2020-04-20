@@ -9,7 +9,6 @@ import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
-import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import timber.log.Timber
@@ -18,11 +17,10 @@ abstract class BaseFragment<
     I : Intent,
     S : ViewState,
     E : SingleEvent,
-    VM : BaseViewModel<I, S, E>,
+    VM : MviViewModel<I, S, E>,
     >(
   @LayoutRes contentLayoutId: Int
-) :
-  Fragment(contentLayoutId) {
+) : Fragment(contentLayoutId), MviView<I, S, E> {
   protected val compositeDisposable = CompositeDisposable()
   protected abstract val viewModel: VM
 
@@ -58,7 +56,4 @@ abstract class BaseFragment<
    * Call in onViewCreated
    */
   protected abstract fun setupView(view: View, savedInstanceState: Bundle?)
-  protected abstract fun viewIntents(): Observable<I>
-  protected abstract fun render(viewState: S)
-  protected abstract fun handleEvent(event: E)
 }
