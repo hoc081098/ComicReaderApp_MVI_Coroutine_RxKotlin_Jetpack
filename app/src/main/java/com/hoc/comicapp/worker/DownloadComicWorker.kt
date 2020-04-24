@@ -135,6 +135,7 @@ class DownloadComicWorker(
       .setAutoCancel(true)
       .setOngoing(false)
       .setPriority(PRIORITY_HIGH)
+      .setOnlyAlertOnce(true)
       .setWhen(System.currentTimeMillis())
       .setContentIntent(
         PendingIntent.getActivity(
