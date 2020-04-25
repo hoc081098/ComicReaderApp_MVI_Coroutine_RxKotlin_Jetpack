@@ -439,3 +439,5 @@ fun Query.snapshots(): Observable<QuerySnapshot> {
     }
   }
 }
+
+inline val Any?.unit get() = Unit
