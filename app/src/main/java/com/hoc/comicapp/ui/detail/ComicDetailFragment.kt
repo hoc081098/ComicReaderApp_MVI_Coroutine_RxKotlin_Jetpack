@@ -25,6 +25,7 @@ import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.Downloaded
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.Downloading
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.NotYetDownload
 import com.hoc.comicapp.utils.action
+import com.hoc.comicapp.utils.dismissAlertDialog
 import com.hoc.comicapp.utils.getDrawableBy
 import com.hoc.comicapp.utils.isOrientationPortrait
 import com.hoc.comicapp.utils.showAlertDialog
@@ -79,6 +80,7 @@ class ComicDetailFragment : BaseFragment<
 
   override fun onDestroyView() {
     super.onDestroyView()
+    requireActivity().dismissAlertDialog()
     recycler_chapters.adapter = null
     root_detail.setTransitionListener(null)
   }
