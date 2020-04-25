@@ -30,6 +30,7 @@ import com.hoc.comicapp.utils.isOrientationPortrait
 import com.hoc.comicapp.utils.showAlertDialog
 import com.hoc.comicapp.utils.snack
 import com.hoc.comicapp.utils.themeInterpolator
+import com.hoc.comicapp.utils.unit
 import com.jakewharton.rxbinding3.recyclerview.scrollEvents
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxrelay2.PublishRelay
@@ -364,8 +365,9 @@ class ComicDetailFragment : BaseFragment<
     }
   }
 
+  @Suppress("IMPLICIT_CAST_TO_ANY")
   override fun handleEvent(event: ComicDetailSingleEvent) {
-    when (event) {
+    return when (event) {
       is ComicDetailSingleEvent.MessageEvent -> {
         view?.snack(event.message)
       }
@@ -376,7 +378,12 @@ class ComicDetailFragment : BaseFragment<
           }
         }
       }
-    }
+      is ComicDetailSingleEvent.EnqueuedDownloadFailure -> {
+        view?.snack("Failed to enqueue download '${event.chapter.chapterName}'")
+      }
+      is ComicDetailSingleEvent.DeletedChapter -> Unit
+      is ComicDetailSingleEvent.DeleteChapterError -> Unit
+    }.unit
   }
 
   override fun setupView(view: View, savedInstanceState: Bundle?) {

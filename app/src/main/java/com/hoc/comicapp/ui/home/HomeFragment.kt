@@ -15,6 +15,7 @@ import com.hoc.comicapp.R
 import com.hoc.comicapp.base.BaseFragment
 import com.hoc.comicapp.utils.isOrientationPortrait
 import com.hoc.comicapp.utils.snack
+import com.hoc.comicapp.utils.unit
 import com.jakewharton.rxbinding3.recyclerview.scrollEvents
 import com.jakewharton.rxbinding3.swiperefreshlayout.refreshes
 import io.reactivex.Observable
@@ -174,10 +175,10 @@ class HomeFragment :
   }
 
   override fun handleEvent(event: HomeSingleEvent) {
-    when (event) {
+    return when (event) {
       is HomeSingleEvent.MessageEvent -> {
         view?.snack(event.message)
       }
-    }
+    }.unit
   }
 }
