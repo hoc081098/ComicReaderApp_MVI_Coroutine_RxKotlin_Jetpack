@@ -41,6 +41,7 @@ import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
 import io.reactivex.android.MainThreadDisposable
+import io.reactivex.android.MainThreadDisposable.verifyMainThread
 import io.reactivex.annotations.CheckReturnValue
 import io.reactivex.annotations.SchedulerSupport
 import io.reactivex.disposables.Disposables
@@ -204,16 +205,23 @@ inline fun <T : Any> LiveDataKtx<T>.observe(
   crossinline observer: (T) -> Unit,
 ) = Observer<T?> { it?.let { observer(it) } }.also { observe(owner, it) }
 
-fun <T> LiveData<T>.toObservable(fallbackNullValue: (() -> T)? = null): Observable<T> {
+fun <T : Any> LiveData<T>.toObservable(fallbackNullValue: (() -> T)? = null): Observable<T> {
   return Observable.create { emitter: ObservableEmitter<T> ->
+    verifyMainThread()
+
     val observer = LiveDataObserver<T> { value: T? ->
       if (!emitter.isDisposed) {
-        val notnullValue = value ?: fallbackNullValue?.invoke() ?: return@LiveDataObserver
+        val notnullValue: T = value ?: fallbackNullValue?.invoke() ?: return@LiveDataObserver
         emitter.onNext(notnullValue)
       }
     }
     observeForever(observer)
-    emitter.setCancellable { removeObserver(observer) }
+
+    emitter.setDisposable(object : MainThreadDisposable() {
+      override fun onDispose() {
+        removeObserver(observer)
+      }
+    })
   }
 }
 
