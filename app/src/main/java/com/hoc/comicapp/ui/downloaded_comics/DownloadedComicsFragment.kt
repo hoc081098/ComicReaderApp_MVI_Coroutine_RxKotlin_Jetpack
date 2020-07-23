@@ -21,7 +21,7 @@ import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.itemSelections
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
-import com.hoc.comicapp.utils.showAlertDialogAsObservable
+import com.hoc.comicapp.utils.showAlertDialogAsMaybe
 import com.hoc.comicapp.utils.snack
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
@@ -154,13 +154,14 @@ class DownloadedComicsFragment : Fragment() {
 
   private fun showDeleteComicDialog(comic: ComicItem): Observable<ComicItem> {
     return requireActivity()
-      .showAlertDialogAsObservable {
+      .showAlertDialogAsMaybe {
         title("Delete comic")
         message("All chapter in this comic won't be available to read offline")
         cancelable(true)
         iconId(R.drawable.ic_delete_white_24dp)
       }
       .map { comic }
+      .toObservable()
   }
 
 }

@@ -29,7 +29,7 @@ import com.hoc.comicapp.utils.getColorBy
 import com.hoc.comicapp.utils.getDrawableBy
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
-import com.hoc.comicapp.utils.showAlertDialogAsObservable
+import com.hoc.comicapp.utils.showAlertDialogAsMaybe
 import com.hoc.comicapp.utils.snack
 import com.hoc.comicapp.utils.textChanges
 import com.jakewharton.rxbinding3.view.clicks
@@ -196,12 +196,12 @@ class MainActivity : AppCompatActivity() {
 
 
   private fun showSignOutDialog(): Observable<Unit> {
-    return showAlertDialogAsObservable {
+    return showAlertDialogAsMaybe {
       title("Sign out")
       message("Are you sure want to sign out?")
       cancelable(true)
       iconId(R.drawable.ic_exit_to_app_white_24dp)
-    }
+    }.toObservable()
   }
 
 

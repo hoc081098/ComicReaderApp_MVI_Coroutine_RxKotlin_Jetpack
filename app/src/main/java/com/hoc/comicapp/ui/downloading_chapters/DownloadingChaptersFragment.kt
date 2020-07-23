@@ -15,7 +15,7 @@ import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersContract.View
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
-import com.hoc.comicapp.utils.showAlertDialogAsObservable
+import com.hoc.comicapp.utils.showAlertDialogAsMaybe
 import com.hoc.comicapp.utils.snack
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
@@ -93,13 +93,14 @@ class DownloadingChaptersFragment : Fragment() {
 
   private fun showCancelDownloadingDialog(chapter: Chapter): Observable<Chapter> {
     return requireActivity()
-      .showAlertDialogAsObservable {
+      .showAlertDialogAsMaybe {
         title("Cancel downloading")
         message("This chapter won't be available to read offline")
         cancelable(true)
         iconId(R.drawable.ic_delete_white_24dp)
       }
       .map { chapter }
+      .toObservable()
   }
 
   override fun onDestroyView() {
