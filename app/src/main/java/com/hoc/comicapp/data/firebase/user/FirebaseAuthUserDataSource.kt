@@ -3,7 +3,7 @@ package com.hoc.comicapp.data.firebase.user
 import android.net.Uri
 import com.hoc.comicapp.data.firebase.entity._User
 import com.hoc.comicapp.utils.Either
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 
 interface FirebaseAuthUserDataSource {
   fun userObservable(): Observable<Either<Throwable, _User?>>

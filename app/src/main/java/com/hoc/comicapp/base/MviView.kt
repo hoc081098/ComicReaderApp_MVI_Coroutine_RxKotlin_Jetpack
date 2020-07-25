@@ -1,7 +1,7 @@
 package com.hoc.comicapp.base
 
 import androidx.annotation.CheckResult
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 
 /**
  * Object representing a UI that will

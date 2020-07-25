@@ -9,11 +9,11 @@ import com.hoc.comicapp.ui.login.LoginContract.PartialChange
 import com.hoc.comicapp.ui.login.LoginContract.SingleEvent
 import com.hoc.comicapp.ui.login.LoginContract.ViewState
 import com.hoc.comicapp.utils.exhaustMap
-import com.jakewharton.rxrelay2.PublishRelay
-import io.reactivex.Observable
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.ofType
-import io.reactivex.rxkotlin.subscribeBy
+import com.jakewharton.rxrelay3.PublishRelay
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.ofType
+import io.reactivex.rxjava3.kotlin.subscribeBy
 
 class LoginVM(
   private val interactor: Interactor,

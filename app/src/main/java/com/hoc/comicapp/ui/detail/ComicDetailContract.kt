@@ -9,7 +9,7 @@ import com.hoc.comicapp.domain.models.DownloadedChapter
 import com.hoc.comicapp.domain.models.FavoriteComic
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.ComicDetail
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 import kotlinx.android.parcel.Parcelize
 import java.util.*
 

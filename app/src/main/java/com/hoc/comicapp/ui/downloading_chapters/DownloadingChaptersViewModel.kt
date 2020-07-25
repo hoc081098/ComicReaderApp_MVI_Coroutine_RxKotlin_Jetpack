@@ -18,15 +18,15 @@ import com.hoc.comicapp.utils.fold
 import com.hoc.comicapp.utils.notOfType
 import com.hoc.comicapp.utils.toObservable
 import com.hoc.comicapp.worker.DownloadComicWorker
-import com.jakewharton.rxrelay2.PublishRelay
-import io.reactivex.Observable
-import io.reactivex.ObservableTransformer
-import io.reactivex.functions.BiFunction
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.ofType
-import io.reactivex.rxkotlin.subscribeBy
+import com.jakewharton.rxrelay3.PublishRelay
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.ObservableTransformer
+import io.reactivex.rxjava3.functions.BiFunction
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.ofType
+import io.reactivex.rxjava3.kotlin.subscribeBy
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.rx2.rxSingle
+import kotlinx.coroutines.rx3.rxSingle
 import timber.log.Timber
 
 @ExperimentalCoroutinesApi
@@ -77,7 +77,7 @@ class DownloadingChaptersViewModel(
           .map<PartialChange> { PartialChange.Data(it) }
           .onErrorReturn { t: Throwable -> PartialChange.Error(UnexpectedError("", t)) }
           .observeOn(rxSchedulerProvider.main)
-          .startWith(PartialChange.Loading)
+          .startWithItem(PartialChange.Loading)
       }
     }
 

@@ -3,7 +3,7 @@ package com.hoc.comicapp.domain.repository
 import android.net.Uri
 import com.hoc.comicapp.domain.DomainResult
 import com.hoc.comicapp.domain.models.User
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 
 interface UserRepository {
   suspend fun login(email: String, password: String): DomainResult<Unit>

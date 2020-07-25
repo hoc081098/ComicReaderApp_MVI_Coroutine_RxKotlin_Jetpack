@@ -6,9 +6,9 @@ import com.hoc.comicapp.ui.register.RegisterContract.Interactor
 import com.hoc.comicapp.ui.register.RegisterContract.PartialChange
 import com.hoc.comicapp.ui.register.RegisterContract.User
 import com.hoc.comicapp.utils.fold
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.rx2.rxObservable
+import kotlinx.coroutines.rx3.rxObservable
 import timber.log.Timber
 
 @ExperimentalCoroutinesApi

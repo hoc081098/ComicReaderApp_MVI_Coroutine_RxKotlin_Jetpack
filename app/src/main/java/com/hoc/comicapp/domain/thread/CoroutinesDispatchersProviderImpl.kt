@@ -1,7 +1,7 @@
 package com.hoc.comicapp.domain.thread
 
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.rx2.asCoroutineDispatcher
+import kotlinx.coroutines.rx3.asCoroutineDispatcher
 
 class CoroutinesDispatchersProviderImpl(
   private val rxSchedulerProvider: RxSchedulerProvider,

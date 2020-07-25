@@ -8,10 +8,9 @@ import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentActivity
-import io.reactivex.Maybe
-import io.reactivex.Observable
-import io.reactivex.android.MainThreadDisposable
-import io.reactivex.android.MainThreadDisposable.verifyMainThread
+import io.reactivex.rxjava3.android.MainThreadDisposable
+import io.reactivex.rxjava3.android.MainThreadDisposable.verifyMainThread
+import io.reactivex.rxjava3.core.Maybe
 import timber.log.Timber
 
 /**

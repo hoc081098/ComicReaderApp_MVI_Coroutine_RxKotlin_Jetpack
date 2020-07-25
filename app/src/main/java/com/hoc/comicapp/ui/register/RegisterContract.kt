@@ -2,7 +2,7 @@ package com.hoc.comicapp.ui.register
 
 import android.net.Uri
 import com.hoc.comicapp.domain.models.ComicAppError
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 
 interface RegisterContract {
   data class ViewState(

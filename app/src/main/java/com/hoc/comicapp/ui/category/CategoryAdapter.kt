@@ -11,12 +11,12 @@ import com.hoc.comicapp.R
 import com.hoc.comicapp.domain.models.Category
 import com.hoc.comicapp.utils.asObservable
 import com.hoc.comicapp.utils.inflate
-import com.jakewharton.rxbinding3.view.clicks
-import com.jakewharton.rxbinding3.view.detaches
-import com.jakewharton.rxrelay2.PublishRelay
-import io.reactivex.Observable
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
+import com.jakewharton.rxbinding4.view.clicks
+import com.jakewharton.rxbinding4.view.detaches
+import com.jakewharton.rxrelay3.PublishRelay
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
 import kotlinx.android.synthetic.main.item_recycler_category.view.*
 
 object CategoryDiffUtilItemCallback : DiffUtil.ItemCallback<Category>() {

@@ -8,7 +8,7 @@ import androidx.lifecycle.distinctUntilChanged
 import com.hoc.comicapp.utils.Event
 import com.shopify.livedataktx.LiveDataKtx
 import com.shopify.livedataktx.toKtx
-import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 import timber.log.Timber
 
 abstract class BaseViewModel<I : MviIntent, S : MviViewState, E : MviSingleEvent> : ViewModel(),

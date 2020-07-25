@@ -8,7 +8,7 @@ import com.hoc.comicapp.domain.models.FavoriteComic
 import com.hoc.comicapp.domain.repository.FavoriteComicsRepository
 import com.hoc.comicapp.utils.bimap
 import com.hoc.comicapp.utils.right
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 
 class FavoriteComicsRepositoryImpl(
   private val errorMapper: ErrorMapper,

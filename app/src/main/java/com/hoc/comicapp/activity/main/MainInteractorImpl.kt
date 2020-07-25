@@ -7,9 +7,9 @@ import com.hoc.comicapp.domain.repository.UserRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.utils.fold
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.rx2.rxObservable
+import kotlinx.coroutines.rx3.rxObservable
 
 @ExperimentalCoroutinesApi
 class MainInteractorImpl(
@@ -30,7 +30,7 @@ class MainInteractorImpl(
         )
       }
       .observeOn(rxSchedulerProvider.main)
-      .startWith(PartialChange.User.Loading)
+      .startWithItem(PartialChange.User.Loading)
   }
 
   override fun signOut(): Observable<PartialChange> {

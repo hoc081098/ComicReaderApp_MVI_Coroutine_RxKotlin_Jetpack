@@ -3,7 +3,7 @@ package com.hoc.comicapp.ui.favorite_comics
 import com.hoc.comicapp.base.MviIntent
 import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.FavoriteComic
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 import java.util.*
 
 interface FavoriteComicsContract {

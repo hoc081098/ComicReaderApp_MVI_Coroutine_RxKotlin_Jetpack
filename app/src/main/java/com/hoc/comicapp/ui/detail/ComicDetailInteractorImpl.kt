@@ -12,10 +12,10 @@ import com.hoc.comicapp.ui.detail.ComicDetailPartialChange.RefreshPartialChange
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.ComicDetail.Detail
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.ComicDetail.Initial
 import com.hoc.comicapp.utils.fold
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.rx2.collect
-import kotlinx.coroutines.rx2.rxObservable
+import kotlinx.coroutines.rx3.collect
+import kotlinx.coroutines.rx3.rxObservable
 
 @ExperimentalCoroutinesApi
 class ComicDetailInteractorImpl(

@@ -14,7 +14,6 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
-import rx_activity_result2.RxActivityResult
 import timber.log.Timber
 import kotlin.time.ExperimentalTime
 
@@ -25,8 +24,6 @@ import kotlin.time.ExperimentalTime
 class App : Application() {
   override fun onCreate() {
     super.onCreate()
-
-    RxActivityResult.register(this)
 
     startKoin {
       // use AndroidLogger as Koin Logger

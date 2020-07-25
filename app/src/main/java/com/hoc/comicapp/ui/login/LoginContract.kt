@@ -1,7 +1,7 @@
 package com.hoc.comicapp.ui.login
 
 import com.hoc.comicapp.domain.models.ComicAppError
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 
 interface LoginContract {
   data class ViewState(

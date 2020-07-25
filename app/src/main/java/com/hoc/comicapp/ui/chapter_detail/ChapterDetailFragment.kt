@@ -21,9 +21,9 @@ import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract.ViewIntent
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract.ViewState
 import com.hoc.comicapp.utils.snack
 import com.hoc.comicapp.utils.unit
-import com.jakewharton.rxbinding3.view.clicks
-import com.jakewharton.rxbinding3.widget.checkedChanges
-import io.reactivex.Observable
+import com.jakewharton.rxbinding4.view.clicks
+import com.jakewharton.rxbinding4.widget.checkedChanges
+import io.reactivex.rxjava3.core.Observable
 import kotlinx.android.synthetic.main.fragment_chapter_detail.*
 import org.koin.androidx.scope.lifecycleScope
 import org.koin.androidx.viewmodel.scope.viewModel

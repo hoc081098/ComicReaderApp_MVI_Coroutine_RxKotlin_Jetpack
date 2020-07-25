@@ -6,7 +6,7 @@ import com.hoc.comicapp.base.MviViewState
 import com.hoc.comicapp.domain.models.Comic
 import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.getMessage
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 
 interface HomeInteractor {
   fun newestComics(): Observable<HomePartialChange>

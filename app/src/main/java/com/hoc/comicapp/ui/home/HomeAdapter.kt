@@ -25,16 +25,16 @@ import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.NEWEST
 import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.UPDATED
 import com.hoc.comicapp.utils.inflate
 import com.hoc.comicapp.utils.mapNotNull
-import com.jakewharton.rxbinding3.recyclerview.scrollStateChanges
-import com.jakewharton.rxbinding3.view.clicks
-import com.jakewharton.rxbinding3.view.detaches
-import com.jakewharton.rxrelay2.PublishRelay
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.subscribeBy
+import com.jakewharton.rxbinding4.recyclerview.scrollStateChanges
+import com.jakewharton.rxbinding4.view.clicks
+import com.jakewharton.rxbinding4.view.detaches
+import com.jakewharton.rxrelay3.PublishRelay
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.disposables.Disposable
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.subscribeBy
 import kotlinx.android.synthetic.main.item_recycler_home_header.view.*
 import kotlinx.android.synthetic.main.item_recycler_home_recycler.view.*
 import kotlinx.android.synthetic.main.item_recyclerview_updated_comic.view.*
@@ -92,11 +92,11 @@ class HomeAdapter(
   val updatedRetryObservable = updatedRetryS.throttleFirst(500, TimeUnit.MILLISECONDS)!!
 
   // Click observables
-  val clickComicObservable: Observable<HomeClickEvent> = Observable.mergeArray(
-      newestAdapter.clickComicObservable,
-      mostViewedAdapter.clickComicObservable,
-      clickComicS,
-    )
+  val clickComicObservable = Observable.mergeArray(
+    newestAdapter.clickComicObservable,
+    mostViewedAdapter.clickComicObservable,
+    clickComicS,
+  )
     .map(::toHomeClickEvent)
     .doOnNext { Timber.d("[*] Click comic $it") }!!
 

@@ -15,12 +15,12 @@ import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewState.Item
 import com.hoc.comicapp.utils.asObservable
 import com.hoc.comicapp.utils.inflate
 import com.hoc.comicapp.utils.mapNotNull
-import com.jakewharton.rxbinding3.view.clicks
-import com.jakewharton.rxbinding3.view.detaches
-import com.jakewharton.rxrelay2.PublishRelay
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.ofType
+import com.jakewharton.rxbinding4.view.clicks
+import com.jakewharton.rxbinding4.view.detaches
+import com.jakewharton.rxrelay3.PublishRelay
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.ofType
 import kotlinx.android.synthetic.main.item_recycler_search_comic.view.*
 import kotlinx.android.synthetic.main.item_recycler_search_comic_load_more.view.*
 

@@ -32,21 +32,20 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
-import com.jakewharton.rxbinding3.InitialValueObservable
-import com.jakewharton.rxrelay2.Relay
+import com.jakewharton.rxbinding4.InitialValueObservable
+import com.jakewharton.rxrelay3.Relay
 import com.jaredrummler.materialspinner.MaterialSpinner
 import com.miguelcatalan.materialsearchview.MaterialSearchView
 import com.shopify.livedataktx.LiveDataKtx
-import io.reactivex.BackpressureStrategy
-import io.reactivex.Observable
-import io.reactivex.ObservableEmitter
-import io.reactivex.android.MainThreadDisposable
-import io.reactivex.android.MainThreadDisposable.verifyMainThread
-import io.reactivex.annotations.CheckReturnValue
-import io.reactivex.annotations.SchedulerSupport
-import io.reactivex.disposables.Disposables
-import io.reactivex.rxkotlin.ofType
-import io.reactivex.subjects.Subject
+import io.reactivex.rxjava3.android.MainThreadDisposable
+import io.reactivex.rxjava3.android.MainThreadDisposable.verifyMainThread
+import io.reactivex.rxjava3.annotations.SchedulerSupport
+import io.reactivex.rxjava3.core.BackpressureStrategy
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.ObservableEmitter
+import io.reactivex.rxjava3.disposables.Disposable
+import io.reactivex.rxjava3.kotlin.ofType
+import io.reactivex.rxjava3.subjects.Subject
 import kotlinx.coroutines.delay
 import timber.log.Timber
 import java.io.File
@@ -55,7 +54,7 @@ import java.io.InputStream
 import kotlin.math.roundToInt
 import androidx.lifecycle.Observer as LiveDataObserver
 
-@CheckReturnValue
+@CheckResult
 @SchedulerSupport(SchedulerSupport.NONE)
 inline fun <reified U : Any, T : Any> Observable<T>.notOfType() = filter { it !is U }!!
 
@@ -232,11 +231,11 @@ inline fun <T : Any> LiveData<Event<T>>.observeEvent(
   event?.getContentIfNotHandled()?.let(observer)
 }.also { observe(owner, it) }
 
-typealias RxObserver<T> = io.reactivex.Observer<T>
+typealias RxObserver<T> = io.reactivex.rxjava3.core.Observer<T>
 
 private fun checkMainThread(observer: RxObserver<*>): Boolean {
   if (Looper.myLooper() != Looper.getMainLooper()) {
-    observer.onSubscribe(Disposables.empty())
+    observer.onSubscribe(Disposable.empty())
     observer.onError(
       IllegalStateException(
         "Expected to be called on the main thread but was ${Thread.currentThread().name}"

@@ -2,7 +2,7 @@ package com.hoc.comicapp.activity.main
 
 import com.hoc.comicapp.base.MviIntent
 import com.hoc.comicapp.domain.models.ComicAppError
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 
 interface MainContract {
   sealed class ViewIntent : MviIntent {

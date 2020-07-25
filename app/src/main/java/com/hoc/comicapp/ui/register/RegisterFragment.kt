@@ -1,8 +1,5 @@
 package com.hoc.comicapp.ui.register
 
-import android.app.Activity
-import android.content.Intent.ACTION_OPEN_DOCUMENT
-import android.content.Intent.CATEGORY_OPENABLE
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +7,7 @@ import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.Button
 import android.widget.ProgressBar
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
@@ -24,24 +22,22 @@ import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.ui.register.RegisterContract.Intent
 import com.hoc.comicapp.ui.register.RegisterContract.SingleEvent
 import com.hoc.comicapp.utils.exhaustMap
-import com.hoc.comicapp.utils.mapNotNull
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.onDismissed
 import com.hoc.comicapp.utils.snack
 import com.hoc.comicapp.utils.uriFromResourceId
-import com.jakewharton.rxbinding3.view.clicks
-import com.jakewharton.rxbinding3.widget.textChanges
-import io.reactivex.Observable
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
+import com.jakewharton.rxbinding4.view.clicks
+import com.jakewharton.rxbinding4.widget.textChanges
+import io.reactivex.rxjava3.android.MainThreadDisposable
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
 import kotlinx.android.synthetic.main.fragment_register.*
 import org.koin.androidx.scope.lifecycleScope
 import org.koin.androidx.viewmodel.scope.viewModel
-import rx_activity_result2.RxActivityResult
 import timber.log.Timber
 import kotlin.LazyThreadSafetyMode.NONE
-import android.content.Intent as AndroidIntent
 
 class RegisterFragment : Fragment() {
 
@@ -127,27 +123,18 @@ class RegisterFragment : Fragment() {
       .exhaustMap {
         Timber.d("Select image")
 
-        val intent = AndroidIntent(ACTION_OPEN_DOCUMENT)
-          .apply {
-            type = "image/*"
-            addCategory(CATEGORY_OPENABLE)
-          }
-          .let { AndroidIntent.createChooser(it, "Choose avatar") }
+        Observable.create<Intent.AvatarChanged> { emitter ->
+          val launcher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+            uri?.let { emitter.onNext(Intent.AvatarChanged(it)) }
+            emitter.onComplete()
+          }.apply { launch(arrayOf("image/*")) }
 
-        RxActivityResult
-          .on(this@RegisterFragment)
-          .startIntent(intent)
-
-      }
-      .mapNotNull {
-        if (it.resultCode() == Activity.RESULT_OK) {
-          it.data()?.data
-        } else {
-          null
+          emitter.setDisposable(object : MainThreadDisposable() {
+            override fun onDispose() = launcher.unregister()
+          })
         }
       }
       .doOnNext { Timber.d("Select image $it") }
-      .map { Intent.AvatarChanged(it) }
   }
 
   override fun onDestroyView() {

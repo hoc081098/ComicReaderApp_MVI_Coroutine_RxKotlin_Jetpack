@@ -9,8 +9,8 @@ import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
 import timber.log.Timber
 
 abstract class BaseFragment<

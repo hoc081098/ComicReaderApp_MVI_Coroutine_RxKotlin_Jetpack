@@ -4,8 +4,8 @@ import androidx.annotation.CheckResult
 import androidx.lifecycle.LiveData
 import com.hoc.comicapp.utils.Event
 import com.shopify.livedataktx.LiveDataKtx
-import io.reactivex.Observable
-import io.reactivex.disposables.Disposable
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.Disposable
 
 /**
  * Object that will subscribes to a MviView's [MviIntent]s,

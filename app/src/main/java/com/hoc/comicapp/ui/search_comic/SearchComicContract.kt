@@ -6,7 +6,7 @@ import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewState.Item
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewState.Item.ComicItem
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 
 interface SearchComicContract {
   interface Interactor {
