@@ -26,7 +26,6 @@ import timber.log.Timber
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 
-@ExperimentalTime
 @ObsoleteCoroutinesApi
 class FavoriteComicsDataSourceImpl(
   private val firebaseAuth: FirebaseAuth,
@@ -42,6 +41,7 @@ class FavoriteComicsDataSourceImpl(
     }
   }
 
+  @OptIn(ExperimentalTime::class)
   @Suppress("FunctionName")
   private suspend fun _updateComics(comics: List<_FavoriteComic>) {
     measureTime {

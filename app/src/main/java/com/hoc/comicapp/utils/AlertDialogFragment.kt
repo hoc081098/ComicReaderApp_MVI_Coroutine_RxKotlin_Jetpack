@@ -68,7 +68,8 @@ fun FragmentActivity.showAlertDialog(init: AlertDialogFragment.Builder.() -> Uni
 fun FragmentActivity.dismissAlertDialog() {
   try {
     val dialogFragment =
-      supportFragmentManager.findFragmentByTag(AlertDialogFragment::class.java.simpleName) as? DialogFragment
+      supportFragmentManager.findFragmentByTag(AlertDialogFragment::class.java.simpleName) as? AlertDialogFragment
+    dialogFragment?.cleanUp()
     dialogFragment?.dismissAllowingStateLoss()
     Timber.d("dismissAlertDialog")
   } catch (e: Exception) {
@@ -118,6 +119,10 @@ class AlertDialogFragment : DialogFragment() {
         }
       }
       .create()
+  }
+
+  fun cleanUp() {
+    builder = null
   }
 
   companion object {

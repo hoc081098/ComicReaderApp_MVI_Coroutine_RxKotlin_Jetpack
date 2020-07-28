@@ -9,23 +9,32 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.work.CoroutineWorker
 import androidx.work.ListenableWorker.Result.failure
 import androidx.work.ListenableWorker.Result.success
+import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.hoc.comicapp.R
 import com.hoc.comicapp.activity.SplashActivity
+import com.hoc.comicapp.data.ErrorMapper
 import com.hoc.comicapp.data.JsonAdaptersContainer
+import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.domain.repository.DownloadComicsRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
+import com.hoc.comicapp.initializer.startKoinIfNeeded
 import com.hoc.comicapp.utils.Either
 import com.hoc.comicapp.utils.fold
 import com.hoc.comicapp.utils.left
 import com.hoc.comicapp.utils.right
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.withContext
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import timber.log.Timber
 
+@ExperimentalCoroutinesApi
+@ObsoleteCoroutinesApi
 class DownloadComicWorker(
   appContext: Context,
   params: WorkerParameters,
@@ -33,6 +42,12 @@ class DownloadComicWorker(
   private val downloadComicsRepo by inject<DownloadComicsRepository>()
   private val jsonAdaptersContainer by inject<JsonAdaptersContainer>()
   private val dispatchers by inject<CoroutinesDispatchersProvider>()
+  private val workManager by inject<WorkManager>()
+  private val errorMapper by inject<ErrorMapper>()
+
+  init {
+    appContext.startKoinIfNeeded()
+  }
 
   override suspend fun doWork(): Result {
     val (chapterLink, chapterJson, comicName, chapterComicName) = extractArgument()
@@ -86,7 +101,10 @@ class DownloadComicWorker(
         chapterComicName,
         0,
         notificationBuilder
-          .setContentText("Download failed")
+          .setContentText(
+            if (e is CancellationException) "Download cancelled"
+            else "Download failed: ${errorMapper.map(e).getMessage()}"
+          )
           .setProgress(0, 0, false)
           .build()
       )
@@ -126,8 +144,13 @@ class DownloadComicWorker(
   }
 
   private fun createNotificationBuilder(chapterComicName: String): NotificationCompat.Builder {
-    return NotificationCompat.Builder(applicationContext,
-        applicationContext.getString(R.string.notification_channel_id))
+    val cancelIntent = workManager.createCancelPendingIntent(id)
+
+    return NotificationCompat
+      .Builder(
+        applicationContext,
+        applicationContext.getString(R.string.notification_channel_id)
+      )
       .setSmallIcon(R.mipmap.ic_launcher_round)
       .setContentTitle("Download $chapterComicName")
       .setContentText("Downloading...")
@@ -145,6 +168,7 @@ class DownloadComicWorker(
           PendingIntent.FLAG_UPDATE_CURRENT
         )
       )
+      .addAction(R.drawable.ic_close_white_24dp, "Cancel", cancelIntent)
   }
 
   companion object {

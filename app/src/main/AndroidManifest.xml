@@ -6,7 +6,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:name=".App"
         android:allowBackup="true"
         android:fullBackupContent="true"
         android:icon="@mipmap/ic_launcher"
@@ -31,6 +30,37 @@
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
+
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+
+            <!-- This entry makes ExampleLoggerInitializer discoverable. -->
+            <meta-data
+                android:name="com.hoc.comicapp.initializer.KoinInitializer"
+                android:value="androidx.startup" />
+
+            <meta-data
+                android:name="com.hoc.comicapp.initializer.NotificationInitializer"
+                android:value="androidx.startup" />
+
+            <meta-data
+                android:name="com.hoc.comicapp.initializer.TimberInitializer"
+                android:value="androidx.startup" />
+
+            <meta-data
+                android:name="com.hoc.comicapp.initializer.WorkManagerInitializer"
+                android:value="androidx.startup" />
+
+        </provider>
+
+        <provider
+            android:name="androidx.work.impl.WorkManagerInitializer"
+            android:authorities="${applicationId}.workmanager-init"
+            android:exported="false"
+            tools:node="remove" />
 
     </application>
 

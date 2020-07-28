@@ -6,7 +6,7 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
 
-@ExperimentalTime
+@OptIn(ExperimentalTime::class)
 class Cache<K : Any, V : Any>(maxSize: Int, private val entryLifetime: Duration) {
   private val timeSource = TimeSource.Monotonic
   private val cache = LruCache<K, Value<V>>(maxSize)

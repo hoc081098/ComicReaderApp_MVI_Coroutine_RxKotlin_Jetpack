@@ -29,7 +29,6 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 import kotlin.time.seconds
 
-@ExperimentalTime
 @ObsoleteCoroutinesApi
 class ComicRepositoryImpl(
   private val errorMapper: ErrorMapper,
@@ -39,6 +38,7 @@ class ComicRepositoryImpl(
   private val comicDao: ComicDao,
   appCoroutineScope: CoroutineScope,
 ) : ComicRepository {
+  @OptIn(ExperimentalTime::class)
   private val cache = Cache<RequestCacheKey, Any>(
     maxSize = 8,
     entryLifetime = 60.seconds
@@ -49,6 +49,7 @@ class ComicRepositoryImpl(
     }
   }
 
+  @OptIn(ExperimentalTime::class)
   @Suppress("FunctionName")
   private suspend fun _updateDownloadedComic(entity: ComicEntity) {
     measureTime {
