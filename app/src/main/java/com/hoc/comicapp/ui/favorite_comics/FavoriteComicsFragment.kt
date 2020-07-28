@@ -63,8 +63,8 @@ class FavoriteComicsFragment : Fragment() {
     }
 
     spinner_sort.setItems(SortOrder.values().toList())
-    spinner_sort.selectedIndex = viewModel.state.safeValue?.sortOrder
-      ?.let { SortOrder.values().indexOf(it) } ?: 0
+    spinner_sort.selectedIndex = viewModel.state.value.sortOrder
+      .let { SortOrder.values().indexOf(it) }
 
     favoriteComicsAdapter
       .clickItem

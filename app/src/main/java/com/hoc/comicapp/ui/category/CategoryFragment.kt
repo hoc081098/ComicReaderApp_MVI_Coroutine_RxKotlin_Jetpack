@@ -70,10 +70,9 @@ class CategoryFragment : Fragment() {
 
     spinner_sort_title.setItems(orders)
     spinner_sort_title.selectedIndex = viewModel.state
-      .safeValue
-      ?.sortOrder
-      ?.let(orders::indexOf)
-      ?: 0
+      .value
+      .sortOrder
+      .let(orders::indexOf)
   }
 
   private fun bind(adapter: CategoryAdapter) {

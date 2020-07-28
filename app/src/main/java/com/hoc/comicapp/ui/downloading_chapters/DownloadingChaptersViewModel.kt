@@ -35,9 +35,7 @@ class DownloadingChaptersViewModel(
   private val workManager: WorkManager,
   private val jsonAdaptersContainer: JsonAdaptersContainer,
   private val downloadComicsRepository: DownloadComicsRepository,
-) : BaseViewModel<ViewIntent, ViewState, SingleEvent>() {
-
-  override val initialState = ViewState.initial()
+) : BaseViewModel<ViewIntent, ViewState, SingleEvent>(ViewState.initial()) {
 
   private val intentS = PublishRelay.create<ViewIntent>()
 

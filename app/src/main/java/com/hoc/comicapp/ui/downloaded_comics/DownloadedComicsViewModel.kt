@@ -22,8 +22,7 @@ import timber.log.Timber
 class DownloadedComicsViewModel(
   private val rxSchedulerProvider: RxSchedulerProvider,
   private val interactor: Interactor,
-) : BaseViewModel<ViewIntent, ViewState, SingleEvent>() {
-  override val initialState = ViewState.initial()
+) : BaseViewModel<ViewIntent, ViewState, SingleEvent>(ViewState.initial()) {
 
   private val intentS = PublishRelay.create<ViewIntent>()
 

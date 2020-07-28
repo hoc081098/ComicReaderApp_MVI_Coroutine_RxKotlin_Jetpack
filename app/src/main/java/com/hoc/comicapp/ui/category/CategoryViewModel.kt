@@ -19,8 +19,7 @@ class CategoryViewModel(
   private val categoryInteractor: CategoryInteractor,
   rxSchedulerProvider: RxSchedulerProvider,
 ) :
-  BaseViewModel<CategoryViewIntent, CategoryViewState, CategorySingleEvent>() {
-  override val initialState = CategoryViewState.initialState()
+  BaseViewModel<CategoryViewIntent, CategoryViewState, CategorySingleEvent>(CategoryViewState.initialState()) {
   private val intentS = PublishRelay.create<CategoryViewIntent>()
 
   /**

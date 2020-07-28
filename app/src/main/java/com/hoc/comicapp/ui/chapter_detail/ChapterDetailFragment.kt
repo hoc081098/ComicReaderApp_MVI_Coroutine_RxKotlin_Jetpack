@@ -75,7 +75,7 @@ class ChapterDetailFragment : BaseFragment<
 
     spinner_chapters.adapter = allChaptersAdapter
 
-    viewModel.state.safeValue?.detail?.let { detail ->
+    viewModel.state.value.detail?.let { detail ->
       allChaptersAdapter.clear()
       allChaptersAdapter.addAll(detail.chapters)
 

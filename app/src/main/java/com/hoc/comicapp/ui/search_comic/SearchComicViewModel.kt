@@ -23,10 +23,8 @@ class SearchComicViewModel(
   private val interactor: Interactor,
   rxSchedulerProvider: RxSchedulerProvider,
 ) :
-  BaseViewModel<ViewIntent, ViewState, SingleEvent>() {
+  BaseViewModel<ViewIntent, ViewState, SingleEvent>(ViewState.initialState()) {
   private val intentS = PublishRelay.create<ViewIntent>()
-
-  override val initialState = ViewState.initialState()
 
   override fun processIntents(intents: Observable<ViewIntent>) =
     intents.subscribe(intentS)!!
@@ -122,11 +120,11 @@ class SearchComicViewModel(
      */
 
     Observable.mergeArray(
-        searchPartialChange,
-        retryPartialChange,
-        loadNextPagePartialChange,
-        retryNextPagePartialChange
-      )
+      searchPartialChange,
+      retryPartialChange,
+      loadNextPagePartialChange,
+      retryNextPagePartialChange
+    )
       .scan(initialState) { state, change -> change.reducer(state) }
       .distinctUntilChanged()
       .observeOn(rxSchedulerProvider.main)

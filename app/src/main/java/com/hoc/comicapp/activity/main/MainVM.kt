@@ -20,9 +20,7 @@ import io.reactivex.rxjava3.kotlin.subscribeBy
 class MainVM(
   private val interactor: Interactor,
   rxSchedulerProvider: RxSchedulerProvider,
-) : BaseViewModel<ViewIntent, ViewState, SingleEvent>() {
-  override val initialState = ViewState.initial()
-
+) : BaseViewModel<ViewIntent, ViewState, SingleEvent>(ViewState.initial()) {
   private val intentS = PublishRelay.create<ViewIntent>()
 
   override fun processIntents(intents: Observable<ViewIntent>) = intents.subscribe(intentS)!!

@@ -21,8 +21,7 @@ class HomeViewModel(
   private val homeInteractor: HomeInteractor,
   rxSchedulerProvider: RxSchedulerProvider,
 ) :
-  BaseViewModel<HomeViewIntent, HomeViewState, HomeSingleEvent>() {
-  override val initialState = HomeViewState.initialState()
+  BaseViewModel<HomeViewIntent, HomeViewState, HomeSingleEvent>(HomeViewState.initialState()) {
 
   private val intentS = PublishRelay.create<HomeViewIntent>()
   private val stateS = BehaviorRelay.createDefault(initialState)
@@ -162,27 +161,27 @@ class HomeViewModel(
   private val intentToViewState =
     ObservableTransformer<HomeViewIntent, HomeViewState> { intentObservable ->
       intentObservable.publish { shared ->
-          Observable.mergeArray(
-            shared
-              .ofType<HomeViewIntent.Initial>()
-              .compose(initialProcessor),
-            shared
-              .ofType<HomeViewIntent.Refresh>()
-              .compose(refreshProcessor),
-            shared
-              .ofType<HomeViewIntent.LoadNextPageUpdatedComic>()
-              .compose(loadNextPageProcessor),
-            shared
-              .ofType<HomeViewIntent.RetryUpdate>()
-              .compose(retryUpdateProcessor),
-            shared
-              .ofType<HomeViewIntent.RetryNewest>()
-              .compose(retryNewestProcessor),
-            shared
-              .ofType<HomeViewIntent.RetryMostViewed>()
-              .compose(retryMostViewedProcessor)
-          )
-        }
+        Observable.mergeArray(
+          shared
+            .ofType<HomeViewIntent.Initial>()
+            .compose(initialProcessor),
+          shared
+            .ofType<HomeViewIntent.Refresh>()
+            .compose(refreshProcessor),
+          shared
+            .ofType<HomeViewIntent.LoadNextPageUpdatedComic>()
+            .compose(loadNextPageProcessor),
+          shared
+            .ofType<HomeViewIntent.RetryUpdate>()
+            .compose(retryUpdateProcessor),
+          shared
+            .ofType<HomeViewIntent.RetryNewest>()
+            .compose(retryNewestProcessor),
+          shared
+            .ofType<HomeViewIntent.RetryMostViewed>()
+            .compose(retryMostViewedProcessor)
+        )
+      }
         .doOnNext { Timber.d("partial_change=$it") }
         .scan(initialState) { state, change -> change.reducer(state) }
         .distinctUntilChanged()

@@ -18,8 +18,7 @@ import io.reactivex.rxjava3.kotlin.subscribeBy
 class LoginVM(
   private val interactor: Interactor,
   private val rxSchedulerProvider: RxSchedulerProvider,
-) : BaseViewModel<Intent, ViewState, SingleEvent>() {
-  override val initialState = ViewState.initial()
+) : BaseViewModel<Intent, ViewState, SingleEvent>(ViewState.initial()) {
 
   private val intentS = PublishRelay.create<Intent>()
 
@@ -63,12 +62,12 @@ class LoginVM(
     val passwordChange = passwordObservable.map { PartialChange.PasswordChanged(it) }
 
     Observable.mergeArray(
-        emailErrorChanges,
-        passwordErrorChange,
-        loginChanges,
-        emailChange,
-        passwordChange
-      )
+      emailErrorChanges,
+      passwordErrorChange,
+      loginChanges,
+      emailChange,
+      passwordChange
+    )
       .scan(initialState) { state, change -> change.reducer(state) }
       .observeOn(rxSchedulerProvider.main)
       .subscribeBy(onNext = ::setNewState)

@@ -3,7 +3,7 @@ package com.hoc.comicapp.base
 import androidx.annotation.CheckResult
 import androidx.lifecycle.LiveData
 import com.hoc.comicapp.utils.Event
-import com.shopify.livedataktx.LiveDataKtx
+import com.hoc.comicapp.utils.NotNullLiveData
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.Disposable
 
@@ -16,7 +16,7 @@ import io.reactivex.rxjava3.disposables.Disposable
  * @param E Top class of the [MviSingleEvent] that the [MviViewModel] will be emitting.
  */
 interface MviViewModel<I : MviIntent, S : MviViewState, E : MviSingleEvent> {
-  val state: LiveDataKtx<S>
+  val state: NotNullLiveData<S>
 
   val singleEvent: LiveData<Event<E>>
 

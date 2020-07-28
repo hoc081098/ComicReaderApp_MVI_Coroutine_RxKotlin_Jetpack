@@ -24,9 +24,7 @@ class ChapterDetailViewModel(
   private val interactor: Interactor,
   rxSchedulerProvider: RxSchedulerProvider,
   private val isDownloaded: Boolean,
-) :
-  BaseViewModel<ViewIntent, ViewState, SingleEvent>() {
-  override val initialState = ViewState.initial()
+) : BaseViewModel<ViewIntent, ViewState, SingleEvent>(ViewState.initial()) {
 
   private val intentS = PublishRelay.create<ViewIntent>()
 
@@ -102,15 +100,15 @@ class ChapterDetailViewModel(
     ObservableTransformer<ViewIntent, PartialChange> { intents ->
       Observable.mergeArray(
         Observable.mergeArray(
-            intents.ofType(),
-            intents.ofType<ViewIntent.Initial>().map { ViewIntent.LoadChapter(it.chapter) },
-            intents.ofType<ViewIntent.LoadNextChapter>()
-              .mapNotNull { nextChapter }
-              .map { ViewIntent.LoadChapter(it) },
-            intents.ofType<ViewIntent.LoadPrevChapter>()
-              .mapNotNull { prevChapter }
-              .map { ViewIntent.LoadChapter(it) }
-          )
+          intents.ofType(),
+          intents.ofType<ViewIntent.Initial>().map { ViewIntent.LoadChapter(it.chapter) },
+          intents.ofType<ViewIntent.LoadNextChapter>()
+            .mapNotNull { nextChapter }
+            .map { ViewIntent.LoadChapter(it) },
+          intents.ofType<ViewIntent.LoadPrevChapter>()
+            .mapNotNull { prevChapter }
+            .map { ViewIntent.LoadChapter(it) }
+        )
           .distinctUntilChanged()
           .compose(loadChapterProcessor),
         intents.ofType<ViewIntent.Refresh>().compose(refreshProcessor),

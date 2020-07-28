@@ -36,7 +36,6 @@ import com.jakewharton.rxbinding4.InitialValueObservable
 import com.jakewharton.rxrelay3.Relay
 import com.jaredrummler.materialspinner.MaterialSpinner
 import com.miguelcatalan.materialsearchview.MaterialSearchView
-import com.shopify.livedataktx.LiveDataKtx
 import io.reactivex.rxjava3.android.MainThreadDisposable
 import io.reactivex.rxjava3.android.MainThreadDisposable.verifyMainThread
 import io.reactivex.rxjava3.annotations.SchedulerSupport
@@ -199,10 +198,11 @@ fun Snackbar.onDismissed(f: () -> Unit) {
   })
 }
 
-inline fun <T : Any> LiveDataKtx<T>.observe(
+inline fun <T : Any> NotNullLiveData<T>.observe(
   owner: LifecycleOwner,
   crossinline observer: (T) -> Unit,
-) = Observer<T?> { it?.let { observer(it) } }.also { observe(owner, it) }
+) = Observer { value: T -> observer(value) }
+  .also { observe(owner, it) }
 
 fun <T : Any> LiveData<T>.toObservable(fallbackNullValue: (() -> T)? = null): Observable<T> {
   return Observable.create { emitter: ObservableEmitter<T> ->

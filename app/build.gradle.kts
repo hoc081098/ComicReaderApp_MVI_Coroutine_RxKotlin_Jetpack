@@ -94,7 +94,6 @@ dependencies {
   implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
   implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
   implementation("androidx.lifecycle:lifecycle-reactivestreams-ktx:$lifecycleVersion")
-  implementation("com.shopify:livedata-ktx:3.0.0")
 
   // Room
   implementation("androidx.room:room-runtime:$roomVersion")
@@ -110,10 +109,10 @@ dependencies {
   implementation("org.koin:koin-androidx-scope:$koinVersion")
 
   // Moshi, Retrofit, OkHttp
-  implementation("com.squareup.moshi:moshi-kotlin:1.8.0")
+  implementation("com.squareup.moshi:moshi-kotlin:1.9.2")
   implementation("com.squareup.retrofit2:retrofit:$retrofit2Version")
   implementation("com.squareup.retrofit2:converter-moshi:$retrofit2Version")
-  implementation("com.squareup.okhttp3:logging-interceptor:4.3.1")
+  implementation("com.squareup.okhttp3:logging-interceptor:4.4.0")
 
   // Leak canary
   debugImplementation("com.squareup.leakcanary:leakcanary-android:2.0-alpha-2")
@@ -154,9 +153,9 @@ dependencies {
   androidTestImplementation("androidx.test.espresso:espresso-core:3.3.0-alpha05")
 
   // Firebase
-  implementation("com.google.firebase:firebase-auth:19.3.0")
+  implementation("com.google.firebase:firebase-auth:19.3.2")
   implementation("com.google.firebase:firebase-storage:19.1.1")
-  implementation("com.google.firebase:firebase-firestore:21.4.1")
+  implementation("com.google.firebase:firebase-firestore:21.5.0")
   implementation("com.google.firebase:firebase-analytics:17.4.4")
 
   implementation("com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava")
