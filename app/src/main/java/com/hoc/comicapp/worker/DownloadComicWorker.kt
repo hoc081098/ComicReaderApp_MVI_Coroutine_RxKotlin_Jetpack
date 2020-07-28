@@ -1,5 +1,6 @@
 package com.hoc.comicapp.worker
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -49,6 +50,7 @@ class DownloadComicWorker(
     appContext.startKoinIfNeeded()
   }
 
+  @SuppressLint("RestrictedApi")
   override suspend fun doWork(): Result {
     val (chapterLink, chapterJson, comicName, chapterComicName) = extractArgument()
       .fold(left = { return failure(workDataOf(it)) }, right = { it })
@@ -89,6 +91,7 @@ class DownloadComicWorker(
         0,
         notificationBuilder
           .setContentText("Download complete. Click to see all downloaded chapter")
+          .apply { mActions.clear() }
           .setProgress(0, 0, false)
           .build()
       )
@@ -105,11 +108,12 @@ class DownloadComicWorker(
             if (e is CancellationException) "Download cancelled"
             else "Download failed: ${errorMapper.map(e).getMessage()}"
           )
+          .apply { mActions.clear() }
           .setProgress(0, 0, false)
           .build()
       )
 
-      failure()
+      failure(workDataOf(ERROR to e.toString()))
     }
   }
 
@@ -125,13 +129,13 @@ class DownloadComicWorker(
     val chapterJson = inputData.getString(CHAPTER)
       ?: return (ERROR to "chapterJson is null").left()
 
-    val (chapterLink, chapterName) = kotlin.runCatching {
-      withContext(dispatchers.io) {
-        // TODO: Remove @Suppress("BlockingMethodInNonBlockingContext"). This seem to be a IntelliJ Idea's bug.
-        @Suppress("BlockingMethodInNonBlockingContext")
-        jsonAdaptersContainer.comicDetailChapterAdapter.fromJson(chapterJson)
+    val (chapterLink, chapterName) = kotlin
+      .runCatching {
+        withContext(dispatchers.io) {
+          jsonAdaptersContainer.comicDetailChapterAdapter.fromJson(chapterJson)
+        }
       }
-    }.getOrNull() ?: return (ERROR to "chapter is null").left()
+      .getOrNull() ?: return (ERROR to "chapter is null").left()
 
     val comicName = inputData.getString(COMIC_NAME)
     val chapterComicName = listOfNotNull(chapterName, comicName).joinToString(" - ")
