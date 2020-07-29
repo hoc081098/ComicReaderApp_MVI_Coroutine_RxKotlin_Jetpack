@@ -5,7 +5,7 @@ buildscript {
   val navVersion by extra("2.3.0-alpha04")
   extra.run {
     set("coroutinesVersion", "1.3.8")
-    set("lifecycleVersion", "2.3.0-alpha01")
+    set("lifecycleVersion", "2.3.0-alpha06")
     set("pagingVersion", "2.1.2")
     set("koinVersion", "2.1.5")
     set("materialVersion", "1.2.0-alpha05")

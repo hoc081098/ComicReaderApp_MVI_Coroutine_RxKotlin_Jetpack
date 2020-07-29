@@ -10,10 +10,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
+import com.hoc.comicapp.databinding.ItemRecyclerSearchComicBinding
+import com.hoc.comicapp.databinding.ItemRecyclerSearchComicLoadMoreBinding
 import com.hoc.comicapp.ui.detail.ComicArg
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewState.Item
 import com.hoc.comicapp.utils.asObservable
-import com.hoc.comicapp.utils.inflate
+import com.hoc.comicapp.utils.inflater
 import com.hoc.comicapp.utils.mapNotNull
 import com.jakewharton.rxbinding4.view.clicks
 import com.jakewharton.rxbinding4.view.detaches
@@ -21,8 +23,6 @@ import com.jakewharton.rxrelay3.PublishRelay
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.ofType
-import kotlinx.android.synthetic.main.item_recycler_search_comic.view.*
-import kotlinx.android.synthetic.main.item_recycler_search_comic_load_more.view.*
 
 object SearchComicDiffUtilItemCallback : DiffUtil.ItemCallback<Item>() {
   override fun areItemsTheSame(
@@ -50,10 +50,22 @@ class SearchComicAdapter(
   val clickButtonRetryOrLoadMoreObservable get() = clickButtonRetryOrLoadMoreS.asObservable()
 
   override fun onCreateViewHolder(parent: ViewGroup, @LayoutRes viewType: Int): VH {
-    val itemView = parent inflate viewType
     return when (viewType) {
-      R.layout.item_recycler_search_comic -> ComicVH(itemView, parent)
-      R.layout.item_recycler_search_comic_load_more -> LoadMoreVH(itemView, parent)
+      R.layout.item_recycler_search_comic -> ComicVH(
+        ItemRecyclerSearchComicBinding.inflate(
+          parent.inflater,
+          parent,
+          false
+        ), parent
+      )
+      R.layout.item_recycler_search_comic_load_more -> LoadMoreVH(
+        ItemRecyclerSearchComicLoadMoreBinding.inflate(
+          parent.inflater,
+          parent,
+          false
+        ),
+        parent
+      )
       else -> error("Don't know viewType=$viewType")
     }
   }
@@ -72,13 +84,12 @@ class SearchComicAdapter(
     abstract fun bind(item: Item)
   }
 
-  inner class LoadMoreVH(itemView: View, parent: View) : VH(itemView) {
-    private val progressBar = itemView.progress_bar!!
-    private val textErrorMessage = itemView.text_error_message!!
-    private val buttonRetryOrLoadMore = itemView.button_retry_or_loadmore!!
-
+  inner class LoadMoreVH(
+    private val binding: ItemRecyclerSearchComicLoadMoreBinding,
+    parent: View
+  ) : VH(binding.root) {
     init {
-      buttonRetryOrLoadMore
+      binding.buttonRetryOrLoadmore
         .clicks()
         .takeUntil(parent.detaches())
         .map { bindingAdapterPosition }
@@ -95,37 +106,33 @@ class SearchComicAdapter(
         .addTo(compositeDisposable)
     }
 
-    override fun bind(item: Item) {
+    override fun bind(item: Item) = binding.run {
       when (item) {
         is Item.ComicItem -> Unit
         Item.Idle -> {
           progressBar.isVisible = false
           textErrorMessage.isVisible = false
-          buttonRetryOrLoadMore.isVisible = true
-          buttonRetryOrLoadMore.text = "Load next page"
+          buttonRetryOrLoadmore.isVisible = true
+          buttonRetryOrLoadmore.text = "Load next page"
         }
         Item.Loading -> {
           progressBar.isVisible = true
           textErrorMessage.isVisible = false
-          buttonRetryOrLoadMore.isVisible = false
+          buttonRetryOrLoadmore.isVisible = false
         }
         is Item.Error -> {
           progressBar.isVisible = false
           textErrorMessage.isVisible = true
           textErrorMessage.text = item.errorMessage
-          buttonRetryOrLoadMore.isVisible = true
-          buttonRetryOrLoadMore.text = "Retry"
+          buttonRetryOrLoadmore.isVisible = true
+          buttonRetryOrLoadmore.text = "Retry"
         }
       }
     }
   }
 
-  inner class ComicVH(itemView: View, parent: View) : VH(itemView) {
-    private val imageComic = itemView.image_comic!!
-    private val textLastChapterName = itemView.text_view_last_chapter_name!!
-    private val textComicName = itemView.text_comic_name!!
-    private val textCategoryNames = itemView.text_category_names!!
-
+  inner class ComicVH(private val binding: ItemRecyclerSearchComicBinding, parent: View) :
+    VH(binding.root) {
     init {
       itemView
         .clicks()
@@ -147,7 +154,7 @@ class SearchComicAdapter(
         .addTo(compositeDisposable)
     }
 
-    override fun bind(item: Item) {
+    override fun bind(item: Item) = binding.run {
       if (item !is Item.ComicItem) {
         return
       }
@@ -162,7 +169,7 @@ class SearchComicAdapter(
 
       textComicName.text = item.title
       val lastChapter = item.lastChapters.lastOrNull()
-      textLastChapterName.text = lastChapter?.chapterName
+      textViewLastChapterName.text = lastChapter?.chapterName
       textCategoryNames.text = lastChapter?.time
     }
   }

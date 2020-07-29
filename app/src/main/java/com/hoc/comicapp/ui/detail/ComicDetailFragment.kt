@@ -15,6 +15,7 @@ import com.google.android.material.transition.MaterialContainerTransform
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.base.BaseFragment
+import com.hoc.comicapp.databinding.FragmentComicDetailBinding
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract
 import com.hoc.comicapp.ui.detail.ComicDetailIntent.CancelDownloadChapter
 import com.hoc.comicapp.ui.detail.ComicDetailIntent.DeleteChapter
@@ -32,6 +33,7 @@ import com.hoc.comicapp.utils.showAlertDialog
 import com.hoc.comicapp.utils.snack
 import com.hoc.comicapp.utils.themeInterpolator
 import com.hoc.comicapp.utils.unit
+import com.hoc.comicapp.utils.viewBinding
 import com.jakewharton.rxbinding4.recyclerview.scrollEvents
 import com.jakewharton.rxbinding4.view.clicks
 import com.jakewharton.rxrelay3.PublishRelay
@@ -39,7 +41,6 @@ import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import io.reactivex.rxjava3.kotlin.withLatestFrom
-import kotlinx.android.synthetic.main.fragment_comic_detail.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.androidx.scope.lifecycleScope
 import org.koin.androidx.viewmodel.scope.viewModel
@@ -61,6 +62,10 @@ class ComicDetailFragment : BaseFragment<
   override val viewModel by lifecycleScope.viewModel<ComicDetailViewModel>(owner = this) {
     parametersOf(args.isDownloaded)
   }
+  override val viewBinding by viewBinding<FragmentComicDetailBinding> {
+    recyclerChapters.adapter = null
+    rootDetail.setTransitionListener(null)
+  }
   private val args by navArgs<ComicDetailFragmentArgs>()
 
   private val glide by lazy(NONE) { GlideApp.with(this) }
@@ -81,8 +86,6 @@ class ComicDetailFragment : BaseFragment<
   override fun onDestroyView() {
     super.onDestroyView()
     requireActivity().dismissAlertDialog()
-    recycler_chapters.adapter = null
-    root_detail.setTransitionListener(null)
   }
 
   //region Setup view
@@ -106,7 +109,7 @@ class ComicDetailFragment : BaseFragment<
 
   private fun startTransitions() {
     Timber.d("transitionName: ${args.transitionName}")
-    root_detail.transitionName = args.transitionName
+    viewBinding.rootDetail.transitionName = args.transitionName
     startPostponedEnterTransition()
   }
 
@@ -126,11 +129,13 @@ class ComicDetailFragment : BaseFragment<
       .let(glide::load)
       .fitCenter()
       .transition(DrawableTransitionOptions.withCrossFade())
-      .into(image_thumbnail)
+      .into(viewBinding.imageThumbnail)
   }
 
   private fun setupFab() {
-    val scrollEvents = recycler_chapters.scrollEvents().share()
+    val fab = viewBinding.fab
+
+    val scrollEvents = viewBinding.recyclerChapters.scrollEvents().share()
     scrollEvents
       .subscribeBy {
         when {
@@ -163,20 +168,20 @@ class ComicDetailFragment : BaseFragment<
               else -> 0
             }
           }
-          .let { recycler_chapters.layoutManager!!.startSmoothScroll(it) }
+          .let { viewBinding.recyclerChapters.layoutManager!!.startSmoothScroll(it) }
       }
       .addTo(compositeDisposable)
   }
 
   private fun setupMotionLayout() {
-    root_detail
+    viewBinding.rootDetail
       .getConstraintSet(R.layout.fragment_comic_detail)
       .setGuidelinePercent(
         R.id.guideline,
         if (requireContext().isOrientationPortrait) 0.45f else 0.175f
       )
 
-    root_detail
+    viewBinding.rootDetail
       .getConstraintSet(R.layout.fragment_comic_detail_end)
       .setGuidelinePercent(
         R.id.guideline,
@@ -185,7 +190,7 @@ class ComicDetailFragment : BaseFragment<
 
 
     var lastProgress = 0f
-    root_detail.setTransitionListener(object : TransitionAdapter() {
+    viewBinding.rootDetail.setTransitionListener(object : TransitionAdapter() {
       override fun onTransitionChange(
         motionLayout: MotionLayout?,
         startId: Int,
@@ -195,15 +200,15 @@ class ComicDetailFragment : BaseFragment<
         if (progress - lastProgress > 0) {
           // from start to end
           if ((progress - 1f).absoluteValue < 0.5f) {
-            text_title.maxLines = 1
-            text_last_updated_status_view.maxLines = 2
+            viewBinding.textTitle.maxLines = 1
+            viewBinding.textLastUpdatedStatusView.maxLines = 2
             Timber.d("END")
           }
         } else {
           // from end to start
           if (progress < 0.3f) {
-            text_title.maxLines = 6
-            text_last_updated_status_view.maxLines = Int.MAX_VALUE
+            viewBinding.textTitle.maxLines = 6
+            viewBinding.textLastUpdatedStatusView.maxLines = Int.MAX_VALUE
             Timber.d("START")
           }
         }
@@ -285,6 +290,7 @@ class ComicDetailFragment : BaseFragment<
           }
         }
       }
+      ComicDetailViewState.DownloadState.Loading -> Unit
     }
   }
 
@@ -306,11 +312,11 @@ class ComicDetailFragment : BaseFragment<
   //endregion
 
   //region Override BaseFragment
-  override fun render(viewState: ComicDetailViewState) {
+  override fun render(viewState: ComicDetailViewState) = viewBinding.run {
     Timber.d("state=$viewState")
     Timber.d("favorite=${viewState.isFavorited}")
 
-    image_favorite.setImageDrawable(
+    imageFavorite.setImageDrawable(
       when (viewState.isFavorited) {
         true -> requireContext().getDrawableBy(id = R.drawable.ic_favorite_white_24dp)
         false -> requireContext().getDrawableBy(id = R.drawable.ic_favorite_border_white_24dp)
@@ -319,18 +325,18 @@ class ComicDetailFragment : BaseFragment<
     )
 
     if (viewState.isLoading) {
-      progress_bar.visibility = View.VISIBLE
-      text_last_updated_status_view.text = "Loading..."
+      progressBar.visibility = View.VISIBLE
+      textLastUpdatedStatusView.text = "Loading..."
     } else {
-      progress_bar.visibility = View.INVISIBLE
+      progressBar.visibility = View.INVISIBLE
     }
 
     if (viewState.errorMessage === null) {
-      group_error.visibility = View.GONE
+      groupError.visibility = View.GONE
     } else {
-      group_error.visibility = View.VISIBLE
-      text_error_message.text = viewState.errorMessage
-      text_last_updated_status_view.text = "Error occurred"
+      groupError.visibility = View.VISIBLE
+      textErrorMessage.text = viewState.errorMessage
+      textLastUpdatedStatusView.text = "Error occurred"
     }
 
 //    TODO: Refresh detail page
@@ -340,13 +346,13 @@ class ComicDetailFragment : BaseFragment<
 
     when (val detail = viewState.comicDetail ?: return) {
       is ComicDetail.Detail -> {
-        text_title.text = detail.title
+        textTitle.text = detail.title
 
         val list = mutableListOf(
           "Last updated" to detail.lastUpdated,
           "View" to detail.view
         )
-        text_last_updated_status_view.text = HtmlCompat.fromHtml(
+        textLastUpdatedStatusView.text = HtmlCompat.fromHtml(
           list.joinToString("<br>") { "\u2022 <b>${it.first}:</b> ${it.second}" },
           HtmlCompat.FROM_HTML_MODE_LEGACY
         )
@@ -361,7 +367,7 @@ class ComicDetailFragment : BaseFragment<
         ) + detail.chapters.map { ChapterAdapterItem.Chapter(it) } + ChapterAdapterItem.Dummy)
       }
       is ComicDetail.Initial -> {
-        text_title.text = detail.title
+        textTitle.text = detail.title
         loadThumbnail(detail.thumbnail)
       }
     }
@@ -388,13 +394,13 @@ class ComicDetailFragment : BaseFragment<
     }.unit
   }
 
-  override fun setupView(view: View, savedInstanceState: Bundle?) {
+  override fun setupView(view: View, savedInstanceState: Bundle?) = viewBinding.run {
     startTransitions()
 
 //    TODO: Refresh detail page
 //    swipe_refresh_layout.setColorSchemeColors(*resources.getIntArray(com.hoc.comicapp.R.array.swipe_refresh_colors))
 
-    recycler_chapters.run {
+    recyclerChapters.run {
       setHasFixedSize(true)
       layoutManager = LinearLayoutManager(context)
       adapter = chapterAdapter
@@ -403,8 +409,8 @@ class ComicDetailFragment : BaseFragment<
     setupFab()
     setupMotionLayout()
 
-    switch_mode.isChecked = !args.isDownloaded
-    switch_mode.setOnCheckedChangeListener { _, _ ->
+    switchMode.isChecked = !args.isDownloaded
+    switchMode.setOnCheckedChangeListener { _, _ ->
       val actionComicDetailFragmentSelf =
         ComicDetailFragmentDirections.actionComicDetailFragmentSelf(
           comic = args.comic,
@@ -415,12 +421,12 @@ class ComicDetailFragment : BaseFragment<
     }
   }
 
-  override fun viewIntents(): Observable<ComicDetailIntent> {
-    return Observable.mergeArray(
+  override fun viewIntents(): Observable<ComicDetailIntent> = viewBinding.run {
+    Observable.mergeArray(
       Observable.just(
         ComicDetailIntent.Initial(args.comic)
       ),
-      button_retry
+      buttonRetry
         .clicks()
         .map { ComicDetailIntent.Retry },
 //        TODO: Refresh detail page
@@ -428,7 +434,7 @@ class ComicDetailFragment : BaseFragment<
 //          .refreshes()
 //          .map { ComicDetailIntent.Refresh(argComic.link) }
       intentS,
-      image_favorite
+      imageFavorite
         .clicks()
         .throttleFirst(300, TimeUnit.MILLISECONDS)
         .map { ComicDetailIntent.ToggleFavorite }

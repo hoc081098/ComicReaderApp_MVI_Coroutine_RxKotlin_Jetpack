@@ -10,14 +10,15 @@ import androidx.recyclerview.widget.RecyclerView.NO_POSITION
 import antonkozyriatskyi.circularprogressindicator.CircularProgressIndicator
 import com.google.android.material.chip.Chip
 import com.hoc.comicapp.R
+import com.hoc.comicapp.databinding.ItemRecyclerChapterBinding
+import com.hoc.comicapp.databinding.ItemRecyclerDetailBinding
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.Category
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.Downloaded
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.Downloading
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.Loading
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.NotYetDownload
 import com.hoc.comicapp.utils.inflate
-import kotlinx.android.synthetic.main.item_recycler_chapter.view.*
-import kotlinx.android.synthetic.main.item_recycler_detail.view.*
+import com.hoc.comicapp.utils.inflater
 import timber.log.Timber
 
 sealed class ChapterAdapterItem {
@@ -62,8 +63,20 @@ class ChapterAdapter(
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
     val view = parent inflate viewType
     return when (viewType) {
-      R.layout.item_recycler_detail -> HeaderVH(view)
-      R.layout.item_recycler_chapter -> ChapterVH(view)
+      R.layout.item_recycler_detail -> HeaderVH(
+        ItemRecyclerDetailBinding.inflate(
+          parent.inflater,
+          parent,
+          false
+        )
+      )
+      R.layout.item_recycler_chapter -> ChapterVH(
+        ItemRecyclerChapterBinding.inflate(
+          parent.inflater,
+          parent,
+          false
+        )
+      )
       R.layout.item_recycler_chapter_dummy -> DummyVH(view)
       else -> error("Unknown viewType=$viewType")
     }
@@ -96,20 +109,17 @@ class ChapterAdapter(
     abstract fun bind(item: ChapterAdapterItem)
   }
 
-  private inner class ChapterVH(itemView: View) : ChapterAdapter.VH(itemView),
+  private inner class ChapterVH(private val binding: ItemRecyclerChapterBinding) :
+    ChapterAdapter.VH(binding.root),
     View.OnClickListener {
-    private val textChapterTitle = itemView.text_chapter_title!!
-    private val textChapterTime = itemView.text_chapter_time!!
-    private val textChapterView = itemView.text_chapter_view!!
-    private val imageDownload = itemView.image_download!!
-    private val circularProgress = itemView.circular_progress!!.apply {
-      maxProgress = 100.0
-      setProgressTextAdapter(PROGRESS_TEXT_ADAPTER)
-    }
-
     init {
+      binding.circularProgress.apply {
+        maxProgress = 100.0
+        setProgressTextAdapter(PROGRESS_TEXT_ADAPTER)
+      }
+
       itemView.setOnClickListener(this)
-      imageDownload.setOnClickListener(this)
+      binding.imageDownload.setOnClickListener(this)
     }
 
     override fun onClick(v: View) {
@@ -121,7 +131,7 @@ class ChapterAdapter(
     }
 
 
-    override fun bind(item: ChapterAdapterItem) {
+    override fun bind(item: ChapterAdapterItem) = binding.run {
       if (item !is ChapterAdapterItem.Chapter) return
       val chapter = item.chapter
       textChapterTitle.text = chapter.chapterName
@@ -130,7 +140,7 @@ class ChapterAdapter(
       updateDownloadState(chapter.downloadState)
     }
 
-    fun updateDownloadState(downloadState: ComicDetailViewState.DownloadState) {
+    fun updateDownloadState(downloadState: ComicDetailViewState.DownloadState) = binding.run {
       when (downloadState) {
         Downloaded -> {
           imageDownload.setImageResource(R.drawable.ic_done_accent_24dp)
@@ -153,19 +163,17 @@ class ChapterAdapter(
     }
   }
 
-  private inner class HeaderVH(itemView: View) : VH(itemView), View.OnClickListener {
-    private val textShortendedContent = itemView.text_shortended_content!!
-    private val categoriesGroup = itemView.categories_group!!
+  private inner class HeaderVH(private val binding: ItemRecyclerDetailBinding) : VH(binding.root),
+    View.OnClickListener {
 
     init {
-      itemView.button_read_latest_chapter.setOnClickListener(this)
-      itemView.button_read_first_chapter.setOnClickListener(this)
+      binding.buttonReadLatestChapter.setOnClickListener(this)
+      binding.buttonReadFirstChapter.setOnClickListener(this)
     }
 
     override fun onClick(v: View) = onClickReadButton(v.id == R.id.button_read_first_chapter)
 
-
-    override fun bind(item: ChapterAdapterItem) {
+    override fun bind(item: ChapterAdapterItem) = binding.run {
       if (item !is ChapterAdapterItem.Header) return
 
       textShortendedContent.text = item.shortenedContent

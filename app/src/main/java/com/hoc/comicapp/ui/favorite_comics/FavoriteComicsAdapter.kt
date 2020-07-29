@@ -9,17 +9,16 @@ import androidx.recyclerview.widget.RecyclerView.NO_POSITION
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.chauthai.swipereveallayout.ViewBinderHelper
 import com.hoc.comicapp.GlideRequests
-import com.hoc.comicapp.R
+import com.hoc.comicapp.databinding.ItemRecyclerFavoriteComicsBinding
 import com.hoc.comicapp.ui.favorite_comics.FavoriteComicsContract.ComicItem
 import com.hoc.comicapp.utils.asObservable
-import com.hoc.comicapp.utils.inflate
+import com.hoc.comicapp.utils.inflater
 import com.jakewharton.rxbinding4.view.clicks
 import com.jakewharton.rxbinding4.view.detaches
 import com.jakewharton.rxrelay3.PublishRelay
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
-import kotlinx.android.synthetic.main.item_recycler_favorite_comics.view.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -43,17 +42,12 @@ class FavoriteComicsAdapter(
   val clickItem get() = _clickItem.asObservable()
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-    VH(parent inflate R.layout.item_recycler_favorite_comics, parent)
+    VH(ItemRecyclerFavoriteComicsBinding.inflate(parent.inflater, parent, false), parent)
 
   override fun onBindViewHolder(holder: VH, position: Int) = holder.bind(getItem(position))
 
-  inner class VH(itemView: View, parent: View) : RecyclerView.ViewHolder(itemView) {
-    private val imageComic = itemView.image_comic!!
-    private val swipeRevealLayout = itemView.swipe_reveal_layout!!
-
-    private val textComicName = itemView.text_comic_name!!
-    private val textCreatedAt = itemView.text_created_at!!
-    private val textViewCount = itemView.text_view!!
+  inner class VH(private val binding: ItemRecyclerFavoriteComicsBinding, parent: View) :
+    RecyclerView.ViewHolder(binding.root) {
 
     private fun <T> Observable<T>.getItemAtPosition(): Observable<ComicItem> {
       return map { bindingAdapterPosition }
@@ -62,15 +56,15 @@ class FavoriteComicsAdapter(
     }
 
     init {
-      itemView
-        .text_delete
+      binding
+        .textDelete
         .clicks()
         .takeUntil(parent.detaches())
         .getItemAtPosition()
         .subscribe(_clickDelete)
         .addTo(compositeDisposable)
 
-      itemView
+      binding
         .cardView
         .clicks()
         .takeUntil(parent.detaches())
@@ -79,7 +73,7 @@ class FavoriteComicsAdapter(
         .addTo(compositeDisposable)
     }
 
-    fun bind(comic: ComicItem) {
+    fun bind(comic: ComicItem) = binding.run {
       viewBinderHelper.bind(swipeRevealLayout, comic.url)
 
       glide
@@ -91,7 +85,7 @@ class FavoriteComicsAdapter(
 
       textComicName.text = comic.title
       textCreatedAt.text = "Added at: ${comic.createdAt?.let { dateFormatter.format(it) } ?: "N/A"}"
-      textViewCount.text = comic.view
+      textView.text = comic.view
     }
   }
 }

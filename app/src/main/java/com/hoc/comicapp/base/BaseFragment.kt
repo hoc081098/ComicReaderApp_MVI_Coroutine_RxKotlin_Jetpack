@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.annotation.CallSuper
 import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
+import androidx.viewbinding.ViewBinding
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -22,7 +23,9 @@ abstract class BaseFragment<
   @LayoutRes contentLayoutId: Int
 ) : Fragment(contentLayoutId), MviView<I, S, E> {
   protected val compositeDisposable = CompositeDisposable()
+
   protected abstract val viewModel: VM
+  protected abstract val viewBinding: ViewBinding
 
   @CallSuper override fun onCreateView(
     inflater: LayoutInflater,

@@ -5,7 +5,10 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.Group
 import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
 import androidx.navigation.findNavController
@@ -21,6 +24,7 @@ import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.activity.main.MainContract.ViewIntent
 import com.hoc.comicapp.activity.main.MainContract.ViewState.User
+import com.hoc.comicapp.databinding.ActivityMainBinding
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.utils.dismissAlertDialog
 import com.hoc.comicapp.utils.dpToPx
@@ -32,12 +36,12 @@ import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.showAlertDialogAsMaybe
 import com.hoc.comicapp.utils.snack
 import com.hoc.comicapp.utils.textChanges
+import com.hoc.comicapp.utils.viewBinding
 import com.jakewharton.rxbinding4.view.clicks
+import de.hdodenhof.circleimageview.CircleImageView
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.nav_header_main.view.*
 import org.koin.androidx.scope.lifecycleScope
 import org.koin.androidx.viewmodel.scope.viewModel
 import timber.log.Timber
@@ -45,6 +49,7 @@ import kotlin.LazyThreadSafetyMode.NONE
 
 class MainActivity : AppCompatActivity() {
   private val mainVM by lifecycleScope.viewModel<MainVM>(owner = this)
+  private val viewBinding by viewBinding(ActivityMainBinding::inflate)
   private val compositeDisposable = CompositeDisposable()
 
   private val glide by lazy(NONE) { GlideApp.with(this) }
@@ -52,14 +57,14 @@ class MainActivity : AppCompatActivity() {
   private val appBarConfiguration: AppBarConfiguration by lazy(NONE) {
     AppBarConfiguration(
       topLevelDestinationIds = setOf(R.id.home_fragment_dest),
-      drawerLayout = drawer_layout
+      drawerLayout = viewBinding.drawerLayout
     )
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    setContentView(R.layout.activity_main)
-    setSupportActionBar(toolbar)
+    setContentView(viewBinding.root)
+    setSupportActionBar(viewBinding.toolbar)
 
     val navController = findNavController(R.id.main_nav_fragment)
     // Set up action bar
@@ -68,10 +73,10 @@ class MainActivity : AppCompatActivity() {
       appBarConfiguration
     )
     // Set up navigation view menu
-    nav_view.setupWithNavController(navController)
-    nav_view.bringToFront()
+    viewBinding.navView.setupWithNavController(navController)
+    viewBinding.navView.bringToFront()
 
-    search_view.run {
+    viewBinding.searchView.run {
       setHint("Search comic...")
 
       setTextColor(getColorBy(id = R.color.colorTextOnBackground))
@@ -89,23 +94,25 @@ class MainActivity : AppCompatActivity() {
   }
 
   private fun bindVM() {
-    val headerView = nav_view.getHeaderView(0)
-    val textDisplayName = headerView.text_display_name!!
-    val textEmail = headerView.text_email!!
-    val imageAvatar = headerView.image_avatar!!
-    val imageView = headerView.imageView!!
-    val userAccountGroup = headerView.user_account_group!!
+    val navView = viewBinding.navView
 
-    val loginMenuItem = nav_view.menu.findItem(R.id.action_home_fragment_dest_to_loginFragment)!!
-    val logoutMenuItem = nav_view.menu.findItem(R.id.action_logout)!!
+    val headerView = navView.getHeaderView(0)
+    val textDisplayName = headerView.findViewById<TextView>(R.id.text_display_name)
+    val textEmail = headerView.findViewById<TextView>(R.id.text_email)
+    val imageAvatar = headerView.findViewById<CircleImageView>(R.id.image_avatar)
+    val imageView = headerView.findViewById<ImageView>(R.id.imageView)
+    val userAccountGroup = headerView.findViewById<Group>(R.id.user_account_group)
+
+    val loginMenuItem = navView.menu.findItem(R.id.action_home_fragment_dest_to_loginFragment)!!
+    val logoutMenuItem = navView.menu.findItem(R.id.action_logout)!!
     val favoriteMenuItem =
-      nav_view.menu.findItem(R.id.action_home_fragment_dest_to_favoriteComicsFragment)!!
+      navView.menu.findItem(R.id.action_home_fragment_dest_to_favoriteComicsFragment)!!
 
     var prevUser: User? = null
     mainVM.state.observe(owner = this) { (user, isLoading, error) ->
       Timber.d("User = $user, isLoading = $isLoading, error = $error")
 
-      nav_view.menu.setGroupVisible(R.id.group2, !isLoading)
+      navView.menu.setGroupVisible(R.id.group2, !isLoading)
 
       if (prevUser === null || prevUser != user) {
         Timber.d("Updated with user = $user")
@@ -186,7 +193,7 @@ class MainActivity : AppCompatActivity() {
           Observable.just(ViewIntent.Initial),
           logoutMenuItem
             .clicks()
-            .doOnNext { drawer_layout.closeDrawer(GravityCompat.START) }
+            .doOnNext { viewBinding.drawerLayout.closeDrawer(GravityCompat.START) }
             .exhaustMap { showSignOutDialog() }
             .map { ViewIntent.SignOut }
         )
@@ -225,12 +232,12 @@ class MainActivity : AppCompatActivity() {
     return true
   }
 
-  override fun onBackPressed() {
-    if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
-      drawer_layout.closeDrawer(GravityCompat.START)
+  override fun onBackPressed() = viewBinding.run {
+    if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+      drawerLayout.closeDrawer(GravityCompat.START)
     } else {
-      if (search_view.isSearchOpen) {
-        search_view.closeSearch()
+      if (searchView.isSearchOpen) {
+        searchView.closeSearch()
       } else {
         super.onBackPressed()
       }
@@ -247,11 +254,12 @@ class MainActivity : AppCompatActivity() {
         || super.onOptionsItemSelected(item)
   }
 
-  fun showSearch() = search_view.showSearch()
+  fun showSearch() = viewBinding.searchView.showSearch()
 
-  fun hideSearchIfNeeded() = if (search_view.isSearchOpen) search_view.closeSearch() else Unit
+  fun hideSearchIfNeeded() =
+    viewBinding.searchView.run { if (isSearchOpen) closeSearch() else Unit }
 
-  fun textSearchChanges() = search_view.textChanges()
+  fun textSearchChanges() = viewBinding.searchView.textChanges()
 
   fun setToolbarTitle(title: CharSequence) {
     supportActionBar?.title = title

@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.internal.AndroidExtensionsFeature.PARCELIZE
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val kotlinVersion: String by rootProject.extra
@@ -24,7 +25,9 @@ plugins {
   id("androidx.navigation.safeargs.kotlin")
 }
 
-androidExtensions { isExperimental = true }
+androidExtensions {
+  features = setOf(PARCELIZE.featureName)
+}
 
 android {
   compileSdkVersion(30)
@@ -52,6 +55,10 @@ android {
   compileOptions {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
+  }
+
+  buildFeatures {
+    viewBinding = true
   }
 }
 
@@ -94,6 +101,7 @@ dependencies {
   implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
   implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
   implementation("androidx.lifecycle:lifecycle-reactivestreams-ktx:$lifecycleVersion")
+  implementation("androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion")
 
   // Room
   implementation("androidx.room:room-runtime:$roomVersion")

@@ -8,6 +8,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.hoc.comicapp.R
+import com.hoc.comicapp.databinding.FragmentDownloadingChaptersBinding
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersContract.SingleEvent
 import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersContract.ViewIntent
@@ -17,10 +18,10 @@ import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.showAlertDialogAsMaybe
 import com.hoc.comicapp.utils.snack
+import com.hoc.comicapp.utils.viewBinding
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
-import kotlinx.android.synthetic.main.fragment_downloading_chapters.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.androidx.scope.lifecycleScope
 import org.koin.androidx.viewmodel.scope.viewModel
@@ -29,6 +30,7 @@ import timber.log.Timber
 @ExperimentalCoroutinesApi
 class DownloadingChaptersFragment : Fragment() {
   private val viewModel by lifecycleScope.viewModel<DownloadingChaptersViewModel>(owner = this)
+  private val viewBinding by viewBinding<FragmentDownloadingChaptersBinding>()
   private val compositeDisposable = CompositeDisposable()
 
   override fun onCreateView(
@@ -50,18 +52,18 @@ class DownloadingChaptersFragment : Fragment() {
     bind(adapter)
   }
 
-  private fun initView(chaptersAdapter: DownloadingChaptersAdapter) {
-    recycler_chapters.run {
+  private fun initView(chaptersAdapter: DownloadingChaptersAdapter) = viewBinding.run {
+    recyclerChapters.run {
       setHasFixedSize(true)
       layoutManager = LinearLayoutManager(context)
       adapter = chaptersAdapter
     }
   }
 
-  private fun bind(adapter: DownloadingChaptersAdapter) {
+  private fun bind(adapter: DownloadingChaptersAdapter) = viewBinding.run {
     viewModel.state.observe(owner = viewLifecycleOwner) { (isLoading, errorMessage, chapters) ->
-      progress_bar.isVisible = isLoading
-      empty_layout.isVisible = chapters.isEmpty()
+      progressBar.isVisible = isLoading
+      emptyLayout.isVisible = chapters.isEmpty()
       adapter.submitList(chapters)
       Timber.d("DownloadingChaptersFragment::state $isLoading $errorMessage ${chapters.size}")
     }

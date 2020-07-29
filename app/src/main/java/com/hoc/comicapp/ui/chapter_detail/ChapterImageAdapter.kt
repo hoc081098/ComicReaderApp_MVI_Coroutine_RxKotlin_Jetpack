@@ -1,13 +1,13 @@
 package com.hoc.comicapp.ui.chapter_detail
 
 import android.graphics.drawable.Drawable
-import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.DecodeFormat
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
@@ -16,8 +16,8 @@ import com.bumptech.glide.request.target.Target
 import com.hoc.comicapp.GlideRequest
 import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
-import com.hoc.comicapp.utils.inflate
-import kotlinx.android.synthetic.main.item_recycler_chapter_detail_image.view.*
+import com.hoc.comicapp.databinding.ItemRecyclerChapterDetailImageBinding
+import com.hoc.comicapp.utils.inflater
 import timber.log.Timber
 import java.io.File
 
@@ -31,18 +31,20 @@ class ChapterImageAdapter(
 ) :
   ListAdapter<String, ChapterImageAdapter.VH>(StringDiffUtilItemCallback) {
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-    VH(parent inflate R.layout.item_recycler_chapter_detail_image)
+    VH(
+      ItemRecyclerChapterDetailImageBinding.inflate(
+        parent.inflater,
+        parent,
+        false
+      )
+    )
 
   override fun onBindViewHolder(holder: VH, position: Int) = holder.bind(getItem(position))
 
-  inner class VH(itemView: View) : RecyclerView.ViewHolder(itemView) {
-    private val imageChapter = itemView.image_chapter!!
-    private val progressBar = itemView.progress_bar!!
-    private val buttonRetry = itemView.button_retry!!
-    private val groupError = itemView.group_error!!
-
+  inner class VH(private val binding: ItemRecyclerChapterDetailImageBinding) :
+    RecyclerView.ViewHolder(binding.root) {
     init {
-      buttonRetry.setOnClickListener {
+      binding.buttonRetry.setOnClickListener {
         val position = bindingAdapterPosition
         if (position != RecyclerView.NO_POSITION) {
           loadImage(imageUrl = getItem(position))
@@ -55,7 +57,7 @@ class ChapterImageAdapter(
       loadImage(imageUrl = imageUrl)
     }
 
-    private fun loadImage(imageUrl: String) {
+    private fun loadImage(imageUrl: String) = binding.run {
       val file = File(itemView.context.filesDir, imageUrl)
       when {
         file.exists() -> loadLocal(file)
@@ -96,7 +98,7 @@ class ChapterImageAdapter(
         .into(imageChapter)
     }
 
-    private fun loadRemote(imageUrl: String): GlideRequest<Drawable> {
+    private fun loadRemote(imageUrl: String): GlideRequest<Drawable> = binding.run {
       Timber.d("load_chapter [remote] $imageUrl")
 
       // show progressBar, hide error
@@ -104,13 +106,14 @@ class ChapterImageAdapter(
       groupError.isVisible = false
 
       // load image url from remote
-      return glide
+      glide
         .load(imageUrl)
-        .thumbnail(0.7f)
-        .diskCacheStrategy(DiskCacheStrategy.ALL)
+        .thumbnail(0.5f)
+        .format(DecodeFormat.PREFER_RGB_565)
+        .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
     }
 
-    private fun loadLocal(file: File): GlideRequest<Drawable> {
+    private fun loadLocal(file: File): GlideRequest<Drawable> = binding.run {
       Timber.d("load_chapter [local] $file")
 
       // load a local file, don't need show progress bar
@@ -118,7 +121,11 @@ class ChapterImageAdapter(
       progressBar.isVisible = false
       groupError.isVisible = false
 
-      return glide.load(file)
+      glide
+        .load(file)
+        .thumbnail(0.5f)
+        .format(DecodeFormat.PREFER_RGB_565)
+        .diskCacheStrategy(DiskCacheStrategy.NONE)
     }
   }
 }

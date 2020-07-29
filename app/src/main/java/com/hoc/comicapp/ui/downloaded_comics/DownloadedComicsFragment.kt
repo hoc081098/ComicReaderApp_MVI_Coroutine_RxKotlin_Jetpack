@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.chauthai.swipereveallayout.ViewBinderHelper
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
+import com.hoc.comicapp.databinding.FragmentDownloadedComicsBinding
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.ui.detail.ComicArg
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.SingleEvent
@@ -23,11 +24,11 @@ import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.showAlertDialogAsMaybe
 import com.hoc.comicapp.utils.snack
+import com.hoc.comicapp.utils.viewBinding
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import kotlinx.android.synthetic.main.fragment_downloaded_comics.*
 import org.koin.androidx.scope.lifecycleScope
 import org.koin.androidx.viewmodel.scope.viewModel
 import timber.log.Timber
@@ -35,6 +36,7 @@ import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsFragmentDirections.
 
 class DownloadedComicsFragment : Fragment() {
   private val viewModel by lifecycleScope.viewModel<DownloadedComicsViewModel>(owner = this)
+  private val viewBinding by viewBinding<FragmentDownloadedComicsBinding>()
   private val compositeDisposable = CompositeDisposable()
 
   private val viewBinderHelper = ViewBinderHelper()
@@ -66,15 +68,15 @@ class DownloadedComicsFragment : Fragment() {
     viewBinderHelper.saveStates(outState)
   }
 
-  private fun initView(downloadedComicsAdapter: DownloadedComicsAdapter) {
-    recycler_comics.run {
+  private fun initView(downloadedComicsAdapter: DownloadedComicsAdapter) = viewBinding.run {
+    recyclerComics.run {
       setHasFixedSize(true)
       layoutManager = LinearLayoutManager(context)
       adapter = downloadedComicsAdapter
     }
 
-    spinner_sort.setItems(SortOrder.values().toList())
-    spinner_sort.selectedIndex =
+    spinnerSort.setItems(SortOrder.values().toList())
+    spinnerSort.selectedIndex =
       viewModel.state.value.sortOrder.let { SortOrder.values().indexOf(it) }
 
     downloadedComicsAdapter.clickItem.subscribeBy {
@@ -94,25 +96,25 @@ class DownloadedComicsFragment : Fragment() {
     }.addTo(compositeDisposable)
   }
 
-  private fun bind(adapter: DownloadedComicsAdapter) {
+  private fun bind(adapter: DownloadedComicsAdapter) = viewBinding.run {
     viewModel.state.observe(owner = viewLifecycleOwner) { (isLoading, errorMessage, comics) ->
 
       if (isLoading) {
-        progress_bar.visibility = View.VISIBLE
+        progressBar.visibility = View.VISIBLE
       } else {
-        progress_bar.visibility = View.INVISIBLE
+        progressBar.visibility = View.INVISIBLE
       }
 
       if (errorMessage == null) {
-        group_error.visibility = View.GONE
+        groupError.visibility = View.GONE
       } else {
-        group_error.visibility = View.VISIBLE
-        text_error_message.text = errorMessage
+        groupError.visibility = View.VISIBLE
+        textErrorMessage.text = errorMessage
       }
 
       adapter.submitList(comics)
 
-      empty_layout.isVisible = !isLoading && errorMessage === null && comics.isEmpty()
+      emptyLayout.isVisible = !isLoading && errorMessage === null && comics.isEmpty()
     }
     viewModel.singleEvent.observeEvent(owner = viewLifecycleOwner) {
       when (it) {
@@ -130,7 +132,7 @@ class DownloadedComicsFragment : Fragment() {
     viewModel.processIntents(
       Observable.mergeArray(
         Observable.just(ViewIntent.Initial),
-        spinner_sort
+        spinnerSort
           .itemSelections<SortOrder>()
           .map { ViewIntent.ChangeSortOrder(it) }
           .doOnNext { Timber.d("Sort $it") },

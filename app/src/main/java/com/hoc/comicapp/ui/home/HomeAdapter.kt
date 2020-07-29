@@ -15,15 +15,21 @@ import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.LinearSnapHelper
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewbinding.ViewBinding
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
+import com.hoc.comicapp.databinding.ItemRecyclerHomeHeaderBinding
+import com.hoc.comicapp.databinding.ItemRecyclerHomeRecyclerBinding
+import com.hoc.comicapp.databinding.ItemRecyclerviewUpdatedComicBinding
+import com.hoc.comicapp.databinding.ItemRecyclerviewUpdatedErrorBinding
+import com.hoc.comicapp.databinding.ItemRecyclerviewUpdatedLoadingBinding
 import com.hoc.comicapp.domain.models.Comic
 import com.hoc.comicapp.ui.detail.ComicArg
 import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.MOST_VIEWED
 import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.NEWEST
 import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.UPDATED
-import com.hoc.comicapp.utils.inflate
+import com.hoc.comicapp.utils.inflater
 import com.hoc.comicapp.utils.mapNotNull
 import com.jakewharton.rxbinding4.recyclerview.scrollStateChanges
 import com.jakewharton.rxbinding4.view.clicks
@@ -35,10 +41,6 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import kotlinx.android.synthetic.main.item_recycler_home_header.view.*
-import kotlinx.android.synthetic.main.item_recycler_home_recycler.view.*
-import kotlinx.android.synthetic.main.item_recyclerview_updated_comic.view.*
-import kotlinx.android.synthetic.main.item_recyclerview_updated_error.view.*
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
@@ -102,15 +104,49 @@ class HomeAdapter(
 
   override fun onCreateViewHolder(parent: ViewGroup, @ViewType viewType: Int): VH {
     return when (viewType) {
-      NEWEST_LIST_VIEW_TYPE -> NewestComicsListVH(parent inflate R.layout.item_recycler_home_recycler)
-      MOST_VIEWED_LIST_VIEW_TYPE -> MostViewedComicsListVH(parent inflate R.layout.item_recycler_home_recycler)
+      NEWEST_LIST_VIEW_TYPE -> NewestComicsListVH(
+        ItemRecyclerHomeRecyclerBinding.inflate(
+          parent.inflater,
+          parent,
+          false
+        )
+      )
+      MOST_VIEWED_LIST_VIEW_TYPE -> MostViewedComicsListVH(
+        ItemRecyclerHomeRecyclerBinding.inflate(
+          parent.inflater,
+          parent,
+          false
+        )
+      )
       COMIC_ITEM_VIEW_TYPE -> ComicItemVH(
-        parent inflate R.layout.item_recyclerview_updated_comic,
+        ItemRecyclerviewUpdatedComicBinding.inflate(
+          parent.inflater,
+          parent,
+          false
+        ),
         parent,
       )
-      ERROR_ITEM_VIEW_TYPE -> ErrorVH(parent inflate R.layout.item_recyclerview_updated_error)
-      LOADING_ITEM_VIEW_TYPE -> LoadingVH(parent inflate R.layout.item_recyclerview_updated_loading)
-      HEADER_VIEW_TYPE -> HeaderVH(parent inflate R.layout.item_recycler_home_header)
+      ERROR_ITEM_VIEW_TYPE -> ErrorVH(
+        ItemRecyclerviewUpdatedErrorBinding.inflate(
+          parent.inflater,
+          parent,
+          false
+        )
+      )
+      LOADING_ITEM_VIEW_TYPE -> LoadingVH(
+        ItemRecyclerviewUpdatedLoadingBinding.inflate(
+          parent.inflater,
+          parent,
+          false
+        )
+      )
+      HEADER_VIEW_TYPE -> HeaderVH(
+        ItemRecyclerHomeHeaderBinding.inflate(
+          parent.inflater,
+          parent,
+          false
+        )
+      )
       else -> error("Unknown view type: $viewType")
     }
   }
@@ -133,16 +169,16 @@ class HomeAdapter(
     abstract fun bind(item: HomeListItem)
   }
 
-  private abstract inner class HorizontalRecyclerVH(itemView: View) : VH(itemView) {
-    protected val recycler =
-      itemView.home_recycler_horizontal!!.apply { setRecycledViewPool(viewPool) }
-    protected val progressBar = itemView.home_progress_bar!!
-    protected val textErrorMessage = itemView.home_error_message!!
-    protected val buttonRetry = itemView.button_home_horizontal_retry!!
-    protected val errorGroup = itemView.error_group!!
+  private abstract inner class HorizontalRecyclerVH(protected val binding: ItemRecyclerHomeRecyclerBinding) :
+    VH(binding.root) {
+    protected val recycler = binding.homeRecyclerHorizontal.apply { setRecycledViewPool(viewPool) }
+    protected val progressBar get() = binding.homeProgressBar
+    protected val textErrorMessage get() = binding.homeErrorMessage
+    protected val buttonRetry get() = binding.buttonHomeHorizontalRetry
   }
 
-  private inner class NewestComicsListVH(itemView: View) : HorizontalRecyclerVH(itemView) {
+  private inner class NewestComicsListVH(binding: ItemRecyclerHomeRecyclerBinding) :
+    HorizontalRecyclerVH(binding) {
     private var currentList = emptyList<Comic>()
     val linearLayoutManager: LinearLayoutManager
 
@@ -169,7 +205,10 @@ class HomeAdapter(
     }
 
     override fun bind(item: HomeListItem) =
-      onlyBind<HomeListItem.NewestListState>(item) { (comics, errorMessage, isLoading) ->
+      onlyBind<HomeListItem.NewestListState, ItemRecyclerHomeRecyclerBinding>(
+        item,
+        binding
+      ) { (comics, errorMessage, isLoading) ->
         Timber.d("suggest_state=[$isLoading, $errorMessage, $comics]")
 
         errorGroup.isVisible = errorMessage !== null
@@ -276,7 +315,8 @@ class HomeAdapter(
     }
   }
 
-  private inner class MostViewedComicsListVH(itemView: View) : HorizontalRecyclerVH(itemView) {
+  private inner class MostViewedComicsListVH(binding: ItemRecyclerHomeRecyclerBinding) :
+    HorizontalRecyclerVH(binding) {
     private var currentList = emptyList<Comic>()
 
     val linearLayoutManager: LinearLayoutManager
@@ -294,7 +334,10 @@ class HomeAdapter(
     }
 
     override fun bind(item: HomeListItem) =
-      onlyBind<HomeListItem.MostViewedListState>(item) { (comics, errorMessage, isLoading) ->
+      onlyBind<HomeListItem.MostViewedListState, ItemRecyclerHomeRecyclerBinding>(
+        item,
+        binding
+      ) { (comics, errorMessage, isLoading) ->
         Timber.d("top_month_state=[$isLoading, $errorMessage, $comics]")
 
         errorGroup.isVisible = errorMessage !== null
@@ -315,22 +358,18 @@ class HomeAdapter(
       }
   }
 
-  private inner class ComicItemVH(itemView: View, parent: View) : VH(itemView) {
-    val imageComic = itemView.image_comic!!
-    private val textView = itemView.text_view!!
-    private val textComicName = itemView.text_comic_name!!
-    private val textChapterName3 = itemView.text_chapter_name_3!!
-    private val textChapterTime3 = itemView.text_chapter_time_3!!
-    private val textChapterName2 = itemView.text_chapter_name_2!!
-    private val textChapterTime2 = itemView.text_chapter_time_2!!
-    private val textChapterName1 = itemView.text_chapter_name_1!!
-    private val textChapterTime1 = itemView.text_chapter_time_1!!
+  private inner class ComicItemVH(
+    private val binding: ItemRecyclerviewUpdatedComicBinding,
+    parent: View
+  ) : VH(binding.root) {
 
-    private val textChapters = listOf(
-      textChapterName3 to textChapterTime3,
-      textChapterName2 to textChapterTime2,
-      textChapterName1 to textChapterTime1
-    )
+    private val textChapters = binding.run {
+      listOf(
+        textChapterName3 to textChapterTime3,
+        textChapterName2 to textChapterTime2,
+        textChapterName1 to textChapterTime1
+      )
+    }
 
     init {
       itemView
@@ -355,7 +394,10 @@ class HomeAdapter(
     }
 
     override fun bind(item: HomeListItem) =
-      onlyBind<HomeListItem.UpdatedItem.ComicItem>(item) { (comic) ->
+      onlyBind<HomeListItem.UpdatedItem.ComicItem, ItemRecyclerviewUpdatedComicBinding>(
+        item,
+        binding
+      ) { (comic) ->
         itemView.transitionName = "updated#${comic.link}"
 
         glide
@@ -378,34 +420,39 @@ class HomeAdapter(
       }
   }
 
-  private class LoadingVH(itemView: View) : VH(itemView) {
-    override fun bind(item: HomeListItem) = onlyBind<HomeListItem.UpdatedItem.Loading>(item) {}
+  private class LoadingVH(private val binding: ItemRecyclerviewUpdatedLoadingBinding) :
+    VH(binding.root) {
+    override fun bind(item: HomeListItem) =
+      onlyBind<HomeListItem.UpdatedItem.Loading, ItemRecyclerviewUpdatedLoadingBinding>(
+        item,
+        binding
+      )
   }
 
-  private inner class ErrorVH(itemView: View) : VH(itemView) {
-    private val textErrorMessage = itemView.text_updated_error_message!!
-    private val buttonRetry = itemView.button_updated_retry!!
-
+  private inner class ErrorVH(private val binding: ItemRecyclerviewUpdatedErrorBinding) :
+    VH(binding.root) {
     init {
-      buttonRetry.setOnClickListener { updatedRetryS.accept(Unit) }
+      binding.buttonUpdatedRetry.setOnClickListener { updatedRetryS.accept(Unit) }
     }
 
     override fun bind(item: HomeListItem) =
-      onlyBind<HomeListItem.UpdatedItem.Error>(item) { (errorMessage) ->
-        textErrorMessage.text = errorMessage
+      onlyBind<HomeListItem.UpdatedItem.Error, ItemRecyclerviewUpdatedErrorBinding>(
+        item,
+        binding
+      ) { (errorMessage) ->
+        textUpdatedErrorMessage.text = errorMessage
       }
   }
 
-  private class HeaderVH(itemView: View) : VH(itemView) {
-    private val textHeader = itemView.text_home_header!!
-
-    override fun bind(item: HomeListItem) = onlyBind<HomeListItem.Header>(item) { (type) ->
-      textHeader.text = when (type) {
-        NEWEST -> "Newest"
-        MOST_VIEWED -> "Most viewed"
-        UPDATED -> "Updated"
+  private class HeaderVH(private val binding: ItemRecyclerHomeHeaderBinding) : VH(binding.root) {
+    override fun bind(item: HomeListItem) =
+      onlyBind<HomeListItem.Header, ItemRecyclerHomeHeaderBinding>(item, binding) { (type) ->
+        textHomeHeader.text = when (type) {
+          NEWEST -> "Newest"
+          MOST_VIEWED -> "Most viewed"
+          UPDATED -> "Updated"
+        }
       }
-    }
   }
 
   override fun onViewRecycled(holder: VH) {
@@ -451,12 +498,13 @@ class HomeAdapter(
     /**
      * @throws IllegalStateException
      */
-    private inline fun <reified T : HomeListItem> VH.onlyBind(
+    private inline fun <reified T : HomeListItem, B : ViewBinding> VH.onlyBind(
       item: HomeListItem,
-      crossinline bind: (T) -> Unit,
+      binding: B,
+      crossinline bind: B.(T) -> Unit = {},
     ) {
       check(item is T) { "${this::class.java.simpleName}::bind only accept ${T::class.java.simpleName}, but item=$item" }
-      bind(item)
+      binding.bind(item)
     }
   }
 }

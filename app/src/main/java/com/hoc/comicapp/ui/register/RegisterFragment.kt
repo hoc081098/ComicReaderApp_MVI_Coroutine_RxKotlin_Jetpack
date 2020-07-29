@@ -18,6 +18,7 @@ import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
+import com.hoc.comicapp.databinding.FragmentRegisterBinding
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.ui.register.RegisterContract.Intent
 import com.hoc.comicapp.ui.register.RegisterContract.SingleEvent
@@ -27,13 +28,13 @@ import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.onDismissed
 import com.hoc.comicapp.utils.snack
 import com.hoc.comicapp.utils.uriFromResourceId
+import com.hoc.comicapp.utils.viewBinding
 import com.jakewharton.rxbinding4.view.clicks
 import com.jakewharton.rxbinding4.widget.textChanges
 import io.reactivex.rxjava3.android.MainThreadDisposable
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
-import kotlinx.android.synthetic.main.fragment_register.*
 import org.koin.androidx.scope.lifecycleScope
 import org.koin.androidx.viewmodel.scope.viewModel
 import timber.log.Timber
@@ -42,6 +43,7 @@ import kotlin.LazyThreadSafetyMode.NONE
 class RegisterFragment : Fragment() {
 
   private val vm by lifecycleScope.viewModel<RegisterVM>(owner = this)
+  private val viewBinding by viewBinding<FragmentRegisterBinding>()
   private val compositeDisposable = CompositeDisposable()
   private val glide by lazy(NONE) { GlideApp.with(this) }
 
@@ -54,38 +56,38 @@ class RegisterFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    edit_full_name.editText!!.setText(vm.state.value.fullName ?: "")
-    edit_email.editText!!.setText(vm.state.value.email ?: "")
-    edit_password.editText!!.setText(vm.state.value.password ?: "")
+    viewBinding.editFullName.editText!!.setText(vm.state.value.fullName ?: "")
+    viewBinding.editEmail.editText!!.setText(vm.state.value.email ?: "")
+    viewBinding.editPassword.editText!!.setText(vm.state.value.password ?: "")
 
-    button_back_to_login.setOnClickListener { findNavController().popBackStack() }
+    viewBinding.buttonBackToLogin.setOnClickListener { findNavController().popBackStack() }
 
     bindVM()
   }
 
-  private fun bindVM() {
+  private fun bindVM() = viewBinding.run {
     vm.state.observe(owner = viewLifecycleOwner) { (emailError, passwordError, fullNameError, isLoading, avatarUri) ->
-      if (edit_email.error != emailError) {
-        edit_email.error = emailError
+      if (editEmail.error != emailError) {
+        editEmail.error = emailError
       }
-      if (edit_password.error != passwordError) {
-        edit_password.error = passwordError
+      if (editPassword.error != passwordError) {
+        editPassword.error = passwordError
       }
-      if (edit_full_name.error != fullNameError) {
-        edit_full_name.error = fullNameError
+      if (editFullName.error != fullNameError) {
+        editFullName.error = fullNameError
       }
 
       if (isLoading) {
-        beginTransition(button_register, progress_bar)
+        beginTransition(buttonRegister, progressBar)
       } else {
-        onComplete(button_register, progress_bar)
+        onComplete(buttonRegister, progressBar)
       }
 
       glide
         .load(avatarUri ?: requireContext().uriFromResourceId(R.drawable.person_white_96x96))
         .centerCrop()
         .dontAnimate()
-        .into(image_avatar)
+        .into(imageAvatar)
     }
 
     vm.singleEvent.observeEvent(owner = viewLifecycleOwner) { event ->
@@ -108,17 +110,17 @@ class RegisterFragment : Fragment() {
 
     vm.processIntents(
       Observable.mergeArray(
-        edit_email.editText!!.textChanges().map { Intent.EmailChanged(it.toString()) },
-        edit_password.editText!!.textChanges().map { Intent.PasswordChanged(it.toString()) },
-        edit_full_name.editText!!.textChanges().map { Intent.FullNameChanged(it.toString()) },
+        editEmail.editText!!.textChanges().map { Intent.EmailChanged(it.toString()) },
+        editPassword.editText!!.textChanges().map { Intent.PasswordChanged(it.toString()) },
+        editFullName.editText!!.textChanges().map { Intent.FullNameChanged(it.toString()) },
         changeAvatarIntent(),
-        button_register.clicks().map { Intent.SubmitRegister }
+        buttonRegister.clicks().map { Intent.SubmitRegister }
       )
     ).addTo(compositeDisposable)
   }
 
   private fun changeAvatarIntent(): Observable<Intent.AvatarChanged> {
-    return image_avatar
+    return viewBinding.imageAvatar
       .clicks()
       .exhaustMap {
         Timber.d("Select image")
@@ -148,7 +150,7 @@ class RegisterFragment : Fragment() {
     progressBar: ProgressBar,
   ) {
     TransitionManager.beginDelayedTransition(
-      root_register_frag,
+      viewBinding.rootRegisterFrag,
       TransitionSet()
         .addTransition(
           ChangeBounds()
@@ -198,7 +200,7 @@ class RegisterFragment : Fragment() {
       )
       .setOrdering(TransitionSet.ORDERING_SEQUENTIAL)
 
-    TransitionManager.beginDelayedTransition(root_register_frag, transition)
+    TransitionManager.beginDelayedTransition(viewBinding.rootRegisterFrag, transition)
 
     progressBar.visibility = View.INVISIBLE
     button.visibility = View.VISIBLE

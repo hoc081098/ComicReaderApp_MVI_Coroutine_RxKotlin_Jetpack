@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.chauthai.swipereveallayout.ViewBinderHelper
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
+import com.hoc.comicapp.databinding.FragmentFavoriteComicsBinding
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.ui.detail.ComicArg
 import com.hoc.comicapp.ui.favorite_comics.FavoriteComicsContract.SortOrder
@@ -21,17 +22,18 @@ import com.hoc.comicapp.utils.itemSelections
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.showAlertDialogAsMaybe
 import com.hoc.comicapp.utils.snack
+import com.hoc.comicapp.utils.viewBinding
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import kotlinx.android.synthetic.main.fragment_favorite_comics.*
 import org.koin.androidx.scope.lifecycleScope
 import org.koin.androidx.viewmodel.scope.viewModel
 
 class FavoriteComicsFragment : Fragment() {
   private val compositeDisposable = CompositeDisposable()
   private val viewModel by lifecycleScope.viewModel<FavoriteComicsVM>(owner = this)
+  private val viewBinding by viewBinding<FragmentFavoriteComicsBinding>()
 
   private val viewBinderHelper = ViewBinderHelper()
 
@@ -55,15 +57,15 @@ class FavoriteComicsFragment : Fragment() {
     viewBinderHelper.restoreStates(savedInstanceState)
   }
 
-  private fun initView(favoriteComicsAdapter: FavoriteComicsAdapter) {
-    recycler_comics.run {
+  private fun initView(favoriteComicsAdapter: FavoriteComicsAdapter) = viewBinding.run {
+    recyclerComics.run {
       setHasFixedSize(true)
       layoutManager = LinearLayoutManager(context)
       adapter = favoriteComicsAdapter
     }
 
-    spinner_sort.setItems(SortOrder.values().toList())
-    spinner_sort.selectedIndex = viewModel.state.value.sortOrder
+    spinnerSort.setItems(SortOrder.values().toList())
+    spinnerSort.selectedIndex = viewModel.state.value.sortOrder
       .let { SortOrder.values().indexOf(it) }
 
     favoriteComicsAdapter
@@ -93,24 +95,24 @@ class FavoriteComicsFragment : Fragment() {
     viewBinderHelper.saveStates(outState)
   }
 
-  private fun bindVM(adapter: FavoriteComicsAdapter) {
+  private fun bindVM(adapter: FavoriteComicsAdapter) = viewBinding.run {
     viewModel.state.observe(owner = viewLifecycleOwner) { (isLoading, error, comics) ->
       if (isLoading) {
-        progress_bar.visibility = View.VISIBLE
+        progressBar.visibility = View.VISIBLE
       } else {
-        progress_bar.visibility = View.INVISIBLE
+        progressBar.visibility = View.INVISIBLE
       }
 
       if (error == null) {
-        group_error.visibility = View.GONE
+        groupError.visibility = View.GONE
       } else {
-        group_error.visibility = View.VISIBLE
-        text_error_message.text = error.getMessage()
+        groupError.visibility = View.VISIBLE
+        textErrorMessage.text = error.getMessage()
       }
 
       adapter.submitList(comics)
 
-      empty_layout.isVisible = !isLoading && error === null && comics.isEmpty()
+      emptyLayout.isVisible = !isLoading && error === null && comics.isEmpty()
     }
 
     viewModel.singleEvent.observeEvent(owner = viewLifecycleOwner) { event ->
@@ -138,7 +140,7 @@ class FavoriteComicsFragment : Fragment() {
                 .toObservable()
             }
             .map { ViewIntent.Remove(it) },
-          spinner_sort
+          spinnerSort
             .itemSelections<SortOrder>()
             .map { ViewIntent.ChangeSortOrder(it) }
         )
