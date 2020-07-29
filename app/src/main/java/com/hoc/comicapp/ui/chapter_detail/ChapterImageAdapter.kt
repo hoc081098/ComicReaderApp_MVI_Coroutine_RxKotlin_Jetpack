@@ -125,7 +125,6 @@ class ChapterImageAdapter(
         .load(file)
         .thumbnail(0.5f)
         .format(DecodeFormat.PREFER_RGB_565)
-        .diskCacheStrategy(DiskCacheStrategy.NONE)
     }
   }
 }
