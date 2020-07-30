@@ -5,7 +5,7 @@ import com.hoc.comicapp.domain.models.CategoryDetailPopularComic
 import com.hoc.comicapp.domain.models.Comic
 import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.Item
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 import kotlinx.android.parcel.Parcelize
 
 /**
@@ -27,7 +27,7 @@ interface CategoryDetailContract {
   /**
    * View intent
    */
-  sealed class ViewIntent : com.hoc.comicapp.base.Intent {
+  sealed class ViewIntent : com.hoc.comicapp.base.MviIntent {
     data class Initial(val arg: CategoryArg) : ViewIntent()
     object Refresh : ViewIntent()
     object LoadNextPage : ViewIntent()
@@ -43,7 +43,7 @@ interface CategoryDetailContract {
     val isRefreshing: Boolean,
     val page: Int,
     val category: CategoryArg,
-  ) : com.hoc.comicapp.base.ViewState {
+  ) : com.hoc.comicapp.base.MviViewState {
     companion object {
       @JvmStatic
       fun initial(category: CategoryArg): ViewState {
@@ -264,7 +264,7 @@ interface CategoryDetailContract {
   /**
    * Single event
    */
-  sealed class SingleEvent : com.hoc.comicapp.base.SingleEvent
+  sealed class SingleEvent : com.hoc.comicapp.base.MviSingleEvent
 
   /**
    * Interactor

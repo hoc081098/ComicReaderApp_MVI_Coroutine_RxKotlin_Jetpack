@@ -5,9 +5,9 @@ import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.ui.login.LoginContract.Interactor
 import com.hoc.comicapp.ui.login.LoginContract.PartialChange
 import com.hoc.comicapp.utils.fold
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.rx2.rxObservable
+import kotlinx.coroutines.rx3.rxObservable
 
 @ExperimentalCoroutinesApi
 class LoginInteractorImpl(

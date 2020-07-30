@@ -9,17 +9,16 @@ import androidx.recyclerview.widget.RecyclerView.NO_POSITION
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.chauthai.swipereveallayout.ViewBinderHelper
 import com.hoc.comicapp.GlideRequests
-import com.hoc.comicapp.R
+import com.hoc.comicapp.databinding.ItemRecyclerDownloadedComicsBinding
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.ViewState.ComicItem
 import com.hoc.comicapp.utils.asObservable
-import com.hoc.comicapp.utils.inflate
-import com.jakewharton.rxbinding3.view.clicks
-import com.jakewharton.rxbinding3.view.detaches
-import com.jakewharton.rxrelay2.PublishRelay
-import io.reactivex.Observable
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
-import kotlinx.android.synthetic.main.item_recycler_downloaded_comics.view.*
+import com.hoc.comicapp.utils.inflater
+import com.jakewharton.rxbinding4.view.clicks
+import com.jakewharton.rxbinding4.view.detaches
+import com.jakewharton.rxrelay3.PublishRelay
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -45,32 +44,19 @@ class DownloadedComicsAdapter(
   val clickItem get() = _clickItem.asObservable()
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-    VH(parent inflate R.layout.item_recycler_downloaded_comics, parent)
+    VH(ItemRecyclerDownloadedComicsBinding.inflate(parent.inflater, parent, false), parent)
 
   override fun onBindViewHolder(holder: VH, position: Int) = holder.bind(getItem(position))
 
-  inner class VH(itemView: View, parent: View) : RecyclerView.ViewHolder(itemView) {
-    private val imageComic = itemView.image_comic!!
-    private val swipeRevealLayout = itemView.swipe_reveal_layout!!
-
-    private val textComicName = itemView.text_comic_name!!
-    private val textView = itemView.text_view!!
-
-    private val textChapterName3 = itemView.text_chapter_name_3!!
-    private val textChapterTime3 = itemView.text_chapter_time_3!!
-
-    private val textChapterName2 = itemView.text_chapter_name_2!!
-    private val textChapterTime2 = itemView.text_chapter_time_2!!
-
-    private val textChapterName1 = itemView.text_chapter_name_1!!
-    private val textChapterTime1 = itemView.text_chapter_time_1!!
-
-    private val textChapters = listOf(
-      textChapterName1 to textChapterTime1,
-      textChapterName2 to textChapterTime2,
-      textChapterName3 to textChapterTime3
-    )
-
+  inner class VH(private val binding: ItemRecyclerDownloadedComicsBinding, parent: View) :
+    RecyclerView.ViewHolder(binding.root) {
+    private val textChapters = binding.run {
+      arrayOf(
+        textChapterName1 to textChapterTime1,
+        textChapterName2 to textChapterTime2,
+        textChapterName3 to textChapterTime3
+      )
+    }
 
     private fun <T> Observable<T>.getItemAtPosition(): Observable<ComicItem> {
       return map { bindingAdapterPosition }
@@ -79,15 +65,15 @@ class DownloadedComicsAdapter(
     }
 
     init {
-      itemView
-        .text_delete
+      binding
+        .textDelete
         .clicks()
         .takeUntil(parent.detaches())
         .getItemAtPosition()
         .subscribe(_clickDelete)
         .addTo(compositeDisposable)
 
-      itemView
+      binding
         .cardView
         .clicks()
         .takeUntil(parent.detaches())
@@ -96,7 +82,7 @@ class DownloadedComicsAdapter(
         .addTo(compositeDisposable)
     }
 
-    fun bind(comic: ComicItem) {
+    fun bind(comic: ComicItem) = binding.run {
       viewBinderHelper.bind(swipeRevealLayout, comic.comicLink)
 
       glide

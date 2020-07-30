@@ -9,7 +9,7 @@ import androidx.room.Transaction
 import androidx.room.Update
 import com.hoc.comicapp.data.local.entities.ComicAndChapters
 import com.hoc.comicapp.data.local.entities.ComicEntity
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 
 @Dao
 abstract class ComicDao {

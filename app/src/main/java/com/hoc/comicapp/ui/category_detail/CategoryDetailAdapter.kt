@@ -17,30 +17,32 @@ import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.LinearSnapHelper
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewbinding.ViewBinding
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
+import com.hoc.comicapp.databinding.ItemRecyclerCategoryDetailComicBinding
+import com.hoc.comicapp.databinding.ItemRecyclerCategoryDetailErrorBinding
+import com.hoc.comicapp.databinding.ItemRecyclerCategoryDetailHeaderBinding
+import com.hoc.comicapp.databinding.ItemRecyclerCategoryDetailLoadingBinding
+import com.hoc.comicapp.databinding.ItemRecyclerCategoryDetailPopularHorizontalRecyclerBinding
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.HeaderType.Popular
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.HeaderType.Updated
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.Item
 import com.hoc.comicapp.ui.detail.ComicArg
 import com.hoc.comicapp.utils.asObservable
-import com.hoc.comicapp.utils.inflate
-import com.jakewharton.rxbinding3.recyclerview.scrollStateChanges
-import com.jakewharton.rxbinding3.view.clicks
-import com.jakewharton.rxbinding3.view.detaches
-import com.jakewharton.rxrelay2.PublishRelay
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.subscribeBy
-import kotlinx.android.synthetic.main.item_recycler_category_detail_comic.view.*
-import kotlinx.android.synthetic.main.item_recycler_category_detail_error.view.*
-import kotlinx.android.synthetic.main.item_recycler_category_detail_header.view.*
-import kotlinx.android.synthetic.main.item_recycler_category_detail_popular_horizontal_recycler.view.*
+import com.hoc.comicapp.utils.inflater
+import com.jakewharton.rxbinding4.recyclerview.scrollStateChanges
+import com.jakewharton.rxbinding4.view.clicks
+import com.jakewharton.rxbinding4.view.detaches
+import com.jakewharton.rxrelay3.PublishRelay
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.disposables.Disposable
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.subscribeBy
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
@@ -75,16 +77,44 @@ class CategoryDetailAdapter(
   val retryObservable get() = _retryS.asObservable()
 
   override fun onCreateViewHolder(parent: ViewGroup, @LayoutRes viewType: Int): VH {
-    val itemView = parent inflate viewType
     return when (viewType) {
       R.layout.item_recycler_category_detail_popular_horizontal_recycler -> PopularHorizontalRecyclerVH(
-        itemView,
+        ItemRecyclerCategoryDetailPopularHorizontalRecyclerBinding.inflate(
+          parent.inflater,
+          parent,
+          false
+        ),
         parent
       )
-      R.layout.item_recycler_category_detail_comic -> ComicVH(itemView)
-      R.layout.item_recycler_category_detail_loading -> LoadingVH(itemView)
-      R.layout.item_recycler_category_detail_error -> ErrorVH(itemView, parent)
-      R.layout.item_recycler_category_detail_header -> HeaderVH(itemView)
+      R.layout.item_recycler_category_detail_comic -> ComicVH(
+        ItemRecyclerCategoryDetailComicBinding.inflate(
+          parent.inflater,
+          parent,
+          false
+        )
+      )
+      R.layout.item_recycler_category_detail_loading -> LoadingVH(
+        ItemRecyclerCategoryDetailLoadingBinding.inflate(
+          parent.inflater,
+          parent,
+          false
+        )
+      )
+      R.layout.item_recycler_category_detail_error -> ErrorVH(
+        ItemRecyclerCategoryDetailErrorBinding.inflate(
+          parent.inflater,
+          parent,
+          false
+        ),
+        parent
+      )
+      R.layout.item_recycler_category_detail_header -> HeaderVH(
+        ItemRecyclerCategoryDetailHeaderBinding.inflate(
+          parent.inflater,
+          parent,
+          false
+        ),
+      )
       else -> error("Don't know viewType=$viewType")
     }
   }
@@ -114,14 +144,11 @@ class CategoryDetailAdapter(
     abstract fun bind(item: Item)
   }
 
-  private inner class PopularHorizontalRecyclerVH(itemView: View, parent: ViewGroup) :
-    VH(itemView) {
-    private val recycler = itemView.popular_recycler_horizontal!!
-    private val progressBar = itemView.popular_progress_bar!!
-    private val textError = itemView.popular_error_message!!
-    private val buttonRetry = itemView.button_popular_horizontal_retry!!
-    private val errorGroup = itemView.error_group!!
-
+  private inner class PopularHorizontalRecyclerVH(
+    private val binding: ItemRecyclerCategoryDetailPopularHorizontalRecyclerBinding,
+    parent: ViewGroup
+  ) :
+    VH(binding.root) {
     private val adapter = PopularHorizontalAdapter(glide, onClickComic)
     private var latestComics: List<CategoryDetailContract.ViewState.PopularItem>? = null
 
@@ -132,13 +159,13 @@ class CategoryDetailAdapter(
     val linearLayoutManager: LinearLayoutManager
 
     init {
-      buttonRetry
+      binding.buttonPopularHorizontalRetry
         .clicks()
         .takeUntil(parent.detaches())
         .subscribe(_retryPopularS)
         .addTo(compositeDisposable)
 
-      recycler.run {
+      binding.popularRecyclerHorizontal.run {
         setHasFixedSize(true)
         linearLayoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
         layoutManager = linearLayoutManager
@@ -165,7 +192,7 @@ class CategoryDetailAdapter(
           private fun onCreate() {
             disposable = startStopAutoScrollS
               .mergeWith(
-                recycler
+                binding.popularRecyclerHorizontal
                   .scrollStateChanges()
                   .filter { it == RecyclerView.SCROLL_STATE_DRAGGING }
                   .switchMap {
@@ -192,7 +219,7 @@ class CategoryDetailAdapter(
               .subscribeBy(
                 onNext = {
                   if (it >= 0 && it != 2L) {
-                    recycler
+                    binding.popularRecyclerHorizontal
                       .layoutManager
                       ?.startSmoothScroll(smoothScroller.apply { targetPosition = it.toInt() })
                   }
@@ -212,51 +239,46 @@ class CategoryDetailAdapter(
         })
     }
 
-    override fun bind(item: Item) = onlyBind<Item.PopularVS>(item) { (comics, error, isLoading) ->
-      errorGroup.isVisible = error !== null
-      textError.text = error?.getMessage()
+    override fun bind(item: Item) =
+      onlyBind<Item.PopularVS, ItemRecyclerCategoryDetailPopularHorizontalRecyclerBinding>(
+        item,
+        binding
+      ) { (comics, error, isLoading) ->
+        errorGroup.isVisible = error !== null
+        popularErrorMessage.text = error?.getMessage()
 
-      progressBar.isVisible = isLoading
+        popularProgressBar.isVisible = isLoading
 
-      if (latestComics != comics) {
-        adapter.submitList(comics) {
-          if (comics.isNotEmpty()) {
-            recycler.scrollToPosition(0)
+        if (latestComics != comics) {
+          adapter.submitList(comics) {
+            if (comics.isNotEmpty()) {
+              popularRecyclerHorizontal.scrollToPosition(0)
+            }
+            startStopAutoScrollS.accept(comics.size > 1)
           }
-          startStopAutoScrollS.accept(comics.size > 1)
+          latestComics = comics
+          Timber.d("comics.size=${comics.size}")
+        } else {
+          Timber.d("comics.size=${comics.size} == ")
         }
-        latestComics = comics
-        Timber.d("comics.size=${comics.size}")
-      } else {
-        Timber.d("comics.size=${comics.size} == ")
-      }
 
-      outLayoutManagerSavedState?.let {
-        Timber.tag("@@@").d("onRestoreInstanceState $it")
-        linearLayoutManager.onRestoreInstanceState(it)
-        outLayoutManagerSavedState = null
+        outLayoutManagerSavedState?.let {
+          Timber.tag("@@@").d("onRestoreInstanceState $it")
+          linearLayoutManager.onRestoreInstanceState(it)
+          outLayoutManagerSavedState = null
+        }
       }
-    }
   }
 
-  private inner class ComicVH(itemView: View) : VH(itemView) {
-    private val imageComic = itemView.image_comic!!
-    private val textComicName = itemView.text_comic_name!!
-    private val textView = itemView.text_view!!
-
-    private val textChapterName3 = itemView.text_chapter_name_3!!
-    private val textChapterName2 = itemView.text_chapter_name_2!!
-    private val textChapterName1 = itemView.text_chapter_name_1!!
-
-    private val textChapterTime3 = itemView.text_chapter_time_3!!
-    private val textChapterTime2 = itemView.text_chapter_time_2!!
-    private val textChapterTime1 = itemView.text_chapter_time_1!!
-
-    private val textChapters = arrayOf(
-      textChapterName3 to textChapterTime3,
-      textChapterName2 to textChapterTime2,
-      textChapterName1 to textChapterTime1
-    )
+  private inner class ComicVH(private val binding: ItemRecyclerCategoryDetailComicBinding) :
+    VH(binding.root) {
+    private val textChapters = binding.run {
+      arrayOf(
+        textChapterName3 to textChapterTime3,
+        textChapterName2 to textChapterTime2,
+        textChapterName1 to textChapterTime1
+      )
+    }
 
     init {
       itemView.setOnClickListener {
@@ -276,68 +298,73 @@ class CategoryDetailAdapter(
       }
     }
 
-    override fun bind(item: Item) = onlyBind<Item.Comic>(item) { comic ->
-      glide
-        .load(comic.thumbnail)
-        .thumbnail(0.5f)
-        .fitCenter()
-        .transition(DrawableTransitionOptions.withCrossFade())
-        .into(imageComic)
+    override fun bind(item: Item) =
+      onlyBind<Item.Comic, ItemRecyclerCategoryDetailComicBinding>(item, binding) { comic ->
+        glide
+          .load(comic.thumbnail)
+          .thumbnail(0.5f)
+          .fitCenter()
+          .transition(DrawableTransitionOptions.withCrossFade())
+          .into(imageComic)
 
-      textComicName.text = comic.title
-      textView.text = comic.view
+        textComicName.text = comic.title
+        textView.text = comic.view
 
-      textChapters
-        .zip(comic.lastChapters)
-        .forEach { (textViews, chapter) ->
-          textViews.first.text = chapter.chapterName
-          textViews.second.text = chapter.time
-        }
-    }
+        textChapters
+          .zip(comic.lastChapters)
+          .forEach { (textViews, chapter) ->
+            textViews.first.text = chapter.chapterName
+            textViews.second.text = chapter.time
+          }
+      }
   }
 
-  private class LoadingVH(itemView: View) : VH(itemView) {
-    override fun bind(item: Item) = onlyBind<Item.Loading>(item) {}
+  private class LoadingVH(private val binding: ItemRecyclerCategoryDetailLoadingBinding) :
+    VH(binding.root) {
+    override fun bind(item: Item) =
+      onlyBind<Item.Loading, ItemRecyclerCategoryDetailLoadingBinding>(item, binding) {}
   }
 
-  private inner class ErrorVH(itemView: View, parent: ViewGroup) : VH(itemView) {
-    private val textErrorMessage = itemView.text_error_message!!
-    private val buttonRetry = itemView.button_retry!!
-
+  private inner class ErrorVH(
+    private val binding: ItemRecyclerCategoryDetailErrorBinding,
+    parent: ViewGroup
+  ) : VH(binding.root) {
     init {
-      buttonRetry
+      binding.buttonRetry
         .clicks()
         .takeUntil(parent.detaches())
         .subscribe(_retryS)
         .addTo(compositeDisposable)
     }
 
-    override fun bind(item: Item) = onlyBind<Item.Error>(item) { (error) ->
-      textErrorMessage.text = error.getMessage()
-    }
+    override fun bind(item: Item) =
+      onlyBind<Item.Error, ItemRecyclerCategoryDetailErrorBinding>(item, binding) { (error) ->
+        textErrorMessage.text = error.getMessage()
+      }
   }
 
-  private inner class HeaderVH(itemView: View) : VH(itemView) {
-    private val textHeader = itemView.text_header!!
-
-    override fun bind(item: Item) = onlyBind<Item.Header>(item) { (type) ->
-      textHeader.text = when (type) {
-        Popular -> "Popular"
-        Updated -> "Latest updated"
+  private inner class HeaderVH(private val binding: ItemRecyclerCategoryDetailHeaderBinding) :
+    VH(binding.root) {
+    override fun bind(item: Item) =
+      onlyBind<Item.Header, ItemRecyclerCategoryDetailHeaderBinding>(item, binding) { (type) ->
+        textHeader.text = when (type) {
+          Popular -> "Popular"
+          Updated -> "Latest updated"
+        }
       }
-    }
   }
 
   private companion object {
     /**
      * @throws IllegalStateException
      */
-    inline fun <reified T : Item> VH.onlyBind(
+    inline fun <reified T : Item, B : ViewBinding> VH.onlyBind(
       item: Item,
-      crossinline bind: (T) -> Unit,
+      binding: B,
+      crossinline bind: B.(T) -> Unit,
     ) {
       check(item is T) { "${this::class.java.simpleName}::bind only accept ${T::class.java.simpleName}, but item=$item" }
-      bind(item)
+      binding.bind(item)
     }
   }
 }

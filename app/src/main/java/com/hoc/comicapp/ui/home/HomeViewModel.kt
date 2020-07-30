@@ -5,14 +5,14 @@ import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.notOfType
-import com.jakewharton.rxrelay2.BehaviorRelay
-import com.jakewharton.rxrelay2.PublishRelay
-import io.reactivex.Observable
-import io.reactivex.ObservableTransformer
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.ofType
-import io.reactivex.rxkotlin.subscribeBy
-import io.reactivex.rxkotlin.withLatestFrom
+import com.jakewharton.rxrelay3.BehaviorRelay
+import com.jakewharton.rxrelay3.PublishRelay
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.ObservableTransformer
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.ofType
+import io.reactivex.rxjava3.kotlin.subscribeBy
+import io.reactivex.rxjava3.kotlin.withLatestFrom
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import timber.log.Timber
 
@@ -21,8 +21,7 @@ class HomeViewModel(
   private val homeInteractor: HomeInteractor,
   rxSchedulerProvider: RxSchedulerProvider,
 ) :
-  BaseViewModel<HomeViewIntent, HomeViewState, HomeSingleEvent>() {
-  override val initialState = HomeViewState.initialState()
+  BaseViewModel<HomeViewIntent, HomeViewState, HomeSingleEvent>(HomeViewState.initialState()) {
 
   private val intentS = PublishRelay.create<HomeViewIntent>()
   private val stateS = BehaviorRelay.createDefault(initialState)
@@ -162,27 +161,27 @@ class HomeViewModel(
   private val intentToViewState =
     ObservableTransformer<HomeViewIntent, HomeViewState> { intentObservable ->
       intentObservable.publish { shared ->
-          Observable.mergeArray(
-            shared
-              .ofType<HomeViewIntent.Initial>()
-              .compose(initialProcessor),
-            shared
-              .ofType<HomeViewIntent.Refresh>()
-              .compose(refreshProcessor),
-            shared
-              .ofType<HomeViewIntent.LoadNextPageUpdatedComic>()
-              .compose(loadNextPageProcessor),
-            shared
-              .ofType<HomeViewIntent.RetryUpdate>()
-              .compose(retryUpdateProcessor),
-            shared
-              .ofType<HomeViewIntent.RetryNewest>()
-              .compose(retryNewestProcessor),
-            shared
-              .ofType<HomeViewIntent.RetryMostViewed>()
-              .compose(retryMostViewedProcessor)
-          )
-        }
+        Observable.mergeArray(
+          shared
+            .ofType<HomeViewIntent.Initial>()
+            .compose(initialProcessor),
+          shared
+            .ofType<HomeViewIntent.Refresh>()
+            .compose(refreshProcessor),
+          shared
+            .ofType<HomeViewIntent.LoadNextPageUpdatedComic>()
+            .compose(loadNextPageProcessor),
+          shared
+            .ofType<HomeViewIntent.RetryUpdate>()
+            .compose(retryUpdateProcessor),
+          shared
+            .ofType<HomeViewIntent.RetryNewest>()
+            .compose(retryNewestProcessor),
+          shared
+            .ofType<HomeViewIntent.RetryMostViewed>()
+            .compose(retryMostViewedProcessor)
+        )
+      }
         .doOnNext { Timber.d("partial_change=$it") }
         .scan(initialState) { state, change -> change.reducer(state) }
         .distinctUntilChanged()

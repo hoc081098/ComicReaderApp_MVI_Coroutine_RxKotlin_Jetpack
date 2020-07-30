@@ -4,25 +4,25 @@ import androidx.annotation.CallSuper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.distinctUntilChanged
 import com.hoc.comicapp.utils.Event
-import com.shopify.livedataktx.LiveDataKtx
-import com.shopify.livedataktx.toKtx
-import io.reactivex.disposables.CompositeDisposable
+import com.hoc.comicapp.utils.NotNullLiveData
+import com.hoc.comicapp.utils.NotNullMutableLiveData
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 import timber.log.Timber
 
-abstract class BaseViewModel<I : Intent, S : ViewState, E : SingleEvent> : ViewModel(),
+abstract class BaseViewModel<
+    I : MviIntent,
+    S : MviViewState,
+    E : MviSingleEvent>(protected val initialState: S) :
+  ViewModel(),
   MviViewModel<I, S, E> {
   protected val compositeDisposable = CompositeDisposable()
-
-  protected abstract val initialState: S
 
   /**
    * ViewState
    */
-  private val stateD = MutableLiveData<S>().apply { value = initialState }
-  private val stateDistinctD = stateD.distinctUntilChanged().toKtx()
-  override val state: LiveDataKtx<S> get() = stateDistinctD
+  private val stateD = NotNullMutableLiveData(initialState)
+  override val state: NotNullLiveData<S> get() = stateD
 
   /**
    * Single event
@@ -37,7 +37,9 @@ abstract class BaseViewModel<I : Intent, S : ViewState, E : SingleEvent> : ViewM
   }
 
   protected fun setNewState(state: S) {
-    stateD.value = state
+    if (state != stateD.value) {
+      stateD.value = state
+    }
   }
 
   protected fun sendEvent(event: E) {

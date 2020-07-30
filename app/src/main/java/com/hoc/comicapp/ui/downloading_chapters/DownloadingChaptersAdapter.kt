@@ -1,20 +1,18 @@
 package com.hoc.comicapp.ui.downloading_chapters
 
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.hoc.comicapp.R
+import com.hoc.comicapp.databinding.ItemRecyclerDownloadingChapterBinding
 import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersContract.ViewState.Chapter
 import com.hoc.comicapp.utils.asObservable
-import com.hoc.comicapp.utils.inflate
-import com.jakewharton.rxbinding3.view.clicks
-import com.jakewharton.rxbinding3.view.detaches
-import com.jakewharton.rxrelay2.PublishRelay
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
-import kotlinx.android.synthetic.main.item_recycler_downloading_chapter.view.*
+import com.hoc.comicapp.utils.inflater
+import com.jakewharton.rxbinding4.view.clicks
+import com.jakewharton.rxbinding4.view.detaches
+import com.jakewharton.rxrelay3.PublishRelay
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
 import timber.log.Timber
 
 object DownloadingChapterItemDiffUtilItemCallback : DiffUtil.ItemCallback<Chapter>() {
@@ -37,7 +35,7 @@ class DownloadingChaptersAdapter(
   val clickCancel get() = _clickCancel.asObservable()
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-    VH(parent inflate R.layout.item_recycler_downloading_chapter, parent)
+    VH(ItemRecyclerDownloadingChapterBinding.inflate(parent.inflater, parent, false), parent)
 
   override fun onBindViewHolder(holder: VH, position: Int) = holder.bind(getItem(position))
 
@@ -54,15 +52,10 @@ class DownloadingChaptersAdapter(
     }
   }
 
-  inner class VH(itemView: View, parent: ViewGroup) : RecyclerView.ViewHolder(itemView) {
-    private val textChapterTitle = itemView.text_chapter_title!!
-    private val textComicTitle = itemView.text_comic_title!!
-    private val progress = itemView.progress!!
-    private val textProgress = itemView.text_progress!!
-    private val imageCancelDownload = itemView.image_cancel_download!!
-
+  inner class VH(private val binding: ItemRecyclerDownloadingChapterBinding, parent: ViewGroup) :
+    RecyclerView.ViewHolder(binding.root) {
     init {
-      imageCancelDownload
+      binding.imageCancelDownload
         .clicks()
         .takeUntil(parent.detaches())
         .map { bindingAdapterPosition }
@@ -71,13 +64,13 @@ class DownloadingChaptersAdapter(
         .addTo(compositeDisposable)
     }
 
-    fun bind(chapter: Chapter) {
+    fun bind(chapter: Chapter) = binding.run {
       textChapterTitle.text = chapter.title
       textComicTitle.text = chapter.comicTitle
       updateProgress(chapter.progress)
     }
 
-    fun updateProgress(progress: Int) {
+    fun updateProgress(progress: Int) = binding.run {
       this.progress.progress = progress
       textProgress.text = "$progress% "
     }

@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.rx2.asObservable
+import kotlinx.coroutines.rx3.asObservable
 import timber.log.Timber
 
 @ExperimentalCoroutinesApi

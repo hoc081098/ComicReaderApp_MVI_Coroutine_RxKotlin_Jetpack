@@ -1,17 +1,15 @@
 package com.hoc.comicapp.ui.category_detail
 
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.hoc.comicapp.GlideRequests
-import com.hoc.comicapp.R
+import com.hoc.comicapp.databinding.ItemRecyclerCategoryDetailPopularComicBinding
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.PopularItem
 import com.hoc.comicapp.ui.detail.ComicArg
-import com.hoc.comicapp.utils.inflate
-import kotlinx.android.synthetic.main.item_recycler_category_detail_popular_comic.view.*
+import com.hoc.comicapp.utils.inflater
 
 private object PopularItemDiffCallback : DiffUtil.ItemCallback<PopularItem>() {
   override fun areItemsTheSame(oldItem: PopularItem, newItem: PopularItem) =
@@ -27,15 +25,18 @@ class PopularHorizontalAdapter(
   ListAdapter<PopularItem, PopularHorizontalAdapter.VH>(PopularItemDiffCallback) {
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-    VH(parent inflate R.layout.item_recycler_category_detail_popular_comic)
+    VH(
+      ItemRecyclerCategoryDetailPopularComicBinding.inflate(
+        parent.inflater,
+        parent,
+        false
+      )
+    )
 
   override fun onBindViewHolder(holder: VH, position: Int) = holder.bind(getItem(position))
 
-  inner class VH(itemView: View) : RecyclerView.ViewHolder(itemView) {
-    private val imageComic = itemView.image_comic!!
-    private val textComicName = itemView.text_comic_name!!
-    private val textChapter = itemView.text_chapter!!
-
+  inner class VH(private val binding: ItemRecyclerCategoryDetailPopularComicBinding) :
+    RecyclerView.ViewHolder(binding.root) {
     init {
       itemView.setOnClickListener {
         val position = bindingAdapterPosition
@@ -54,7 +55,7 @@ class PopularHorizontalAdapter(
       }
     }
 
-    fun bind(item: PopularItem) {
+    fun bind(item: PopularItem) = binding.run {
       glide
         .load(item.thumbnail)
         .thumbnail(0.5f)

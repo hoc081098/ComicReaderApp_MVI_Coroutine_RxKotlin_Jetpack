@@ -16,6 +16,7 @@ import androidx.transition.Fade
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import com.hoc.comicapp.R
+import com.hoc.comicapp.databinding.FragmentLoginBinding
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.ui.login.LoginContract.Intent
 import com.hoc.comicapp.ui.login.LoginContract.SingleEvent
@@ -23,12 +24,12 @@ import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.onDismissed
 import com.hoc.comicapp.utils.snack
-import com.jakewharton.rxbinding3.view.clicks
-import com.jakewharton.rxbinding3.widget.textChanges
-import io.reactivex.Observable
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
-import kotlinx.android.synthetic.main.fragment_login.*
+import com.hoc.comicapp.utils.viewBinding
+import com.jakewharton.rxbinding4.view.clicks
+import com.jakewharton.rxbinding4.widget.textChanges
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
 import org.koin.androidx.scope.lifecycleScope
 import org.koin.androidx.viewmodel.scope.viewModel
 import timber.log.Timber
@@ -36,6 +37,7 @@ import timber.log.Timber
 class LoginFragment : Fragment() {
 
   private val vm by lifecycleScope.viewModel<LoginVM>(owner = this)
+  private val viewBinding by viewBinding<FragmentLoginBinding>()
   private val compositeDisposable = CompositeDisposable()
 
   override fun onCreateView(
@@ -47,10 +49,10 @@ class LoginFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    edit_email.editText!!.setText(vm.state.safeValue?.email ?: "")
-    edit_password.editText!!.setText(vm.state.safeValue?.password ?: "")
+    viewBinding.editEmail.editText!!.setText(vm.state.value.email ?: "")
+    viewBinding.editPassword.editText!!.setText(vm.state.value.password ?: "")
 
-    button_register.setOnClickListener {
+    viewBinding.buttonRegister.setOnClickListener {
       val toRegisterFragment =
         LoginFragmentDirections.actionLoginFragmentToRegisterFragment()
       findNavController().navigate(toRegisterFragment)
@@ -59,19 +61,19 @@ class LoginFragment : Fragment() {
     bindVM()
   }
 
-  private fun bindVM() {
+  private fun bindVM() = viewBinding.run {
     vm.state.observe(owner = viewLifecycleOwner) { (emailError, passwordError, isLoading) ->
-      if (edit_email.error != emailError) {
-        edit_email.error = emailError
+      if (editEmail.error != emailError) {
+        editEmail.error = emailError
       }
-      if (edit_password.error != passwordError) {
-        edit_password.error = passwordError
+      if (editPassword.error != passwordError) {
+        editPassword.error = passwordError
       }
 
       if (isLoading) {
-        beginTransition(button_login, progress_bar)
+        beginTransition(buttonLogin, progressBar)
       } else {
-        onComplete(button_login, progress_bar)
+        onComplete(buttonLogin, progressBar)
       }
     }
 
@@ -95,9 +97,9 @@ class LoginFragment : Fragment() {
 
     vm.processIntents(
       Observable.mergeArray(
-        edit_email.editText!!.textChanges().map { Intent.EmailChanged(it.toString()) },
-        edit_password.editText!!.textChanges().map { Intent.PasswordChange(it.toString()) },
-        button_login.clicks().map { Intent.SubmitLogin }
+        editEmail.editText!!.textChanges().map { Intent.EmailChanged(it.toString()) },
+        editPassword.editText!!.textChanges().map { Intent.PasswordChange(it.toString()) },
+        buttonLogin.clicks().map { Intent.SubmitLogin }
       )
     ).addTo(compositeDisposable)
   }
@@ -112,7 +114,7 @@ class LoginFragment : Fragment() {
     progressBar: ProgressBar,
   ) {
     TransitionManager.beginDelayedTransition(
-      root_login_frag,
+      viewBinding.rootLoginFrag,
       TransitionSet()
         .addTransition(
           ChangeBounds()
@@ -162,7 +164,7 @@ class LoginFragment : Fragment() {
       )
       .setOrdering(TransitionSet.ORDERING_SEQUENTIAL)
 
-    TransitionManager.beginDelayedTransition(root_login_frag, transition)
+    TransitionManager.beginDelayedTransition(viewBinding.rootLoginFrag, transition)
 
     progressBar.visibility = View.INVISIBLE
     button.visibility = View.VISIBLE

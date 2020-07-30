@@ -1,22 +1,21 @@
 package com.hoc.comicapp.ui.home
 
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
+import com.hoc.comicapp.databinding.ItemRecyclerviewTopMonthComicOrRecommenedBinding
 import com.hoc.comicapp.domain.models.Comic
 import com.hoc.comicapp.ui.home.HomeAdapter.Companion.MOST_VIEW_COMIC_ITEM_VIEW_TYPE
 import com.hoc.comicapp.utils.asObservable
-import com.hoc.comicapp.utils.inflate
+import com.hoc.comicapp.utils.inflater
 import com.hoc.comicapp.utils.mapNotNull
-import com.jakewharton.rxbinding3.view.clicks
-import com.jakewharton.rxrelay2.PublishRelay
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
-import kotlinx.android.synthetic.main.item_recyclerview_top_month_comic_or_recommened.view.*
+import com.jakewharton.rxbinding4.view.clicks
+import com.jakewharton.rxrelay3.PublishRelay
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
 
 class MostViewedAdapter(
   private val glide: GlideRequests,
@@ -28,7 +27,13 @@ class MostViewedAdapter(
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
     when (viewType) {
-      MOST_VIEW_COMIC_ITEM_VIEW_TYPE -> return VH(parent inflate R.layout.item_recyclerview_top_month_comic_or_recommened)
+      MOST_VIEW_COMIC_ITEM_VIEW_TYPE -> return VH(
+        ItemRecyclerviewTopMonthComicOrRecommenedBinding.inflate(
+          parent.inflater,
+          parent,
+          false,
+        )
+      )
       else -> throw IllegalStateException("viewType must be $MOST_VIEW_COMIC_ITEM_VIEW_TYPE, but viewType=$viewType")
     }
   }
@@ -37,12 +42,7 @@ class MostViewedAdapter(
 
   override fun onBindViewHolder(holder: VH, position: Int) = holder.bind(getItem(position))
 
-  inner class VH(itemView: View) : RecyclerView.ViewHolder(itemView) {
-    private val imageComic = itemView.image_comic!!
-    private val textComicName = itemView.text_comic_name!!
-    private val textChapter = itemView.text_chapter!!
-    private val textView = itemView.text_view_or_last_updated_time!!
-
+  inner class VH(private val binding: ItemRecyclerviewTopMonthComicOrRecommenedBinding) : RecyclerView.ViewHolder(binding.root) {
     init {
       itemView
         .clicks()
@@ -62,12 +62,12 @@ class MostViewedAdapter(
         .addTo(compositeDisposable)
     }
 
-    fun bind(item: Comic) {
+    fun bind(item: Comic)  = binding.run {
       itemView.transitionName ="most_viewed#${item.link}"
 
       textComicName.text = item.title
       textChapter.text = item.lastChapters.lastOrNull()?.chapterName
-      textView.text = item.view
+      textViewOrLastUpdatedTime.text = item.view
 
       glide
         .load(item.thumbnail)
@@ -76,6 +76,8 @@ class MostViewedAdapter(
         .fitCenter()
         .transition(DrawableTransitionOptions.withCrossFade())
         .into(imageComic)
+
+      Unit
     }
   }
 }

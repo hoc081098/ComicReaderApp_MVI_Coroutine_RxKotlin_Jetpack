@@ -1,12 +1,12 @@
 package com.hoc.comicapp.ui.search_comic
 
-import com.hoc.comicapp.base.Intent
+import com.hoc.comicapp.base.MviIntent
 import com.hoc.comicapp.domain.models.Comic
 import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewState.Item
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewState.Item.ComicItem
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 
 interface SearchComicContract {
   interface Interactor {
@@ -18,7 +18,7 @@ interface SearchComicContract {
     val comics: List<Item>,
     val errorMessage: String?,
     val page: Int,
-  ) : com.hoc.comicapp.base.ViewState {
+  ) : com.hoc.comicapp.base.MviViewState {
     companion object {
       @JvmStatic
       fun initialState() = ViewState(
@@ -142,7 +142,7 @@ interface SearchComicContract {
     }
   }
 
-  sealed class ViewIntent : Intent {
+  sealed class ViewIntent : MviIntent {
     data class SearchIntent(val term: String) : ViewIntent()
     object RetryFirstIntent : ViewIntent()
 
@@ -150,7 +150,7 @@ interface SearchComicContract {
     object RetryNextPage : ViewIntent()
   }
 
-  sealed class SingleEvent : com.hoc.comicapp.base.SingleEvent {
+  sealed class SingleEvent : com.hoc.comicapp.base.MviSingleEvent {
     data class MessageEvent(val message: String) : SingleEvent()
   }
 }

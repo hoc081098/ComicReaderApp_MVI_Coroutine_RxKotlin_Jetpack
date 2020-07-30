@@ -16,20 +16,20 @@ import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.Downloaded
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.Downloading
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.NotYetDownload
+import com.hoc.comicapp.utils.NotNullMutableLiveData
 import com.hoc.comicapp.utils.combineLatest
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.mapNotNull
 import com.hoc.comicapp.utils.notOfType
 import com.hoc.comicapp.worker.DownloadComicWorker
-import com.jakewharton.rxrelay2.BehaviorRelay
-import com.jakewharton.rxrelay2.PublishRelay
-import com.shopify.livedataktx.MutableLiveDataKtx
-import io.reactivex.Observable
-import io.reactivex.ObservableTransformer
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.ofType
-import io.reactivex.rxkotlin.subscribeBy
-import io.reactivex.rxkotlin.withLatestFrom
+import com.jakewharton.rxrelay3.BehaviorRelay
+import com.jakewharton.rxrelay3.PublishRelay
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.ObservableTransformer
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.ofType
+import io.reactivex.rxjava3.kotlin.subscribeBy
+import io.reactivex.rxjava3.kotlin.withLatestFrom
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import timber.log.Timber
 
@@ -40,7 +40,9 @@ class ComicDetailViewModel(
   private val rxSchedulerProvider: RxSchedulerProvider,
   private val workManager: WorkManager,
   private val isDownloaded: Boolean,
-) : BaseViewModel<ComicDetailIntent, ComicDetailViewState, ComicDetailSingleEvent>(),
+) : BaseViewModel<ComicDetailIntent, ComicDetailViewState, ComicDetailSingleEvent>(
+  ComicDetailViewState.initialState()
+),
   Observer<ComicDetailViewState> {
 
   override fun onChanged(t: ComicDetailViewState?) {
@@ -48,7 +50,6 @@ class ComicDetailViewModel(
   }
 
   private val _stateD: LiveData<ComicDetailViewState>
-  override val initialState = ComicDetailViewState.initialState()
 
   private val intentS = PublishRelay.create<ComicDetailIntent>()
   private val stateS = BehaviorRelay.createDefault(initialState)
@@ -117,19 +118,20 @@ class ComicDetailViewModel(
         }
     }
 
-  private val intentToViewState = ObservableTransformer<ComicDetailIntent, ComicDetailViewState> { intent ->
-    intent.publish { shared ->
+  private val intentToViewState =
+    ObservableTransformer<ComicDetailIntent, ComicDetailViewState> { intent ->
+      intent.publish { shared ->
         Observable.mergeArray(
           shared.ofType<ComicDetailIntent.Initial>().compose(initialProcessor),
           shared.ofType<ComicDetailIntent.Refresh>().compose(refreshProcessor),
           shared.ofType<ComicDetailIntent.Retry>().compose(retryProcessor)
         )
       }
-      .doOnNext { Timber.d("partial_change=$it") }
-      .scan(initialState) { state, change -> change.reducer(state) }
-      .distinctUntilChanged()
-      .observeOn(rxSchedulerProvider.main)
-  }
+        .doOnNext { Timber.d("partial_change=$it") }
+        .scan(initialState) { state, change -> change.reducer(state) }
+        .distinctUntilChanged()
+        .observeOn(rxSchedulerProvider.main)
+    }
 
   init {
     val filteredIntent = intentS
@@ -166,7 +168,7 @@ class ComicDetailViewModel(
       .addTo(compositeDisposable)
 
     // behavior subject -> live data
-    val stateD = MutableLiveDataKtx<ComicDetailViewState>().apply { value = initialState }
+    val stateD = NotNullMutableLiveData(initialState)
     stateS
       .subscribeBy(onNext = stateD::setValue)
       .addTo(compositeDisposable)

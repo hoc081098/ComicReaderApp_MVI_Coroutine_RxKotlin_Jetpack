@@ -10,24 +10,26 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager.VERTICAL
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
+import com.hoc.comicapp.databinding.FragmentCategoryBinding
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract
 import com.hoc.comicapp.utils.itemSelections
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.snack
-import com.jakewharton.rxbinding3.swiperefreshlayout.refreshes
-import com.jakewharton.rxbinding3.view.clicks
-import io.reactivex.Observable
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.subscribeBy
-import kotlinx.android.synthetic.main.fragment_category.*
+import com.hoc.comicapp.utils.viewBinding
+import com.jakewharton.rxbinding4.swiperefreshlayout.refreshes
+import com.jakewharton.rxbinding4.view.clicks
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.subscribeBy
 import org.koin.androidx.scope.lifecycleScope
 import org.koin.androidx.viewmodel.scope.viewModel
 import timber.log.Timber
 
 class CategoryFragment : Fragment() {
   private val viewModel by lifecycleScope.viewModel<CategoryViewModel>(owner = this)
+  private val viewBinding by viewBinding<FragmentCategoryBinding>()
   private val compositeDisposable = CompositeDisposable()
 
   override fun onCreateView(
@@ -45,8 +47,8 @@ class CategoryFragment : Fragment() {
     bind(adapter)
   }
 
-  private fun initView(categoryAdapter: CategoryAdapter) {
-    recycler_categories.run {
+  private fun initView(categoryAdapter: CategoryAdapter) = viewBinding.run {
+    recyclerCategories.run {
       setHasFixedSize(true)
       layoutManager = StaggeredGridLayoutManager(2, VERTICAL)
       adapter = categoryAdapter
@@ -68,15 +70,14 @@ class CategoryFragment : Fragment() {
       }
       .addTo(compositeDisposable)
 
-    spinner_sort_title.setItems(orders)
-    spinner_sort_title.selectedIndex = viewModel.state
-      .safeValue
-      ?.sortOrder
-      ?.let(orders::indexOf)
-      ?: 0
+    spinnerSortTitle.setItems(orders)
+    spinnerSortTitle.selectedIndex = viewModel.state
+      .value
+      .sortOrder
+      .let(orders::indexOf)
   }
 
-  private fun bind(adapter: CategoryAdapter) {
+  private fun bind(adapter: CategoryAdapter) = viewBinding.run {
     viewModel.singleEvent.observeEvent(owner = viewLifecycleOwner) {
       when (it) {
         is CategorySingleEvent.MessageEvent -> {
@@ -88,22 +89,22 @@ class CategoryFragment : Fragment() {
       Timber.d("[STATE] categories.length=${categories.size} isLoading=$isLoading errorMessage=$errorMessage")
 
       if (refreshLoading) {
-        swipe_refresh_layout.post { swipe_refresh_layout.isRefreshing = true }
+        swipeRefreshLayout.post { swipeRefreshLayout.isRefreshing = true }
       } else {
-        swipe_refresh_layout.isRefreshing = false
+        swipeRefreshLayout.isRefreshing = false
       }
 
       if (isLoading) {
-        progress_bar.visibility = View.VISIBLE
+        progressBar.visibility = View.VISIBLE
       } else {
-        progress_bar.visibility = View.INVISIBLE
+        progressBar.visibility = View.INVISIBLE
       }
 
       if (errorMessage == null) {
-        group_error.visibility = View.GONE
+        groupError.visibility = View.GONE
       } else {
-        group_error.visibility = View.VISIBLE
-        text_error_message.text = errorMessage
+        groupError.visibility = View.VISIBLE
+        textErrorMessage.text = errorMessage
       }
 
       adapter.submitList(categories)
@@ -111,13 +112,13 @@ class CategoryFragment : Fragment() {
     viewModel.processIntents(
       Observable.mergeArray(
         Observable.just(CategoryViewIntent.Initial),
-        button_retry
+        buttonRetry
           .clicks()
           .map { CategoryViewIntent.Retry },
-        swipe_refresh_layout
+        swipeRefreshLayout
           .refreshes()
           .map { CategoryViewIntent.Refresh },
-        spinner_sort_title
+        spinnerSortTitle
           .itemSelections<String>()
           .map { CategoryViewIntent.ChangeSortOrder(it) }
       )

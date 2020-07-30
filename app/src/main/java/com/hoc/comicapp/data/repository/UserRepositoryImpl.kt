@@ -8,7 +8,7 @@ import com.hoc.comicapp.domain.models.User
 import com.hoc.comicapp.domain.repository.UserRepository
 import com.hoc.comicapp.utils.bimap
 import com.hoc.comicapp.utils.right
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.delay
 import timber.log.Timber
 

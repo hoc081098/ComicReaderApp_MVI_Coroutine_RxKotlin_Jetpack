@@ -16,7 +16,7 @@ import com.hoc.comicapp.utils.map
 import com.hoc.comicapp.utils.right
 import com.hoc.comicapp.utils.snapshots
 import com.hoc.comicapp.utils.toOptional
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope

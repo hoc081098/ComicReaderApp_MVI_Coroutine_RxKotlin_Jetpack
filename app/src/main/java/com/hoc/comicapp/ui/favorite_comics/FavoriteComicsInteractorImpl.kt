@@ -7,9 +7,9 @@ import com.hoc.comicapp.ui.favorite_comics.FavoriteComicsContract.ComicItem
 import com.hoc.comicapp.ui.favorite_comics.FavoriteComicsContract.Interactor
 import com.hoc.comicapp.ui.favorite_comics.FavoriteComicsContract.PartialChange
 import com.hoc.comicapp.utils.fold
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.rx2.rxObservable
+import kotlinx.coroutines.rx3.rxObservable
 
 @ExperimentalCoroutinesApi
 class FavoriteComicsInteractorImpl(
@@ -39,6 +39,6 @@ class FavoriteComicsInteractorImpl(
         )
       }
       .observeOn(rxSchedulerProvider.main)
-      .startWith(PartialChange.FavoriteComics.Loading)
+      .startWithItem(PartialChange.FavoriteComics.Loading)
   }
 }

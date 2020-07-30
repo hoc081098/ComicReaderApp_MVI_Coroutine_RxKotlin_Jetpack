@@ -15,7 +15,7 @@ import com.hoc.comicapp.utils.fold
 import com.hoc.comicapp.utils.left
 import com.hoc.comicapp.utils.right
 import com.hoc.comicapp.utils.snapshots
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -26,7 +26,6 @@ import timber.log.Timber
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 
-@ExperimentalTime
 @ObsoleteCoroutinesApi
 class FavoriteComicsDataSourceImpl(
   private val firebaseAuth: FirebaseAuth,
@@ -42,6 +41,7 @@ class FavoriteComicsDataSourceImpl(
     }
   }
 
+  @OptIn(ExperimentalTime::class)
   @Suppress("FunctionName")
   private suspend fun _updateComics(comics: List<_FavoriteComic>) {
     measureTime {

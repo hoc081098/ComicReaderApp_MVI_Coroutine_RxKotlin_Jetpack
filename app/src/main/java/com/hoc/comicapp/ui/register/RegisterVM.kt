@@ -15,18 +15,17 @@ import com.hoc.comicapp.utils.Optional
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.getOrNull
 import com.hoc.comicapp.utils.toOptional
-import com.jakewharton.rxrelay2.BehaviorRelay
-import com.jakewharton.rxrelay2.PublishRelay
-import io.reactivex.Observable
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.ofType
-import io.reactivex.rxkotlin.subscribeBy
+import com.jakewharton.rxrelay3.BehaviorRelay
+import com.jakewharton.rxrelay3.PublishRelay
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.ofType
+import io.reactivex.rxjava3.kotlin.subscribeBy
 
 class RegisterVM(
   private val interactor: Interactor,
   private val rxSchedulerProvider: RxSchedulerProvider,
-) : BaseViewModel<Intent, ViewState, SingleEvent>() {
-  override val initialState = ViewState.initial()
+) : BaseViewModel<Intent, ViewState, SingleEvent>(ViewState.initial()) {
 
   private val intentS = PublishRelay.create<Intent>()
 
@@ -93,15 +92,15 @@ class RegisterVM(
     val avatarChange = avatarObservable.map { PartialChange.AvatarChanged(it) }
 
     Observable.mergeArray(
-        emailErrorChange,
-        passwordErrorChange,
-        fullNameErrorChange,
-        avatarChange,
-        registerChange,
-        emailChange,
-        passwordChange,
-        fullNameChange
-      ).scan(initialState) { state, change -> change.reducer(state) }
+      emailErrorChange,
+      passwordErrorChange,
+      fullNameErrorChange,
+      avatarChange,
+      registerChange,
+      emailChange,
+      passwordChange,
+      fullNameChange
+    ).scan(initialState) { state, change -> change.reducer(state) }
       .observeOn(rxSchedulerProvider.main)
       .subscribeBy(onNext = ::setNewState)
       .addTo(compositeDisposable)

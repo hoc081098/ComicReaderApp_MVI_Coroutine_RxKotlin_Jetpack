@@ -1,5 +1,6 @@
 package com.hoc.comicapp.worker
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -9,23 +10,32 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.work.CoroutineWorker
 import androidx.work.ListenableWorker.Result.failure
 import androidx.work.ListenableWorker.Result.success
+import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.hoc.comicapp.R
 import com.hoc.comicapp.activity.SplashActivity
+import com.hoc.comicapp.data.ErrorMapper
 import com.hoc.comicapp.data.JsonAdaptersContainer
+import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.domain.repository.DownloadComicsRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
+import com.hoc.comicapp.initializer.startKoinIfNeeded
 import com.hoc.comicapp.utils.Either
 import com.hoc.comicapp.utils.fold
 import com.hoc.comicapp.utils.left
 import com.hoc.comicapp.utils.right
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.withContext
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import timber.log.Timber
 
+@ExperimentalCoroutinesApi
+@ObsoleteCoroutinesApi
 class DownloadComicWorker(
   appContext: Context,
   params: WorkerParameters,
@@ -33,7 +43,14 @@ class DownloadComicWorker(
   private val downloadComicsRepo by inject<DownloadComicsRepository>()
   private val jsonAdaptersContainer by inject<JsonAdaptersContainer>()
   private val dispatchers by inject<CoroutinesDispatchersProvider>()
+  private val workManager by inject<WorkManager>()
+  private val errorMapper by inject<ErrorMapper>()
 
+  init {
+    appContext.startKoinIfNeeded()
+  }
+
+  @SuppressLint("RestrictedApi")
   override suspend fun doWork(): Result {
     val (chapterLink, chapterJson, comicName, chapterComicName) = extractArgument()
       .fold(left = { return failure(workDataOf(it)) }, right = { it })
@@ -74,6 +91,7 @@ class DownloadComicWorker(
         0,
         notificationBuilder
           .setContentText("Download complete. Click to see all downloaded chapter")
+          .apply { mActions.clear() }
           .setProgress(0, 0, false)
           .build()
       )
@@ -86,12 +104,16 @@ class DownloadComicWorker(
         chapterComicName,
         0,
         notificationBuilder
-          .setContentText("Download failed")
+          .setContentText(
+            if (e is CancellationException) "Download cancelled"
+            else "Download failed: ${errorMapper.map(e).getMessage()}"
+          )
+          .apply { mActions.clear() }
           .setProgress(0, 0, false)
           .build()
       )
 
-      failure()
+      failure(workDataOf(ERROR to e.toString()))
     }
   }
 
@@ -107,13 +129,13 @@ class DownloadComicWorker(
     val chapterJson = inputData.getString(CHAPTER)
       ?: return (ERROR to "chapterJson is null").left()
 
-    val (chapterLink, chapterName) = kotlin.runCatching {
-      withContext(dispatchers.io) {
-        // TODO: Remove @Suppress("BlockingMethodInNonBlockingContext"). This seem to be a IntelliJ Idea's bug.
-        @Suppress("BlockingMethodInNonBlockingContext")
-        jsonAdaptersContainer.comicDetailChapterAdapter.fromJson(chapterJson)
+    val (chapterLink, chapterName) = kotlin
+      .runCatching {
+        withContext(dispatchers.io) {
+          jsonAdaptersContainer.comicDetailChapterAdapter.fromJson(chapterJson)
+        }
       }
-    }.getOrNull() ?: return (ERROR to "chapter is null").left()
+      .getOrNull() ?: return (ERROR to "chapter is null").left()
 
     val comicName = inputData.getString(COMIC_NAME)
     val chapterComicName = listOfNotNull(chapterName, comicName).joinToString(" - ")
@@ -126,8 +148,13 @@ class DownloadComicWorker(
   }
 
   private fun createNotificationBuilder(chapterComicName: String): NotificationCompat.Builder {
-    return NotificationCompat.Builder(applicationContext,
-        applicationContext.getString(R.string.notification_channel_id))
+    val cancelIntent = workManager.createCancelPendingIntent(id)
+
+    return NotificationCompat
+      .Builder(
+        applicationContext,
+        applicationContext.getString(R.string.notification_channel_id)
+      )
       .setSmallIcon(R.mipmap.ic_launcher_round)
       .setContentTitle("Download $chapterComicName")
       .setContentText("Downloading...")
@@ -135,6 +162,7 @@ class DownloadComicWorker(
       .setAutoCancel(true)
       .setOngoing(false)
       .setPriority(PRIORITY_HIGH)
+      .setOnlyAlertOnce(true)
       .setWhen(System.currentTimeMillis())
       .setContentIntent(
         PendingIntent.getActivity(
@@ -144,6 +172,7 @@ class DownloadComicWorker(
           PendingIntent.FLAG_UPDATE_CURRENT
         )
       )
+      .addAction(R.drawable.ic_close_white_24dp, "Cancel", cancelIntent)
   }
 
   companion object {

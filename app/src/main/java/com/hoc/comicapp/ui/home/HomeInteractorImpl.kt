@@ -7,11 +7,11 @@ import com.hoc.comicapp.utils.flatMap
 import com.hoc.comicapp.utils.fold
 import com.hoc.comicapp.utils.getOrNull
 import com.hoc.comicapp.utils.map
-import io.reactivex.Observable
-import io.reactivex.rxkotlin.Observables
-import io.reactivex.rxkotlin.cast
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.kotlin.Observables
+import io.reactivex.rxjava3.kotlin.cast
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.rx2.rxObservable
+import kotlinx.coroutines.rx3.rxObservable
 
 @ExperimentalCoroutinesApi
 class HomeInteractorImpl(
@@ -135,6 +135,6 @@ class HomeInteractorImpl(
           }
         }
       }.fold({ HomePartialChange.RefreshPartialChange.RefreshFailure(it) }, { it })
-    }.startWith(HomePartialChange.RefreshPartialChange.Loading)
+    }.startWithItem(HomePartialChange.RefreshPartialChange.Loading)
   }
 }

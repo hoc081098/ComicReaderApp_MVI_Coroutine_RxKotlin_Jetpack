@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import com.hoc.comicapp.domain.DomainResult
 import com.hoc.comicapp.domain.models.DownloadedChapter
 import com.hoc.comicapp.domain.models.DownloadedComic
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.flow.Flow
 
 interface DownloadComicsRepository {

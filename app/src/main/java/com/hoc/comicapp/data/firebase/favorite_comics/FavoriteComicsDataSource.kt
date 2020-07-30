@@ -2,7 +2,7 @@ package com.hoc.comicapp.data.firebase.favorite_comics
 
 import com.hoc.comicapp.data.firebase.entity._FavoriteComic
 import com.hoc.comicapp.utils.Either
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 
 interface FavoriteComicsDataSource {
   fun isFavorited(url: String): Observable<Either<Throwable, Boolean>>

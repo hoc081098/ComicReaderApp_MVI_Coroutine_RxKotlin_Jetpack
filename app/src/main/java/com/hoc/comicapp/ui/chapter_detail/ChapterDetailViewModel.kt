@@ -12,21 +12,19 @@ import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract.ViewState.Chapte
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.mapNotNull
 import com.hoc.comicapp.utils.notOfType
-import com.jakewharton.rxrelay2.PublishRelay
-import io.reactivex.Observable
-import io.reactivex.ObservableTransformer
-import io.reactivex.rxkotlin.Observables
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.ofType
-import io.reactivex.rxkotlin.subscribeBy
+import com.jakewharton.rxrelay3.PublishRelay
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.ObservableTransformer
+import io.reactivex.rxjava3.kotlin.Observables
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.ofType
+import io.reactivex.rxjava3.kotlin.subscribeBy
 
 class ChapterDetailViewModel(
   private val interactor: Interactor,
   rxSchedulerProvider: RxSchedulerProvider,
   private val isDownloaded: Boolean,
-) :
-  BaseViewModel<ViewIntent, ViewState, SingleEvent>() {
-  override val initialState = ViewState.initial()
+) : BaseViewModel<ViewIntent, ViewState, SingleEvent>(ViewState.initial()) {
 
   private val intentS = PublishRelay.create<ViewIntent>()
 
@@ -102,15 +100,15 @@ class ChapterDetailViewModel(
     ObservableTransformer<ViewIntent, PartialChange> { intents ->
       Observable.mergeArray(
         Observable.mergeArray(
-            intents.ofType(),
-            intents.ofType<ViewIntent.Initial>().map { ViewIntent.LoadChapter(it.chapter) },
-            intents.ofType<ViewIntent.LoadNextChapter>()
-              .mapNotNull { nextChapter }
-              .map { ViewIntent.LoadChapter(it) },
-            intents.ofType<ViewIntent.LoadPrevChapter>()
-              .mapNotNull { prevChapter }
-              .map { ViewIntent.LoadChapter(it) }
-          )
+          intents.ofType(),
+          intents.ofType<ViewIntent.Initial>().map { ViewIntent.LoadChapter(it.chapter) },
+          intents.ofType<ViewIntent.LoadNextChapter>()
+            .mapNotNull { nextChapter }
+            .map { ViewIntent.LoadChapter(it) },
+          intents.ofType<ViewIntent.LoadPrevChapter>()
+            .mapNotNull { prevChapter }
+            .map { ViewIntent.LoadChapter(it) }
+        )
           .distinctUntilChanged()
           .compose(loadChapterProcessor),
         intents.ofType<ViewIntent.Refresh>().compose(refreshProcessor),

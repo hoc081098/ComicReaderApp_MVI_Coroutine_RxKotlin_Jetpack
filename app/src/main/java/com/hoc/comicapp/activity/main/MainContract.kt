@@ -1,11 +1,11 @@
 package com.hoc.comicapp.activity.main
 
-import com.hoc.comicapp.base.Intent
+import com.hoc.comicapp.base.MviIntent
 import com.hoc.comicapp.domain.models.ComicAppError
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 
 interface MainContract {
-  sealed class ViewIntent : Intent {
+  sealed class ViewIntent : MviIntent {
     object Initial : ViewIntent()
     object SignOut : ViewIntent()
   }
@@ -14,7 +14,7 @@ interface MainContract {
     val user: User?,
     val isLoading: Boolean,
     val error: ComicAppError?,
-  ) : com.hoc.comicapp.base.ViewState {
+  ) : com.hoc.comicapp.base.MviViewState {
     companion object {
       fun initial(): ViewState {
         return ViewState(
@@ -74,7 +74,7 @@ interface MainContract {
     }
   }
 
-  sealed class SingleEvent : com.hoc.comicapp.base.SingleEvent {
+  sealed class SingleEvent : com.hoc.comicapp.base.MviSingleEvent {
     data class GetUserError(val error: ComicAppError) : SingleEvent()
     object SignOutSuccess : SingleEvent()
     data class SignOutFailure(val error: ComicAppError) : SingleEvent()

@@ -1,23 +1,22 @@
 package com.hoc.comicapp.ui.category
 
 import android.util.SparseBooleanArray
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
+import com.hoc.comicapp.databinding.ItemRecyclerCategoryBinding
 import com.hoc.comicapp.domain.models.Category
 import com.hoc.comicapp.utils.asObservable
-import com.hoc.comicapp.utils.inflate
-import com.jakewharton.rxbinding3.view.clicks
-import com.jakewharton.rxbinding3.view.detaches
-import com.jakewharton.rxrelay2.PublishRelay
-import io.reactivex.Observable
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
-import kotlinx.android.synthetic.main.item_recycler_category.view.*
+import com.hoc.comicapp.utils.inflater
+import com.jakewharton.rxbinding4.view.clicks
+import com.jakewharton.rxbinding4.view.detaches
+import com.jakewharton.rxrelay3.PublishRelay
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
 
 object CategoryDiffUtilItemCallback : DiffUtil.ItemCallback<Category>() {
   override fun areItemsTheSame(oldItem: Category, newItem: Category) = oldItem.link == newItem.link
@@ -33,20 +32,25 @@ class CategoryAdapter(
   val clickCategoryObservable get() = clickCategoryS.asObservable()
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-    VH(parent inflate R.layout.item_recycler_category, parent)
+    VH(
+      ItemRecyclerCategoryBinding.inflate(
+        parent.inflater,
+        parent,
+        false
+      ),
+      parent
+    )
 
   override fun onBindViewHolder(holder: VH, position: Int) =
     holder.bind(getItem(position), position)
 
-  inner class VH(itemView: View, parent: ViewGroup) : RecyclerView.ViewHolder(itemView) {
-    private val textCategoryName = itemView.text_category_name!!
-    private val textCategoryDescription = itemView.text_category_description!!
-    private val imageCategoryThumbnail = itemView.image_category_thumbnail!!
-
+  inner class VH(private val binding: ItemRecyclerCategoryBinding, parent: ViewGroup) :
+    RecyclerView.ViewHolder(binding.root) {
     init {
-      Observable.mergeArray(
-          itemView.image_navigation_next.clicks(),
-          itemView.text_go_to_detail.clicks(),
+      Observable
+        .mergeArray(
+          binding.imageNavigationNext.clicks(),
+          binding.textGoToDetail.clicks(),
           itemView.clicks()
         ).takeUntil(parent.detaches())
         .map { bindingAdapterPosition }
@@ -56,7 +60,7 @@ class CategoryAdapter(
         .addTo(compositeDisposable)
     }
 
-    fun bind(item: Category, position: Int) {
+    fun bind(item: Category, position: Int) = binding.run {
       glide
         .load(item.thumbnail)
         .placeholder(R.drawable.splash_background)

@@ -8,9 +8,9 @@ import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.PartialCha
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.ViewState.ComicItem
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.ViewState.ComicItem.Companion.fromDomain
 import com.hoc.comicapp.utils.fold
-import io.reactivex.Observable
-import io.reactivex.Single
-import kotlinx.coroutines.rx2.rxSingle
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Single
+import kotlinx.coroutines.rx3.rxSingle
 
 class DownloadedComicsInteractorImpl(
   private val downloadComicsRepository: DownloadComicsRepository,
@@ -40,6 +40,6 @@ class DownloadedComicsInteractorImpl(
           }
         )
       }
-      .startWith(PartialChange.Loading)
+      .startWithItem(PartialChange.Loading)
   }
 }

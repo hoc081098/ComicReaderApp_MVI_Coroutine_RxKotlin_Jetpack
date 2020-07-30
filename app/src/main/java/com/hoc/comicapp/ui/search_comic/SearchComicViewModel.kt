@@ -9,13 +9,13 @@ import com.hoc.comicapp.ui.search_comic.SearchComicContract.SingleEvent
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewIntent
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewState
 import com.hoc.comicapp.utils.exhaustMap
-import com.jakewharton.rxrelay2.BehaviorRelay
-import com.jakewharton.rxrelay2.PublishRelay
-import io.reactivex.Observable
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.ofType
-import io.reactivex.rxkotlin.subscribeBy
-import io.reactivex.rxkotlin.withLatestFrom
+import com.jakewharton.rxrelay3.BehaviorRelay
+import com.jakewharton.rxrelay3.PublishRelay
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.ofType
+import io.reactivex.rxjava3.kotlin.subscribeBy
+import io.reactivex.rxjava3.kotlin.withLatestFrom
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
@@ -23,10 +23,8 @@ class SearchComicViewModel(
   private val interactor: Interactor,
   rxSchedulerProvider: RxSchedulerProvider,
 ) :
-  BaseViewModel<ViewIntent, ViewState, SingleEvent>() {
+  BaseViewModel<ViewIntent, ViewState, SingleEvent>(ViewState.initialState()) {
   private val intentS = PublishRelay.create<ViewIntent>()
-
-  override val initialState = ViewState.initialState()
 
   override fun processIntents(intents: Observable<ViewIntent>) =
     intents.subscribe(intentS)!!
@@ -122,11 +120,11 @@ class SearchComicViewModel(
      */
 
     Observable.mergeArray(
-        searchPartialChange,
-        retryPartialChange,
-        loadNextPagePartialChange,
-        retryNextPagePartialChange
-      )
+      searchPartialChange,
+      retryPartialChange,
+      loadNextPagePartialChange,
+      retryNextPagePartialChange
+    )
       .scan(initialState) { state, change -> change.reducer(state) }
       .distinctUntilChanged()
       .observeOn(rxSchedulerProvider.main)

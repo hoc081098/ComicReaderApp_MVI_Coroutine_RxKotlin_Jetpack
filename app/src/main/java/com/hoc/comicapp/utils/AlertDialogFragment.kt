@@ -8,39 +8,40 @@ import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentActivity
-import io.reactivex.Observable
+import io.reactivex.rxjava3.android.MainThreadDisposable
+import io.reactivex.rxjava3.android.MainThreadDisposable.verifyMainThread
+import io.reactivex.rxjava3.core.Maybe
 import timber.log.Timber
 
 /**
  * Show alert dialog fragment
- * @return an [Observable] emit [Unit] when select OK button, otherwise return an empty [Observable]
+ * @return a [Maybe] that emits [Unit] when pressing OK button,
+ * otherwise return an empty [Maybe]
  */
-fun FragmentActivity.showAlertDialogAsObservable(init: AlertDialogFragment.Builder.() -> Unit): Observable<Unit> {
-  return Observable.create { emitter ->
+fun FragmentActivity.showAlertDialogAsMaybe(
+  negativeText: String = "Cancel",
+  positiveText: String = "OK",
+  init: AlertDialogFragment.Builder.() -> Unit,
+): Maybe<Unit> {
+  return Maybe.create { emitter ->
+    verifyMainThread()
+
     showAlertDialog {
       init()
 
-      negativeAction("Cancel") { dialog, _ ->
-        dialog.cancel()
-        if (!emitter.isDisposed) {
-          emitter.onComplete()
-        }
-      }
-      positiveAction("OK") { dialog, _ ->
-        dialog.dismiss()
-        if (!emitter.isDisposed) {
-          emitter.onNext(Unit)
-          emitter.onComplete()
-        }
-      }
-      onCancel {
-        if (!emitter.isDisposed) {
-          emitter.onComplete()
-        }
+      onCancel { emitter.onComplete() }
+
+      negativeAction(negativeText) { _, _ -> emitter.onComplete() }
+
+      positiveAction(positiveText) { _, _ ->
+        emitter.onSuccess(Unit)
+        emitter.onComplete()
       }
     }
 
-    emitter.setCancellable { dismissAlertDialog() }
+    emitter.setDisposable(object : MainThreadDisposable() {
+      override fun onDispose() = dismissAlertDialog()
+    })
   }
 }
 
@@ -67,7 +68,8 @@ fun FragmentActivity.showAlertDialog(init: AlertDialogFragment.Builder.() -> Uni
 fun FragmentActivity.dismissAlertDialog() {
   try {
     val dialogFragment =
-      supportFragmentManager.findFragmentByTag(AlertDialogFragment::class.java.simpleName) as? DialogFragment
+      supportFragmentManager.findFragmentByTag(AlertDialogFragment::class.java.simpleName) as? AlertDialogFragment
+    dialogFragment?.cleanUp()
     dialogFragment?.dismissAllowingStateLoss()
     Timber.d("dismissAlertDialog")
   } catch (e: Exception) {
@@ -117,6 +119,10 @@ class AlertDialogFragment : DialogFragment() {
         }
       }
       .create()
+  }
+
+  fun cleanUp() {
+    builder = null
   }
 
   companion object {

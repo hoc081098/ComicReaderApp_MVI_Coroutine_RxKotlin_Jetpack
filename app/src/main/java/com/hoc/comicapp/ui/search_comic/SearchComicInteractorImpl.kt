@@ -6,9 +6,9 @@ import com.hoc.comicapp.ui.search_comic.SearchComicContract.Interactor
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.PartialChange
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewState.Item.ComicItem
 import com.hoc.comicapp.utils.fold
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.rx2.rxObservable
+import kotlinx.coroutines.rx3.rxObservable
 import timber.log.Timber
 
 @ExperimentalCoroutinesApi

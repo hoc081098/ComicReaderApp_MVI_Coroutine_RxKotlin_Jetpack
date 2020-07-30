@@ -1,12 +1,9 @@
 package com.hoc.comicapp.ui.home
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
 import androidx.core.view.doOnPreDraw
-import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
@@ -15,17 +12,17 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.transition.Hold
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
+import com.hoc.comicapp.base.BaseFragment
+import com.hoc.comicapp.databinding.FragmentHomeBinding
 import com.hoc.comicapp.utils.isOrientationPortrait
-import com.hoc.comicapp.utils.observe
-import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.snack
-import com.jakewharton.rxbinding3.recyclerview.scrollEvents
-import com.jakewharton.rxbinding3.swiperefreshlayout.refreshes
-import io.reactivex.Observable
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.subscribeBy
-import kotlinx.android.synthetic.main.fragment_home.*
+import com.hoc.comicapp.utils.unit
+import com.hoc.comicapp.utils.viewBinding
+import com.jakewharton.rxbinding4.recyclerview.scrollEvents
+import com.jakewharton.rxbinding4.swiperefreshlayout.refreshes
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.subscribeBy
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.androidx.scope.lifecycleScope
 import org.koin.androidx.viewmodel.scope.viewModel
@@ -33,15 +30,23 @@ import timber.log.Timber
 import kotlin.LazyThreadSafetyMode.NONE
 
 @ExperimentalCoroutinesApi
-class HomeFragment : Fragment() {
-  private val homeViewModel by lifecycleScope.viewModel<HomeViewModel>(owner = this)
-  private val compositeDisposable = CompositeDisposable()
+class HomeFragment :
+  BaseFragment<
+      HomeViewIntent,
+      HomeViewState,
+      HomeSingleEvent,
+      HomeViewModel,
+      >(R.layout.fragment_home) {
+  override val viewModel by lifecycleScope.viewModel<HomeViewModel>(owner = this)
+  override val viewBinding by viewBinding<FragmentHomeBinding> {
+    recyclerHome.adapter = null
+  }
 
   private val homeAdapter by lazy(NONE) {
     HomeAdapter(
       viewLifecycleOwner,
       GlideApp.with(this),
-      recycler_home.recycledViewPool,
+      viewBinding.recyclerHome.recycledViewPool,
       compositeDisposable
     )
   }
@@ -53,61 +58,23 @@ class HomeFragment : Fragment() {
     }
   }
 
-  override fun onCreateView(
-    inflater: LayoutInflater,
-    container: ViewGroup?,
-    savedInstanceState: Bundle?,
-  ): View = inflater.inflate(R.layout.fragment_home, container, false)
-    .also { Timber.d("HomeFragment::onCreateView") }
+  private fun getMaxSpanCount() = if (requireContext().isOrientationPortrait) 2 else 4
 
-  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    super.onViewCreated(view, savedInstanceState)
-    Timber.d("HomeFragment::onViewCreated")
+  /*
+   *
+   */
 
+  override fun setupView(view: View, savedInstanceState: Bundle?) {
+    // Transition
     postponeEnterTransition()
     view.doOnPreDraw { startPostponedEnterTransition() }
 
-    initView(homeAdapter)
-    bind(homeAdapter)
-  }
-
-  private fun bind(homeAdapter: HomeAdapter) {
-    homeViewModel.state.observe(owner = viewLifecycleOwner) { (items, refreshLoading) ->
-      Timber.d("state=${items.size} refreshLoading=$refreshLoading")
-
-      homeAdapter.submitList(items)
-      if (refreshLoading) {
-        swipe_refresh_layout.post { swipe_refresh_layout.isRefreshing = true }
-      } else {
-        swipe_refresh_layout.isRefreshing = false
-      }
-    }
-    homeViewModel.singleEvent.observeEvent(viewLifecycleOwner) {
-      when (it) {
-        is HomeSingleEvent.MessageEvent -> {
-          view?.snack(it.message)
-        }
-      }
-    }
-    homeViewModel.processIntents(
-      Observable.mergeArray(
-        Observable.just(HomeViewIntent.Initial),
-        swipe_refresh_layout.refreshes().map { HomeViewIntent.Refresh },
-        loadNextPageIntent(),
-        homeAdapter.newestRetryObservable.map { HomeViewIntent.RetryNewest },
-        homeAdapter.mostViewedRetryObservable.map { HomeViewIntent.RetryMostViewed },
-        homeAdapter.updatedRetryObservable.map { HomeViewIntent.RetryUpdate }
-      )
-    ).addTo(compositeDisposable)
-  }
-
-  private fun initView(homeAdapter: HomeAdapter) {
-    swipe_refresh_layout.setColorSchemeColors(*resources.getIntArray(R.array.swipe_refresh_colors))
-
-    recycler_home.run {
+    // Swipe refresh layout and recycler view
+    viewBinding.swipeRefreshLayout.setColorSchemeColors(*resources.getIntArray(R.array.swipe_refresh_colors))
+    viewBinding.recyclerHome.run {
 
       setHasFixedSize(true)
-      layoutManager = GridLayoutManager(context, getMaxSpanCount()).apply {
+      layoutManager = GridLayoutManager(this@HomeFragment.context, getMaxSpanCount()).apply {
         spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
           override fun getSpanSize(position: Int): Int {
             return if (homeAdapter.getItemViewType(position) == HomeAdapter.COMIC_ITEM_VIEW_TYPE) {
@@ -133,25 +100,27 @@ class HomeFragment : Fragment() {
       })
     }
 
-    fab.setOnClickListener { view ->
-      object : LinearSmoothScroller(view.context) {
-        override fun getVerticalSnapPreference() = SNAP_TO_START
-      }
-        .apply { targetPosition = 0 }
-        .let { recycler_home.layoutManager!!.startSmoothScroll(it) }
+    // Setup fab
+    val scroller = object : LinearSmoothScroller(view.context) {
+      override fun getVerticalSnapPreference() = SNAP_TO_START
     }
-
-    recycler_home
+    viewBinding.fab.setOnClickListener {
+      scroller
+        .apply { targetPosition = 0 }
+        .let { viewBinding.recyclerHome.layoutManager!!.startSmoothScroll(it) }
+    }
+    viewBinding.recyclerHome
       .scrollEvents()
       .subscribeBy {
         if (it.dy < 0) {
-          fab.show()
+          viewBinding.fab.show()
         } else {
-          fab.hide()
+          viewBinding.fab.hide()
         }
       }
       .addTo(compositeDisposable)
 
+    // Adapter click event
     homeAdapter
       .clickComicObservable
       .subscribeBy { (view, comicArg, transitionName) ->
@@ -171,22 +140,44 @@ class HomeFragment : Fragment() {
       .addTo(compositeDisposable)
   }
 
-  private fun loadNextPageIntent(): Observable<HomeViewIntent.LoadNextPageUpdatedComic> {
-    return recycler_home
-      .scrollEvents()
-      .filter { (_, _, dy) ->
-        val gridLayoutManager = recycler_home.layoutManager as GridLayoutManager
-        dy > 0 && gridLayoutManager.findLastVisibleItemPosition() + 2 * getMaxSpanCount() >= gridLayoutManager.itemCount
+  override fun viewIntents(): Observable<HomeViewIntent> {
+    fun loadNextPageIntent(): Observable<HomeViewIntent.LoadNextPageUpdatedComic> {
+      return viewBinding.recyclerHome
+        .scrollEvents()
+        .filter { (_, _, dy) ->
+          val gridLayoutManager = viewBinding.recyclerHome.layoutManager as GridLayoutManager
+          dy > 0 && gridLayoutManager.findLastVisibleItemPosition() + 2 * getMaxSpanCount() >= gridLayoutManager.itemCount
+        }
+        .map { HomeViewIntent.LoadNextPageUpdatedComic }
+    }
+
+    return Observable.mergeArray(
+      Observable.just(HomeViewIntent.Initial),
+      viewBinding.swipeRefreshLayout.refreshes().map { HomeViewIntent.Refresh },
+      loadNextPageIntent(),
+      homeAdapter.newestRetryObservable.map { HomeViewIntent.RetryNewest },
+      homeAdapter.mostViewedRetryObservable.map { HomeViewIntent.RetryMostViewed },
+      homeAdapter.updatedRetryObservable.map { HomeViewIntent.RetryUpdate }
+    )
+  }
+
+  override fun render(viewState: HomeViewState) {
+    val (items, refreshLoading) = viewState
+    Timber.d("state=${items.size} refreshLoading=$refreshLoading")
+
+    homeAdapter.submitList(items)
+    if (refreshLoading) {
+      viewBinding.swipeRefreshLayout.post { viewBinding.swipeRefreshLayout.isRefreshing = true }
+    } else {
+      viewBinding.swipeRefreshLayout.isRefreshing = false
+    }
+  }
+
+  override fun handleEvent(event: HomeSingleEvent) {
+    return when (event) {
+      is HomeSingleEvent.MessageEvent -> {
+        view?.snack(event.message)
       }
-      .map { HomeViewIntent.LoadNextPageUpdatedComic }
+    }.unit
   }
-
-  override fun onDestroyView() {
-    super.onDestroyView()
-    Timber.d("HomeFragment::onDestroyView")
-    compositeDisposable.clear()
-    recycler_home.adapter = null
-  }
-
-  private fun getMaxSpanCount() = if (requireContext().isOrientationPortrait) 2 else 4
 }

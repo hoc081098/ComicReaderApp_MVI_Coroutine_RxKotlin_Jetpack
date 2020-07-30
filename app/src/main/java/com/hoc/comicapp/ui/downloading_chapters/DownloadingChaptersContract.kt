@@ -1,16 +1,16 @@
 package com.hoc.comicapp.ui.downloading_chapters
 
-import com.hoc.comicapp.base.Intent
+import com.hoc.comicapp.base.MviIntent
+import com.hoc.comicapp.base.MviSingleEvent
+import com.hoc.comicapp.base.MviViewState
 import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.DownloadedChapter
 import java.util.*
-import com.hoc.comicapp.base.SingleEvent as BaseSingleEvent
-import com.hoc.comicapp.base.ViewState as BaseViewState
 
 @Suppress("unused")
 interface DownloadingChaptersContract {
 
-  sealed class ViewIntent : Intent {
+  sealed class ViewIntent : MviIntent {
     object Initial : ViewIntent()
     data class CancelDownload(val chapter: ViewState.Chapter) : ViewIntent()
   }
@@ -19,7 +19,7 @@ interface DownloadingChaptersContract {
     val isLoading: Boolean,
     val error: String?,
     val chapters: List<Chapter>,
-  ) : BaseViewState {
+  ) : MviViewState {
 
     companion object {
       fun initial(): ViewState {
@@ -70,7 +70,7 @@ interface DownloadingChaptersContract {
     object Loading : PartialChange()
   }
 
-  sealed class SingleEvent : BaseSingleEvent {
+  sealed class SingleEvent : MviSingleEvent {
     data class Message(val message: String) : SingleEvent()
 
     data class Deleted(val chapter: ViewState.Chapter) : SingleEvent()

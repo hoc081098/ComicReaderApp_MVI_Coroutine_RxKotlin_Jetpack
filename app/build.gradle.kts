@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.internal.AndroidExtensionsFeature.PARCELIZE
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val kotlinVersion: String by rootProject.extra
@@ -24,15 +25,17 @@ plugins {
   id("androidx.navigation.safeargs.kotlin")
 }
 
-androidExtensions { isExperimental = true }
+androidExtensions {
+  features = setOf(PARCELIZE.featureName)
+}
 
 android {
-  compileSdkVersion(29)
+  compileSdkVersion(30)
 
   defaultConfig {
     applicationId = "com.hoc.comicapp"
     minSdkVersion(21)
-    targetSdkVersion(29)
+    targetSdkVersion(30)
     versionCode = 1
     versionName = "1.0"
 
@@ -53,11 +56,16 @@ android {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
   }
+
+  buildFeatures {
+    viewBinding = true
+  }
 }
 
 tasks.withType<KotlinCompile> {
   kotlinOptions {
     jvmTarget = "1.8"
+    freeCompilerArgs = freeCompilerArgs + listOf("-Xopt-in=kotlin.RequiresOptIn")
   }
 }
 
@@ -68,16 +76,18 @@ dependencies {
   implementation(kotlin("stdlib-jdk8", kotlinVersion))
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-rx2:$coroutinesVersion")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-rx3:$coroutinesVersion")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutinesVersion")
 
   // AndroidX, Material
-  implementation("androidx.recyclerview:recyclerview:1.2.0-alpha02")
-  implementation("androidx.appcompat:appcompat:1.1.0")
-  implementation("androidx.core:core-ktx:1.3.0-beta01")
-  implementation("androidx.activity:activity-ktx:1.1.0")
-  implementation("androidx.fragment:fragment-ktx:1.2.4")
-  implementation("androidx.constraintlayout:constraintlayout:2.0.0-beta4")
+  implementation("androidx.recyclerview:recyclerview:1.2.0-alpha05")
+  implementation("androidx.appcompat:appcompat:1.3.0-alpha01")
+  implementation("androidx.core:core-ktx:1.5.0-alpha01")
+  implementation("androidx.activity:activity-ktx:1.2.0-alpha07")
+  implementation("androidx.fragment:fragment-ktx:1.3.0-alpha07")
+  implementation("androidx.constraintlayout:constraintlayout:2.0.0-beta8")
+  implementation("androidx.activity:activity-ktx:1.2.0-alpha07")
+  implementation("androidx.startup:startup-runtime:1.0.0-alpha02")
   implementation("com.google.android.material:material:$materialVersion")
 
   // Navigation
@@ -91,13 +101,13 @@ dependencies {
   implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
   implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
   implementation("androidx.lifecycle:lifecycle-reactivestreams-ktx:$lifecycleVersion")
-  implementation("com.shopify:livedata-ktx:3.0.0")
+  implementation("androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion")
 
   // Room
   implementation("androidx.room:room-runtime:$roomVersion")
   kapt("androidx.room:room-compiler:$roomVersion")
   implementation("androidx.room:room-ktx:$roomVersion")
-  implementation("androidx.room:room-rxjava2:$roomVersion") // optional - RxJava support for Room
+  implementation("androidx.room:room-rxjava3:$roomVersion") // optional - RxJava support for Room
 
   // Work manager
   implementation("androidx.work:work-runtime-ktx:$workVersion") // Kotlin + coroutines
@@ -107,28 +117,27 @@ dependencies {
   implementation("org.koin:koin-androidx-scope:$koinVersion")
 
   // Moshi, Retrofit, OkHttp
-  implementation("com.squareup.moshi:moshi-kotlin:1.8.0")
+  implementation("com.squareup.moshi:moshi-kotlin:1.9.2")
   implementation("com.squareup.retrofit2:retrofit:$retrofit2Version")
   implementation("com.squareup.retrofit2:converter-moshi:$retrofit2Version")
-  implementation("com.squareup.okhttp3:logging-interceptor:4.3.1")
+  implementation("com.squareup.okhttp3:logging-interceptor:4.4.0")
 
   // Leak canary
   debugImplementation("com.squareup.leakcanary:leakcanary-android:2.0-alpha-2")
 
   // RxRelay, RxBinding, Timber
-  implementation("com.jakewharton.rxrelay2:rxrelay:$rxRelayVersion")
-  implementation("com.jakewharton.threetenabp:threetenabp:$threetenabpVersion")
-  implementation("com.jakewharton.rxbinding3:rxbinding:$rxBindingVersion")
-  implementation("com.jakewharton.rxbinding3:rxbinding-core:$rxBindingVersion")
-  implementation("com.jakewharton.rxbinding3:rxbinding-material:$rxBindingVersion")
-  implementation("com.jakewharton.rxbinding3:rxbinding-swiperefreshlayout:$rxBindingVersion")
-  implementation("com.jakewharton.rxbinding3:rxbinding-recyclerview:$rxBindingVersion")
+  implementation("com.jakewharton.rxrelay3:rxrelay:$rxRelayVersion")
+  implementation("com.jakewharton.rxbinding4:rxbinding:$rxBindingVersion")
+  implementation("com.jakewharton.rxbinding4:rxbinding-core:$rxBindingVersion")
+  implementation("com.jakewharton.rxbinding4:rxbinding-material:$rxBindingVersion")
+  implementation("com.jakewharton.rxbinding4:rxbinding-swiperefreshlayout:$rxBindingVersion")
+  implementation("com.jakewharton.rxbinding4:rxbinding-recyclerview:$rxBindingVersion")
   implementation("com.jakewharton.timber:timber:$timberVersion")
 
   // Rx
-  implementation("io.reactivex.rxjava2:rxkotlin:2.4.0")
-  implementation("io.reactivex.rxjava2:rxandroid:2.1.1")
-  implementation("com.github.VictorAlbertos:RxActivityResult:0.5.0-2.x")
+  implementation("io.reactivex.rxjava3:rxkotlin:3.0.0")
+  implementation("io.reactivex.rxjava3:rxjava:3.0.4")
+  implementation("io.reactivex.rxjava3:rxandroid:3.0.0")
 
   // Glide
   implementation("com.github.bumptech.glide:glide:$glideVersion")
@@ -152,9 +161,10 @@ dependencies {
   androidTestImplementation("androidx.test.espresso:espresso-core:3.3.0-alpha05")
 
   // Firebase
-  implementation("com.google.firebase:firebase-auth:19.3.0")
+  implementation("com.google.firebase:firebase-auth:19.3.2")
   implementation("com.google.firebase:firebase-storage:19.1.1")
-  implementation("com.google.firebase:firebase-firestore:21.4.1")
+  implementation("com.google.firebase:firebase-firestore:21.5.0")
+  implementation("com.google.firebase:firebase-analytics:17.4.4")
 
   implementation("com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava")
 }

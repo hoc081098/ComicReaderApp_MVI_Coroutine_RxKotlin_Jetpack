@@ -11,24 +11,26 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.activity.main.MainActivity
+import com.hoc.comicapp.databinding.FragmentSearchComicBinding
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.SingleEvent
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewIntent
 import com.hoc.comicapp.utils.isOrientationPortrait
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.snack
-import com.jakewharton.rxbinding3.view.clicks
-import io.reactivex.Observable
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.subscribeBy
-import kotlinx.android.synthetic.main.fragment_search_comic.*
+import com.hoc.comicapp.utils.viewBinding
+import com.jakewharton.rxbinding4.view.clicks
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.subscribeBy
 import org.koin.androidx.scope.lifecycleScope
 import org.koin.androidx.viewmodel.scope.viewModel
 import timber.log.Timber
 
 class SearchComicFragment : Fragment() {
   private val viewModel by lifecycleScope.viewModel<SearchComicViewModel>(owner = this)
+  private val viewBinding by viewBinding<FragmentSearchComicBinding>()
   private val compositeDisposable = CompositeDisposable()
   private val mainActivity get() = requireActivity() as MainActivity
 
@@ -50,11 +52,11 @@ class SearchComicFragment : Fragment() {
     bind(searchComicAdapter)
   }
 
-  private fun initView(searchComicAdapter: SearchComicAdapter) {
+  private fun initView(searchComicAdapter: SearchComicAdapter) = viewBinding.run {
     view?.post { mainActivity.showSearch() }
 
     val maxSpanCount = if (requireContext().isOrientationPortrait) 2 else 4
-    recycler_search_comic.run {
+    recyclerSearchComic.run {
       setHasFixedSize(true)
       layoutManager = GridLayoutManager(context, maxSpanCount).apply {
         spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
@@ -83,7 +85,7 @@ class SearchComicFragment : Fragment() {
       .addTo(compositeDisposable)
   }
 
-  private fun bind(adapter: SearchComicAdapter) {
+  private fun bind(adapter: SearchComicAdapter) = viewBinding.run {
     viewModel.singleEvent.observeEvent(owner = viewLifecycleOwner) {
       when (it) {
         is SingleEvent.MessageEvent -> {
@@ -95,28 +97,28 @@ class SearchComicFragment : Fragment() {
       Timber.d("[STATE] comics.length=${comics.size} isLoading=$isLoading errorMessage=$errorMessage")
 
       if (isLoading) {
-        progress_bar.visibility = View.VISIBLE
+        progressBar.visibility = View.VISIBLE
       } else {
-        progress_bar.visibility = View.INVISIBLE
+        progressBar.visibility = View.INVISIBLE
       }
 
       if (errorMessage == null) {
-        group_error.visibility = View.GONE
+        groupError.visibility = View.GONE
       } else {
-        group_error.visibility = View.VISIBLE
-        text_error_message.text = errorMessage
+        groupError.visibility = View.VISIBLE
+        textErrorMessage.text = errorMessage
       }
 
       adapter.submitList(comics)
 
-      empty_layout.isVisible = !isLoading && errorMessage === null && comics.isEmpty()
+      emptyLayout.isVisible = !isLoading && errorMessage === null && comics.isEmpty()
     }
     viewModel.processIntents(
       Observable.mergeArray(
         mainActivity
           .textSearchChanges()
           .map { ViewIntent.SearchIntent(it) },
-        button_retry
+        buttonRetry
           .clicks()
           .map { ViewIntent.RetryFirstIntent },
         adapter

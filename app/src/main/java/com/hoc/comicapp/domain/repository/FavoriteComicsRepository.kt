@@ -2,7 +2,7 @@ package com.hoc.comicapp.domain.repository
 
 import com.hoc.comicapp.domain.DomainResult
 import com.hoc.comicapp.domain.models.FavoriteComic
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 
 interface FavoriteComicsRepository {
   fun favoriteComics(): Observable<DomainResult<List<FavoriteComic>>>

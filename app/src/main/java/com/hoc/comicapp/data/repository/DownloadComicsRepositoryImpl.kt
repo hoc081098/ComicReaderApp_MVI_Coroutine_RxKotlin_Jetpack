@@ -34,7 +34,7 @@ import com.hoc.comicapp.utils.left
 import com.hoc.comicapp.utils.retryIO
 import com.hoc.comicapp.utils.right
 import com.hoc.comicapp.worker.DownloadComicWorker
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch

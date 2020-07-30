@@ -1,17 +1,17 @@
 package com.hoc.comicapp.ui.downloaded_comics
 
 import android.app.Application
-import com.hoc.comicapp.base.Intent
+import com.hoc.comicapp.base.MviIntent
+import com.hoc.comicapp.base.MviSingleEvent
+import com.hoc.comicapp.base.MviViewState
 import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.DownloadedChapter
 import com.hoc.comicapp.domain.models.DownloadedComic
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.ViewState.ComicItem
-import io.reactivex.Observable
-import io.reactivex.Single
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Single
 import java.io.File
 import java.util.*
-import com.hoc.comicapp.base.SingleEvent as BaseSingleEvent
-import com.hoc.comicapp.base.ViewState as BaseViewState
 
 interface DownloadedComicsContract {
   interface Interactor {
@@ -19,7 +19,7 @@ interface DownloadedComicsContract {
     fun deleteComic(comicItem: ComicItem): Single<Pair<ComicItem, ComicAppError?>>
   }
 
-  sealed class ViewIntent : Intent {
+  sealed class ViewIntent : MviIntent {
     object Initial : ViewIntent()
     data class ChangeSortOrder(val order: SortOrder) : ViewIntent()
     data class DeleteComic(val comic: ComicItem) : ViewIntent()
@@ -43,7 +43,7 @@ interface DownloadedComicsContract {
     val error: String?,
     val comics: List<ComicItem>,
     val sortOrder: SortOrder,
-  ) : BaseViewState {
+  ) : MviViewState {
 
     companion object {
       fun initial(): ViewState {
@@ -128,7 +128,7 @@ interface DownloadedComicsContract {
     object Loading : PartialChange()
   }
 
-  sealed class SingleEvent : BaseSingleEvent {
+  sealed class SingleEvent : MviSingleEvent {
     data class Message(val message: String) : SingleEvent()
 
     data class DeletedComic(val comic: ComicItem) : SingleEvent()
