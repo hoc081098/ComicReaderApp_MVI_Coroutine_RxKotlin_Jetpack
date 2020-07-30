@@ -113,7 +113,7 @@ class ChapterAdapter(
     ChapterAdapter.VH(binding.root),
     View.OnClickListener {
     init {
-      binding.circularProgress.apply {
+      binding.circularProgress.run {
         maxProgress = 100.0
         setProgressTextAdapter(PROGRESS_TEXT_ADAPTER)
       }
