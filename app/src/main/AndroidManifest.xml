@@ -62,6 +62,10 @@
             android:exported="false"
             tools:node="remove" />
 
+        <receiver
+            android:name=".ComicAppBroadcastReceiver"
+            android:exported="false" />
+
     </application>
 
 </manifest>

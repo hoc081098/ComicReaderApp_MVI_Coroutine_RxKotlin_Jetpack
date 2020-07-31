@@ -4,15 +4,17 @@ import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.ParcelUuid
+import android.os.SystemClock
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.PRIORITY_HIGH
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.CoroutineWorker
 import androidx.work.ListenableWorker.Result.failure
 import androidx.work.ListenableWorker.Result.success
-import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
+import com.hoc.comicapp.ComicAppBroadcastReceiver
 import com.hoc.comicapp.R
 import com.hoc.comicapp.activity.SplashActivity
 import com.hoc.comicapp.data.ErrorMapper
@@ -29,6 +31,9 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
 import org.koin.core.KoinComponent
 import org.koin.core.inject
@@ -43,7 +48,6 @@ class DownloadComicWorker(
   private val downloadComicsRepo by inject<DownloadComicsRepository>()
   private val jsonAdaptersContainer by inject<JsonAdaptersContainer>()
   private val dispatchers by inject<CoroutinesDispatchersProvider>()
-  private val workManager by inject<WorkManager>()
   private val errorMapper by inject<ErrorMapper>()
 
   init {
@@ -56,65 +60,74 @@ class DownloadComicWorker(
       .fold(left = { return failure(workDataOf(it)) }, right = { it })
 
     val notificationManager = NotificationManagerCompat.from(applicationContext)
-    val notificationBuilder = createNotificationBuilder(chapterComicName)
+    val notificationBuilder = createNotificationBuilder(
+      chapterComicName = chapterComicName,
+      chapterLink = chapterLink
+    )
 
-    return try {
-      notificationManager.notify(
-        chapterComicName,
-        0,
-        notificationBuilder.build()
-      )
+    downloadComicsRepo
+      .downloadChapter(chapterLink)
+      .onStart {
+        notificationManager.notify(
+          chapterLink,
+          0,
+          notificationBuilder.build()
+        )
+      }
+      .onEach {
+        notificationManager.notify(
+          chapterLink,
+          0,
+          notificationBuilder
+            .setProgress(100, it, false)
+            .setContentText("$it %")
+            .build()
+        )
 
-      downloadComicsRepo
-        .downloadChapter(chapterLink)
-        .collect {
-          notificationManager.notify(
-            chapterComicName,
-            0,
-            notificationBuilder
-              .setProgress(100, it, false)
-              .setContentText("$it %")
-              .build()
+        setProgress(
+          workDataOf(
+            PROGRESS to it,
+            COMIC_NAME to comicName,
+            CHAPTER to chapterJson
           )
-
-          setProgress(
-            workDataOf(
-              PROGRESS to it,
-              COMIC_NAME to comicName,
-              CHAPTER to chapterJson
+        )
+      }
+      .onCompletion { throwable ->
+        when (throwable) {
+          null -> {
+            notificationManager.notify(
+              chapterLink,
+              0,
+              notificationBuilder
+                .setContentText("Download complete. Click to see all downloaded chapters")
+                .apply { mActions.clear() }
+                .setProgress(0, 0, false)
+                .build()
             )
-          )
+
+            Timber.d("Download success.")
+          }
+          else -> {
+            notificationManager.notify(
+              chapterLink,
+              0,
+              notificationBuilder
+                .setContentText(
+                  if (throwable is CancellationException) "Download cancelled"
+                  else "Download failed: ${errorMapper.map(throwable).getMessage()}"
+                )
+                .apply { mActions.clear() }
+                .setProgress(0, 0, false)
+                .build()
+            )
+
+            Timber.d(throwable, "Download failed. Throwable: $throwable")
+          }
         }
+      }
+      .collect()
 
-      notificationManager.notify(
-        chapterComicName,
-        0,
-        notificationBuilder
-          .setContentText("Download complete. Click to see all downloaded chapter")
-          .apply { mActions.clear() }
-          .setProgress(0, 0, false)
-          .build()
-      )
-
-      success()
-    } catch (e: Throwable) {
-      Timber.d(e, "Exception: $e")
-
-      notificationManager.notify(
-        chapterComicName,
-        0,
-        notificationBuilder
-          .setContentText(
-            if (e is CancellationException) "Download cancelled"
-            else "Download failed: ${errorMapper.map(e).getMessage()}"
-          )
-          .apply { mActions.clear() }
-          .setProgress(0, 0, false)
-          .build()
-      )
-
-      failure(workDataOf(ERROR to e.toString()))
-    }
+    return success()
   }
 
   private data class WorkerArgument(
@@ -147,8 +160,23 @@ class DownloadComicWorker(
     ).right()
   }
 
-  private fun createNotificationBuilder(chapterComicName: String): NotificationCompat.Builder {
-    val cancelIntent = workManager.createCancelPendingIntent(id)
+  private fun createNotificationBuilder(
+    chapterComicName: String,
+    chapterLink: String
+  ): NotificationCompat.Builder {
+    val cancelIntent = PendingIntent.getBroadcast(
+      applicationContext,
+      SystemClock.uptimeMillis().toInt(),
+      ComicAppBroadcastReceiver.makeIntent(
+        applicationContext,
+        ComicAppBroadcastReceiver.Action.CancelDownload(
+          workerId = ParcelUuid(id),
+          chapterLink = chapterLink,
+          chapterComicName = chapterComicName,
+        )
+      ),
+      PendingIntent.FLAG_UPDATE_CURRENT
+    )
 
     return NotificationCompat
       .Builder(
