@@ -85,7 +85,7 @@ dependencies {
   implementation("androidx.core:core-ktx:1.5.0-alpha01")
   implementation("androidx.activity:activity-ktx:1.2.0-alpha07")
   implementation("androidx.fragment:fragment-ktx:1.3.0-alpha07")
-  implementation("androidx.constraintlayout:constraintlayout:2.0.0-beta8")
+  implementation("androidx.constraintlayout:constraintlayout:2.0.0-rc1")
   implementation("androidx.activity:activity-ktx:1.2.0-alpha07")
   implementation("androidx.startup:startup-runtime:1.0.0-alpha02")
   implementation("com.google.android.material:material:$materialVersion")
