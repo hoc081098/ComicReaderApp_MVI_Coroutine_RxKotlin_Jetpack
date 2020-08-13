@@ -120,7 +120,7 @@ dependencies {
   implementation("com.squareup.moshi:moshi-kotlin:1.9.2")
   implementation("com.squareup.retrofit2:retrofit:$retrofit2Version")
   implementation("com.squareup.retrofit2:converter-moshi:$retrofit2Version")
-  implementation("com.squareup.okhttp3:logging-interceptor:4.4.0")
+  implementation("com.squareup.okhttp3:logging-interceptor:4.8.0")
 
   // Leak canary
   debugImplementation("com.squareup.leakcanary:leakcanary-android:2.0-alpha-2")

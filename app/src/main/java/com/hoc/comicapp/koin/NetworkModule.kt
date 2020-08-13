@@ -1,6 +1,7 @@
 package com.hoc.comicapp.koin
 
 import com.hoc.comicapp.BuildConfig
+import com.hoc.comicapp.ImageHeaders
 import com.hoc.comicapp.data.remote.COMIC_BASE_URL
 import com.hoc.comicapp.data.remote.ComicApiService
 import com.squareup.moshi.Moshi
@@ -41,6 +42,19 @@ private fun provideOkHttpClient(): OkHttpClient {
         HttpLoggingInterceptor()
           .apply { this.level = HttpLoggingInterceptor.Level.BODY }
           .let(::addInterceptor)
+      }
+    }
+    .addInterceptor { chain ->
+      val request = chain.request()
+      val headers = ImageHeaders.headersFor(request.url.toString())
+      if (headers.isEmpty()) {
+        chain.proceed(request)
+      } else {
+        request
+          .newBuilder()
+          .apply { headers.forEach { (k, v) -> addHeader(k, v) } }
+          .build()
+          .let(chain::proceed)
       }
     }
     .build()
