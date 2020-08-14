@@ -2,6 +2,7 @@ package com.hoc.comicapp.data.repository
 
 import com.hoc.comicapp.data.ErrorMapper
 import com.hoc.comicapp.data.Mappers
+import com.hoc.comicapp.data.analytics.readChapter
 import com.hoc.comicapp.data.firebase.favorite_comics.FavoriteComicsDataSource
 import com.hoc.comicapp.data.local.dao.ComicDao
 import com.hoc.comicapp.data.local.entities.ComicEntity
@@ -9,6 +10,8 @@ import com.hoc.comicapp.data.remote.ComicApiService
 import com.hoc.comicapp.data.remote.response.ComicDetailResponse
 import com.hoc.comicapp.data.remote.response.ComicResponse
 import com.hoc.comicapp.domain.DomainResult
+import com.hoc.comicapp.domain.analytics.AnalyticsEvent
+import com.hoc.comicapp.domain.analytics.AnalyticsService
 import com.hoc.comicapp.domain.models.Category
 import com.hoc.comicapp.domain.models.CategoryDetailPopularComic
 import com.hoc.comicapp.domain.models.ChapterDetail
@@ -17,6 +20,7 @@ import com.hoc.comicapp.domain.models.ComicDetail
 import com.hoc.comicapp.domain.repository.ComicRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.utils.Cache
+import com.hoc.comicapp.utils.getOrNull
 import com.hoc.comicapp.utils.right
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ObsoleteCoroutinesApi
@@ -29,6 +33,7 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 import kotlin.time.seconds
 
+@OptIn(ExperimentalTime::class)
 @ObsoleteCoroutinesApi
 class ComicRepositoryImpl(
   private val errorMapper: ErrorMapper,
@@ -36,9 +41,9 @@ class ComicRepositoryImpl(
   private val dispatchersProvider: CoroutinesDispatchersProvider,
   private val favoriteComicsDataSource: FavoriteComicsDataSource,
   private val comicDao: ComicDao,
+  private val analyticsService: AnalyticsService,
   appCoroutineScope: CoroutineScope,
 ) : ComicRepository {
-  @OptIn(ExperimentalTime::class)
   private val cache = Cache<RequestCacheKey, Any>(
     maxSize = 8,
     entryLifetime = 60.seconds
@@ -49,7 +54,6 @@ class ComicRepositoryImpl(
     }
   }
 
-  @OptIn(ExperimentalTime::class)
   @Suppress("FunctionName")
   private suspend fun _updateDownloadedComic(entity: ComicEntity) {
     measureTime {
@@ -186,6 +190,16 @@ class ComicRepositoryImpl(
       comicApiService
         .getChapterDetail(chapterLink)
         .let(Mappers::responseToDomainModel)
+    }.also { result ->
+      result.getOrNull()?.let { detail ->
+        analyticsService.track(
+          AnalyticsEvent.readChapter(
+            chapterLink = detail.chapterLink,
+            chapterName = detail.chapterName,
+            imagesSize = detail.images.size
+          )
+        )
+      }
     }
   }
 

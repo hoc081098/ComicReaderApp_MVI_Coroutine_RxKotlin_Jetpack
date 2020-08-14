@@ -13,6 +13,7 @@ import androidx.work.workDataOf
 import com.hoc.comicapp.data.ErrorMapper
 import com.hoc.comicapp.data.JsonAdaptersContainer
 import com.hoc.comicapp.data.Mappers
+import com.hoc.comicapp.data.analytics.downloadChapter
 import com.hoc.comicapp.data.local.AppDatabase
 import com.hoc.comicapp.data.local.dao.ChapterDao
 import com.hoc.comicapp.data.local.dao.ComicDao
@@ -21,6 +22,8 @@ import com.hoc.comicapp.data.local.entities.ComicAndChapters
 import com.hoc.comicapp.data.local.entities.ComicEntity
 import com.hoc.comicapp.data.remote.ComicApiService
 import com.hoc.comicapp.domain.DomainResult
+import com.hoc.comicapp.domain.analytics.AnalyticsEvent
+import com.hoc.comicapp.domain.analytics.AnalyticsService
 import com.hoc.comicapp.domain.models.ComicDetail
 import com.hoc.comicapp.domain.models.DownloadedChapter
 import com.hoc.comicapp.domain.models.DownloadedComic
@@ -48,6 +51,8 @@ import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.File
 import java.util.*
+import kotlin.time.ExperimentalTime
+import kotlin.time.TimeSource
 
 class DownloadComicsRepositoryImpl(
   private val comicApiService: ComicApiService,
@@ -60,6 +65,7 @@ class DownloadComicsRepositoryImpl(
   private val errorMapper: ErrorMapper,
   private val workManager: WorkManager,
   private val jsonAdapterConstraints: JsonAdaptersContainer,
+  private val analyticsService: AnalyticsService,
 ) : DownloadComicsRepository {
 
   /*
@@ -191,9 +197,12 @@ class DownloadComicsRepositoryImpl(
       .subscribeOn(rxSchedulerProvider.io)
   }
 
-  @ExperimentalCoroutinesApi override fun downloadChapter(chapterLink: String): Flow<Int> {
+  @OptIn(ExperimentalTime::class)
+  @ExperimentalCoroutinesApi
+  override fun downloadChapter(chapterLink: String): Flow<Int> {
     return flow {
       Timber.d("$tag Begin")
+      val start = TimeSource.Monotonic.markNow()
 
       emit(0)
 
@@ -256,7 +265,19 @@ class DownloadComicsRepositoryImpl(
 
       emit(100)
 
-      Timber.d("$tag Images = $imagePaths")
+      val elapsed = start.elapsedNow()
+      analyticsService.track(
+        AnalyticsEvent.downloadChapter(
+          chapterLink = chapterLink,
+          chapterName = chapterDetail.chapterName,
+          comicLink = chapterDetail.comicLink,
+          comicName = chapterDetail.comicName,
+          elapsedInMilliseconds = elapsed.inMilliseconds,
+          elapsedInString = elapsed.toString()
+        )
+      )
+
+      Timber.d("$tag Elapsed = $elapsed, Images = $imagePaths")
     }.flowOn(dispatchersProvider.io)
   }
 

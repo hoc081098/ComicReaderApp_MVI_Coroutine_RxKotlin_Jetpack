@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.hoc.comicapp">
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -52,6 +54,10 @@
 
             <meta-data
                 android:name="com.hoc.comicapp.initializer.WorkManagerInitializer"
+                android:value="androidx.startup" />
+
+            <meta-data
+                android:name="com.hoc.comicapp.initializer.AnalyticsInitializer"
                 android:value="androidx.startup" />
 
         </provider>

@@ -8,6 +8,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.hoc.comicapp.data.ErrorMapper
 import com.hoc.comicapp.data.JsonAdaptersContainer
+import com.hoc.comicapp.data.analytics.AnalyticsServiceImpl
 import com.hoc.comicapp.data.firebase.favorite_comics.FavoriteComicsDataSource
 import com.hoc.comicapp.data.firebase.favorite_comics.FavoriteComicsDataSourceImpl
 import com.hoc.comicapp.data.firebase.user.FirebaseAuthUserDataSource
@@ -20,6 +21,7 @@ import com.hoc.comicapp.data.repository.ComicRepositoryImpl
 import com.hoc.comicapp.data.repository.DownloadComicsRepositoryImpl
 import com.hoc.comicapp.data.repository.FavoriteComicsRepositoryImpl
 import com.hoc.comicapp.data.repository.UserRepositoryImpl
+import com.hoc.comicapp.domain.analytics.AnalyticsService
 import com.hoc.comicapp.domain.repository.ComicRepository
 import com.hoc.comicapp.domain.repository.DownloadComicsRepository
 import com.hoc.comicapp.domain.repository.FavoriteComicsRepository
@@ -49,12 +51,14 @@ val dataModule = module {
       get(),
       get(),
       get(),
+      get(),
     )
   }
 
   single {
     provideDownloadComicsRepository(
       application = androidApplication(),
+      get(),
       get(),
       get(),
       get(),
@@ -109,6 +113,12 @@ val dataModule = module {
    */
 
   single { provideErrorMapper(get()) }
+
+
+  /*
+   * Analytics
+   */
+  single<AnalyticsService> { AnalyticsServiceImpl() }
 }
 
 private fun provideFavoriteComicsRepository(
@@ -129,6 +139,7 @@ private fun provideComicRepository(
   favoriteComicsDataSource: FavoriteComicsDataSource,
   comicDao: ComicDao,
   appCoroutineScope: CoroutineScope,
+  analyticsService: AnalyticsService,
 ): ComicRepository {
   return ComicRepositoryImpl(
     errorMapper = errorMapper,
@@ -136,7 +147,8 @@ private fun provideComicRepository(
     dispatchersProvider = dispatchersProvider,
     favoriteComicsDataSource = favoriteComicsDataSource,
     comicDao = comicDao,
-    appCoroutineScope = appCoroutineScope
+    appCoroutineScope = appCoroutineScope,
+    analyticsService = analyticsService
   )
 }
 
@@ -151,6 +163,7 @@ private fun provideDownloadComicsRepository(
   errorMapper: ErrorMapper,
   workManager: WorkManager,
   jsonAdapterConstraints: JsonAdaptersContainer,
+  analyticsService: AnalyticsService,
 ): DownloadComicsRepository {
   return DownloadComicsRepositoryImpl(
     comicApiService = comicApiService,
@@ -163,6 +176,7 @@ private fun provideDownloadComicsRepository(
     errorMapper = errorMapper,
     workManager = workManager,
     jsonAdapterConstraints = jsonAdapterConstraints,
+    analyticsService = analyticsService,
   )
 }
 
