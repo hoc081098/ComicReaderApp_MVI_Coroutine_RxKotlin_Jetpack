@@ -165,6 +165,7 @@ dependencies {
   implementation("com.google.firebase:firebase-storage:19.1.1")
   implementation("com.google.firebase:firebase-firestore:21.5.0")
   implementation("com.google.firebase:firebase-analytics:17.4.4")
+  implementation("com.google.firebase:firebase-crashlytics:17.1.1")
 
   implementation("com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava")
 
@@ -172,3 +173,4 @@ dependencies {
 }
 
 apply(plugin = "com.google.gms.google-services")
+apply(plugin = "com.google.firebase.crashlytics")

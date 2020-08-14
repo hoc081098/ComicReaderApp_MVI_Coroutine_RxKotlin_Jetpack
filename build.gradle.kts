@@ -28,6 +28,7 @@ buildscript {
     classpath(kotlin("gradle-plugin", kotlinVersion))
     classpath("androidx.navigation:navigation-safe-args-gradle-plugin:$navVersion")
     classpath("com.google.gms:google-services:4.3.3")
+    classpath("com.google.firebase:firebase-crashlytics-gradle:2.2.0")
   }
 }
 
