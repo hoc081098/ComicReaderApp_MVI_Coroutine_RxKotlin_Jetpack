@@ -22,7 +22,7 @@ import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract.ViewIntent
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract.ViewState
 import com.hoc.comicapp.utils.snack
 import com.hoc.comicapp.utils.unit
-import com.hoc.comicapp.utils.viewBinding
+import com.hoc081098.viewbindingdelegate.viewBinding
 import com.jakewharton.rxbinding4.view.clicks
 import com.jakewharton.rxbinding4.widget.checkedChanges
 import io.reactivex.rxjava3.core.Observable
@@ -42,10 +42,7 @@ class ChapterDetailFragment : BaseFragment<
   override val viewModel by lifecycleScope.viewModel<ChapterDetailViewModel>(owner = this) {
     parametersOf(navArgs.isDownloaded)
   }
-  override val viewBinding by viewBinding<FragmentChapterDetailBinding> {
-    recyclerImages.adapter = null
-    spinnerChapters.adapter = null
-  }
+  override val viewBinding by viewBinding<FragmentChapterDetailBinding>()
 
   private val mainActivity get() = requireActivity() as MainActivity
   private var shouldEmitSelectedItem = false
@@ -62,6 +59,12 @@ class ChapterDetailFragment : BaseFragment<
         )
       )
     )
+  }
+
+  override fun onDestroyView() {
+    super.onDestroyView()
+    viewBinding.recyclerImages.adapter = null
+    viewBinding.spinnerChapters.adapter = null
   }
 
   //region Override BaseFragment

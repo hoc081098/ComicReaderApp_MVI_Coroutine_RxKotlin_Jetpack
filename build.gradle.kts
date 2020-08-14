@@ -1,8 +1,8 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-  val kotlinVersion by extra("1.4-M1")
-  val navVersion by extra("2.3.0-alpha04")
+  val kotlinVersion by extra("1.4.0")
+  val navVersion by extra("2.3.0")
   extra.run {
     set("coroutinesVersion", "1.3.8")
     set("lifecycleVersion", "2.3.0-alpha06")

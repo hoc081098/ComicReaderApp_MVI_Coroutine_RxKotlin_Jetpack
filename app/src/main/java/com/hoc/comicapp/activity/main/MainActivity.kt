@@ -36,7 +36,7 @@ import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.showAlertDialogAsMaybe
 import com.hoc.comicapp.utils.snack
 import com.hoc.comicapp.utils.textChanges
-import com.hoc.comicapp.utils.viewBinding
+import com.hoc081098.viewbindingdelegate.viewBinding
 import com.jakewharton.rxbinding4.view.clicks
 import de.hdodenhof.circleimageview.CircleImageView
 import io.reactivex.rxjava3.core.Observable
@@ -47,9 +47,9 @@ import org.koin.androidx.viewmodel.scope.viewModel
 import timber.log.Timber
 import kotlin.LazyThreadSafetyMode.NONE
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(R.layout.activity_main) {
   private val mainVM by lifecycleScope.viewModel<MainVM>(owner = this)
-  private val viewBinding by viewBinding(ActivityMainBinding::inflate)
+  private val viewBinding by viewBinding<ActivityMainBinding>()
   private val compositeDisposable = CompositeDisposable()
 
   private val glide by lazy(NONE) { GlideApp.with(this) }
@@ -63,7 +63,6 @@ class MainActivity : AppCompatActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    setContentView(viewBinding.root)
     setSupportActionBar(viewBinding.toolbar)
 
     val navController = findNavController(R.id.main_nav_fragment)

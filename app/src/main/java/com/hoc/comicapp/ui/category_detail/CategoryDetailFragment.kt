@@ -19,7 +19,7 @@ import com.hoc.comicapp.ui.category_detail.CategoryDetailFragmentDirections.Comp
 import com.hoc.comicapp.ui.detail.ComicArg
 import com.hoc.comicapp.utils.isOrientationPortrait
 import com.hoc.comicapp.utils.observe
-import com.hoc.comicapp.utils.viewBinding
+import com.hoc081098.viewbindingdelegate.viewBinding
 import com.jakewharton.rxbinding4.recyclerview.scrollEvents
 import com.jakewharton.rxbinding4.swiperefreshlayout.refreshes
 import io.reactivex.rxjava3.core.Observable
@@ -38,9 +38,7 @@ class CategoryDetailFragment : Fragment() {
   private val args by navArgs<CategoryDetailFragmentArgs>()
 
   private val vm by lifecycleScope.viewModel<CategoryDetailVM>(owner = this) { parametersOf(args.category) }
-  private val viewBinding by viewBinding<FragmentCategoryDetailBinding> {
-    recyclerCategoryDetail.adapter = null
-  }
+  private val viewBinding by viewBinding<FragmentCategoryDetailBinding>()
   private val compositeDisposable = CompositeDisposable()
 
   private val categoryDetailAdapter by lazy(NONE) {
@@ -139,6 +137,7 @@ class CategoryDetailFragment : Fragment() {
 
   override fun onDestroyView() {
     super.onDestroyView()
+    viewBinding.recyclerCategoryDetail.adapter = null
     compositeDisposable.clear()
   }
 

@@ -123,7 +123,7 @@ dependencies {
   implementation("com.squareup.okhttp3:logging-interceptor:4.8.0")
 
   // Leak canary
-  debugImplementation("com.squareup.leakcanary:leakcanary-android:2.0-alpha-2")
+  debugImplementation("com.squareup.leakcanary:leakcanary-android:2.4")
 
   // RxRelay, RxBinding, Timber
   implementation("com.jakewharton.rxrelay3:rxrelay:$rxRelayVersion")
@@ -167,6 +167,8 @@ dependencies {
   implementation("com.google.firebase:firebase-analytics:17.4.4")
 
   implementation("com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava")
+
+  implementation("com.github.hoc081098:ViewBindingDelegate:0.0.2")
 }
 
 apply(plugin = "com.google.gms.google-services")

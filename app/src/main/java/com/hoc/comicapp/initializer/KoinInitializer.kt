@@ -2,7 +2,6 @@ package com.hoc.comicapp.initializer
 
 import android.content.Context
 import androidx.startup.Initializer
-import com.hoc.comicapp.BuildConfig
 import com.hoc.comicapp.koin.appModule
 import com.hoc.comicapp.koin.dataModule
 import com.hoc.comicapp.koin.networkModule
@@ -38,7 +37,9 @@ class KoinInitializer : Initializer<Koin> {
 fun Context.startKoinIfNeeded(): Koin {
   return KoinContextHandler.getOrNull() ?: startKoin {
     // use AndroidLogger as Koin Logger
-    androidLogger(level = if (BuildConfig.DEBUG) Level.DEBUG else Level.NONE)
+    // androidLogger(level = if (BuildConfig.DEBUG) Level.DEBUG else Level.NONE)
+    // TODO: https://github.com/InsertKoinIO/koin/issues/847
+    androidLogger(level = Level.ERROR)
 
     // use the Android context given there
     androidContext(applicationContext)

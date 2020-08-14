@@ -33,7 +33,7 @@ import com.hoc.comicapp.utils.showAlertDialog
 import com.hoc.comicapp.utils.snack
 import com.hoc.comicapp.utils.themeInterpolator
 import com.hoc.comicapp.utils.unit
-import com.hoc.comicapp.utils.viewBinding
+import com.hoc081098.viewbindingdelegate.viewBinding
 import com.jakewharton.rxbinding4.recyclerview.scrollEvents
 import com.jakewharton.rxbinding4.view.clicks
 import com.jakewharton.rxrelay3.PublishRelay
@@ -62,10 +62,7 @@ class ComicDetailFragment : BaseFragment<
   override val viewModel by lifecycleScope.viewModel<ComicDetailViewModel>(owner = this) {
     parametersOf(args.isDownloaded)
   }
-  override val viewBinding by viewBinding<FragmentComicDetailBinding> {
-    recyclerChapters.adapter = null
-    rootDetail.setTransitionListener(null)
-  }
+  override val viewBinding by viewBinding<FragmentComicDetailBinding>()
   private val args by navArgs<ComicDetailFragmentArgs>()
 
   private val glide by lazy(NONE) { GlideApp.with(this) }
@@ -85,6 +82,9 @@ class ComicDetailFragment : BaseFragment<
 
   override fun onDestroyView() {
     super.onDestroyView()
+
+    viewBinding.recyclerChapters.adapter = null
+    viewBinding.rootDetail.setTransitionListener(null)
     requireActivity().dismissAlertDialog()
   }
 

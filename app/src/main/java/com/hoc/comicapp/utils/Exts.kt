@@ -1,3 +1,5 @@
+@file:Suppress("SpellCheckingInspection", "unused")
+
 package com.hoc.comicapp.utils
 
 import android.annotation.SuppressLint
@@ -357,9 +359,9 @@ fun <A, B, C, R> LiveData<A>.combineLatest(
     var lastB: B? = null
     var lastC: C? = null
 
-    addSource(this@combineLatest) {
-      if (it == null && value != null) value = null
-      lastA = it
+    addSource(this@combineLatest) { v ->
+      if (v == null && value != null) value = null
+      lastA = v
 
       lastA?.let { a ->
         lastB?.let { b ->
@@ -368,9 +370,9 @@ fun <A, B, C, R> LiveData<A>.combineLatest(
       }
     }
 
-    addSource(b) {
-      if (it == null && value != null) value = null
-      lastB = it
+    addSource(b) { v ->
+      if (v == null && value != null) value = null
+      lastB = v
 
       lastA?.let { a ->
         lastB?.let { b ->
@@ -379,9 +381,9 @@ fun <A, B, C, R> LiveData<A>.combineLatest(
       }
     }
 
-    addSource(c) {
-      if (it == null && value != null) value = null
-      lastC = it
+    addSource(c) { v ->
+      if (v == null && value != null) value = null
+      lastC = v
 
       lastA?.let { a ->
         lastB?.let { b ->
@@ -450,3 +452,5 @@ fun Query.snapshots(): Observable<QuerySnapshot> {
 @Suppress("unused")
 inline val Any?.unit
   get() = Unit
+
+inline val ViewGroup.inflater: LayoutInflater get() = LayoutInflater.from(context)
