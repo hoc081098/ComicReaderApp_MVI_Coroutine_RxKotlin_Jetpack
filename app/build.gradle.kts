@@ -170,6 +170,8 @@ dependencies {
   implementation("com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava")
 
   implementation("com.github.hoc081098:ViewBindingDelegate:0.0.2")
+
+  Dependencies.A
 }
 
 apply(plugin = "com.google.gms.google-services")
