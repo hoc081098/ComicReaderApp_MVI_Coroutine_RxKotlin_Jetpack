@@ -9,7 +9,6 @@ import android.widget.Button
 import android.widget.ProgressBar
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.transition.ChangeBounds
@@ -28,6 +27,7 @@ import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.onDismissed
 import com.hoc.comicapp.utils.snack
 import com.hoc.comicapp.utils.uriFromResourceId
+import com.hoc.comicapp.utils.viewModel
 import com.hoc081098.viewbindingdelegate.viewBinding
 import com.jakewharton.rxbinding4.view.clicks
 import com.jakewharton.rxbinding4.widget.textChanges
@@ -35,14 +35,13 @@ import io.reactivex.rxjava3.android.MainThreadDisposable
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
-import org.koin.androidx.scope.lifecycleScope
-import org.koin.androidx.viewmodel.scope.viewModel
+import org.koin.androidx.scope.ScopeFragment
 import timber.log.Timber
 import kotlin.LazyThreadSafetyMode.NONE
 
-class RegisterFragment : Fragment() {
+class RegisterFragment : ScopeFragment() {
 
-  private val vm by lifecycleScope.viewModel<RegisterVM>(owner = this)
+  private val vm by viewModel<RegisterVM>()
   private val viewBinding by viewBinding<FragmentRegisterBinding>()
   private val compositeDisposable = CompositeDisposable()
   private val glide by lazy(NONE) { GlideApp.with(this) }

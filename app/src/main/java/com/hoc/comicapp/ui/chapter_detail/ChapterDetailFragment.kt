@@ -22,12 +22,12 @@ import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract.ViewIntent
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract.ViewState
 import com.hoc.comicapp.utils.snack
 import com.hoc.comicapp.utils.unit
+import com.hoc.comicapp.utils.viewModel
 import com.hoc081098.viewbindingdelegate.viewBinding
 import com.jakewharton.rxbinding4.view.clicks
 import com.jakewharton.rxbinding4.widget.checkedChanges
 import io.reactivex.rxjava3.core.Observable
-import org.koin.androidx.scope.lifecycleScope
-import org.koin.androidx.viewmodel.scope.viewModel
+
 import org.koin.core.parameter.parametersOf
 import timber.log.Timber
 import kotlin.LazyThreadSafetyMode.NONE
@@ -39,7 +39,7 @@ class ChapterDetailFragment : BaseFragment<
     ChapterDetailViewModel
     >(R.layout.fragment_chapter_detail) {
   private val navArgs by navArgs<ChapterDetailFragmentArgs>()
-  override val viewModel by lifecycleScope.viewModel<ChapterDetailViewModel>(owner = this) {
+  override val viewModel by viewModel<ChapterDetailViewModel> {
     parametersOf(navArgs.isDownloaded)
   }
   override val viewBinding by viewBinding<FragmentChapterDetailBinding>()
@@ -156,7 +156,7 @@ class ChapterDetailFragment : BaseFragment<
       emitter.setCancellable { spinnerChapters.onItemSelectedListener = null }
     }
 
-     Observable.mergeArray(
+    Observable.mergeArray(
       Observable.just(
         ViewIntent.Initial(
           ViewState.Chapter(

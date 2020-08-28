@@ -86,7 +86,7 @@ class SearchComicAdapter(
 
   inner class LoadMoreVH(
     private val binding: ItemRecyclerSearchComicLoadMoreBinding,
-    parent: View
+    parent: View,
   ) : VH(binding.root) {
     init {
       binding.buttonRetryOrLoadmore

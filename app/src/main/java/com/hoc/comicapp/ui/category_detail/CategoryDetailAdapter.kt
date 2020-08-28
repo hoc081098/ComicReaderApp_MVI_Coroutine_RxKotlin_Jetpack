@@ -146,7 +146,7 @@ class CategoryDetailAdapter(
 
   private inner class PopularHorizontalRecyclerVH(
     private val binding: ItemRecyclerCategoryDetailPopularHorizontalRecyclerBinding,
-    parent: ViewGroup
+    parent: ViewGroup,
   ) :
     VH(binding.root) {
     private val adapter = PopularHorizontalAdapter(glide, onClickComic)
@@ -327,7 +327,7 @@ class CategoryDetailAdapter(
 
   private inner class ErrorVH(
     private val binding: ItemRecyclerCategoryDetailErrorBinding,
-    parent: ViewGroup
+    parent: ViewGroup,
   ) : VH(binding.root) {
     init {
       binding.buttonRetry

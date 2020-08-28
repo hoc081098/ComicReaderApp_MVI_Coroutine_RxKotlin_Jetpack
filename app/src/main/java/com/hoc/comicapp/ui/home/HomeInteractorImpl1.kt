@@ -34,16 +34,16 @@ class HomeInteractorImpl1(
         val updated = updatedAsync.await()
 
         newest.flatMap { newestComics ->
-            mostViewed.flatMap { mostViewedComics ->
-              updated.map { updatedComics ->
-                RefreshSuccess(
-                  newestComics = newestComics,
-                  mostViewedComics = mostViewedComics,
-                  updatedComics = updatedComics
-                )
-              }
+          mostViewed.flatMap { mostViewedComics ->
+            updated.map { updatedComics ->
+              RefreshSuccess(
+                newestComics = newestComics,
+                mostViewedComics = mostViewedComics,
+                updatedComics = updatedComics
+              )
             }
           }
+        }
           .fold(
             { RefreshFailure(it) },
             { it }

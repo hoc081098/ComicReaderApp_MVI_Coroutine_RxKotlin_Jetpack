@@ -360,7 +360,7 @@ class HomeAdapter(
 
   private inner class ComicItemVH(
     private val binding: ItemRecyclerviewUpdatedComicBinding,
-    parent: View
+    parent: View,
   ) : VH(binding.root) {
 
     private val textChapters = binding.run {

@@ -42,7 +42,8 @@ class MostViewedAdapter(
 
   override fun onBindViewHolder(holder: VH, position: Int) = holder.bind(getItem(position))
 
-  inner class VH(private val binding: ItemRecyclerviewTopMonthComicOrRecommenedBinding) : RecyclerView.ViewHolder(binding.root) {
+  inner class VH(private val binding: ItemRecyclerviewTopMonthComicOrRecommenedBinding) :
+    RecyclerView.ViewHolder(binding.root) {
     init {
       itemView
         .clicks()
@@ -62,8 +63,8 @@ class MostViewedAdapter(
         .addTo(compositeDisposable)
     }
 
-    fun bind(item: Comic)  = binding.run {
-      itemView.transitionName ="most_viewed#${item.link}"
+    fun bind(item: Comic) = binding.run {
+      itemView.transitionName = "most_viewed#${item.link}"
 
       textComicName.text = item.title
       textChapter.text = item.lastChapters.lastOrNull()?.chapterName

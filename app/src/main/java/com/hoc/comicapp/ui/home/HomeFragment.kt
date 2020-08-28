@@ -17,6 +17,7 @@ import com.hoc.comicapp.databinding.FragmentHomeBinding
 import com.hoc.comicapp.utils.isOrientationPortrait
 import com.hoc.comicapp.utils.snack
 import com.hoc.comicapp.utils.unit
+import com.hoc.comicapp.utils.viewModel
 import com.hoc081098.viewbindingdelegate.viewBinding
 import com.jakewharton.rxbinding4.recyclerview.scrollEvents
 import com.jakewharton.rxbinding4.swiperefreshlayout.refreshes
@@ -24,8 +25,6 @@ import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.koin.androidx.scope.lifecycleScope
-import org.koin.androidx.viewmodel.scope.viewModel
 import timber.log.Timber
 import kotlin.LazyThreadSafetyMode.NONE
 
@@ -37,7 +36,7 @@ class HomeFragment :
       HomeSingleEvent,
       HomeViewModel,
       >(R.layout.fragment_home) {
-  override val viewModel by lifecycleScope.viewModel<HomeViewModel>(owner = this)
+  override val viewModel by viewModel<HomeViewModel>()
   override val viewBinding by viewBinding<FragmentHomeBinding>()
 
   private val homeAdapter by lazy(NONE) {
