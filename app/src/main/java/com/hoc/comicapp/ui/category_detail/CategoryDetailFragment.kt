@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
@@ -19,6 +18,7 @@ import com.hoc.comicapp.ui.category_detail.CategoryDetailFragmentDirections.Comp
 import com.hoc.comicapp.ui.detail.ComicArg
 import com.hoc.comicapp.utils.isOrientationPortrait
 import com.hoc.comicapp.utils.observe
+import com.hoc.comicapp.utils.viewModel
 import com.hoc081098.viewbindingdelegate.viewBinding
 import com.jakewharton.rxbinding4.recyclerview.scrollEvents
 import com.jakewharton.rxbinding4.swiperefreshlayout.refreshes
@@ -28,16 +28,15 @@ import io.reactivex.rxjava3.core.Observable.mergeArray
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import org.koin.androidx.scope.lifecycleScope
-import org.koin.androidx.viewmodel.scope.viewModel
+import org.koin.androidx.scope.ScopeFragment
 import org.koin.core.parameter.parametersOf
 import timber.log.Timber
 import kotlin.LazyThreadSafetyMode.NONE
 
-class CategoryDetailFragment : Fragment() {
+class CategoryDetailFragment : ScopeFragment() {
   private val args by navArgs<CategoryDetailFragmentArgs>()
 
-  private val vm by lifecycleScope.viewModel<CategoryDetailVM>(owner = this) { parametersOf(args.category) }
+  private val vm by viewModel<CategoryDetailVM> { parametersOf(args.category) }
   private val viewBinding by viewBinding<FragmentCategoryDetailBinding>()
   private val compositeDisposable = CompositeDisposable()
 

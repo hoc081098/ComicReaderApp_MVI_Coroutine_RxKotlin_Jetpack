@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chauthai.swipereveallayout.ViewBinderHelper
@@ -24,18 +23,18 @@ import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.showAlertDialogAsMaybe
 import com.hoc.comicapp.utils.snack
+import com.hoc.comicapp.utils.viewModel
 import com.hoc081098.viewbindingdelegate.viewBinding
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import org.koin.androidx.scope.lifecycleScope
-import org.koin.androidx.viewmodel.scope.viewModel
+import org.koin.androidx.scope.ScopeFragment
 import timber.log.Timber
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsFragmentDirections.Companion.actionDownloadedComicsFragmentToComicDetailFragment as toComicDetailFragment
 
-class DownloadedComicsFragment : Fragment() {
-  private val viewModel by lifecycleScope.viewModel<DownloadedComicsViewModel>(owner = this)
+class DownloadedComicsFragment : ScopeFragment() {
+  private val viewModel by viewModel<DownloadedComicsViewModel>()
   private val viewBinding by viewBinding<FragmentDownloadedComicsBinding>()
   private val compositeDisposable = CompositeDisposable()
 

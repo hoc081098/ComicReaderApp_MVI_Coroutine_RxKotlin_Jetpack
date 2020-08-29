@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.observe
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,17 +21,17 @@ import com.hoc.comicapp.utils.itemSelections
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.showAlertDialogAsMaybe
 import com.hoc.comicapp.utils.snack
+import com.hoc.comicapp.utils.viewModel
 import com.hoc081098.viewbindingdelegate.viewBinding
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import org.koin.androidx.scope.lifecycleScope
-import org.koin.androidx.viewmodel.scope.viewModel
+import org.koin.androidx.scope.ScopeFragment
 
-class FavoriteComicsFragment : Fragment() {
+class FavoriteComicsFragment : ScopeFragment() {
   private val compositeDisposable = CompositeDisposable()
-  private val viewModel by lifecycleScope.viewModel<FavoriteComicsVM>(owner = this)
+  private val viewModel by viewModel<FavoriteComicsVM>()
   private val viewBinding by viewBinding<FragmentFavoriteComicsBinding>()
 
   private val viewBinderHelper = ViewBinderHelper()

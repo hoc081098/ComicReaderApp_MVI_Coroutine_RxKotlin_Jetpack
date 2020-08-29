@@ -6,12 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.CallSuper
 import androidx.annotation.LayoutRes
-import androidx.fragment.app.Fragment
 import androidx.viewbinding.ViewBinding
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
+import org.koin.androidx.scope.ScopeFragment
 import timber.log.Timber
 
 abstract class BaseFragment<
@@ -20,8 +20,8 @@ abstract class BaseFragment<
     E : MviSingleEvent,
     VM : MviViewModel<I, S, E>,
     >(
-  @LayoutRes contentLayoutId: Int
-) : Fragment(contentLayoutId), MviView<I, S, E> {
+  @LayoutRes private val contentLayoutId: Int, // TODO(Koin): Use ScopeFragment(contentLayoutId)
+) : ScopeFragment(), MviView<I, S, E> {
   protected val compositeDisposable = CompositeDisposable()
 
   protected abstract val viewModel: VM
@@ -31,7 +31,9 @@ abstract class BaseFragment<
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?,
-  ) = super.onCreateView(inflater, container, savedInstanceState)
+  ) = inflater.inflate(contentLayoutId,
+    container,
+    false)!! // TODO(Koin): Use ScopeFragment(contentLayoutId)
     .also { Timber.d("$this::onCreateView") }
 
   @CallSuper override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

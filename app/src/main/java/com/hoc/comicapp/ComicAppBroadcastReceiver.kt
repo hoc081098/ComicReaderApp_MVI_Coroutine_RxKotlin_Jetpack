@@ -68,7 +68,7 @@ class ComicAppBroadcastReceiver : BroadcastReceiver(), KoinComponent {
 
   private fun createCancelledNotification(
     context: Context,
-    chapterComicName: String
+    chapterComicName: String,
   ): Notification {
     return NotificationCompat
       .Builder(
@@ -101,7 +101,7 @@ class ComicAppBroadcastReceiver : BroadcastReceiver(), KoinComponent {
     data class CancelDownload(
       val workerId: ParcelUuid,
       val chapterLink: String,
-      val chapterComicName: String
+      val chapterComicName: String,
     ) : Action()
   }
 }

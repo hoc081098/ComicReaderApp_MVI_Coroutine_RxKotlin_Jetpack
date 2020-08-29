@@ -81,13 +81,13 @@ dependencies {
 
   // AndroidX, Material
   implementation("androidx.recyclerview:recyclerview:1.2.0-alpha05")
-  implementation("androidx.appcompat:appcompat:1.3.0-alpha01")
-  implementation("androidx.core:core-ktx:1.5.0-alpha01")
-  implementation("androidx.activity:activity-ktx:1.2.0-alpha07")
-  implementation("androidx.fragment:fragment-ktx:1.3.0-alpha07")
-  implementation("androidx.constraintlayout:constraintlayout:2.0.0-rc1")
-  implementation("androidx.activity:activity-ktx:1.2.0-alpha07")
-  implementation("androidx.startup:startup-runtime:1.0.0-alpha02")
+  implementation("androidx.appcompat:appcompat:1.3.0-alpha02")
+  implementation("androidx.core:core-ktx:1.5.0-alpha02")
+  implementation("androidx.activity:activity-ktx:1.2.0-alpha08")
+  implementation("androidx.fragment:fragment-ktx:1.3.0-alpha08")
+  implementation("androidx.constraintlayout:constraintlayout:2.0.0")
+  implementation("androidx.activity:activity-ktx:1.2.0-alpha08")
+  implementation("androidx.startup:startup-runtime:1.0.0-alpha03")
   implementation("com.google.android.material:material:$materialVersion")
 
   // Navigation
@@ -164,8 +164,8 @@ dependencies {
   implementation("com.google.firebase:firebase-auth:19.3.2")
   implementation("com.google.firebase:firebase-storage:19.1.1")
   implementation("com.google.firebase:firebase-firestore:21.5.0")
-  implementation("com.google.firebase:firebase-analytics:17.4.4")
-  implementation("com.google.firebase:firebase-crashlytics:17.1.1")
+  implementation("com.google.firebase:firebase-analytics:17.5.0")
+  implementation("com.google.firebase:firebase-crashlytics:17.2.1")
 
   implementation("com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava")
 

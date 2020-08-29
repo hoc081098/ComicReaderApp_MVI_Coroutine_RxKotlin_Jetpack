@@ -162,7 +162,7 @@ class DownloadComicWorker(
 
   private fun createNotificationBuilder(
     chapterComicName: String,
-    chapterLink: String
+    chapterLink: String,
   ): NotificationCompat.Builder {
     val cancelIntent = PendingIntent.getBroadcast(
       applicationContext,

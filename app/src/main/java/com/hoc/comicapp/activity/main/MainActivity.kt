@@ -7,7 +7,6 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.Group
 import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
@@ -42,13 +41,13 @@ import de.hdodenhof.circleimageview.CircleImageView
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
-import org.koin.androidx.scope.lifecycleScope
-import org.koin.androidx.viewmodel.scope.viewModel
+import org.koin.androidx.scope.ScopeActivity
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
 import kotlin.LazyThreadSafetyMode.NONE
 
-class MainActivity : AppCompatActivity(R.layout.activity_main) {
-  private val mainVM by lifecycleScope.viewModel<MainVM>(owner = this)
+class MainActivity : ScopeActivity() { // TODO(Koin): Use ScopeActivity(contentLayoutId)
+  private val mainVM by viewModel<MainVM>()
   private val viewBinding by viewBinding<ActivityMainBinding>()
   private val compositeDisposable = CompositeDisposable()
 
@@ -63,6 +62,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    setContentView(R.layout.activity_main) // TODO(Koin): Use ScopeActivity(contentLayoutId)
     setSupportActionBar(viewBinding.toolbar)
 
     val navController = findNavController(R.id.main_nav_fragment)

@@ -13,7 +13,8 @@ import timber.log.Timber
 abstract class BaseViewModel<
     I : MviIntent,
     S : MviViewState,
-    E : MviSingleEvent>(protected val initialState: S) :
+    E : MviSingleEvent,
+    >(protected val initialState: S) :
   ViewModel(),
   MviViewModel<I, S, E> {
   protected val compositeDisposable = CompositeDisposable()

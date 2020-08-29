@@ -33,6 +33,7 @@ import com.hoc.comicapp.utils.showAlertDialog
 import com.hoc.comicapp.utils.snack
 import com.hoc.comicapp.utils.themeInterpolator
 import com.hoc.comicapp.utils.unit
+import com.hoc.comicapp.utils.viewModel
 import com.hoc081098.viewbindingdelegate.viewBinding
 import com.jakewharton.rxbinding4.recyclerview.scrollEvents
 import com.jakewharton.rxbinding4.view.clicks
@@ -42,8 +43,6 @@ import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import io.reactivex.rxjava3.kotlin.withLatestFrom
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.koin.androidx.scope.lifecycleScope
-import org.koin.androidx.viewmodel.scope.viewModel
 import org.koin.core.parameter.parametersOf
 import timber.log.Timber
 import java.io.File
@@ -59,7 +58,7 @@ class ComicDetailFragment : BaseFragment<
     ComicDetailSingleEvent,
     ComicDetailViewModel
     >(R.layout.fragment_comic_detail) {
-  override val viewModel by lifecycleScope.viewModel<ComicDetailViewModel>(owner = this) {
+  override val viewModel by viewModel<ComicDetailViewModel> {
     parametersOf(args.isDownloaded)
   }
   override val viewBinding by viewBinding<FragmentComicDetailBinding>()
@@ -92,14 +91,14 @@ class ComicDetailFragment : BaseFragment<
   private fun prepareTransitions() {
     postponeEnterTransition()
 
-    sharedElementEnterTransition = MaterialContainerTransform(requireContext()).apply {
+    sharedElementEnterTransition = MaterialContainerTransform().apply {
       // Scope the transition to a view in the hierarchy so we know it will be added under
       // the bottom app bar but over the Hold transition from the exiting HomeFragment.
       drawingViewId = R.id.main_nav_fragment
       duration = resources.getInteger(R.integer.reply_motion_default_large).toLong()
       interpolator = requireContext().themeInterpolator(R.attr.motionInterpolatorPersistent)
     }
-    sharedElementReturnTransition = MaterialContainerTransform(requireContext()).apply {
+    sharedElementReturnTransition = MaterialContainerTransform().apply {
       // Again, scope the return transition so it is added below the bottom app bar.
       drawingViewId = R.id.recycler_home
       duration = resources.getInteger(R.integer.reply_motion_default_large).toLong()
