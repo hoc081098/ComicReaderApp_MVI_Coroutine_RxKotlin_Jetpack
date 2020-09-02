@@ -6,7 +6,6 @@ buildscript {
   extra.run {
     set("coroutinesVersion", "1.3.9")
     set("lifecycleVersion", "2.3.0-alpha07")
-    set("pagingVersion", "2.1.2")
     set("koinVersion", "2.2.0-alpha-1")
     set("materialVersion", "1.2.0")
     set("glideVersion", "4.11.0")
@@ -28,7 +27,7 @@ buildscript {
     classpath(kotlin("gradle-plugin", kotlinVersion))
     classpath("androidx.navigation:navigation-safe-args-gradle-plugin:$navVersion")
     classpath("com.google.gms:google-services:4.3.3")
-    classpath("com.google.firebase:firebase-crashlytics-gradle:2.2.0")
+    classpath("com.google.firebase:firebase-crashlytics-gradle:2.2.1")
   }
 }
 

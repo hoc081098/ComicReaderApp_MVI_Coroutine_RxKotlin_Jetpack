@@ -72,42 +72,34 @@ tasks.withType<KotlinCompile> {
 dependencies {
   implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
-  // Kotlin, Kotlin Coroutines
-  implementation(kotlin("stdlib-jdk8", kotlinVersion))
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-rx3:$coroutinesVersion")
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutinesVersion")
+  implementation(deps.kotlin.stdlib)
+  implementation(deps.kotlin.coroutinesCore)
+  implementation(deps.kotlin.coroutinesAndroid)
+  implementation(deps.kotlin.coroutinesRx3)
+  implementation(deps.kotlin.coroutinesPlayServices)
 
-  // AndroidX, Material
-  implementation("androidx.recyclerview:recyclerview:1.2.0-alpha05")
-  implementation("androidx.appcompat:appcompat:1.3.0-alpha02")
-  implementation("androidx.core:core-ktx:1.5.0-alpha02")
-  implementation("androidx.activity:activity-ktx:1.2.0-alpha08")
-  implementation("androidx.fragment:fragment-ktx:1.3.0-alpha08")
-  implementation("androidx.constraintlayout:constraintlayout:2.0.0")
-  implementation("androidx.activity:activity-ktx:1.2.0-alpha08")
-  implementation("androidx.startup:startup-runtime:1.0.0-alpha03")
-  implementation("com.google.android.material:material:$materialVersion")
+  implementation(deps.androidX.activity)
+  implementation(deps.androidX.appCompat)
+  implementation(deps.androidX.core)
+  implementation(deps.androidX.fragment)
+  implementation(deps.androidX.startUp)
 
-  // Navigation
-  implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
-  implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
+  implementation(deps.androidX.view.constraintLayout)
+  implementation(deps.androidX.view.recyclerView)
+  implementation(deps.androidX.view.material)
 
-  // Paging
-  implementation("androidx.paging:paging-runtime-ktx:$pagingVersion")
+  implementation(deps.androidX.navigation.fragment)
+  implementation(deps.androidX.navigation.ui)
 
-  // Lifecycle, LiveData
-  implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
-  implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
-  implementation("androidx.lifecycle:lifecycle-reactivestreams-ktx:$lifecycleVersion")
-  implementation("androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion")
+  implementation(deps.androidX.lifecycle.viewModel)
+  implementation(deps.androidX.lifecycle.liveData)
+  implementation(deps.androidX.lifecycle.reactiveStreams)
+  implementation(deps.androidX.lifecycle.common)
 
-  // Room
-  implementation("androidx.room:room-runtime:$roomVersion")
-  kapt("androidx.room:room-compiler:$roomVersion")
-  implementation("androidx.room:room-ktx:$roomVersion")
-  implementation("androidx.room:room-rxjava3:$roomVersion") // optional - RxJava support for Room
+  implementation(deps.androidX.room.runtime)
+  kapt(deps.androidX.room.compiler)
+  implementation(deps.androidX.room.ktx)
+  implementation(deps.androidX.room.rxJava3)
 
   // Work manager
   implementation("androidx.work:work-runtime-ktx:$workVersion") // Kotlin + coroutines
@@ -136,7 +128,7 @@ dependencies {
 
   // Rx
   implementation("io.reactivex.rxjava3:rxkotlin:3.0.0")
-  implementation("io.reactivex.rxjava3:rxjava:3.0.4")
+  implementation("io.reactivex.rxjava3:rxjava:3.0.6")
   implementation("io.reactivex.rxjava3:rxandroid:3.0.0")
 
   // Glide
@@ -162,16 +154,14 @@ dependencies {
 
   // Firebase
   implementation("com.google.firebase:firebase-auth:19.3.2")
-  implementation("com.google.firebase:firebase-storage:19.1.1")
-  implementation("com.google.firebase:firebase-firestore:21.5.0")
+  implementation("com.google.firebase:firebase-storage:19.2.0")
+  implementation("com.google.firebase:firebase-firestore:21.6.0")
   implementation("com.google.firebase:firebase-analytics:17.5.0")
   implementation("com.google.firebase:firebase-crashlytics:17.2.1")
 
   implementation("com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava")
 
   implementation("com.github.hoc081098:ViewBindingDelegate:0.0.2")
-
-  Dependencies.A
 }
 
 apply(plugin = "com.google.gms.google-services")
