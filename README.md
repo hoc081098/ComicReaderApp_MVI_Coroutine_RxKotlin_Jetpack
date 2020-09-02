@@ -9,10 +9,13 @@ This project brings to the table set of best practices, tools, and solutions:
 -   Functional & Reactive programming with [RxKotlin](https://github.com/ReactiveX/RxKotlin), [RxJava3](https://github.com/ReactiveX/RxJava)
 -   Clean Architecture with MVI (Uni-directional data flow)
 -   Modern architecture (Clean Architecture, Model-View-ViewModel)
--   Jetpack Navigation, single-activity architecture
--   [Android Jetpack](https://developer.android.com/jetpack)
--   Dependency Injection ([Koin](https://github.com/InsertKoinIO/com.egoriku.landing.koin))
--   Material Design
+-   Navigation, single-activity architecture with [Jetpack Navigation](https://developer.android.com/guide/navigation)
+-   Initialize components at application startup with [AndroidX Startup](https://developer.android.com/topic/libraries/app-startup)
+-   Cache local data with [Room Persistence Library](https://developer.android.com/topic/libraries/architecture/room)
+-   Schedule tasks with [WorkManager](https://developer.android.com/topic/libraries/architecture/workmanager)
+-   ViewModel, LiveData, Lifecycle, ... with [Android Jetpack](https://developer.android.com/jetpack)
+-   Dependency injection [Koin](https://insert-koin.io/)
+-   Material Design [Material Components for Android](https://github.com/material-components/material-components-android)
 -   Kotlin Gradle DSL
 -   Firebase: Firestore, Authentication, Analytics, Crashlytics
 
