@@ -17,7 +17,7 @@ This project brings to the table set of best practices, tools, and solutions:
 -   Dependency injection [Koin](https://insert-koin.io/)
 -   Material Design [Material Components for Android](https://github.com/material-components/material-components-android)
 -   Kotlin Gradle DSL
--   Firebase: Firestore, Authentication, Analytics, Crashlytics
+-   Firebase: Firestore, Authentication, Storage, Analytics, Crashlytics
 
 # Develop
 - Clone: `git clone https://github.com/hoc081098/ComicReaderApp_MVI_Coroutine_RxKotlin.git`
