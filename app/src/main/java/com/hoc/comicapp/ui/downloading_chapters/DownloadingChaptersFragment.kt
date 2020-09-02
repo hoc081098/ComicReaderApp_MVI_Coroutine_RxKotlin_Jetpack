@@ -26,7 +26,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.androidx.scope.ScopeFragment
 import timber.log.Timber
 
-@ExperimentalCoroutinesApi
 class DownloadingChaptersFragment : ScopeFragment() {
   private val viewModel by viewModel<DownloadingChaptersViewModel>()
   private val viewBinding by viewBinding<FragmentDownloadingChaptersBinding>()

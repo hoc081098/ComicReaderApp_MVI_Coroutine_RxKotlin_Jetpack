@@ -20,8 +20,6 @@ import org.koin.core.KoinComponent
 import org.koin.core.inject
 import timber.log.Timber
 
-@ExperimentalCoroutinesApi
-@ObsoleteCoroutinesApi
 class ComicAppBroadcastReceiver : BroadcastReceiver(), KoinComponent {
   private val workManager by inject<WorkManager>()
   private val appCoroutineScope by inject<CoroutineScope>()

@@ -10,8 +10,6 @@ import kotlinx.coroutines.ObsoleteCoroutinesApi
 import timber.log.Timber
 
 class AnalyticsInitializer : Initializer<Unit> {
-  @ExperimentalCoroutinesApi
-  @ObsoleteCoroutinesApi
   override fun create(context: Context) {
     context
       .startKoinIfNeeded()

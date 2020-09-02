@@ -33,7 +33,6 @@ import io.reactivex.rxjava3.kotlin.withLatestFrom
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import timber.log.Timber
 
-@ExperimentalCoroutinesApi
 class ComicDetailViewModel(
   private val comicDetailInteractor: ComicDetailInteractor,
   private val downloadComicsRepository: DownloadComicsRepository,

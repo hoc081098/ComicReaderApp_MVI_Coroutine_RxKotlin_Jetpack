@@ -29,13 +29,11 @@ import com.hoc.comicapp.domain.repository.UserRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ObsoleteCoroutinesApi
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 import retrofit2.Retrofit
 
-@ObsoleteCoroutinesApi
 val dataModule = module {
   /*
    * FavoriteComicsRepository + ComicRepository + DownloadComicsRepository
@@ -131,7 +129,6 @@ private fun provideFavoriteComicsRepository(
   )
 }
 
-@ObsoleteCoroutinesApi
 private fun provideComicRepository(
   errorMapper: ErrorMapper,
   comicApiService: ComicApiService,
@@ -218,7 +215,6 @@ private fun provideFirebaseAuthUserDataSource(
   )
 }
 
-@ObsoleteCoroutinesApi
 private fun provideFavoriteComicsDataSource(
   firebaseAuth: FirebaseAuth,
   firebaseFirestore: FirebaseFirestore,

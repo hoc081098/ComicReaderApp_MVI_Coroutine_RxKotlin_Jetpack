@@ -11,7 +11,7 @@ import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.rx3.rxObservable
 
-@ExperimentalCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
 class MainInteractorImpl(
   private val userRepository: UserRepository,
   private val dispatchersProvider: CoroutinesDispatchersProvider,
@@ -34,7 +34,7 @@ class MainInteractorImpl(
   }
 
   override fun signOut(): Observable<PartialChange> {
-    return rxObservable<PartialChange>(dispatchersProvider.main) {
+    return rxObservable(dispatchersProvider.main) {
       userRepository
         .signOut()
         .fold(

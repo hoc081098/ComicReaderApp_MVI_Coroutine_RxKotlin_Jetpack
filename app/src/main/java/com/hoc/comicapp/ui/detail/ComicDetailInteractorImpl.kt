@@ -17,7 +17,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.rx3.collect
 import kotlinx.coroutines.rx3.rxObservable
 
-@ExperimentalCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
 class ComicDetailInteractorImpl(
   private val comicRepository: ComicRepository,
   private val dispatchersProvider: CoroutinesDispatchersProvider,

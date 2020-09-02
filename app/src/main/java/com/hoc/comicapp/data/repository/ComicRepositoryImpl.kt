@@ -33,8 +33,10 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 import kotlin.time.seconds
 
-@OptIn(ExperimentalTime::class)
-@ObsoleteCoroutinesApi
+@OptIn(
+  ExperimentalTime::class,
+  ObsoleteCoroutinesApi::class
+)
 class ComicRepositoryImpl(
   private val errorMapper: ErrorMapper,
   private val comicApiService: ComicApiService,

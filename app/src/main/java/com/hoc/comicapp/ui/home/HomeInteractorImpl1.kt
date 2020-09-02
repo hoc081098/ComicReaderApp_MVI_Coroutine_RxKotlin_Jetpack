@@ -14,7 +14,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.rx3.rxObservable
 
-@ExperimentalCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
 class HomeInteractorImpl1(
   private val comicRepository: ComicRepository,
   private val homeInteractorImpl: HomeInteractorImpl,

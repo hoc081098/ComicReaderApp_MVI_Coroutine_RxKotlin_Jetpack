@@ -28,7 +28,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import timber.log.Timber
 import kotlin.LazyThreadSafetyMode.NONE
 
-@ExperimentalCoroutinesApi
 class HomeFragment :
   BaseFragment<
       HomeViewIntent,

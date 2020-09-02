@@ -11,7 +11,7 @@ import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.rx3.rxObservable
 
-@ExperimentalCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
 class FavoriteComicsInteractorImpl(
   private val favoriteComicsRepository: FavoriteComicsRepository,
   private val rxSchedulerProvider: RxSchedulerProvider,

@@ -13,7 +13,7 @@ import io.reactivex.rxjava3.kotlin.cast
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.rx3.rxObservable
 
-@ExperimentalCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
 class HomeInteractorImpl(
   private val comicRepository: ComicRepository,
   private val dispatchersProvider: CoroutinesDispatchersProvider,

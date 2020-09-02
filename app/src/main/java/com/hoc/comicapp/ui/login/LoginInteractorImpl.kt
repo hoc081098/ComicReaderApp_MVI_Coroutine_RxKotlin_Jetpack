@@ -9,7 +9,7 @@ import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.rx3.rxObservable
 
-@ExperimentalCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
 class LoginInteractorImpl(
   private val userRepository: UserRepository,
   private val dispatchersProvider: CoroutinesDispatchersProvider,

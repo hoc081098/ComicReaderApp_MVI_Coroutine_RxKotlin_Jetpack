@@ -77,7 +77,7 @@ class SearchComicViewModel(
 
     val loadNextPagePartialChange = intentS
       .ofType<ViewIntent.LoadNextPage>()
-      .withLatestFrom(searchTerm) { _, term -> term }
+      .withLatestFrom(searchTerm, { _, term -> term })
       .withLatestFrom(stateS)
       .map { it.first to it.second.page + 1 }
       .doOnNext { Timber.d("[LOAD NEXT PAGE] $it") }

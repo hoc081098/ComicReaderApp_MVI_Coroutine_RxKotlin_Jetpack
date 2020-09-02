@@ -1,5 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 buildscript {
   repositories {
     google()
@@ -16,6 +18,21 @@ buildscript {
 }
 
 allprojects {
+  tasks.withType<KotlinCompile> {
+    kotlinOptions {
+      jvmTarget = JavaVersion.VERSION_1_8.toString()
+      freeCompilerArgs = freeCompilerArgs + listOf("-Xopt-in=kotlin.RequiresOptIn")
+    }
+  }
+
+  configurations.all {
+    resolutionStrategy.eachDependency {
+      if (requested.group == "org.jetbrains.kotlin" && requested.name == "kotlin-reflect") {
+        useVersion(versions.kotlin.core)
+      }
+    }
+  }
+
   repositories {
     google()
     jcenter()

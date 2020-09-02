@@ -11,7 +11,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.rx3.rxObservable
 import timber.log.Timber
 
-@ExperimentalCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
 class SearchComicInteractorImpl(
   private val comicRepository: ComicRepository,
   private val dispatchersProvider: CoroutinesDispatchersProvider,

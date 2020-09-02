@@ -13,10 +13,8 @@ import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.ofType
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import io.reactivex.rxjava3.kotlin.withLatestFrom
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import timber.log.Timber
 
-@ExperimentalCoroutinesApi
 class HomeViewModel(
   private val homeInteractor: HomeInteractor,
   rxSchedulerProvider: RxSchedulerProvider,

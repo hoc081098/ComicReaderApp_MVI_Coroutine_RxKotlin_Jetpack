@@ -51,7 +51,6 @@ import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.math.absoluteValue
 import com.hoc.comicapp.ui.detail.ComicDetailFragmentDirections.Companion.actionComicDetailFragmentToChapterDetailFragment as toChapterDetail
 
-@ExperimentalCoroutinesApi
 class ComicDetailFragment : BaseFragment<
     ComicDetailIntent,
     ComicDetailViewState,

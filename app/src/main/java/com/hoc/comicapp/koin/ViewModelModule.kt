@@ -47,13 +47,11 @@ import com.hoc.comicapp.ui.search_comic.SearchComicContract
 import com.hoc.comicapp.ui.search_comic.SearchComicFragment
 import com.hoc.comicapp.ui.search_comic.SearchComicInteractorImpl
 import com.hoc.comicapp.ui.search_comic.SearchComicViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.android.ext.koin.androidApplication
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
-@ExperimentalCoroutinesApi
 val viewModelModule = module {
   scope<HomeFragment> {
     scoped {

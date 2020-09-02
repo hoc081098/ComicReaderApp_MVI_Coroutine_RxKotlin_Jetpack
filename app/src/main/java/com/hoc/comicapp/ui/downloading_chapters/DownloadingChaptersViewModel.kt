@@ -25,11 +25,9 @@ import io.reactivex.rxjava3.functions.BiFunction
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.ofType
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.rx3.rxSingle
 import timber.log.Timber
 
-@ExperimentalCoroutinesApi
 class DownloadingChaptersViewModel(
   private val rxSchedulerProvider: RxSchedulerProvider,
   private val workManager: WorkManager,

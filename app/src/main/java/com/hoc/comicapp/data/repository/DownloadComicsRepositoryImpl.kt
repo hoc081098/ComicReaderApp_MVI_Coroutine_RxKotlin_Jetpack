@@ -38,7 +38,6 @@ import com.hoc.comicapp.utils.retryIO
 import com.hoc.comicapp.utils.right
 import com.hoc.comicapp.worker.DownloadComicWorker
 import io.reactivex.rxjava3.core.Observable
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
@@ -72,7 +71,6 @@ class DownloadComicsRepositoryImpl(
    * Implement DownloadComicsRepository
    */
 
-  @ExperimentalCoroutinesApi
   override fun getDownloadedChapter(chapterLink: String): Flow<DomainResult<DownloadedChapter>> {
     val allChaptersF = chapterDao.getAllChaptersFlow().distinctUntilChanged()
     val chapterF = chapterDao.getByChapterLink(chapterLink).distinctUntilChanged()
@@ -198,7 +196,6 @@ class DownloadComicsRepositoryImpl(
   }
 
   @OptIn(ExperimentalTime::class)
-  @ExperimentalCoroutinesApi
   override fun downloadChapter(chapterLink: String): Flow<Int> {
     return flow {
       Timber.d("$tag Begin")

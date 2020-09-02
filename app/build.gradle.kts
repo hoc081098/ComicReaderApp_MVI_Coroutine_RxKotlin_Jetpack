@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.internal.AndroidExtensionsFeature.PARCELIZE
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   id("com.android.application")
@@ -50,13 +49,6 @@ android {
 
   buildFeatures {
     viewBinding = true
-  }
-}
-
-tasks.withType<KotlinCompile> {
-  kotlinOptions {
-    jvmTarget = "1.8"
-    freeCompilerArgs = freeCompilerArgs + listOf("-Xopt-in=kotlin.RequiresOptIn")
   }
 }
 

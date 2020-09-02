@@ -29,7 +29,6 @@ import com.hoc.comicapp.utils.left
 import com.hoc.comicapp.utils.right
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
@@ -39,8 +38,7 @@ import org.koin.core.KoinComponent
 import org.koin.core.inject
 import timber.log.Timber
 
-@ExperimentalCoroutinesApi
-@ObsoleteCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
 class DownloadComicWorker(
   appContext: Context,
   params: WorkerParameters,

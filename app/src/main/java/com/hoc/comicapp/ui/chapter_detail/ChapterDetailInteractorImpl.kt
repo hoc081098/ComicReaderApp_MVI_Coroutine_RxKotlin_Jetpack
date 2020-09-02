@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.rx3.asObservable
 import timber.log.Timber
 
-@ExperimentalCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
 class ChapterDetailInteractorImpl(
   private val comicRepository: ComicRepository,
   private val dispatchersProvider: CoroutinesDispatchersProvider,
