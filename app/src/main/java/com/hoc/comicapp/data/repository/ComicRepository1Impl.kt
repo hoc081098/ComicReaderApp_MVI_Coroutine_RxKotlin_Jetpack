@@ -15,6 +15,7 @@ import kotlinx.coroutines.rx3.await
 import kotlinx.coroutines.rx3.rxSingle
 import timber.log.Timber
 
+@Suppress("unused")
 class ComicRepository1Impl(
   private val comicRepositoryImpl: ComicRepositoryImpl,
   private val errorMapper: ErrorMapper,
