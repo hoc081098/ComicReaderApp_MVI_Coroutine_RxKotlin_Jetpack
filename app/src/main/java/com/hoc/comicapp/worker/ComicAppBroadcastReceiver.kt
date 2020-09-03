@@ -1,4 +1,4 @@
-package com.hoc.comicapp
+package com.hoc.comicapp.worker
 
 import android.app.Notification
 import android.content.BroadcastReceiver
@@ -10,11 +10,10 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.WorkManager
 import androidx.work.await
+import com.hoc.comicapp.R
 import com.hoc.comicapp.initializer.startKoinIfNeeded
 import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.launch
 import org.koin.core.KoinComponent
 import org.koin.core.inject
@@ -35,32 +34,34 @@ class ComicAppBroadcastReceiver : BroadcastReceiver(), KoinComponent {
         .also { Timber.d("Action = $it") }
         ?: return
       ) {
-      is Action.CancelDownload -> {
-        val pendingResult = goAsync()
+      is Action.CancelDownload -> cancelDownload(action, context)
+    }
+  }
 
-        appCoroutineScope.launch {
-          kotlin
-            .runCatching {
-              workManager
-                .cancelWorkById(action.workerId.uuid)
-                .result
-                .await()
-            }
-            .onSuccess {
-              NotificationManagerCompat
-                .from(context)
-                .notify(
-                  action.chapterLink,
-                  0,
-                  createCancelledNotification(
-                    context,
-                    action.chapterComicName
-                  )
-                )
-            }
-          pendingResult.finish()
+  private fun cancelDownload(action: Action.CancelDownload, context: Context) {
+    val pendingResult = goAsync()
+
+    appCoroutineScope.launch {
+      kotlin
+        .runCatching {
+          workManager
+            .cancelWorkById(action.workerId.uuid)
+            .result
+            .await()
         }
-      }
+        .onSuccess {
+          NotificationManagerCompat
+            .from(context)
+            .notify(
+              action.chapterLink,
+              0,
+              createCancelledNotification(
+                context,
+                action.chapterComicName
+              )
+            )
+        }
+      pendingResult.finish()
     }
   }
 

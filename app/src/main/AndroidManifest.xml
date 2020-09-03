@@ -69,7 +69,7 @@
             tools:node="remove" />
 
         <receiver
-            android:name=".ComicAppBroadcastReceiver"
+            android:name=".worker.ComicAppBroadcastReceiver"
             android:exported="false" />
 
     </application>

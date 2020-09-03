@@ -27,6 +27,11 @@ interface ComicRepository {
   suspend fun getNewestComics(page: Int = 1): DomainResult<List<Comic>>
 
   /**
+   * Get triple of newest comics, most viewed comics and updated comics.
+   */
+  suspend fun refreshAll(): DomainResult<Triple<List<Comic>, List<Comic>, List<Comic>>>
+
+  /**
    * Get comic detail and all chapters
    * @param comicLink comic url
    */

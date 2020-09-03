@@ -15,6 +15,13 @@ fun <L : Any?, R : Any?> Either<L, R>.getOrNull(): R? {
   }
 }
 
+fun <L : Throwable, R : Any?> Either<L, R>.getOrThrow(): R {
+  return when (this) {
+    is Left -> throw value
+    is Right -> value
+  }
+}
+
 inline fun <L, R, T> Either<L, R>.fold(left: (L) -> T, right: (R) -> T): T =
   when (this) {
     is Left -> left(value)

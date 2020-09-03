@@ -21,11 +21,14 @@ import com.hoc.comicapp.domain.repository.ComicRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.utils.Cache
 import com.hoc.comicapp.utils.getOrNull
+import com.hoc.comicapp.utils.getOrThrow
 import com.hoc.comicapp.utils.right
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.actor
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -169,6 +172,27 @@ class ComicRepositoryImpl(
         .getNewestComics(page)
         .also(::updateFavoritesAndDownloaded)
         .map(Mappers::responseToDomainModel)
+    }
+  }
+
+  override suspend fun refreshAll(): DomainResult<Triple<List<Comic>, List<Comic>, List<Comic>>> {
+    return try {
+      coroutineScope {
+        val newestAsync = async { getNewestComics().getOrThrow() }
+        val mostViewedAsync = async { getMostViewedComics().getOrThrow() }
+        val updatedAsync = async { getUpdatedComics().getOrThrow() }
+
+        Triple(
+          newestAsync.await(),
+          mostViewedAsync.await(),
+          updatedAsync.await()
+        ).right()
+      }
+    } catch (throwable: Throwable) {
+      Timber.d(throwable, "ComicRepositoryImpl::refreshAll [ERROR] $throwable")
+
+      delay(500)
+      errorMapper.mapAsLeft(throwable)
     }
   }
 

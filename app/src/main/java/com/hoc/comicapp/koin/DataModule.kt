@@ -43,29 +43,29 @@ val dataModule = module {
 
   single {
     provideComicRepository(
-      get(),
-      get(),
-      get(),
-      get(),
-      get(),
-      get(),
-      get(),
+      errorMapper = get(),
+      comicApiService = get(),
+      dispatchersProvider = get(),
+      favoriteComicsDataSource = get(),
+      comicDao = get(),
+      appCoroutineScope = get(),
+      analyticsService = get(),
     )
   }
 
   single {
     provideDownloadComicsRepository(
       application = androidApplication(),
-      get(),
-      get(),
-      get(),
-      get(),
-      get(),
-      get(),
-      get(),
-      get(),
-      get(),
-      get(),
+      comicApiService = get(),
+      dispatchersProvider = get(),
+      comicDao = get(),
+      chapterDao = get(),
+      appDatabase = get(),
+      rxSchedulerProvider = get(),
+      errorMapper = get(),
+      workManager = get(),
+      jsonAdapterConstraints = get(),
+      analyticsService = get(),
     )
   }
 

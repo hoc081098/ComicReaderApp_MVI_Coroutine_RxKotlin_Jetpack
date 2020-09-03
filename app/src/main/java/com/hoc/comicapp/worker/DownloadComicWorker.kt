@@ -14,7 +14,6 @@ import androidx.work.ListenableWorker.Result.failure
 import androidx.work.ListenableWorker.Result.success
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
-import com.hoc.comicapp.ComicAppBroadcastReceiver
 import com.hoc.comicapp.R
 import com.hoc.comicapp.activity.SplashActivity
 import com.hoc.comicapp.data.ErrorMapper

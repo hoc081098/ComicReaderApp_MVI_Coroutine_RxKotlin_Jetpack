@@ -24,7 +24,6 @@ import com.jakewharton.rxbinding4.swiperefreshlayout.refreshes
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import timber.log.Timber
 import kotlin.LazyThreadSafetyMode.NONE
 
@@ -167,10 +166,15 @@ class HomeFragment :
     Timber.d("state=${items.size} refreshLoading=$refreshLoading")
 
     homeAdapter.submitList(items)
-    if (refreshLoading) {
-      viewBinding.swipeRefreshLayout.post { viewBinding.swipeRefreshLayout.isRefreshing = true }
-    } else {
-      viewBinding.swipeRefreshLayout.isRefreshing = false
+
+    viewBinding.swipeRefreshLayout.run {
+      if (refreshLoading) {
+        if (!isRefreshing) {
+          post { isRefreshing = true }
+        }
+      } else {
+        isRefreshing = false
+      }
     }
   }
 

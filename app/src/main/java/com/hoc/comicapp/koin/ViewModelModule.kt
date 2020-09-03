@@ -33,7 +33,6 @@ import com.hoc.comicapp.ui.favorite_comics.FavoriteComicsVM
 import com.hoc.comicapp.ui.home.HomeFragment
 import com.hoc.comicapp.ui.home.HomeInteractor
 import com.hoc.comicapp.ui.home.HomeInteractorImpl
-import com.hoc.comicapp.ui.home.HomeInteractorImpl1
 import com.hoc.comicapp.ui.home.HomeViewModel
 import com.hoc.comicapp.ui.login.LoginContract
 import com.hoc.comicapp.ui.login.LoginFragment
@@ -49,25 +48,16 @@ import com.hoc.comicapp.ui.search_comic.SearchComicInteractorImpl
 import com.hoc.comicapp.ui.search_comic.SearchComicViewModel
 import org.koin.android.ext.koin.androidApplication
 import org.koin.androidx.viewmodel.dsl.viewModel
-import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val viewModelModule = module {
   scope<HomeFragment> {
-    scoped {
+    scoped<HomeInteractor> {
       HomeInteractorImpl(
         comicRepository = get(),
         dispatchersProvider = get(),
       )
     }
-
-    scoped {
-      HomeInteractorImpl1(
-        comicRepository = get(),
-        homeInteractorImpl = get(),
-        dispatchersProvider = get(),
-      )
-    } bind HomeInteractor::class
 
     viewModel {
       HomeViewModel(

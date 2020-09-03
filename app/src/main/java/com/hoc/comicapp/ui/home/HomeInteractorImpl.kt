@@ -3,12 +3,9 @@ package com.hoc.comicapp.ui.home
 import com.hoc.comicapp.domain.repository.ComicRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.utils.Left
-import com.hoc.comicapp.utils.flatMap
 import com.hoc.comicapp.utils.fold
 import com.hoc.comicapp.utils.getOrNull
-import com.hoc.comicapp.utils.map
 import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.kotlin.Observables
 import io.reactivex.rxjava3.kotlin.cast
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.rx3.rxObservable
@@ -119,22 +116,22 @@ class HomeInteractorImpl(
   }
 
   override fun refreshAll(): Observable<HomePartialChange> {
-    return Observables.zip(
-      rxObservable(dispatchersProvider.main) { send(comicRepository.getNewestComics()) },
-      rxObservable(dispatchersProvider.main) { send(comicRepository.getMostViewedComics()) },
-      rxObservable(dispatchersProvider.main) { send(comicRepository.getUpdatedComics()) }
-    ).map<HomePartialChange> { (newest, mostViewed, updated) ->
-      newest.flatMap { newestList ->
-        mostViewed.flatMap { mostViewedList ->
-          updated.map { updatedList ->
+    return rxObservable(dispatchersProvider.main) {
+      send(HomePartialChange.RefreshPartialChange.Loading)
+
+      comicRepository
+        .refreshAll()
+        .fold(
+          left = { HomePartialChange.RefreshPartialChange.RefreshFailure(it) },
+          right = { (newest, mostViewed, updated) ->
             HomePartialChange.RefreshPartialChange.RefreshSuccess(
-              newestComics = newestList,
-              mostViewedComics = mostViewedList,
-              updatedComics = updatedList
+              newestComics = newest,
+              mostViewedComics = mostViewed,
+              updatedComics = updated
             )
           }
-        }
-      }.fold({ HomePartialChange.RefreshPartialChange.RefreshFailure(it) }, { it })
-    }.startWithItem(HomePartialChange.RefreshPartialChange.Loading)
+        )
+        .let { send(it) }
+    }
   }
 }
