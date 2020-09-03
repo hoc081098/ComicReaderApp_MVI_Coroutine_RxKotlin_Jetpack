@@ -39,7 +39,7 @@ class ComicRepository1Impl(
   }
 }
 
-fun <T1 : Any, T2 : Any, T3 : Any> Singles.zipDomainResult(
+private fun <T1 : Any, T2 : Any, T3 : Any> Singles.zipDomainResult(
   source1: Single<DomainResult<T1>>,
   source2: Single<DomainResult<T2>>,
   source3: Single<DomainResult<T3>>,
