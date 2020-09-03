@@ -7,9 +7,16 @@ import kotlin.time.TimeMark
 import kotlin.time.TimeSource
 
 @OptIn(ExperimentalTime::class)
-class Cache<K : Any, V : Any>(maxSize: Int, private val entryLifetime: Duration) {
+class Cache<K : Any, V : Any>(
+  maxSize: Int,
+  private val entryLifetime: Duration,
+  private val sizeOf: (key: K, value: V) -> Int = DefaultSizeCalculator,
+) {
   private val timeSource = TimeSource.Monotonic
-  private val cache = LruCache<K, Value<V>>(maxSize)
+
+  private val cache = object : LruCache<K, Value<V>>(maxSize) {
+    override fun sizeOf(key: K, value: Value<V>) = sizeOf(key, value.value)
+  }
 
   @Synchronized operator fun get(key: K): V? {
     val value = cache[key] ?: return null
@@ -39,4 +46,8 @@ class Cache<K : Any, V : Any>(maxSize: Int, private val entryLifetime: Duration)
     val value: V,
     val expiredTime: TimeMark,
   )
+
+  private object DefaultSizeCalculator : (Any, Any) -> Int {
+    override fun invoke(p1: Any, p2: Any): Int = 1
+  }
 }
