@@ -131,6 +131,6 @@ class SearchComicViewModel(
       .subscribe(stateS)
       .addTo(compositeDisposable)
 
-    stateS.subscribeBy(onNext = ::setNewState).addTo(compositeDisposable)
+    stateS.subscribeBy(onNext = setNewState).addTo(compositeDisposable)
   }
 }

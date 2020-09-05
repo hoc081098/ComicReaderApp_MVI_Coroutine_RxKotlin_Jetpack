@@ -88,7 +88,7 @@ class DownloadingChaptersViewModel(
       .compose(intentToChanges)
       .scan(initialState, reducer)
       .observeOn(rxSchedulerProvider.main)
-      .subscribeBy(onNext = ::setNewState)
+      .subscribeBy(onNext = setNewState)
       .addTo(compositeDisposable)
 
     filteredIntent

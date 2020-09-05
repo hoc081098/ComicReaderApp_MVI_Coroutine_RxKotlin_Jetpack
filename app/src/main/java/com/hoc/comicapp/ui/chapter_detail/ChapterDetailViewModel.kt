@@ -138,7 +138,7 @@ class ChapterDetailViewModel(
         ) { state, orientation -> state.copy(orientation = orientation) }
       }
       .observeOn(rxSchedulerProvider.main)
-      .subscribeBy(onNext = ::setNewState)
+      .subscribeBy(onNext = setNewState)
       .addTo(compositeDisposable)
   }
 

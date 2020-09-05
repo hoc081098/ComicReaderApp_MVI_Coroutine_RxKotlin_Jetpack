@@ -70,7 +70,7 @@ class MainVM(
       .compose(intentToChanges)
       .scan(initialState) { vs, change -> change.reducer(vs) }
       .observeOn(rxSchedulerProvider.main)
-      .subscribeBy(onNext = ::setNewState)
+      .subscribeBy(onNext = setNewState)
       .addTo(compositeDisposable)
   }
 

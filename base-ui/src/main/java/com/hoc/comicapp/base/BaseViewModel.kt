@@ -37,7 +37,7 @@ abstract class BaseViewModel<
     Timber.d("$this::init")
   }
 
-  protected fun setNewState(state: S) {
+  protected val setNewState = { state: S ->
     if (state != stateD.value) {
       stateD.value = state
     }
