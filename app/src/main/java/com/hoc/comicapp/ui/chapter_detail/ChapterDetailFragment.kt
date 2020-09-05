@@ -22,7 +22,7 @@ import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract.ViewIntent
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract.ViewState
 import com.hoc.comicapp.utils.snack
 import com.hoc.comicapp.utils.unit
-import com.hoc.comicapp.utils.viewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import com.hoc081098.viewbindingdelegate.viewBinding
 import com.jakewharton.rxbinding4.view.clicks
 import com.jakewharton.rxbinding4.widget.checkedChanges

@@ -7,6 +7,7 @@ buildscript {
     google()
     jcenter()
     maven(url = "https://dl.bintray.com/kotlin/kotlin-eap")
+    maven(url = "https://plugins.gradle.org/m2/")
   }
   dependencies {
     classpath(deps.sdk.classpath)
@@ -14,8 +15,11 @@ buildscript {
     classpath(deps.androidX.navigation.classpath)
     classpath(deps.firebase.classpath)
     classpath(deps.firebase.crashlytics.classpath)
+    classpath(deps.spotless.classpath)
   }
 }
+
+apply(from = "${project.rootDir}/spotless.gradle.kts")
 
 allprojects {
   tasks.withType<KotlinCompile> {

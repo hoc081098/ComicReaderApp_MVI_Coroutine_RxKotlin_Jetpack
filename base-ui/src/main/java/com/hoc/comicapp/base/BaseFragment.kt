@@ -20,8 +20,8 @@ abstract class BaseFragment<
     E : MviSingleEvent,
     VM : MviViewModel<I, S, E>,
     >(
-  @LayoutRes private val contentLayoutId: Int, // TODO(Koin): Use ScopeFragment(contentLayoutId)
-) : ScopeFragment(), MviView<I, S, E> {
+  @LayoutRes contentLayoutId: Int,
+) : ScopeFragment(contentLayoutId), MviView<I, S, E> {
   protected val compositeDisposable = CompositeDisposable()
 
   protected abstract val viewModel: VM
@@ -31,9 +31,7 @@ abstract class BaseFragment<
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?,
-  ) = inflater.inflate(contentLayoutId,
-    container,
-    false)!! // TODO(Koin): Use ScopeFragment(contentLayoutId)
+  ) = super.onCreateView(inflater, container, savedInstanceState)!!
     .also { Timber.d("$this::onCreateView") }
 
   @CallSuper override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

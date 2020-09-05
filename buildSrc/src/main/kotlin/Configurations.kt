@@ -21,6 +21,12 @@ object appConfig {
 }
 
 object versions {
+  const val ktLint = "0.38.1"
+
+  object spotless {
+    const val classpath = "5.3.0"
+  }
+
   object sdk {
     const val classpath = "4.0.1"
     const val buildTools = "30.0.2"
@@ -53,7 +59,7 @@ object versions {
     const val work = "2.5.0-alpha01"
   }
 
-  const val koin = "2.2.0-alpha-1"
+  const val koin = "2.2.0-beta-1"
   const val moshiKotlin = "1.9.2"
   const val retrofit = "2.9.0"
   const val okHttpLoggingInterceptor = "4.8.0"
@@ -98,6 +104,10 @@ object versions {
 }
 
 object deps {
+  object spotless {
+    const val classpath = "com.diffplug.spotless:spotless-plugin-gradle:${versions.spotless.classpath}"
+  }
+
   object module {
     const val baseUi = ":base-ui"
     const val utils = ":utils"

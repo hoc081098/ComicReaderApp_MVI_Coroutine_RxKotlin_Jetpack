@@ -46,7 +46,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
 import kotlin.LazyThreadSafetyMode.NONE
 
-class MainActivity : ScopeActivity() { // TODO(Koin): Use ScopeActivity(contentLayoutId)
+class MainActivity : ScopeActivity(R.layout.activity_main) {
   private val mainVM by viewModel<MainVM>()
   private val viewBinding by viewBinding<ActivityMainBinding>()
   private val compositeDisposable = CompositeDisposable()
@@ -62,7 +62,6 @@ class MainActivity : ScopeActivity() { // TODO(Koin): Use ScopeActivity(contentL
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    setContentView(R.layout.activity_main) // TODO(Koin): Use ScopeActivity(contentLayoutId)
     setSupportActionBar(viewBinding.toolbar)
 
     val navController = findNavController(R.id.main_nav_fragment)
