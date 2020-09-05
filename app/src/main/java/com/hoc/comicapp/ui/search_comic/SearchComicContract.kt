@@ -1,6 +1,8 @@
 package com.hoc.comicapp.ui.search_comic
 
 import com.hoc.comicapp.base.MviIntent
+import com.hoc.comicapp.base.MviSingleEvent
+import com.hoc.comicapp.base.MviViewState
 import com.hoc.comicapp.domain.models.Comic
 import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.getMessage
@@ -18,7 +20,7 @@ interface SearchComicContract {
     val comics: List<Item>,
     val errorMessage: String?,
     val page: Int,
-  ) : com.hoc.comicapp.base.MviViewState {
+  ) : MviViewState {
     companion object {
       @JvmStatic
       fun initialState() = ViewState(
@@ -150,7 +152,7 @@ interface SearchComicContract {
     object RetryNextPage : ViewIntent()
   }
 
-  sealed class SingleEvent : com.hoc.comicapp.base.MviSingleEvent {
+  sealed class SingleEvent : MviSingleEvent {
     data class MessageEvent(val message: String) : SingleEvent()
   }
 }

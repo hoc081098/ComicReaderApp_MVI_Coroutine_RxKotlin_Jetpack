@@ -98,6 +98,11 @@ object versions {
 }
 
 object deps {
+  object module {
+    const val baseUi = ":base-ui"
+    const val utils = ":utils"
+  }
+
   object sdk {
     const val classpath = "com.android.tools.build:gradle:${versions.sdk.classpath}"
   }

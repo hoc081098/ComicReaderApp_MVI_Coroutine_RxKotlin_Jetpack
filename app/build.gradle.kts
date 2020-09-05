@@ -54,6 +54,8 @@ android {
 
 dependencies {
   implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+  implementation(project(deps.module.baseUi))
+  implementation(project(deps.module.utils))
 
   implementation(deps.kotlin.stdlib)
   implementation(deps.kotlin.coroutinesCore)

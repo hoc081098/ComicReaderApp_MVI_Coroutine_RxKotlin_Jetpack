@@ -54,6 +54,11 @@ class LoginVM(
             when (it) {
               PartialChange.LoginSuccess -> sendEvent(SingleEvent.LoginSuccess)
               is PartialChange.LoginFailure -> sendEvent(SingleEvent.LoginFailure(it.error))
+              is PartialChange.EmailError -> Unit
+              is PartialChange.PasswordError -> Unit
+              is PartialChange.EmailChanged -> Unit
+              is PartialChange.PasswordChanged -> Unit
+              PartialChange.Loading -> Unit
             }
           }
       }
