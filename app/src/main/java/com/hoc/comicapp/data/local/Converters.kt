@@ -5,7 +5,7 @@ import com.hoc.comicapp.data.JsonAdaptersContainer
 import com.hoc.comicapp.data.local.entities.ComicEntity
 import org.koin.core.KoinComponent
 import org.koin.core.inject
-import java.util.*
+import java.util.Date
 
 /**
  * Type converters to allow Room to reference complex data types.

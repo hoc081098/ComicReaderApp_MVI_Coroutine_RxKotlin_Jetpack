@@ -1,14 +1,14 @@
-plugins {
-  id("com.diffplug.spotless")
-}
+import com.diffplug.gradle.spotless.SpotlessExtension
 
-configure<com.diffplug.gradle.spotless.SpotlessExtension> {
+apply(plugin = "com.diffplug.spotless")
+
+configure<SpotlessExtension> {
   kotlin {
     target("**/*.kt")
     ktlint(versions.ktLint).userData(
       mapOf(
         "indent_size" to "2",
-        "kotlin_imports_layout" to "ascii",
+        "kotlin_imports_layout" to "ascii"
       )
     )
 

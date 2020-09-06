@@ -2,24 +2,11 @@
 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-buildscript {
-  repositories {
-    google()
-    jcenter()
-    maven(url = "https://dl.bintray.com/kotlin/kotlin-eap")
-    maven(url = "https://plugins.gradle.org/m2/")
-  }
-  dependencies {
-    classpath(deps.sdk.classpath)
-    classpath(deps.kotlin.classpath)
-    classpath(deps.androidX.navigation.classpath)
-    classpath(deps.firebase.classpath)
-    classpath(deps.firebase.crashlytics.classpath)
-    classpath(deps.spotless.classpath)
-  }
-}
+buildscript { repositories { mavenCentral() }}
 
-apply(from = "${project.rootDir}/spotless.gradle.kts")
+subprojects {
+  apply(from = "${rootProject.rootDir}/spotless.gradle.kts")
+}
 
 allprojects {
   tasks.withType<KotlinCompile> {

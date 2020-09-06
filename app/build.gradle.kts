@@ -131,7 +131,7 @@ dependencies {
   implementation(deps.firebase.storage)
   implementation(deps.firebase.firestore)
   implementation(deps.firebase.analytics)
-  implementation(deps.firebase.crashlytics.crashlytics)
+  implementation(deps.firebase.crashlytics)
 
   implementation(deps.listenableFuture)
   implementation(deps.viewBindingDelegate)
