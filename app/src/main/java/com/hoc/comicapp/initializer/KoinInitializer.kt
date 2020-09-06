@@ -10,7 +10,7 @@ import com.hoc.comicapp.koin.viewModelModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.Koin
-import org.koin.core.context.KoinContextHandler
+import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
 import timber.log.Timber
@@ -30,7 +30,7 @@ class KoinInitializer : Initializer<Koin> {
  * @return [Koin] instance.
  */
 fun Context.startKoinIfNeeded(): Koin {
-  return KoinContextHandler.getOrNull() ?: startKoin {
+  return GlobalContext.getOrNull() ?: startKoin {
     // use AndroidLogger as Koin Logger
     androidLogger(level = if (BuildConfig.DEBUG) Level.DEBUG else Level.NONE)
 
