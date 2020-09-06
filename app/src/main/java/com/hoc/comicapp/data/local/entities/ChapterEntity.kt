@@ -5,7 +5,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import java.util.*
+import java.util.Date
 
 @Entity(
   tableName = "downloaded_chapters",

@@ -30,7 +30,6 @@ import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.ofType
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import io.reactivex.rxjava3.kotlin.withLatestFrom
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import timber.log.Timber
 
 class ComicDetailViewModel(
@@ -247,7 +246,8 @@ class ComicDetailViewModel(
             is ComicDetailViewState.ComicDetail.Initial -> detail.title
             null -> return@defer Observable.just(
               ComicDetailSingleEvent.EnqueuedDownloadFailure(
-                chapter, UnexpectedError(
+                chapter,
+                UnexpectedError(
                   "State is null",
                   IllegalStateException("State is null")
                 )
@@ -272,19 +272,22 @@ class ComicDetailViewModel(
   ): DownloadState {
     return when {
       downloadedChapters.any { it.chapterLink == chapter.chapterLink } -> Downloaded
-      else -> when (
-        val workInfo = workInfos.find { chapter.chapterLink in it.tags && it.state == RUNNING }) {
-        null -> NotYetDownload
-        else -> Downloading(
-          workInfo.progress.getInt(
-            DownloadComicWorker.PROGRESS,
-            0
-          )
-        ).also {
-          Timber.tag("####").d(workInfo.toString())
-          Timber.tag("####").d(it.toString())
+      else ->
+        when (
+          val workInfo = workInfos.find { chapter.chapterLink in it.tags && it.state == RUNNING }
+        ) {
+          null -> NotYetDownload
+          else ->
+            Downloading(
+              workInfo.progress.getInt(
+                DownloadComicWorker.PROGRESS,
+                0
+              )
+            ).also {
+              Timber.tag("####").d(workInfo.toString())
+              Timber.tag("####").d(it.toString())
+            }
         }
-      }
     }
   }
 

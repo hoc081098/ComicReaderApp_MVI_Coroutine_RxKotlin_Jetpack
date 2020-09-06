@@ -18,7 +18,6 @@ import com.hoc.comicapp.ui.category_detail.CategoryDetailFragmentDirections.Comp
 import com.hoc.comicapp.ui.detail.ComicArg
 import com.hoc.comicapp.utils.isOrientationPortrait
 import com.hoc.comicapp.utils.observe
-import com.hoc.comicapp.utils.viewModel
 import com.hoc081098.viewbindingdelegate.viewBinding
 import com.jakewharton.rxbinding4.recyclerview.scrollEvents
 import com.jakewharton.rxbinding4.swiperefreshlayout.refreshes
@@ -28,10 +27,11 @@ import io.reactivex.rxjava3.core.Observable.mergeArray
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
+import kotlin.LazyThreadSafetyMode.NONE
 import org.koin.androidx.scope.ScopeFragment
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import timber.log.Timber
-import kotlin.LazyThreadSafetyMode.NONE
 
 class CategoryDetailFragment : ScopeFragment() {
   private val args by navArgs<CategoryDetailFragmentArgs>()
@@ -48,7 +48,6 @@ class CategoryDetailFragment : ScopeFragment() {
       ::onClickComic
     )
   }
-
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -101,17 +100,19 @@ class CategoryDetailFragment : ScopeFragment() {
       setHasFixedSize(true)
       adapter = categoryDetailAdapter
 
-      addOnItemTouchListener(object : RecyclerView.SimpleOnItemTouchListener() {
-        override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
-          if (e.action == MotionEvent.ACTION_DOWN &&
-            rv.scrollState == RecyclerView.SCROLL_STATE_SETTLING
-          ) {
-            Timber.d("Stop scroll")
-            rv.stopScroll()
+      addOnItemTouchListener(
+        object : RecyclerView.SimpleOnItemTouchListener() {
+          override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
+            if (e.action == MotionEvent.ACTION_DOWN &&
+              rv.scrollState == RecyclerView.SCROLL_STATE_SETTLING
+            ) {
+              Timber.d("Stop scroll")
+              rv.stopScroll()
+            }
+            return false
           }
-          return false
         }
-      })
+      )
     }
 
     fab.setOnClickListener { view ->

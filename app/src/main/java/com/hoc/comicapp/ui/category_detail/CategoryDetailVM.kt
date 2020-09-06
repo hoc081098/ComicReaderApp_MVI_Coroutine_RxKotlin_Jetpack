@@ -103,7 +103,7 @@ class CategoryDetailVM(
       .addTo(compositeDisposable)
 
     stateS
-      .subscribeBy(onNext = ::setNewState)
+      .subscribeBy(onNext = setNewState)
       .addTo(compositeDisposable)
   }
 

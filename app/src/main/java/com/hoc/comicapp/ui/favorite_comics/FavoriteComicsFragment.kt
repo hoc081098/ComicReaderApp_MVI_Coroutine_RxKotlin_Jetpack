@@ -21,13 +21,13 @@ import com.hoc.comicapp.utils.itemSelections
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.showAlertDialogAsMaybe
 import com.hoc.comicapp.utils.snack
-import com.hoc.comicapp.utils.viewModel
 import com.hoc081098.viewbindingdelegate.viewBinding
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import org.koin.androidx.scope.ScopeFragment
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class FavoriteComicsFragment : ScopeFragment() {
   private val compositeDisposable = CompositeDisposable()

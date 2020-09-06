@@ -5,7 +5,7 @@ import com.hoc.comicapp.base.MviSingleEvent
 import com.hoc.comicapp.base.MviViewState
 import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.DownloadedChapter
-import java.util.*
+import java.util.Date
 
 @Suppress("unused")
 interface DownloadingChaptersContract {

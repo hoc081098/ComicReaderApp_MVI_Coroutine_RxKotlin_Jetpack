@@ -5,12 +5,12 @@ import com.hoc.comicapp.ImageHeaders
 import com.hoc.comicapp.data.remote.COMIC_BASE_URL
 import com.hoc.comicapp.data.remote.ComicApiService
 import com.squareup.moshi.Moshi
+import java.util.concurrent.TimeUnit
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
-import java.util.concurrent.TimeUnit
 
 val networkModule = module {
   single { provideOkHttpClient() }

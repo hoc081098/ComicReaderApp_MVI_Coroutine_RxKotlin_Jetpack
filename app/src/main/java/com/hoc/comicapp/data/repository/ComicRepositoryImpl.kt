@@ -23,6 +23,9 @@ import com.hoc.comicapp.utils.Cache
 import com.hoc.comicapp.utils.getOrNull
 import com.hoc.comicapp.utils.getOrThrow
 import com.hoc.comicapp.utils.right
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
+import kotlin.time.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.async
@@ -32,9 +35,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import kotlin.time.ExperimentalTime
-import kotlin.time.measureTime
-import kotlin.time.seconds
 
 @OptIn(
   ExperimentalTime::class,

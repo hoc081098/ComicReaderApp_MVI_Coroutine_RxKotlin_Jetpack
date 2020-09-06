@@ -18,8 +18,8 @@ import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
 import com.hoc.comicapp.databinding.ItemRecyclerChapterDetailImageBinding
 import com.hoc.comicapp.utils.inflater
-import timber.log.Timber
 import java.io.File
+import timber.log.Timber
 
 object StringDiffUtilItemCallback : DiffUtil.ItemCallback<String>() {
   override fun areItemsTheSame(oldItem: String, newItem: String): Boolean = oldItem == newItem
@@ -63,34 +63,36 @@ class ChapterImageAdapter(
         file.exists() -> loadLocal(file)
         else -> loadRemote(imageUrl)
       }
-        .listener(object : RequestListener<Drawable?> {
-          override fun onLoadFailed(
-            e: GlideException?,
-            model: Any?,
-            target: Target<Drawable?>?,
-            isFirstResource: Boolean,
-          ): Boolean {
-            // show error, hide progressBar
-            groupError.isVisible = true
-            progressBar.isVisible = false
+        .listener(
+          object : RequestListener<Drawable?> {
+            override fun onLoadFailed(
+              e: GlideException?,
+              model: Any?,
+              target: Target<Drawable?>?,
+              isFirstResource: Boolean,
+            ): Boolean {
+              // show error, hide progressBar
+              groupError.isVisible = true
+              progressBar.isVisible = false
 
-            return false
+              return false
+            }
+
+            override fun onResourceReady(
+              resource: Drawable?,
+              model: Any?,
+              target: Target<Drawable?>?,
+              dataSource: DataSource?,
+              isFirstResource: Boolean,
+            ): Boolean {
+              // hide progressBar, hide error
+              progressBar.isVisible = false
+              groupError.isVisible = false
+
+              return false
+            }
           }
-
-          override fun onResourceReady(
-            resource: Drawable?,
-            model: Any?,
-            target: Target<Drawable?>?,
-            dataSource: DataSource?,
-            isFirstResource: Boolean,
-          ): Boolean {
-            // hide progressBar, hide error
-            progressBar.isVisible = false
-            groupError.isVisible = false
-
-            return false
-          }
-        })
+        )
         .transition(DrawableTransitionOptions.withCrossFade())
         .dontTransform()
         .placeholder(R.drawable.splash_background)

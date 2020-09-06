@@ -43,8 +43,8 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import timber.log.Timber
 import java.util.concurrent.TimeUnit
+import timber.log.Timber
 
 private object ItemDiffCallback : DiffUtil.ItemCallback<Item>() {
   override fun areItemsTheSame(oldItem: Item, newItem: Item): Boolean {
@@ -185,58 +185,60 @@ class CategoryDetailAdapter(
 
       lifecycleOwner
         .lifecycle
-        .addObserver(object : LifecycleObserver {
-          var disposable: Disposable? = null
+        .addObserver(
+          object : LifecycleObserver {
+            var disposable: Disposable? = null
 
-          @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
-          private fun onCreate() {
-            disposable = startStopAutoScrollS
-              .mergeWith(
-                binding.popularRecyclerHorizontal
-                  .scrollStateChanges()
-                  .filter { it == RecyclerView.SCROLL_STATE_DRAGGING }
-                  .switchMap {
-                    Observable.just(false)
-                      .concatWith(
-                        Observable.timer(
-                          delayAfterTouchInMillis,
-                          TimeUnit.MILLISECONDS
-                        ).map { true }
-                      )
+            @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+            private fun onCreate() {
+              disposable = startStopAutoScrollS
+                .mergeWith(
+                  binding.popularRecyclerHorizontal
+                    .scrollStateChanges()
+                    .filter { it == RecyclerView.SCROLL_STATE_DRAGGING }
+                    .switchMap {
+                      Observable.just(false)
+                        .concatWith(
+                          Observable.timer(
+                            delayAfterTouchInMillis,
+                            TimeUnit.MILLISECONDS
+                          ).map { true }
+                        )
+                    }
+                )
+                .map { it to adapter.itemCount }
+                .switchMap { (startAutoScroll, itemCount) ->
+                  if (!startAutoScroll || itemCount == 0) {
+                    Observable.just(-1L)
+                  } else {
+                    Observable
+                      .interval(intervalInMillis, TimeUnit.MILLISECONDS)
+                      .map { it % itemCount }
                   }
-              )
-              .map { it to adapter.itemCount }
-              .switchMap { (startAutoScroll, itemCount) ->
-                if (!startAutoScroll || itemCount == 0) {
-                  Observable.just(-1L)
-                } else {
-                  Observable
-                    .interval(intervalInMillis, TimeUnit.MILLISECONDS)
-                    .map { it % itemCount }
                 }
-              }
-              .observeOn(AndroidSchedulers.mainThread())
-              .subscribeBy(
-                onNext = {
-                  if (it >= 0 && it != 2L) {
-                    binding.popularRecyclerHorizontal
-                      .layoutManager
-                      ?.startSmoothScroll(smoothScroller.apply { targetPosition = it.toInt() })
-                  }
-                },
-                onError = {}
-              )
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                  onNext = {
+                    if (it >= 0 && it != 2L) {
+                      binding.popularRecyclerHorizontal
+                        .layoutManager
+                        ?.startSmoothScroll(smoothScroller.apply { targetPosition = it.toInt() })
+                    }
+                  },
+                  onError = {}
+                )
+            }
+
+            @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+            private fun onResume() = startStopAutoScrollS.accept(true)
+
+            @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+            private fun onPause() = startStopAutoScrollS.accept(false)
+
+            @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+            private fun onDestroy() = disposable?.dispose()
           }
-
-          @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
-          private fun onResume() = startStopAutoScrollS.accept(true)
-
-          @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-          private fun onPause() = startStopAutoScrollS.accept(false)
-
-          @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-          private fun onDestroy() = disposable?.dispose()
-        })
+        )
     }
 
     override fun bind(item: Item) =

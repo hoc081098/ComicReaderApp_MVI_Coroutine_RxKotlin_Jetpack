@@ -216,13 +216,13 @@ sealed class HomePartialChange {
         Loading -> {
           state.copy(
             items = state.items.filterNot(HomeListItem::isLoadingOrError) +
-                HomeListItem.UpdatedItem.Loading
+              HomeListItem.UpdatedItem.Loading
           )
         }
         is Error -> {
           state.copy(
             items = state.items.filterNot(HomeListItem::isLoadingOrError) +
-                HomeListItem.UpdatedItem.Error(this.error.getMessage())
+              HomeListItem.UpdatedItem.Error(this.error.getMessage())
           )
         }
       }

@@ -1,10 +1,11 @@
 package com.hoc.comicapp.ui.favorite_comics
 
 import com.hoc.comicapp.base.MviIntent
+import com.hoc.comicapp.base.MviSingleEvent
 import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.FavoriteComic
 import io.reactivex.rxjava3.core.Observable
-import java.util.*
+import java.util.Date
 
 interface FavoriteComicsContract {
   sealed class ViewIntent : MviIntent {
@@ -74,7 +75,7 @@ interface FavoriteComicsContract {
     )
   }
 
-  sealed class SingleEvent : com.hoc.comicapp.base.MviSingleEvent {
+  sealed class SingleEvent : MviSingleEvent {
     data class Message(val message: String) : SingleEvent()
   }
 

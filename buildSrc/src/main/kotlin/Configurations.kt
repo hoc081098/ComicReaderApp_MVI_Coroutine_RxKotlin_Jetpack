@@ -1,7 +1,7 @@
 @file:Suppress("ClassName", "SpellCheckingInspection", "MemberVisibilityCanBePrivate", "SimpleDateFormat")
 
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
 
 object appConfig {
   const val applicationId = "com.hoc.comicapp"
@@ -21,8 +21,9 @@ object appConfig {
 }
 
 object versions {
+  const val ktLint = "0.38.1"
+
   object sdk {
-    const val classpath = "4.0.1"
     const val buildTools = "30.0.2"
     const val compile = 30
     const val min = 21
@@ -53,7 +54,7 @@ object versions {
     const val work = "2.5.0-alpha01"
   }
 
-  const val koin = "2.2.0-alpha-1"
+  const val koin = "2.2.0-beta-1"
   const val moshiKotlin = "1.9.2"
   const val retrofit = "2.9.0"
   const val okHttpLoggingInterceptor = "4.8.0"
@@ -82,24 +83,20 @@ object versions {
   }
 
   object firebase {
-    const val classpath = "4.3.3"
     const val auth = "19.3.2"
     const val storage = "19.2.0"
     const val firestore = "21.6.0"
     const val analytics = "17.5.0"
-
-    object crashlytics {
-      const val crashlytics = "17.2.1"
-      const val classpath = "2.2.1"
-    }
+    const val crashlytics = "17.2.1"
   }
 
   const val viewBindingDelegate = "0.0.2"
 }
 
 object deps {
-  object sdk {
-    const val classpath = "com.android.tools.build:gradle:${versions.sdk.classpath}"
+  object module {
+    const val baseUi = ":base-ui"
+    const val utils = ":utils"
   }
 
   object kotlin {
@@ -108,7 +105,6 @@ object deps {
     const val coroutinesPlayServices = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:${versions.kotlin.coroutines}"
     const val coroutinesRx3 = "org.jetbrains.kotlinx:kotlinx-coroutines-rx3:${versions.kotlin.coroutines}"
     const val stdlib = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin.core}"
-    const val classpath = "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin.core}"
   }
 
   object androidX {
@@ -125,7 +121,6 @@ object deps {
     }
 
     object navigation {
-      const val classpath = "androidx.navigation:navigation-safe-args-gradle-plugin:${versions.androidX.navigation}"
       const val fragment = "androidx.navigation:navigation-fragment-ktx:${versions.androidX.navigation}"
       const val ui = "androidx.navigation:navigation-ui-ktx:${versions.androidX.navigation}"
     }
@@ -199,16 +194,11 @@ object deps {
   }
 
   object firebase {
-    const val classpath = "com.google.gms:google-services:${versions.firebase.classpath}"
     const val auth = "com.google.firebase:firebase-auth:${versions.firebase.auth}"
     const val storage = "com.google.firebase:firebase-storage:${versions.firebase.storage}"
     const val firestore = "com.google.firebase:firebase-firestore:${versions.firebase.firestore}"
     const val analytics = "com.google.firebase:firebase-analytics:${versions.firebase.analytics}"
-
-    object crashlytics {
-      const val crashlytics = "com.google.firebase:firebase-crashlytics:${versions.firebase.crashlytics.crashlytics}"
-      const val classpath = "com.google.firebase:firebase-crashlytics-gradle:${versions.firebase.crashlytics.classpath}"
-    }
+    const val crashlytics = "com.google.firebase:firebase-crashlytics:${versions.firebase.crashlytics}"
   }
 
   const val listenableFuture = "com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava"

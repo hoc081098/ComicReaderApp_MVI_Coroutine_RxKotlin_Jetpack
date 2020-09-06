@@ -64,6 +64,11 @@ class ChapterDetailViewModel(
             when (it) {
               is PartialChange.Refresh.Error -> sendMessageEvent(message = "Refresh error occurred: ${it.error.getMessage()}")
               is PartialChange.Refresh.Success -> sendMessageEvent(message = "Refresh success")
+              is PartialChange.GetChapterDetail.Initial -> Unit
+              is PartialChange.GetChapterDetail.Data -> Unit
+              is PartialChange.GetChapterDetail.Error -> Unit
+              PartialChange.GetChapterDetail.Loading -> Unit
+              PartialChange.Refresh.Loading -> Unit
             }
           }
       }
@@ -133,7 +138,7 @@ class ChapterDetailViewModel(
         ) { state, orientation -> state.copy(orientation = orientation) }
       }
       .observeOn(rxSchedulerProvider.main)
-      .subscribeBy(onNext = ::setNewState)
+      .subscribeBy(onNext = setNewState)
       .addTo(compositeDisposable)
   }
 

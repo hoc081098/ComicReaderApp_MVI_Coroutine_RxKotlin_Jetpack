@@ -33,7 +33,7 @@ class ComicAppBroadcastReceiver : BroadcastReceiver(), KoinComponent {
       val action = intent.getParcelableExtra<Action>(ACTION)
         .also { Timber.d("Action = $it") }
         ?: return
-      ) {
+    ) {
       is Action.CancelDownload -> cancelDownload(action, context)
     }
   }

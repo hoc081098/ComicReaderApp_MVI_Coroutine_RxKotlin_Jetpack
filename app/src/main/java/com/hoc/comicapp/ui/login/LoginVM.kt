@@ -54,6 +54,11 @@ class LoginVM(
             when (it) {
               PartialChange.LoginSuccess -> sendEvent(SingleEvent.LoginSuccess)
               is PartialChange.LoginFailure -> sendEvent(SingleEvent.LoginFailure(it.error))
+              is PartialChange.EmailError -> Unit
+              is PartialChange.PasswordError -> Unit
+              is PartialChange.EmailChanged -> Unit
+              is PartialChange.PasswordChanged -> Unit
+              PartialChange.Loading -> Unit
             }
           }
       }
@@ -70,7 +75,7 @@ class LoginVM(
     )
       .scan(initialState) { state, change -> change.reducer(state) }
       .observeOn(rxSchedulerProvider.main)
-      .subscribeBy(onNext = ::setNewState)
+      .subscribeBy(onNext = setNewState)
       .addTo(compositeDisposable)
   }
 

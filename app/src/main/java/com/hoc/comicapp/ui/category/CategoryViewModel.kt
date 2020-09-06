@@ -116,7 +116,7 @@ class CategoryViewModel(
     intentS
       .compose(intentFilter)
       .compose(intentToViewState)
-      .subscribeBy(onNext = ::setNewState)
+      .subscribeBy(onNext = setNewState)
       .addTo(compositeDisposable)
   }
 

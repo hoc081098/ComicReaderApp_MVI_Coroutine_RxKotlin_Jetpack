@@ -47,6 +47,9 @@ class MainVM(
             when (it) {
               PartialChange.SignOut.UserSignedOut -> sendEvent(SingleEvent.SignOutSuccess)
               is PartialChange.SignOut.Error -> sendEvent(SingleEvent.SignOutFailure(it.error))
+              PartialChange.User.Loading -> Unit
+              is PartialChange.User.UserChanged -> Unit
+              is PartialChange.User.Error -> Unit
             }
           }
       }
@@ -67,7 +70,7 @@ class MainVM(
       .compose(intentToChanges)
       .scan(initialState) { vs, change -> change.reducer(vs) }
       .observeOn(rxSchedulerProvider.main)
-      .subscribeBy(onNext = ::setNewState)
+      .subscribeBy(onNext = setNewState)
       .addTo(compositeDisposable)
   }
 

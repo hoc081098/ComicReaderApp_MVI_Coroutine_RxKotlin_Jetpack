@@ -104,7 +104,6 @@ class HomeInteractorImpl(
        */
       val updatedResult = comicRepository.getUpdatedComics(page = page)
 
-
       /**
        * Send success change or error change
        */

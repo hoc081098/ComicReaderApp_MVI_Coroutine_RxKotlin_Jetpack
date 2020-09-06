@@ -17,21 +17,21 @@ import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.SingleEven
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.SortOrder
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.ViewIntent
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.ViewState.ComicItem
+import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsFragmentDirections.Companion.actionDownloadedComicsFragmentToComicDetailFragment as toComicDetailFragment
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.itemSelections
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.showAlertDialogAsMaybe
 import com.hoc.comicapp.utils.snack
-import com.hoc.comicapp.utils.viewModel
 import com.hoc081098.viewbindingdelegate.viewBinding
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import org.koin.androidx.scope.ScopeFragment
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
-import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsFragmentDirections.Companion.actionDownloadedComicsFragmentToComicDetailFragment as toComicDetailFragment
 
 class DownloadedComicsFragment : ScopeFragment() {
   private val viewModel by viewModel<DownloadedComicsViewModel>()
@@ -161,5 +161,4 @@ class DownloadedComicsFragment : ScopeFragment() {
       .map { comic }
       .toObservable()
   }
-
 }

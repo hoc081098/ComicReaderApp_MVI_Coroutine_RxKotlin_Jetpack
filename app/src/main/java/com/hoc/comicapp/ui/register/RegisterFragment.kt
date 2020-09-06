@@ -27,7 +27,6 @@ import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.onDismissed
 import com.hoc.comicapp.utils.snack
 import com.hoc.comicapp.utils.uriFromResourceId
-import com.hoc.comicapp.utils.viewModel
 import com.hoc081098.viewbindingdelegate.viewBinding
 import com.jakewharton.rxbinding4.view.clicks
 import com.jakewharton.rxbinding4.widget.textChanges
@@ -35,9 +34,10 @@ import io.reactivex.rxjava3.android.MainThreadDisposable
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
-import org.koin.androidx.scope.ScopeFragment
-import timber.log.Timber
 import kotlin.LazyThreadSafetyMode.NONE
+import org.koin.androidx.scope.ScopeFragment
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import timber.log.Timber
 
 class RegisterFragment : ScopeFragment() {
 
@@ -130,9 +130,11 @@ class RegisterFragment : ScopeFragment() {
             emitter.onComplete()
           }.apply { launch(arrayOf("image/*")) }
 
-          emitter.setDisposable(object : MainThreadDisposable() {
-            override fun onDispose() = launcher.unregister()
-          })
+          emitter.setDisposable(
+            object : MainThreadDisposable() {
+              override fun onDispose() = launcher.unregister()
+            }
+          )
         }
       }
       .doOnNext { Timber.d("Select image $it") }
@@ -142,7 +144,6 @@ class RegisterFragment : ScopeFragment() {
     super.onDestroyView()
     compositeDisposable.clear()
   }
-
 
   private fun beginTransition(
     button: Button,
@@ -168,7 +169,6 @@ class RegisterFragment : ScopeFragment() {
         )
         .setOrdering(TransitionSet.ORDERING_SEQUENTIAL)
     )
-
 
     button.layoutParams = (button.layoutParams as ConstraintLayout.LayoutParams).apply {
       width = height
@@ -213,4 +213,3 @@ class RegisterFragment : ScopeFragment() {
     const val ANIM_DURATION = 300L
   }
 }
-

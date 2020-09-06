@@ -41,12 +41,12 @@ import de.hdodenhof.circleimageview.CircleImageView
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
+import kotlin.LazyThreadSafetyMode.NONE
 import org.koin.androidx.scope.ScopeActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
-import kotlin.LazyThreadSafetyMode.NONE
 
-class MainActivity : ScopeActivity() { // TODO(Koin): Use ScopeActivity(contentLayoutId)
+class MainActivity : ScopeActivity(R.layout.activity_main) {
   private val mainVM by viewModel<MainVM>()
   private val viewBinding by viewBinding<ActivityMainBinding>()
   private val compositeDisposable = CompositeDisposable()
@@ -62,7 +62,6 @@ class MainActivity : ScopeActivity() { // TODO(Koin): Use ScopeActivity(contentL
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    setContentView(R.layout.activity_main) // TODO(Koin): Use ScopeActivity(contentLayoutId)
     setSupportActionBar(viewBinding.toolbar)
 
     val navController = findNavController(R.id.main_nav_fragment)
@@ -200,7 +199,6 @@ class MainActivity : ScopeActivity() { // TODO(Koin): Use ScopeActivity(contentL
       .addTo(compositeDisposable)
   }
 
-
   private fun showSignOutDialog(): Observable<Unit> {
     return showAlertDialogAsMaybe {
       title("Sign out")
@@ -209,7 +207,6 @@ class MainActivity : ScopeActivity() { // TODO(Koin): Use ScopeActivity(contentL
       iconId(R.drawable.ic_exit_to_app_white_24dp)
     }.toObservable()
   }
-
 
   override fun onDestroy() {
     super.onDestroy()
@@ -249,8 +246,8 @@ class MainActivity : ScopeActivity() { // TODO(Koin): Use ScopeActivity(contentL
     ) {
       return showSearch().let { true }
     }
-    return item.onNavDestinationSelected(findNavController(R.id.main_nav_fragment))
-        || super.onOptionsItemSelected(item)
+    return item.onNavDestinationSelected(findNavController(R.id.main_nav_fragment)) ||
+      super.onOptionsItemSelected(item)
   }
 
   fun showSearch() = viewBinding.searchView.showSearch()

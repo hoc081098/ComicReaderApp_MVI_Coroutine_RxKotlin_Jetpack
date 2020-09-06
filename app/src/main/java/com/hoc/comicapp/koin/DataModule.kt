@@ -112,7 +112,6 @@ val dataModule = module {
 
   single { provideErrorMapper(get()) }
 
-
   /*
    * Analytics
    */
