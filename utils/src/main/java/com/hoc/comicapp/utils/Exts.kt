@@ -28,6 +28,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.Observer
+import androidx.lifecycle.Observer as LiveDataObserver
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.firestore.DocumentReference
@@ -47,13 +48,12 @@ import io.reactivex.rxjava3.core.ObservableEmitter
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.ofType
 import io.reactivex.rxjava3.subjects.Subject
-import kotlinx.coroutines.delay
-import timber.log.Timber
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import kotlin.math.roundToInt
-import androidx.lifecycle.Observer as LiveDataObserver
+import kotlinx.coroutines.delay
+import timber.log.Timber
 
 @CheckResult
 @SchedulerSupport(SchedulerSupport.NONE)
@@ -104,9 +104,9 @@ fun Context.uriFromResourceId(@AnyRes resId: Int): Uri? {
     val res = this@uriFromResourceId.resources
     Uri.parse(
       ContentResolver.SCHEME_ANDROID_RESOURCE +
-          "://" + res.getResourcePackageName(resId)
-          + '/' + res.getResourceTypeName(resId)
-          + '/' + res.getResourceEntryName(resId)
+        "://" + res.getResourcePackageName(resId) +
+        '/' + res.getResourceTypeName(resId) +
+        '/' + res.getResourceEntryName(resId)
     )
   }.getOrNull()
 }
@@ -133,7 +133,6 @@ inline fun Context.toast(
     if (short) Toast.LENGTH_SHORT else Toast.LENGTH_LONG
   ).apply { show() }!!
 
-
 enum class SnackbarLength {
   SHORT {
     override val length = Snackbar.LENGTH_SHORT
@@ -157,7 +156,6 @@ fun Context.themeInterpolator(@AttrRes attr: Int): Interpolator {
     }
   )
 }
-
 
 inline fun View.snack(
   @StringRes messageRes: Int,
@@ -189,15 +187,16 @@ fun Snackbar.action(
   color?.let { setActionTextColor(color) }
 }
 
-
 fun Snackbar.onDismissed(f: () -> Unit) {
-  addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar?>() {
-    override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-      super.onDismissed(transientBottomBar, event)
-      f()
-      removeCallback(this)
+  addCallback(
+    object : BaseTransientBottomBar.BaseCallback<Snackbar?>() {
+      override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+        super.onDismissed(transientBottomBar, event)
+        f()
+        removeCallback(this)
+      }
     }
-  })
+  )
 }
 
 inline fun <T : Any> NotNullLiveData<T>.observe(
@@ -218,11 +217,13 @@ fun <T : Any> LiveData<T>.toObservable(fallbackNullValue: (() -> T)? = null): Ob
     }
     observeForever(observer)
 
-    emitter.setDisposable(object : MainThreadDisposable() {
-      override fun onDispose() {
-        removeObserver(observer)
+    emitter.setDisposable(
+      object : MainThreadDisposable() {
+        override fun onDispose() {
+          removeObserver(observer)
+        }
       }
-    })
+    )
   }
 }
 
@@ -323,7 +324,6 @@ internal class MaterialSearchViewObservable(private val view: MaterialSearchView
     override fun onDispose() = view.setOnQueryTextListener(null)
   }
 }
-
 
 fun InputStream.copyTo(
   target: File,

@@ -11,7 +11,7 @@ import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.ViewState.
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import java.io.File
-import java.util.*
+import java.util.Date
 
 interface DownloadedComicsContract {
   interface Interactor {
@@ -32,8 +32,10 @@ interface DownloadedComicsContract {
     ComicTitleAsc("Comic title ascending", compareBy { it.title }),
     ComicTitleDesc("Comic title descending", compareByDescending { it.title }),
     LatestChapterAsc("Latest chapter first", compareBy { it.chapters.first().downloadedAt }),
-    LatestChapterDesc("Latest chapter last",
-      compareByDescending { it.chapters.first().downloadedAt });
+    LatestChapterDesc(
+      "Latest chapter last",
+      compareByDescending { it.chapters.first().downloadedAt }
+    );
 
     override fun toString() = description
   }

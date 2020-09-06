@@ -1,7 +1,7 @@
 @file:Suppress("ClassName", "SpellCheckingInspection", "MemberVisibilityCanBePrivate", "SimpleDateFormat")
 
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
 
 object appConfig {
   const val applicationId = "com.hoc.comicapp"

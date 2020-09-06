@@ -8,6 +8,7 @@ configure<SpotlessExtension> {
     ktlint(versions.ktLint).userData(
       mapOf(
         "indent_size" to "2",
+        "continuation_indent_size" to "4",
         "kotlin_imports_layout" to "ascii"
       )
     )
@@ -27,6 +28,14 @@ configure<SpotlessExtension> {
 
   kotlinGradle {
     target("**/*.gradle.kts", "*.gradle.kts")
+
+    ktlint(versions.ktLint).userData(
+      mapOf(
+        "indent_size" to "2",
+        "continuation_indent_size" to "4",
+        "kotlin_imports_layout" to "ascii"
+      )
+    )
 
     trimTrailingWhitespace()
     indentWithSpaces()

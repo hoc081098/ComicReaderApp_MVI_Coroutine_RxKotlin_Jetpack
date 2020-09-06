@@ -56,7 +56,8 @@ class SearchComicAdapter(
           parent.inflater,
           parent,
           false
-        ), parent
+        ),
+        parent
       )
       R.layout.item_recycler_search_comic_load_more -> LoadMoreVH(
         ItemRecyclerSearchComicLoadMoreBinding.inflate(

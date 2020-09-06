@@ -20,7 +20,7 @@ import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Locale
 
 object DownloadedComicItemDiffUtilItemCallback : DiffUtil.ItemCallback<ComicItem>() {
   override fun areItemsTheSame(oldItem: ComicItem, newItem: ComicItem) =

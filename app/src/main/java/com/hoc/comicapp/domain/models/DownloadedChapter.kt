@@ -1,6 +1,6 @@
 package com.hoc.comicapp.domain.models
 
-import java.util.*
+import java.util.Date
 
 data class DownloadedChapter(
   val chapterLink: String, // https://ww2.mangafox.online/solo-leveling/chapter-0-275968490470920

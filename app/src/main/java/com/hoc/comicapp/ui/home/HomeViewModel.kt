@@ -35,23 +35,29 @@ class HomeViewModel(
             homeInteractor
               .newestComics()
               .doOnNext {
-                val messageFromError = (it as? HomePartialChange.NewestHomePartialChange.Error
-                  ?: return@doOnNext).error.getMessage()
+                val messageFromError = (
+                  it as? HomePartialChange.NewestHomePartialChange.Error
+                    ?: return@doOnNext
+                  ).error.getMessage()
                 sendMessageEvent("Get newest list error: $messageFromError")
               },
             homeInteractor
               .mostViewedComics()
               .doOnNext {
-                val messageFromError = (it as? HomePartialChange.MostViewedHomePartialChange.Error
-                  ?: return@doOnNext).error.getMessage()
+                val messageFromError = (
+                  it as? HomePartialChange.MostViewedHomePartialChange.Error
+                    ?: return@doOnNext
+                  ).error.getMessage()
                 sendMessageEvent("Get most viewed list error: $messageFromError")
               },
             homeInteractor
               .updatedComics(page = 1)
               .doOnNext {
                 val messageFromError =
-                  (it as? HomePartialChange.UpdatedPartialChange.Error
-                    ?: return@doOnNext).error.getMessage()
+                  (
+                    it as? HomePartialChange.UpdatedPartialChange.Error
+                      ?: return@doOnNext
+                    ).error.getMessage()
                 sendMessageEvent("Get updated list error: $messageFromError")
               }
           )
@@ -113,8 +119,10 @@ class HomeViewModel(
           homeInteractor
             .updatedComics(page = page)
             .doOnNext {
-              val messageFromError = (it as? HomePartialChange.UpdatedPartialChange.Error
-                ?: return@doOnNext).error.getMessage()
+              val messageFromError = (
+                it as? HomePartialChange.UpdatedPartialChange.Error
+                  ?: return@doOnNext
+                ).error.getMessage()
               sendMessageEvent("Error when retry get updated list: $messageFromError")
             }
         }
@@ -129,8 +137,10 @@ class HomeViewModel(
         homeInteractor
           .newestComics()
           .doOnNext {
-            val messageFromError = (it as? HomePartialChange.NewestHomePartialChange.Error
-              ?: return@doOnNext).error.getMessage()
+            val messageFromError = (
+              it as? HomePartialChange.NewestHomePartialChange.Error
+                ?: return@doOnNext
+              ).error.getMessage()
             sendMessageEvent("Error when retry get newest list: $messageFromError")
           }
       }
@@ -145,8 +155,10 @@ class HomeViewModel(
         homeInteractor
           .mostViewedComics()
           .doOnNext {
-            val messageFromError = (it as? HomePartialChange.MostViewedHomePartialChange.Error
-              ?: return@doOnNext).error.getMessage()
+            val messageFromError = (
+              it as? HomePartialChange.MostViewedHomePartialChange.Error
+                ?: return@doOnNext
+              ).error.getMessage()
             sendMessageEvent("Error when retry get most viewed list: $messageFromError")
           }
       }

@@ -34,4 +34,3 @@
         app:srcCompat="@drawable/ic_arrow_upward_white_24dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
-

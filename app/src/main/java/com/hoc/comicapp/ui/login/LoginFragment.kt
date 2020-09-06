@@ -23,7 +23,6 @@ import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.onDismissed
 import com.hoc.comicapp.utils.snack
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import com.hoc081098.viewbindingdelegate.viewBinding
 import com.jakewharton.rxbinding4.view.clicks
 import com.jakewharton.rxbinding4.widget.textChanges
@@ -31,6 +30,7 @@ import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import org.koin.androidx.scope.ScopeFragment
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
 
 class LoginFragment : ScopeFragment() {
@@ -133,7 +133,6 @@ class LoginFragment : ScopeFragment() {
         .setOrdering(TransitionSet.ORDERING_SEQUENTIAL)
     )
 
-
     button.layoutParams = (button.layoutParams as ConstraintLayout.LayoutParams).apply {
       width = height
     }
@@ -177,4 +176,3 @@ class LoginFragment : ScopeFragment() {
     const val ANIM_DURATION = 300L
   }
 }
-

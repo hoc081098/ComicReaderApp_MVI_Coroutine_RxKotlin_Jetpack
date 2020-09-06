@@ -17,6 +17,7 @@ import com.hoc.comicapp.R
 import com.hoc.comicapp.base.BaseFragment
 import com.hoc.comicapp.databinding.FragmentComicDetailBinding
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract
+import com.hoc.comicapp.ui.detail.ComicDetailFragmentDirections.Companion.actionComicDetailFragmentToChapterDetailFragment as toChapterDetail
 import com.hoc.comicapp.ui.detail.ComicDetailIntent.CancelDownloadChapter
 import com.hoc.comicapp.ui.detail.ComicDetailIntent.DeleteChapter
 import com.hoc.comicapp.ui.detail.ComicDetailIntent.DownloadChapter
@@ -33,7 +34,6 @@ import com.hoc.comicapp.utils.showAlertDialog
 import com.hoc.comicapp.utils.snack
 import com.hoc.comicapp.utils.themeInterpolator
 import com.hoc.comicapp.utils.unit
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import com.hoc081098.viewbindingdelegate.viewBinding
 import com.jakewharton.rxbinding4.recyclerview.scrollEvents
 import com.jakewharton.rxbinding4.view.clicks
@@ -42,21 +42,20 @@ import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import io.reactivex.rxjava3.kotlin.withLatestFrom
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.koin.core.parameter.parametersOf
-import timber.log.Timber
 import java.io.File
 import java.util.concurrent.TimeUnit
 import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.math.absoluteValue
-import com.hoc.comicapp.ui.detail.ComicDetailFragmentDirections.Companion.actionComicDetailFragmentToChapterDetailFragment as toChapterDetail
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
+import timber.log.Timber
 
 class ComicDetailFragment : BaseFragment<
-    ComicDetailIntent,
-    ComicDetailViewState,
-    ComicDetailSingleEvent,
-    ComicDetailViewModel
-    >(R.layout.fragment_comic_detail) {
+  ComicDetailIntent,
+  ComicDetailViewState,
+  ComicDetailSingleEvent,
+  ComicDetailViewModel
+  >(R.layout.fragment_comic_detail) {
   override val viewModel by viewModel<ComicDetailViewModel> {
     parametersOf(args.isDownloaded)
   }
@@ -186,33 +185,34 @@ class ComicDetailFragment : BaseFragment<
         if (requireContext().isOrientationPortrait) 0.175f else 0.05f
       )
 
-
     var lastProgress = 0f
-    viewBinding.rootDetail.setTransitionListener(object : TransitionAdapter() {
-      override fun onTransitionChange(
-        motionLayout: MotionLayout?,
-        startId: Int,
-        endId: Int,
-        progress: Float,
-      ) {
-        if (progress - lastProgress > 0) {
-          // from start to end
-          if ((progress - 1f).absoluteValue < 0.5f) {
-            viewBinding.textTitle.maxLines = 1
-            viewBinding.textLastUpdatedStatusView.maxLines = 2
-            Timber.d("END")
+    viewBinding.rootDetail.setTransitionListener(
+      object : TransitionAdapter() {
+        override fun onTransitionChange(
+          motionLayout: MotionLayout?,
+          startId: Int,
+          endId: Int,
+          progress: Float,
+        ) {
+          if (progress - lastProgress > 0) {
+// from start to end
+            if ((progress - 1f).absoluteValue < 0.5f) {
+              viewBinding.textTitle.maxLines = 1
+              viewBinding.textLastUpdatedStatusView.maxLines = 2
+              Timber.d("END")
+            }
+          } else {
+// from end to start
+            if (progress < 0.3f) {
+              viewBinding.textTitle.maxLines = 6
+              viewBinding.textLastUpdatedStatusView.maxLines = Int.MAX_VALUE
+              Timber.d("START")
+            }
           }
-        } else {
-          // from end to start
-          if (progress < 0.3f) {
-            viewBinding.textTitle.maxLines = 6
-            viewBinding.textLastUpdatedStatusView.maxLines = Int.MAX_VALUE
-            Timber.d("START")
-          }
+          lastProgress = progress
         }
-        lastProgress = progress
       }
-    })
+    )
   }
   //endregion
 
@@ -244,7 +244,7 @@ class ComicDetailFragment : BaseFragment<
   }
 
   private fun onClickDownload(chapter: Chapter) {
-    //TODO: cancel worker???
+    // TODO: cancel worker???
     when (chapter.downloadState) {
       Downloaded -> {
         requireActivity().showAlertDialog {
@@ -357,12 +357,14 @@ class ComicDetailFragment : BaseFragment<
 
         loadThumbnail(detail.thumbnail)
 
-        chapterAdapter.submitList(listOf(
-          ChapterAdapterItem.Header(
-            categories = detail.categories,
-            shortenedContent = detail.shortenedContent
-          )
-        ) + detail.chapters.map { ChapterAdapterItem.Chapter(it) } + ChapterAdapterItem.Dummy)
+        chapterAdapter.submitList(
+          listOf(
+            ChapterAdapterItem.Header(
+              categories = detail.categories,
+              shortenedContent = detail.shortenedContent
+            )
+          ) + detail.chapters.map { ChapterAdapterItem.Chapter(it) } + ChapterAdapterItem.Dummy
+        )
       }
       is ComicDetail.Initial -> {
         textTitle.text = detail.title

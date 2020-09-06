@@ -41,8 +41,8 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import timber.log.Timber
 import java.util.concurrent.TimeUnit
+import timber.log.Timber
 
 typealias HomeClickEvent = Triple<View, ComicArg, String>
 typealias _HomeClickEvent = Triple<View, Comic, String>
@@ -243,75 +243,77 @@ class HomeAdapter(
         }
       }
 
-      lifecycleOwner.lifecycle.addObserver(object : LifecycleObserver {
-        var disposable: Disposable? = null
+      lifecycleOwner.lifecycle.addObserver(
+        object : LifecycleObserver {
+          var disposable: Disposable? = null
 
-        @OnLifecycleEvent(Lifecycle.Event.ON_START)
-        private fun onCreate() {
-          disposable = startStopAutoScrollS
-            .doOnNext { Timber.d("[###] [1] $it") }
-            .concatMap {
-              if (it) {
-                Observable.timer(delayAfterTouchInMillis, TimeUnit.MILLISECONDS).map { true }
-              } else {
-                Observable.just(false)
-              }
-            }
-            .mergeWith(
-              recycler
-                .scrollStateChanges()
-                .filter { it == RecyclerView.SCROLL_STATE_DRAGGING }
-                .switchMap {
+          @OnLifecycleEvent(Lifecycle.Event.ON_START)
+          private fun onCreate() {
+            disposable = startStopAutoScrollS
+              .doOnNext { Timber.d("[###] [1] $it") }
+              .concatMap {
+                if (it) {
+                  Observable.timer(delayAfterTouchInMillis, TimeUnit.MILLISECONDS).map { true }
+                } else {
                   Observable.just(false)
-                    .concatWith(
-                      Observable.timer(
-                        delayAfterTouchInMillis,
-                        TimeUnit.MILLISECONDS
-                      ).map { true }
-                    )
                 }
-                .doOnNext { Timber.d("[###] [2] $it") }
-            )
-            .map { it to newestAdapter.itemCount }
-            .distinctUntilChanged()
-            .doOnNext { Timber.d("[###] [3] $it") }
-            .switchMap { (startAutoScroll, itemCount) ->
-              if (!startAutoScroll || itemCount == 0) {
-                Observable.just(-1L)
-              } else {
-                Observable
-                  .interval(0, intervalInMillis, TimeUnit.MILLISECONDS)
-                  .map { it % itemCount }
               }
-            }
-            .doOnNext { Timber.d("[###] [4] $it") }
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeBy(
-              onNext = {
-                if (it >= 0) {
-                  recycler
-                    .layoutManager
-                    ?.startSmoothScroll(smoothScroller.apply { targetPosition = it.toInt() })
+              .mergeWith(
+                recycler
+                  .scrollStateChanges()
+                  .filter { it == RecyclerView.SCROLL_STATE_DRAGGING }
+                  .switchMap {
+                    Observable.just(false)
+                      .concatWith(
+                        Observable.timer(
+                          delayAfterTouchInMillis,
+                          TimeUnit.MILLISECONDS
+                        ).map { true }
+                      )
+                  }
+                  .doOnNext { Timber.d("[###] [2] $it") }
+              )
+              .map { it to newestAdapter.itemCount }
+              .distinctUntilChanged()
+              .doOnNext { Timber.d("[###] [3] $it") }
+              .switchMap { (startAutoScroll, itemCount) ->
+                if (!startAutoScroll || itemCount == 0) {
+                  Observable.just(-1L)
+                } else {
+                  Observable
+                    .interval(0, intervalInMillis, TimeUnit.MILLISECONDS)
+                    .map { it % itemCount }
                 }
-              },
-              onError = {}
-            )
-          Timber.d("[>>>] ON_CREATE")
+              }
+              .doOnNext { Timber.d("[###] [4] $it") }
+              .observeOn(AndroidSchedulers.mainThread())
+              .subscribeBy(
+                onNext = {
+                  if (it >= 0) {
+                    recycler
+                      .layoutManager
+                      ?.startSmoothScroll(smoothScroller.apply { targetPosition = it.toInt() })
+                  }
+                },
+                onError = {}
+              )
+            Timber.d("[>>>] ON_CREATE")
+          }
+
+          @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+          private fun onResume() = startStopAutoScrollS.accept(true)
+            .also { Timber.d("[>>>] ON_RESUME -> start") }
+
+          @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+          private fun onPause() = startStopAutoScrollS.accept(false)
+            .also { Timber.d("[>>>] ON_PAUSE -> stop") }
+
+          @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+          private fun onDestroy() = disposable?.dispose()
+            .also { lifecycleOwner.lifecycle.removeObserver(this) }
+            .also { Timber.d("[>>>] ON_DESTROY -> disposed") }
         }
-
-        @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
-        private fun onResume() = startStopAutoScrollS.accept(true)
-          .also { Timber.d("[>>>] ON_RESUME -> start") }
-
-        @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-        private fun onPause() = startStopAutoScrollS.accept(false)
-          .also { Timber.d("[>>>] ON_PAUSE -> stop") }
-
-        @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-        private fun onDestroy() = disposable?.dispose()
-          .also { lifecycleOwner.lifecycle.removeObserver(this) }
-          .also { Timber.d("[>>>] ON_DESTROY -> disposed") }
-      })
+      )
     }
   }
 
@@ -387,7 +389,6 @@ class HomeAdapter(
               else -> null
             }
           }
-
         }
         .subscribe(clickComicS)
         .addTo(compositeDisposable)
@@ -508,5 +509,3 @@ class HomeAdapter(
     }
   }
 }
-
-

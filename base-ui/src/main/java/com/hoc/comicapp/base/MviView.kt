@@ -14,10 +14,10 @@ import io.reactivex.rxjava3.core.Observable
  * @param E Top class of the [MviSingleEvent] the [MviView] will be subscribing to.
  */
 interface MviView<
-    I : MviIntent,
-    S : MviViewState,
-    E : MviSingleEvent,
-    > {
+  I : MviIntent,
+  S : MviViewState,
+  E : MviSingleEvent,
+  > {
   /**
    * Entry point for the [MviView] to render itself based on a [MviViewState].
    */

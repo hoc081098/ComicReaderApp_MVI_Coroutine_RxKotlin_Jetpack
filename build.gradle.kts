@@ -2,7 +2,7 @@
 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-buildscript { repositories { mavenCentral() }}
+buildscript { repositories { mavenCentral() } }
 
 subprojects {
   apply(from = "${rootProject.rootDir}/spotless.gradle.kts")

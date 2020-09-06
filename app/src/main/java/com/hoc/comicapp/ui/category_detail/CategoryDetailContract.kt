@@ -202,13 +202,13 @@ interface CategoryDetailContract {
           Loading -> {
             state.copy(
               items = state.items.filterNot(Item::isLoadingOrError) +
-                  Item.Loading
+                Item.Loading
             )
           }
           is Error -> {
             state.copy(
               items = state.items.filterNot(Item::isLoadingOrError) +
-                  Item.Error(this.error)
+                Item.Error(this.error)
             )
           }
           is Data -> {

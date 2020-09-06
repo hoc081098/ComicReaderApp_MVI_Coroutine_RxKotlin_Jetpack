@@ -46,8 +46,8 @@ object ChapterDiffUtilItemCallback : DiffUtil.ItemCallback<ChapterAdapterItem>()
   override fun getChangePayload(oldItem: ChapterAdapterItem, newItem: ChapterAdapterItem): Any? {
     return when {
       oldItem is ChapterAdapterItem.Chapter &&
-          newItem is ChapterAdapterItem.Chapter &&
-          newItem.chapter.isSameExceptDownloadState(oldItem.chapter) -> newItem.chapter.downloadState
+        newItem is ChapterAdapterItem.Chapter &&
+        newItem.chapter.isSameExceptDownloadState(oldItem.chapter) -> newItem.chapter.downloadState
       else -> null
     }
   }
@@ -130,7 +130,6 @@ class ChapterAdapter(
       onClickChapter(item.chapter, v)
     }
 
-
     override fun bind(item: ChapterAdapterItem) = binding.run {
       if (item !is ChapterAdapterItem.Chapter) return
       val chapter = item.chapter
@@ -163,7 +162,8 @@ class ChapterAdapter(
     }
   }
 
-  private inner class HeaderVH(private val binding: ItemRecyclerDetailBinding) : VH(binding.root),
+  private inner class HeaderVH(private val binding: ItemRecyclerDetailBinding) :
+    VH(binding.root),
     View.OnClickListener {
 
     init {

@@ -13,5 +13,4 @@ class ComicAndChapters {
 
   @Relation(parentColumn = "comic_link", entityColumn = "comic_link")
   lateinit var chapters: List<ChapterEntity>
-
 }

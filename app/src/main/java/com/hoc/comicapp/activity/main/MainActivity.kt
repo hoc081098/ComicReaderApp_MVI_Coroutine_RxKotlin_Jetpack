@@ -41,10 +41,10 @@ import de.hdodenhof.circleimageview.CircleImageView
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
+import kotlin.LazyThreadSafetyMode.NONE
 import org.koin.androidx.scope.ScopeActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
-import kotlin.LazyThreadSafetyMode.NONE
 
 class MainActivity : ScopeActivity(R.layout.activity_main) {
   private val mainVM by viewModel<MainVM>()
@@ -199,7 +199,6 @@ class MainActivity : ScopeActivity(R.layout.activity_main) {
       .addTo(compositeDisposable)
   }
 
-
   private fun showSignOutDialog(): Observable<Unit> {
     return showAlertDialogAsMaybe {
       title("Sign out")
@@ -208,7 +207,6 @@ class MainActivity : ScopeActivity(R.layout.activity_main) {
       iconId(R.drawable.ic_exit_to_app_white_24dp)
     }.toObservable()
   }
-
 
   override fun onDestroy() {
     super.onDestroy()
@@ -248,8 +246,8 @@ class MainActivity : ScopeActivity(R.layout.activity_main) {
     ) {
       return showSearch().let { true }
     }
-    return item.onNavDestinationSelected(findNavController(R.id.main_nav_fragment))
-        || super.onOptionsItemSelected(item)
+    return item.onNavDestinationSelected(findNavController(R.id.main_nav_fragment)) ||
+      super.onOptionsItemSelected(item)
   }
 
   fun showSearch() = viewBinding.searchView.showSearch()

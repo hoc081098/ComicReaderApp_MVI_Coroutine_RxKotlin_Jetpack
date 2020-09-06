@@ -31,11 +31,11 @@ import com.hoc.comicapp.domain.models.NetworkError
 import com.hoc.comicapp.domain.models.ServerError
 import com.hoc.comicapp.domain.models.UnexpectedError
 import com.hoc.comicapp.utils.left
-import retrofit2.HttpException
-import retrofit2.Retrofit
 import java.io.IOException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
+import retrofit2.HttpException
+import retrofit2.Retrofit
 
 object Mappers {
 

@@ -11,10 +11,10 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import timber.log.Timber
 
 abstract class BaseViewModel<
-    I : MviIntent,
-    S : MviViewState,
-    E : MviSingleEvent,
-    >(protected val initialState: S) :
+  I : MviIntent,
+  S : MviViewState,
+  E : MviSingleEvent,
+  >(protected val initialState: S) :
   ViewModel(),
   MviViewModel<I, S, E> {
   protected val compositeDisposable = CompositeDisposable()

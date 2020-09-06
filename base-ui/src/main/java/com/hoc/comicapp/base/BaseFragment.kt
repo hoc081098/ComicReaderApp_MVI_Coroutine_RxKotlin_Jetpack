@@ -15,13 +15,12 @@ import org.koin.androidx.scope.ScopeFragment
 import timber.log.Timber
 
 abstract class BaseFragment<
-    I : MviIntent,
-    S : MviViewState,
-    E : MviSingleEvent,
-    VM : MviViewModel<I, S, E>,
-    >(
-  @LayoutRes contentLayoutId: Int,
-) : ScopeFragment(contentLayoutId), MviView<I, S, E> {
+  I : MviIntent,
+  S : MviViewState,
+  E : MviSingleEvent,
+  VM : MviViewModel<I, S, E>>(@LayoutRes contentLayoutId: Int) :
+  ScopeFragment(contentLayoutId),
+  MviView<I, S, E> {
   protected val compositeDisposable = CompositeDisposable()
 
   protected abstract val viewModel: VM

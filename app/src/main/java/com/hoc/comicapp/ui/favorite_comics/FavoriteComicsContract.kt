@@ -5,7 +5,7 @@ import com.hoc.comicapp.base.MviSingleEvent
 import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.FavoriteComic
 import io.reactivex.rxjava3.core.Observable
-import java.util.*
+import java.util.Date
 
 interface FavoriteComicsContract {
   sealed class ViewIntent : MviIntent {

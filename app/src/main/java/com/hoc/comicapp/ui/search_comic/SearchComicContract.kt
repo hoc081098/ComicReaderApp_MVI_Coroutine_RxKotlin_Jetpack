@@ -156,4 +156,3 @@ interface SearchComicContract {
     data class MessageEvent(val message: String) : SingleEvent()
   }
 }
-

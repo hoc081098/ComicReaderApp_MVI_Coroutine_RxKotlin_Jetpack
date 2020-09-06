@@ -38,6 +38,10 @@ import com.hoc.comicapp.utils.retryIO
 import com.hoc.comicapp.utils.right
 import com.hoc.comicapp.worker.DownloadComicWorker
 import io.reactivex.rxjava3.core.Observable
+import java.io.File
+import java.util.Date
+import kotlin.time.ExperimentalTime
+import kotlin.time.TimeSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
@@ -48,10 +52,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import java.io.File
-import java.util.*
-import kotlin.time.ExperimentalTime
-import kotlin.time.TimeSource
 
 class DownloadComicsRepositoryImpl(
   private val comicApiService: ComicApiService,

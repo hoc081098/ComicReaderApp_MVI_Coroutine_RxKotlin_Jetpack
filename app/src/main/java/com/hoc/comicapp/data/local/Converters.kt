@@ -3,9 +3,9 @@ package com.hoc.comicapp.data.local
 import androidx.room.TypeConverter
 import com.hoc.comicapp.data.JsonAdaptersContainer
 import com.hoc.comicapp.data.local.entities.ComicEntity
+import java.util.Date
 import org.koin.core.KoinComponent
 import org.koin.core.inject
-import java.util.Date
 
 /**
  * Type converters to allow Room to reference complex data types.

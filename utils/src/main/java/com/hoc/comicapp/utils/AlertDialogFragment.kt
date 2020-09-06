@@ -39,9 +39,11 @@ fun FragmentActivity.showAlertDialogAsMaybe(
       }
     }
 
-    emitter.setDisposable(object : MainThreadDisposable() {
-      override fun onDispose() = dismissAlertDialog()
-    })
+    emitter.setDisposable(
+      object : MainThreadDisposable() {
+        override fun onDispose() = dismissAlertDialog()
+      }
+    )
   }
 }
 
