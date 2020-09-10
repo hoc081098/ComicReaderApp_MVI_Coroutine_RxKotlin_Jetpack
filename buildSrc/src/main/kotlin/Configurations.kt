@@ -31,7 +31,7 @@ object versions {
   }
 
   object kotlin {
-    const val core = "1.4.0"
+    const val core = "1.4.10"
     const val coroutines = "1.3.9"
   }
 
@@ -44,7 +44,7 @@ object versions {
 
     object view {
       const val constraintLayout = "2.0.1"
-      const val material = "1.2.0"
+      const val material = "1.3.0-alpha02"
       const val recyclerView = "1.2.0-alpha05"
     }
 
@@ -55,9 +55,9 @@ object versions {
   }
 
   const val koin = "2.2.0-beta-1"
-  const val moshiKotlin = "1.9.2"
+  const val moshiKotlin = "1.10.0"
   const val retrofit = "2.9.0"
-  const val okHttpLoggingInterceptor = "4.8.0"
+  const val okHttpLoggingInterceptor = "4.8.1"
   const val leakCanaryAndroid = "2.4"
   const val rxRelay = "3.0.0"
   const val rxBinding = "4.0.0"
@@ -90,7 +90,7 @@ object versions {
     const val crashlytics = "17.2.1"
   }
 
-  const val viewBindingDelegate = "0.0.2"
+  const val viewBindingDelegate = "1.0.0-alpha01"
 }
 
 object deps {

@@ -9,6 +9,8 @@ subprojects {
 }
 
 allprojects {
+  apply(plugin = "com.github.ben-manes.versions")
+
   tasks.withType<KotlinCompile> {
     kotlinOptions {
       jvmTarget = JavaVersion.VERSION_1_8.toString()

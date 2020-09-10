@@ -39,4 +39,6 @@ dependencies {
 
   implementation(Plugins.googleServices)
   implementation(Plugins.crashlytics)
+
+  implementation("com.github.ben-manes:gradle-versions-plugin:0.31.0")
 }
