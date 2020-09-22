@@ -1,55 +1,13 @@
-import org.jetbrains.kotlin.gradle.internal.AndroidExtensionsFeature.PARCELIZE
-
 plugins {
+  `comic-app-plugin`
   id("com.android.application")
-  id("kotlin-android")
-  id("kotlin-android-extensions")
   id("kotlin-kapt")
   id("androidx.navigation.safeargs.kotlin")
 }
 
-androidExtensions {
-  features = setOf(PARCELIZE.featureName)
-}
-
-android {
-  buildToolsVersion(versions.sdk.buildTools)
-  compileSdkVersion(versions.sdk.compile)
-
-  defaultConfig {
-    applicationId = appConfig.applicationId
-
-    minSdkVersion(versions.sdk.min)
-    targetSdkVersion(versions.sdk.target)
-
-    versionCode = appConfig.versionCode
-    versionName = appConfig.versionName
-
-    resConfigs(appConfig.supportedLocales)
-
-    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-  }
-
-  buildTypes {
-    getByName("release") {
-      isMinifyEnabled = true
-      isShrinkResources = true
-
-      proguardFiles(
-        getDefaultProguardFile("proguard-android-optimize.txt"),
-        "proguard-rules.pro"
-      )
-    }
-  }
-
-  compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-  }
-
-  buildFeatures {
-    viewBinding = true
-  }
+comicApp {
+  viewBinding = true
+  parcelize = true
 }
 
 dependencies {

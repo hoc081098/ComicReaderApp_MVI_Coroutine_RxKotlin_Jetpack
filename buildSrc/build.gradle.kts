@@ -12,6 +12,15 @@ plugins {
   `kotlin-dsl-precompiled-script-plugins`
 }
 
+gradlePlugin {
+  plugins {
+    register("comic-app-plugin") {
+      id = "comic-app-plugin"
+      implementationClass = "com.hoc.comicapp.plugin.ComicAppPlugin"
+    }
+  }
+}
+
 internal object PluginVersions {
   const val kotlin = "1.4.0"
   const val androidGradle = "4.0.1"
