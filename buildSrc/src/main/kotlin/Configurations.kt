@@ -38,9 +38,9 @@ object versions {
   object androidX {
     const val activity = "1.2.0-alpha08"
     const val appCompat = "1.3.0-alpha02"
-    const val core = "1.5.0-alpha02"
+    const val core = "1.5.0-alpha03"
     const val fragment = "1.3.0-alpha08"
-    const val startUp = "1.0.0-alpha03"
+    const val startUp = "1.0.0-beta01"
 
     object view {
       const val constraintLayout = "2.0.1"
@@ -51,20 +51,20 @@ object versions {
     const val navigation = "2.3.0"
     const val lifecycle = "2.3.0-alpha07"
     const val room = "2.3.0-alpha02"
-    const val work = "2.5.0-alpha01"
+    const val work = "2.5.0-alpha02"
   }
 
   const val koin = "2.2.0-beta-1"
   const val moshiKotlin = "1.10.0"
   const val retrofit = "2.9.0"
-  const val okHttpLoggingInterceptor = "4.8.1"
+  const val okHttpLoggingInterceptor = "4.9.0"
   const val leakCanaryAndroid = "2.4"
   const val rxRelay = "3.0.0"
   const val rxBinding = "4.0.0"
   const val timber = "4.7.1"
 
   object reactiveX {
-    const val kotlin = "3.0.0"
+    const val kotlin = "3.0.1"
     const val java = "3.0.6"
     const val android = "3.0.0"
   }
@@ -83,7 +83,7 @@ object versions {
   }
 
   object firebase {
-    const val auth = "19.3.2"
+    const val auth = "19.4.0"
     const val storage = "19.2.0"
     const val firestore = "21.6.0"
     const val analytics = "17.5.0"

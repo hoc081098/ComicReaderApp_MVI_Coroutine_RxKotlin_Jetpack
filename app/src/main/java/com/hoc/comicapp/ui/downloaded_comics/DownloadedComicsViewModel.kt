@@ -13,7 +13,6 @@ import com.jakewharton.rxrelay3.PublishRelay
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.ObservableTransformer
 import io.reactivex.rxjava3.functions.BiFunction
-import io.reactivex.rxjava3.kotlin.Observables.combineLatest
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.ofType
 import io.reactivex.rxjava3.kotlin.subscribeBy
@@ -51,7 +50,7 @@ class DownloadedComicsViewModel(
       .compose(intentToChanges)
       .scan(initialState, reducer)
 
-    combineLatest(
+    Observable.combineLatest(
       scannedState,
       filteredIntent
         .ofType<ViewIntent.ChangeSortOrder>()

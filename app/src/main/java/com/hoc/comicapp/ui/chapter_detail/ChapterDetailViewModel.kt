@@ -15,7 +15,6 @@ import com.hoc.comicapp.utils.notOfType
 import com.jakewharton.rxrelay3.PublishRelay
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.ObservableTransformer
-import io.reactivex.rxjava3.kotlin.Observables
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.ofType
 import io.reactivex.rxjava3.kotlin.subscribeBy
@@ -128,7 +127,7 @@ class ChapterDetailViewModel(
     intentS
       .compose(intentFilter)
       .publish { intents ->
-        Observables.combineLatest(
+        Observable.combineLatest(
           intents
             .compose(intentToChanges)
             .scan(initialState) { vs, change -> change.reducer(vs) },

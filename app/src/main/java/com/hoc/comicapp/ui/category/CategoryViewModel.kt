@@ -9,7 +9,6 @@ import com.hoc.comicapp.utils.notOfType
 import com.jakewharton.rxrelay3.PublishRelay
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.ObservableTransformer
-import io.reactivex.rxjava3.kotlin.Observables
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.cast
 import io.reactivex.rxjava3.kotlin.ofType
@@ -28,8 +27,8 @@ class CategoryViewModel(
    */
   private val intentToViewState =
     ObservableTransformer<CategoryViewIntent, CategoryViewState> { intents ->
-      Observables.combineLatest(
-        source1 = intents.publish { shared ->
+      Observable.combineLatest(
+        intents.publish { shared ->
           Observable.mergeArray(
             shared
               .ofType<CategoryViewIntent.Initial>()
@@ -42,22 +41,23 @@ class CategoryViewModel(
               .compose(retryProcessor)
           )
         }.scan(initialState) { state, change -> change.reducer(state) },
-        source2 = intents
+        intents
           .ofType<CategoryViewIntent.ChangeSortOrder>()
           .map { it.sortOrder }
           .distinctUntilChanged(),
-        combineFunction = { viewState, sortOrder ->
-          viewState.copy(
-            categories = viewState
-              .categories
-              .sortedWith(
-                categoryComparators[sortOrder]
-                  ?: return@combineLatest viewState
-              ),
-            sortOrder = sortOrder
-          )
-        }
-      ).distinctUntilChanged().observeOn(rxSchedulerProvider.main)
+      ) { viewState, sortOrder ->
+        viewState.copy(
+          categories = viewState
+            .categories
+            .sortedWith(
+              categoryComparators[sortOrder]
+                ?: return@combineLatest viewState
+            ),
+          sortOrder = sortOrder
+        )
+      }
+        .distinctUntilChanged()
+        .observeOn(rxSchedulerProvider.main)
     }
 
   /**
