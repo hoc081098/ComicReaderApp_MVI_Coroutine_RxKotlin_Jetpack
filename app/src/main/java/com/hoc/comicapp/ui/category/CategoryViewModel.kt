@@ -135,7 +135,6 @@ class CategoryViewModel(
     /**
      * Only take 1 [CategoryViewIntent.Initial]
      */
-    @JvmStatic
     private val intentFilter = ObservableTransformer<CategoryViewIntent, CategoryViewIntent> {
       it.publish { shared ->
         Observable.mergeArray(

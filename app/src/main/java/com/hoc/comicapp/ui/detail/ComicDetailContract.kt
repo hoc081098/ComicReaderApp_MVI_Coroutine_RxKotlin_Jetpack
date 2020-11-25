@@ -11,7 +11,7 @@ import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.ComicDetail
 import io.reactivex.rxjava3.core.Observable
 import java.util.Date
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 /**
  * Argument to pass to [ComicDetailFragment]

@@ -223,7 +223,6 @@ class HomeViewModel(
     /**
      * Only take 1 [HomeViewIntent.Initial]
      */
-    @JvmStatic
     private val intentFilter = ObservableTransformer<HomeViewIntent, HomeViewIntent> {
       it.publish { shared ->
         Observable.mergeArray(

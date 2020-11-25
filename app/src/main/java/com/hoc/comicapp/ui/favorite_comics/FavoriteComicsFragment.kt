@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.lifecycle.observe
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chauthai.swipereveallayout.ViewBinderHelper
@@ -18,6 +17,7 @@ import com.hoc.comicapp.ui.favorite_comics.FavoriteComicsContract.SortOrder
 import com.hoc.comicapp.ui.favorite_comics.FavoriteComicsContract.ViewIntent
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.itemSelections
+import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent
 import com.hoc.comicapp.utils.showAlertDialogAsMaybe
 import com.hoc.comicapp.utils.snack

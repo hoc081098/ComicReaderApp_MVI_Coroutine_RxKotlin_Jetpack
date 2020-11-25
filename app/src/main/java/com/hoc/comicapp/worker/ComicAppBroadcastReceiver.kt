@@ -12,9 +12,9 @@ import androidx.work.WorkManager
 import androidx.work.await
 import com.hoc.comicapp.R
 import com.hoc.comicapp.initializer.startKoinIfNeeded
-import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.parcelize.Parcelize
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import timber.log.Timber

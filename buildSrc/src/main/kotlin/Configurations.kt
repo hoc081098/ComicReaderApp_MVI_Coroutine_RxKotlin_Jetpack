@@ -21,7 +21,7 @@ object appConfig {
 }
 
 object versions {
-  const val ktLint = "0.38.1"
+  const val ktLint = "0.39.0"
 
   object sdk {
     const val buildTools = "30.0.2"
@@ -31,41 +31,41 @@ object versions {
   }
 
   object kotlin {
-    const val core = "1.4.10"
-    const val coroutines = "1.3.9"
+    const val core = "1.4.20"
+    const val coroutines = "1.4.1"
   }
 
   object androidX {
-    const val activity = "1.2.0-alpha08"
+    const val activity = "1.2.0-beta01"
     const val appCompat = "1.3.0-alpha02"
-    const val core = "1.5.0-alpha03"
-    const val fragment = "1.3.0-alpha08"
-    const val startUp = "1.0.0-beta01"
+    const val core = "1.5.0-alpha05"
+    const val fragment = "1.3.0-beta01"
+    const val startUp = "1.0.0"
 
     object view {
-      const val constraintLayout = "2.0.1"
-      const val material = "1.3.0-alpha02"
-      const val recyclerView = "1.2.0-alpha05"
+      const val constraintLayout = "2.1.0-alpha1"
+      const val material = "1.3.0-alpha04"
+      const val recyclerView = "1.2.0-alpha06"
     }
 
-    const val navigation = "2.3.0"
-    const val lifecycle = "2.3.0-alpha07"
-    const val room = "2.3.0-alpha02"
-    const val work = "2.5.0-alpha02"
+    const val navigation = "2.3.1"
+    const val lifecycle = "2.3.0-beta01"
+    const val room = "2.3.0-alpha03"
+    const val work = "2.5.0-beta01"
   }
 
   const val koin = "2.2.0-beta-1"
-  const val moshiKotlin = "1.10.0"
+  const val moshiKotlin = "1.11.0"
   const val retrofit = "2.9.0"
-  const val okHttpLoggingInterceptor = "4.9.0"
-  const val leakCanaryAndroid = "2.4"
+  const val okHttpLoggingInterceptor = "4.10.0-RC1"
+  const val leakCanaryAndroid = "2.5"
   const val rxRelay = "3.0.0"
   const val rxBinding = "4.0.0"
   const val timber = "4.7.1"
 
   object reactiveX {
     const val kotlin = "3.0.1"
-    const val java = "3.0.6"
+    const val java = "3.0.7"
     const val android = "3.0.0"
   }
 
@@ -83,11 +83,11 @@ object versions {
   }
 
   object firebase {
-    const val auth = "19.4.0"
+    const val auth = "20.0.1"
     const val storage = "19.2.0"
-    const val firestore = "21.6.0"
-    const val analytics = "17.5.0"
-    const val crashlytics = "17.2.1"
+    const val firestore = "22.0.0"
+    const val analytics = "18.0.0"
+    const val crashlytics = "17.3.0"
   }
 
   const val viewBindingDelegate = "1.0.0-alpha01"
