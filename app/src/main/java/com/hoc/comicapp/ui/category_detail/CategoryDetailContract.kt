@@ -6,7 +6,7 @@ import com.hoc.comicapp.domain.models.Comic
 import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.Item
 import io.reactivex.rxjava3.core.Observable
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 /**
  * Contract

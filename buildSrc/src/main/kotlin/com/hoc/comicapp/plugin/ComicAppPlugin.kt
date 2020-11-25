@@ -11,13 +11,10 @@ import org.gradle.api.Project
 import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPluginConvention
-import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.getPlugin
 import org.gradle.kotlin.dsl.withType
-import org.jetbrains.kotlin.gradle.internal.AndroidExtensionsExtension
-import org.jetbrains.kotlin.gradle.internal.AndroidExtensionsFeature
 import org.jetbrains.kotlin.gradle.plugin.KotlinBasePluginWrapper
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import versions
@@ -81,11 +78,7 @@ class ComicAppPlugin : Plugin<Project> {
 
 private fun Project.enableParcelize(enabled: Boolean) {
   if (enabled) {
-    plugins.apply("kotlin-android-extensions")
-
-    project.configure<AndroidExtensionsExtension> {
-      features = setOf(AndroidExtensionsFeature.PARCELIZE.featureName)
-    }
+    plugins.apply("kotlin-parcelize")
   }
 }
 

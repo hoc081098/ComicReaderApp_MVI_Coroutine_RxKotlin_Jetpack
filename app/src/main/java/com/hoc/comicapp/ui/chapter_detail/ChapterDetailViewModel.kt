@@ -151,7 +151,6 @@ class ChapterDetailViewModel(
     /**
      * Only take 1 [ViewIntent.Initial]
      */
-    @JvmStatic
     private val intentFilter = ObservableTransformer<ViewIntent, ViewIntent> {
       it.publish { shared ->
         Observable.mergeArray(

@@ -22,12 +22,12 @@ gradlePlugin {
 }
 
 internal object PluginVersions {
-  const val kotlin = "1.4.0"
-  const val androidGradle = "4.0.1"
-  const val navigationSafeArgs = "2.3.0"
-  const val googleServices = "4.3.3"
-  const val crashlytics = "2.2.1"
-  const val spotless = "5.3.0"
+  const val kotlin = "1.4.20"
+  const val androidGradle = "4.1.1"
+  const val navigationSafeArgs = "2.3.1"
+  const val googleServices = "4.3.4"
+  const val crashlytics = "2.4.1"
+  const val spotless = "5.8.2"
 }
 
 internal object Plugins {
