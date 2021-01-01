@@ -12,12 +12,13 @@ import com.hoc.comicapp.utils.exhaustMap
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.functions.BiFunction
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.ofType
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import io.reactivex.rxjava3.kotlin.withLatestFrom
-import java.util.concurrent.TimeUnit
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 
 class SearchComicViewModel(
   private val interactor: Interactor,
@@ -77,7 +78,7 @@ class SearchComicViewModel(
 
     val loadNextPagePartialChange = intentS
       .ofType<ViewIntent.LoadNextPage>()
-      .withLatestFrom(searchTerm, { _, term -> term })
+      .withLatestFrom(searchTerm, BiFunction { _, term -> term })
       .withLatestFrom(stateS)
       .map { it.first to it.second.page + 1 }
       .doOnNext { Timber.d("[LOAD NEXT PAGE] $it") }
@@ -97,7 +98,7 @@ class SearchComicViewModel(
 
     val retryNextPagePartialChange = intentS
       .ofType<ViewIntent.RetryNextPage>()
-      .withLatestFrom(searchTerm) { _, term -> term }
+      .withLatestFrom(searchTerm, BiFunction { _, term -> term })
       .withLatestFrom(stateS)
       .map { it.first to it.second.page + 1 }
       .doOnNext { Timber.d("[RETRY NEXT PAGE] $it") }
