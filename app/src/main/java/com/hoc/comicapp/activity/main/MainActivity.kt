@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.Group
 import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -25,6 +26,7 @@ import com.hoc.comicapp.activity.main.MainContract.ViewIntent
 import com.hoc.comicapp.activity.main.MainContract.ViewState.User
 import com.hoc.comicapp.databinding.ActivityMainBinding
 import com.hoc.comicapp.domain.models.getMessage
+import com.hoc.comicapp.navigation.AppNavigator
 import com.hoc.comicapp.utils.dismissAlertDialog
 import com.hoc.comicapp.utils.dpToPx
 import com.hoc.comicapp.utils.exhaustMap
@@ -41,6 +43,8 @@ import de.hdodenhof.circleimageview.CircleImageView
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlin.LazyThreadSafetyMode.NONE
 import org.koin.androidx.scope.ScopeActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -89,6 +93,10 @@ class MainActivity : ScopeActivity(R.layout.activity_main) {
     if (savedInstanceState !== null) {
       dismissAlertDialog()
     }
+
+    get<AppNavigator>().commandFlow
+      .onEach { it(navController, this) }
+      .launchIn(lifecycleScope)
   }
 
   private fun bindVM() {
@@ -247,7 +255,7 @@ class MainActivity : ScopeActivity(R.layout.activity_main) {
       return showSearch().let { true }
     }
     return item.onNavDestinationSelected(findNavController(R.id.main_nav_fragment)) ||
-      super.onOptionsItemSelected(item)
+        super.onOptionsItemSelected(item)
   }
 
   fun showSearch() = viewBinding.searchView.showSearch()

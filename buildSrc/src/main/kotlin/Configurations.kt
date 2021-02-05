@@ -148,6 +148,7 @@ object deps {
   object koin {
     const val androidXViewModel = "org.koin:koin-androidx-viewmodel:${versions.koin}"
     const val androidXScope = "org.koin:koin-androidx-scope:${versions.koin}"
+    const val core = "org.koin:koin-core:${versions.koin}"
   }
 
   const val moshiKotlin = "com.squareup.moshi:moshi-kotlin:${versions.moshiKotlin}"
