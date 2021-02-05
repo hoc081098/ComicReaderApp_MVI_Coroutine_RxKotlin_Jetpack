@@ -136,17 +136,29 @@ private class HeaderedLoader(concreteLoader: ModelLoader<GlideUrl?, InputStream?
 object ImageHeaders {
   fun headersFor(model: String?): Map<String, String> {
     Timber.d("url=$model")
-    if (model == null || "s8.mkklcdnv8.com" !in model) return emptyMap()
+    model ?: return emptyMap()
 
-    val regex = "https://s8.mkklcdnv8.com/mangakakalot/.+/(.+)/(.+)/.+".toRegex()
-    val (name, chapter) = regex.find(model)!!.destructured
-    val referer = "https://manganelo.com/chapter/$name/$chapter"
-    Timber.d("url=$model -> referer=$referer")
+    if ("mangakakalot" in model) {
+      return mapOf(
+        "user-agent" to USER_AGENT,
+        "referer" to "https://mangakakalot.com/",
+        "cookie" to "__cfduid=d92a49507fe881e99fffddfad020ecb271612495383",
+      )
+    }
 
-    return mapOf(
-      "user-agent" to USER_AGENT,
-      "referer" to referer
-    )
+    if ("s8.mkklcdnv8.com" in model) {
+      val regex = "https://s8.mkklcdnv8.com/mangakakalot/.+/(.+)/(.+)/.+".toRegex()
+      val (name, chapter) = regex.find(model)!!.destructured
+      val referer = "https://manganelo.com/chapter/$name/$chapter"
+      Timber.d("url=$model -> referer=$referer")
+
+      return mapOf(
+        "user-agent" to USER_AGENT,
+        "referer" to referer,
+      )
+    }
+
+    return emptyMap()
   }
 
   private const val USER_AGENT =
