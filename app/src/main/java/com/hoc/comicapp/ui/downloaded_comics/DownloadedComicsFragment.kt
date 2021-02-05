@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chauthai.swipereveallayout.ViewBinderHelper
 import com.hoc.comicapp.GlideApp
@@ -13,6 +12,7 @@ import com.hoc.comicapp.R
 import com.hoc.comicapp.databinding.FragmentDownloadedComicsBinding
 import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.navigation.Arguments
+import com.hoc.comicapp.navigation.appNavigator
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.SingleEvent
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.SortOrder
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.ViewIntent
@@ -28,7 +28,7 @@ import com.hoc081098.viewbindingdelegate.viewBinding
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
-import io.reactivex.rxjava3.kotlin.subscribeBy
+import kotlinx.coroutines.rx3.rxSingle
 import org.koin.androidx.scope.ScopeFragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
@@ -78,21 +78,28 @@ class DownloadedComicsFragment : ScopeFragment() {
     spinnerSort.selectedIndex =
       viewModel.state.value.sortOrder.let { SortOrder.values().indexOf(it) }
 
-    downloadedComicsAdapter.clickItem.subscribeBy {
-      findNavController().navigate(
-        toComicDetailFragment(
-          comic = Arguments.ComicDetailArgs(
-            title = it.title,
-            thumbnail = it.thumbnail.toRelativeString(requireContext().filesDir),
-            link = it.comicLink,
-            view = it.view,
-            remoteThumbnail = it.remoteThumbnail
-          ),
-          title = it.title,
-          isDownloaded = true
-        )
-      )
-    }.addTo(compositeDisposable)
+    downloadedComicsAdapter.clickItem
+      .flatMapSingle { item ->
+        rxSingle {
+          appNavigator.navigate {
+            navigate(
+              toComicDetailFragment(
+                comic = Arguments.ComicDetailArgs(
+                  title = item.title,
+                  thumbnail = item.thumbnail.toRelativeString(requireContext().filesDir),
+                  link = item.comicLink,
+                  view = item.view,
+                  remoteThumbnail = item.remoteThumbnail
+                ),
+                title = item.title,
+                isDownloaded = true
+              )
+            )
+          }
+        }
+      }
+      .subscribe()
+      .addTo(compositeDisposable)
   }
 
   private fun bind(adapter: DownloadedComicsAdapter) = viewBinding.run {
