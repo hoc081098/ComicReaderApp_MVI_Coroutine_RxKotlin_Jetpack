@@ -14,7 +14,6 @@ import io.reactivex.rxjava3.core.Observable
 import java.util.Date
 import kotlinx.parcelize.Parcelize
 
-
 interface ComicDetailInteractor {
   fun getFavoriteChange(link: String): Observable<ComicDetailPartialChange>
 
@@ -132,7 +131,7 @@ data class ComicDetailViewState(
     val view: String,
     val downloadState: DownloadState = DownloadState.Loading,
     val comicLink: String,
-  )  {
+  ) {
 
     fun isSameExceptDownloadState(other: Chapter): Boolean {
       if (this === other) return true

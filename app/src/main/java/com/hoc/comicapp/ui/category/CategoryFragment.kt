@@ -11,7 +11,6 @@ import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.databinding.FragmentCategoryBinding
 import com.hoc.comicapp.navigation.Arguments
-import com.hoc.comicapp.ui.category_detail.CategoryDetailContract
 import com.hoc.comicapp.utils.itemSelections
 import com.hoc.comicapp.utils.observe
 import com.hoc.comicapp.utils.observeEvent

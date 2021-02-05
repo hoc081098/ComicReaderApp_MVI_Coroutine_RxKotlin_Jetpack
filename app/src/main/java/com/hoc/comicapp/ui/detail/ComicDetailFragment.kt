@@ -17,7 +17,6 @@ import com.hoc.comicapp.R
 import com.hoc.comicapp.base.BaseFragment
 import com.hoc.comicapp.databinding.FragmentComicDetailBinding
 import com.hoc.comicapp.navigation.Arguments
-import com.hoc.comicapp.ui.category_detail.CategoryDetailContract
 import com.hoc.comicapp.ui.detail.ComicDetailFragmentDirections.Companion.actionComicDetailFragmentToChapterDetailFragment as toChapterDetail
 import com.hoc.comicapp.ui.detail.ComicDetailIntent.CancelDownloadChapter
 import com.hoc.comicapp.ui.detail.ComicDetailIntent.DeleteChapter
@@ -52,11 +51,11 @@ import org.koin.core.parameter.parametersOf
 import timber.log.Timber
 
 class ComicDetailFragment : BaseFragment<
-    ComicDetailIntent,
-    ComicDetailViewState,
-    ComicDetailSingleEvent,
-    ComicDetailViewModel
-    >(R.layout.fragment_comic_detail) {
+  ComicDetailIntent,
+  ComicDetailViewState,
+  ComicDetailSingleEvent,
+  ComicDetailViewModel
+  >(R.layout.fragment_comic_detail) {
   override val viewModel by viewModel<ComicDetailViewModel> {
     parametersOf(args.isDownloaded)
   }
