@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.navigation.NavController
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
+import timber.log.Timber
 
 typealias NavigationCommand = NavController.(Context) -> Unit
 
@@ -12,5 +13,6 @@ class AppNavigator {
 
   val commandFlow get() = _commandFlow.receiveAsFlow()
 
-  suspend fun navigate(command: NavigationCommand) = _commandFlow.send(command)
+  suspend fun navigate(command: NavigationCommand) =
+    _commandFlow.send(command).also { Timber.d("Navigate send $command") }
 }

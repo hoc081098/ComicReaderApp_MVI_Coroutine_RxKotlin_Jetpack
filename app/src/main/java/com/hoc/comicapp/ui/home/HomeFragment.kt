@@ -4,9 +4,7 @@ import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.view.doOnPreDraw
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.FragmentNavigatorExtras
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
@@ -15,7 +13,7 @@ import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.base.BaseFragment
 import com.hoc.comicapp.databinding.FragmentHomeBinding
-import com.hoc.comicapp.navigation.AppNavigator
+import com.hoc.comicapp.navigation.appNavigator
 import com.hoc.comicapp.utils.isOrientationPortrait
 import com.hoc.comicapp.utils.snack
 import com.hoc.comicapp.utils.unit
@@ -25,20 +23,18 @@ import com.jakewharton.rxbinding4.swiperefreshlayout.refreshes
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.rx3.asFlow
-import kotlin.LazyThreadSafetyMode.NONE
+import kotlinx.coroutines.rx3.rxSingle
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
+import kotlin.LazyThreadSafetyMode.NONE
 
 class HomeFragment :
   BaseFragment<
-    HomeViewIntent,
-    HomeViewState,
-    HomeSingleEvent,
-    HomeViewModel,
-    >(R.layout.fragment_home) {
+      HomeViewIntent,
+      HomeViewState,
+      HomeSingleEvent,
+      HomeViewModel,
+      >(R.layout.fragment_home) {
   override val viewModel by viewModel<HomeViewModel>()
   override val viewBinding by viewBinding<FragmentHomeBinding>()
 
@@ -130,22 +126,24 @@ class HomeFragment :
     // Adapter click event
     homeAdapter
       .clickComicObservable
-      .asFlow()
-      .onEach { (view, comicArg, transitionName) ->
-        val toComicDetailFragment =
-          HomeFragmentDirections.actionHomeFragmentDestToComicDetailFragment(
-            comic = comicArg,
-            title = comicArg.title,
-            isDownloaded = false,
-            transitionName = transitionName
-          )
+      .flatMapSingle { (view, comicArg, transitionName) ->
+        rxSingle {
+          val toComicDetailFragment =
+            HomeFragmentDirections.actionHomeFragmentDestToComicDetailFragment(
+              comic = comicArg,
+              title = comicArg.title,
+              isDownloaded = false,
+              transitionName = transitionName
+            )
 
-        view.transitionName = transitionName
-        val extras = FragmentNavigatorExtras(view to view.transitionName)
+          view.transitionName = transitionName
+          val extras = FragmentNavigatorExtras(view to view.transitionName)
 
-        get<AppNavigator>().navigate { navigate(toComicDetailFragment, extras) }
+          appNavigator.navigate { navigate(toComicDetailFragment, extras) }
+        }
       }
-      .launchIn(viewLifecycleOwner.lifecycleScope)
+      .subscribe()
+      .addTo(compositeDisposable)
   }
 
   override fun viewIntents(): Observable<HomeViewIntent> {

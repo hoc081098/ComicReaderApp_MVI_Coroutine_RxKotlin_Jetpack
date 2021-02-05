@@ -222,22 +222,22 @@ val viewModelModule = module {
     }
   }
 
-  scope<MainActivity> {
-    scoped<MainContract.Interactor> {
-      MainInteractorImpl(
-        userRepository = get(),
-        dispatchersProvider = get(),
-        rxSchedulerProvider = get(),
-      )
-    }
-
-    viewModel {
-      MainVM(
-        interactor = get(),
-        rxSchedulerProvider = get(),
-      )
-    }
+  //region MainActivity
+  factory<MainContract.Interactor> {
+    MainInteractorImpl(
+      userRepository = get(),
+      dispatchersProvider = get(),
+      rxSchedulerProvider = get(),
+    )
   }
+
+  viewModel {
+    MainVM(
+      interactor = get(),
+      rxSchedulerProvider = get(),
+    )
+  }
+  //endregion
 
   scope<DownloadingChaptersFragment> {
     viewModel {

@@ -54,7 +54,7 @@ object versions {
     const val work = "2.5.0-beta01"
   }
 
-  const val koin = "2.2.0-beta-1"
+  const val koin = "2.2.2"
   const val moshiKotlin = "1.11.0"
   const val retrofit = "2.9.0"
   const val okHttpLoggingInterceptor = "4.10.0-RC1"

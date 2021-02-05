@@ -7,6 +7,8 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.MainThread
+import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.Group
 import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
@@ -45,12 +47,19 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlin.LazyThreadSafetyMode.NONE
-import org.koin.androidx.scope.ScopeActivity
+import org.koin.androidx.scope.activityRetainedScope
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
+import kotlin.LazyThreadSafetyMode.NONE
 
-class MainActivity : ScopeActivity(R.layout.activity_main) {
+class MainActivity : AppCompatActivity(R.layout.activity_main) {
+  @MainThread
+  val appNavigator by lazy(NONE) {
+    activityRetainedScope()
+      .get<AppNavigator>()
+      .also { Timber.d("Get AppNavigator: $it") }
+  }
+
   private val mainVM by viewModel<MainVM>()
   private val viewBinding by viewBinding<ActivityMainBinding>()
   private val compositeDisposable = CompositeDisposable()
@@ -94,8 +103,12 @@ class MainActivity : ScopeActivity(R.layout.activity_main) {
       dismissAlertDialog()
     }
 
-    get<AppNavigator>().commandFlow
-      .onEach { it(navController, this) }
+    appNavigator
+      .commandFlow
+      .onEach { command ->
+        runCatching { command(navController, this) }
+          .onFailure { Timber.e(it, "Execute navigation command error: $it") }
+      }
       .launchIn(lifecycleScope)
   }
 
