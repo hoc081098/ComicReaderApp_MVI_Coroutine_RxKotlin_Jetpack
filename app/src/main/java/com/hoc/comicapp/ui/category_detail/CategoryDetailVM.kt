@@ -2,7 +2,7 @@ package com.hoc.comicapp.ui.category_detail
 
 import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
-import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.CategoryArg
+import com.hoc.comicapp.navigation.Arguments
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.Interactor
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.PartialChange
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.SingleEvent
@@ -22,7 +22,7 @@ import io.reactivex.rxjava3.kotlin.subscribeBy
 class CategoryDetailVM(
   rxSchedulerProvider: RxSchedulerProvider,
   private val interactor: Interactor,
-  category: CategoryArg,
+  category: Arguments.CategoryDetailArgs,
 ) : BaseViewModel<ViewIntent, ViewState, SingleEvent>(ViewState.initial(category)) {
   private val intentS = PublishRelay.create<ViewIntent>()
   private val stateS = BehaviorRelay.createDefault(initialState)

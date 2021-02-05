@@ -97,6 +97,7 @@ object deps {
   object module {
     const val baseUi = ":base-ui"
     const val utils = ":utils"
+    const val navigation = ":navigation"
   }
 
   object kotlin {

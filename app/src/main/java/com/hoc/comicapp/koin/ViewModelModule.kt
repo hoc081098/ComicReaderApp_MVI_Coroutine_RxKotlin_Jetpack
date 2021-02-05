@@ -4,6 +4,7 @@ import com.hoc.comicapp.activity.main.MainActivity
 import com.hoc.comicapp.activity.main.MainContract
 import com.hoc.comicapp.activity.main.MainInteractorImpl
 import com.hoc.comicapp.activity.main.MainVM
+import com.hoc.comicapp.navigation.Arguments
 import com.hoc.comicapp.ui.category.CategoryFragment
 import com.hoc.comicapp.ui.category.CategoryInteractor
 import com.hoc.comicapp.ui.category.CategoryInteractorImpl
@@ -163,7 +164,7 @@ val viewModelModule = module {
       )
     }
 
-    viewModel { (category: CategoryDetailContract.CategoryArg) ->
+    viewModel { (category: Arguments.CategoryDetailArgs) ->
       CategoryDetailVM(
         rxSchedulerProvider = get(),
         interactor = get(),

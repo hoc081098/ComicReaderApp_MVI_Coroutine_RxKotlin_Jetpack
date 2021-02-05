@@ -2,7 +2,12 @@
 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-buildscript { repositories { mavenCentral() } }
+buildscript { val kotlin_version by extra("1.4.20")
+  repositories { mavenCentral() }
+  dependencies {
+    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
+  }
+}
 
 subprojects {
   apply(from = "${rootProject.rootDir}/spotless.gradle.kts")

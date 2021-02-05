@@ -7,8 +7,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.databinding.ItemRecyclerCategoryDetailPopularComicBinding
+import com.hoc.comicapp.navigation.Arguments
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.PopularItem
-import com.hoc.comicapp.ui.detail.ComicArg
 import com.hoc.comicapp.utils.inflater
 
 private object PopularItemDiffCallback : DiffUtil.ItemCallback<PopularItem>() {
@@ -20,7 +20,7 @@ private object PopularItemDiffCallback : DiffUtil.ItemCallback<PopularItem>() {
 
 class PopularHorizontalAdapter(
   private val glide: GlideRequests,
-  private val onClickComic: (ComicArg) -> Unit,
+  private val onClickComic: (Arguments.ComicDetailArgs) -> Unit,
 ) :
   ListAdapter<PopularItem, PopularHorizontalAdapter.VH>(PopularItemDiffCallback) {
 
@@ -43,7 +43,7 @@ class PopularHorizontalAdapter(
         if (position != RecyclerView.NO_POSITION) {
           val item = getItem(position)
           onClickComic(
-            ComicArg(
+            Arguments.ComicDetailArgs(
               title = item.title,
               thumbnail = item.thumbnail,
               link = item.link,

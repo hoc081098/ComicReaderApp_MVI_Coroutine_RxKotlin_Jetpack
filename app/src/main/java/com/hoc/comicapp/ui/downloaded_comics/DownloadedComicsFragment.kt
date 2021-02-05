@@ -12,7 +12,7 @@ import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.databinding.FragmentDownloadedComicsBinding
 import com.hoc.comicapp.domain.models.getMessage
-import com.hoc.comicapp.ui.detail.ComicArg
+import com.hoc.comicapp.navigation.Arguments
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.SingleEvent
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.SortOrder
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.ViewIntent
@@ -81,7 +81,7 @@ class DownloadedComicsFragment : ScopeFragment() {
     downloadedComicsAdapter.clickItem.subscribeBy {
       findNavController().navigate(
         toComicDetailFragment(
-          comic = ComicArg(
+          comic = Arguments.ComicDetailArgs(
             title = it.title,
             thumbnail = it.thumbnail.toRelativeString(requireContext().filesDir),
             link = it.comicLink,

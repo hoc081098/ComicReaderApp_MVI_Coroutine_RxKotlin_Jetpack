@@ -16,6 +16,7 @@ import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.base.BaseFragment
 import com.hoc.comicapp.databinding.FragmentComicDetailBinding
+import com.hoc.comicapp.navigation.Arguments
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract
 import com.hoc.comicapp.ui.detail.ComicDetailFragmentDirections.Companion.actionComicDetailFragmentToChapterDetailFragment as toChapterDetail
 import com.hoc.comicapp.ui.detail.ComicDetailIntent.CancelDownloadChapter
@@ -51,11 +52,11 @@ import org.koin.core.parameter.parametersOf
 import timber.log.Timber
 
 class ComicDetailFragment : BaseFragment<
-  ComicDetailIntent,
-  ComicDetailViewState,
-  ComicDetailSingleEvent,
-  ComicDetailViewModel
-  >(R.layout.fragment_comic_detail) {
+    ComicDetailIntent,
+    ComicDetailViewState,
+    ComicDetailSingleEvent,
+    ComicDetailViewModel
+    >(R.layout.fragment_comic_detail) {
   override val viewModel by viewModel<ComicDetailViewModel> {
     parametersOf(args.isDownloaded)
   }
@@ -222,7 +223,7 @@ class ComicDetailFragment : BaseFragment<
       R.id.image_download -> onClickDownload(chapter)
       else -> findNavController().navigate(
         toChapterDetail(
-          chapter = chapter,
+          chapter = chapter.toChapterDetailArgs(),
           isDownloaded = args.isDownloaded
         )
       )
@@ -233,7 +234,7 @@ class ComicDetailFragment : BaseFragment<
     val toCategoryDetailFragment =
       ComicDetailFragmentDirections.actionComicDetailFragmentToCategoryDetailFragment(
         title = category.name,
-        category = CategoryDetailContract.CategoryArg(
+        category = Arguments.CategoryDetailArgs(
           description = "",
           link = category.link,
           name = category.name,
@@ -301,7 +302,7 @@ class ComicDetailFragment : BaseFragment<
     } else {
       findNavController().navigate(
         toChapterDetail(
-          chapter = chapter,
+          chapter = chapter.toChapterDetailArgs(),
           isDownloaded = args.isDownloaded
         )
       )
@@ -441,4 +442,14 @@ class ComicDetailFragment : BaseFragment<
     )
   }
   //endregion
+}
+
+private fun Chapter.toChapterDetailArgs(): Arguments.ChapterDetailArgs {
+  return Arguments.ChapterDetailArgs(
+    chapterLink = chapterLink,
+    chapterName = chapterName,
+    time = time,
+    view = view,
+    comicLink = comicLink,
+  )
 }

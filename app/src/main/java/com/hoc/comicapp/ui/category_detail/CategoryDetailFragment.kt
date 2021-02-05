@@ -13,9 +13,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.databinding.FragmentCategoryDetailBinding
+import com.hoc.comicapp.navigation.Arguments
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewIntent
 import com.hoc.comicapp.ui.category_detail.CategoryDetailFragmentDirections.Companion.actionCategoryDetailFragmentToComicDetailFragment
-import com.hoc.comicapp.ui.detail.ComicArg
 import com.hoc.comicapp.utils.isOrientationPortrait
 import com.hoc.comicapp.utils.observe
 import com.hoc081098.viewbindingdelegate.viewBinding
@@ -153,7 +153,7 @@ class CategoryDetailFragment : ScopeFragment() {
 
   private val maxSpanCount get() = if (requireContext().isOrientationPortrait) 2 else 4
 
-  private fun onClickComic(comic: ComicArg) {
+  private fun onClickComic(comic: Arguments.ComicDetailArgs) {
     val toComicDetailFragment = actionCategoryDetailFragmentToComicDetailFragment(
       title = comic.title,
       isDownloaded = false,

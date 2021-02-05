@@ -60,6 +60,7 @@ class ComicAppPlugin : Plugin<Project> {
             @Suppress("UnstableApiUsage")
             libraryExtension.buildFeatures {
               viewBinding = comicAppExtension.viewBinding
+              dataBinding = false
             }
             enableParcelize(comicAppExtension.parcelize)
           }

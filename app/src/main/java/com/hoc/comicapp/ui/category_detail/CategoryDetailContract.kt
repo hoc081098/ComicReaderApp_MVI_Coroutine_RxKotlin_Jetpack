@@ -1,34 +1,21 @@
 package com.hoc.comicapp.ui.category_detail
 
-import android.os.Parcelable
 import com.hoc.comicapp.domain.models.CategoryDetailPopularComic
 import com.hoc.comicapp.domain.models.Comic
 import com.hoc.comicapp.domain.models.ComicAppError
+import com.hoc.comicapp.navigation.Arguments
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.Item
 import io.reactivex.rxjava3.core.Observable
-import kotlinx.parcelize.Parcelize
 
 /**
  * Contract
  */
 interface CategoryDetailContract {
-
-  /**
-   * Argument
-   */
-  @Parcelize
-  data class CategoryArg(
-    val description: String,
-    val link: String,
-    val name: String,
-    val thumbnail: String,
-  ) : Parcelable
-
   /**
    * View intent
    */
   sealed class ViewIntent : com.hoc.comicapp.base.MviIntent {
-    data class Initial(val arg: CategoryArg) : ViewIntent()
+    data class Initial(val arg: Arguments.CategoryDetailArgs) : ViewIntent()
     object Refresh : ViewIntent()
     object LoadNextPage : ViewIntent()
     object RetryPopular : ViewIntent()
@@ -42,11 +29,11 @@ interface CategoryDetailContract {
     val items: List<Item>,
     val isRefreshing: Boolean,
     val page: Int,
-    val category: CategoryArg,
+    val category: Arguments.CategoryDetailArgs,
   ) : com.hoc.comicapp.base.MviViewState {
     companion object {
       @JvmStatic
-      fun initial(category: CategoryArg): ViewState {
+      fun initial(category: Arguments.CategoryDetailArgs): ViewState {
         return ViewState(
           items = listOf(
             Item.Header(HeaderType.Popular),

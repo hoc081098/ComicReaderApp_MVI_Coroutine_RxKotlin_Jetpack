@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager.VERTICAL
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.databinding.FragmentCategoryBinding
+import com.hoc.comicapp.navigation.Arguments
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract
 import com.hoc.comicapp.utils.itemSelections
 import com.hoc.comicapp.utils.observe
@@ -58,7 +59,7 @@ class CategoryFragment : ScopeFragment() {
         val toCategoryDetailFragment =
           CategoryFragmentDirections.actionCategoryFragmentToCategoryDetailFragment(
             title = it.name,
-            category = CategoryDetailContract.CategoryArg(
+            category = Arguments.CategoryDetailArgs(
               description = it.description,
               link = it.link,
               name = it.name,

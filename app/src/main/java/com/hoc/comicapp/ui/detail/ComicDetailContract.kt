@@ -8,22 +8,12 @@ import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.DownloadedChapter
 import com.hoc.comicapp.domain.models.FavoriteComic
 import com.hoc.comicapp.domain.models.getMessage
+import com.hoc.comicapp.navigation.Arguments
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.ComicDetail
 import io.reactivex.rxjava3.core.Observable
 import java.util.Date
 import kotlinx.parcelize.Parcelize
 
-/**
- * Argument to pass to [ComicDetailFragment]
- */
-@Parcelize
-data class ComicArg(
-  val link: String,
-  val thumbnail: String,
-  val title: String,
-  val view: String,
-  val remoteThumbnail: String,
-) : Parcelable
 
 interface ComicDetailInteractor {
   fun getFavoriteChange(link: String): Observable<ComicDetailPartialChange>
@@ -53,7 +43,7 @@ interface ComicDetailInteractor {
 }
 
 sealed class ComicDetailIntent : MviIntent {
-  data class Initial(val arg: ComicArg) : ComicDetailIntent()
+  data class Initial(val arg: Arguments.ComicDetailArgs) : ComicDetailIntent()
 
   object Refresh : ComicDetailIntent()
   object Retry : ComicDetailIntent()
@@ -135,7 +125,6 @@ data class ComicDetailViewState(
     object Loading : DownloadState()
   }
 
-  @Parcelize
   data class Chapter(
     val chapterLink: String,
     val chapterName: String,
@@ -143,7 +132,7 @@ data class ComicDetailViewState(
     val view: String,
     val downloadState: DownloadState = DownloadState.Loading,
     val comicLink: String,
-  ) : Parcelable {
+  )  {
 
     fun isSameExceptDownloadState(other: Chapter): Boolean {
       if (this === other) return true

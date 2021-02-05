@@ -25,7 +25,7 @@ import com.hoc.comicapp.databinding.ItemRecyclerviewUpdatedComicBinding
 import com.hoc.comicapp.databinding.ItemRecyclerviewUpdatedErrorBinding
 import com.hoc.comicapp.databinding.ItemRecyclerviewUpdatedLoadingBinding
 import com.hoc.comicapp.domain.models.Comic
-import com.hoc.comicapp.ui.detail.ComicArg
+import com.hoc.comicapp.navigation.Arguments
 import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.MOST_VIEWED
 import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.NEWEST
 import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.UPDATED
@@ -44,14 +44,14 @@ import io.reactivex.rxjava3.kotlin.subscribeBy
 import java.util.concurrent.TimeUnit
 import timber.log.Timber
 
-typealias HomeClickEvent = Triple<View, ComicArg, String>
+typealias HomeClickEvent = Triple<View, Arguments.ComicDetailArgs, String>
 typealias _HomeClickEvent = Triple<View, Comic, String>
 
 private fun toHomeClickEvent(event: _HomeClickEvent): HomeClickEvent {
   return Triple(
     event.first,
     event.second.let { comic ->
-      ComicArg(
+      Arguments.ComicDetailArgs(
         link = comic.link,
         thumbnail = comic.thumbnail,
         title = comic.title,

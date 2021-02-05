@@ -12,7 +12,7 @@ import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
 import com.hoc.comicapp.databinding.ItemRecyclerSearchComicBinding
 import com.hoc.comicapp.databinding.ItemRecyclerSearchComicLoadMoreBinding
-import com.hoc.comicapp.ui.detail.ComicArg
+import com.hoc.comicapp.navigation.Arguments
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewState.Item
 import com.hoc.comicapp.utils.asObservable
 import com.hoc.comicapp.utils.inflater
@@ -43,7 +43,7 @@ class SearchComicAdapter(
   private val glide: GlideRequests,
   private val compositeDisposable: CompositeDisposable,
 ) : ListAdapter<Item, SearchComicAdapter.VH>(SearchComicDiffUtilItemCallback) {
-  private val clickComicS = PublishRelay.create<ComicArg>()
+  private val clickComicS = PublishRelay.create<Arguments.ComicDetailArgs>()
   val clickComicObservable get() = clickComicS.asObservable()
 
   private val clickButtonRetryOrLoadMoreS = PublishRelay.create<Boolean>()
@@ -143,7 +143,7 @@ class SearchComicAdapter(
         .map { getItem(it) }
         .ofType<Item.ComicItem>()
         .map {
-          ComicArg(
+          Arguments.ComicDetailArgs(
             title = it.title,
             thumbnail = it.thumbnail,
             link = it.link,

@@ -27,10 +27,10 @@ import com.hoc.comicapp.databinding.ItemRecyclerCategoryDetailHeaderBinding
 import com.hoc.comicapp.databinding.ItemRecyclerCategoryDetailLoadingBinding
 import com.hoc.comicapp.databinding.ItemRecyclerCategoryDetailPopularHorizontalRecyclerBinding
 import com.hoc.comicapp.domain.models.getMessage
+import com.hoc.comicapp.navigation.Arguments
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.HeaderType.Popular
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.HeaderType.Updated
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.Item
-import com.hoc.comicapp.ui.detail.ComicArg
 import com.hoc.comicapp.utils.asObservable
 import com.hoc.comicapp.utils.inflater
 import com.jakewharton.rxbinding4.recyclerview.scrollStateChanges
@@ -65,7 +65,7 @@ class CategoryDetailAdapter(
   private val glide: GlideRequests,
   private val lifecycleOwner: LifecycleOwner,
   private val compositeDisposable: CompositeDisposable,
-  private val onClickComic: (ComicArg) -> Unit,
+  private val onClickComic: (Arguments.ComicDetailArgs) -> Unit,
 ) :
   ListAdapter<Item, CategoryDetailAdapter.VH>(ItemDiffCallback) {
   private var outLayoutManagerSavedState: Parcelable? = null
@@ -288,7 +288,7 @@ class CategoryDetailAdapter(
         if (position != RecyclerView.NO_POSITION) {
           val item = getItem(position) as? Item.Comic ?: return@setOnClickListener
           onClickComic(
-            ComicArg(
+            Arguments.ComicDetailArgs(
               title = item.title,
               link = item.link,
               thumbnail = item.thumbnail,
