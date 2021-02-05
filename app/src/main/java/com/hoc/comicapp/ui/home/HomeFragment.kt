@@ -23,18 +23,18 @@ import com.jakewharton.rxbinding4.swiperefreshlayout.refreshes
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
+import kotlin.LazyThreadSafetyMode.NONE
 import kotlinx.coroutines.rx3.rxSingle
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
-import kotlin.LazyThreadSafetyMode.NONE
 
 class HomeFragment :
   BaseFragment<
-      HomeViewIntent,
-      HomeViewState,
-      HomeSingleEvent,
-      HomeViewModel,
-      >(R.layout.fragment_home) {
+    HomeViewIntent,
+    HomeViewState,
+    HomeSingleEvent,
+    HomeViewModel,
+    >(R.layout.fragment_home) {
   override val viewModel by viewModel<HomeViewModel>()
   override val viewBinding by viewBinding<FragmentHomeBinding>()
 

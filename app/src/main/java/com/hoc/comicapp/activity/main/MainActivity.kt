@@ -7,7 +7,6 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.annotation.MainThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.Group
 import androidx.core.view.GravityCompat
@@ -45,15 +44,18 @@ import de.hdodenhof.circleimageview.CircleImageView
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
+import kotlin.LazyThreadSafetyMode.NONE
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.koin.androidx.scope.activityRetainedScope
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
-import kotlin.LazyThreadSafetyMode.NONE
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
-  @MainThread
+  /**
+   * Get [AppNavigator].
+   * Should only be called on the main thread.
+   */
   val appNavigator by lazy(NONE) {
     activityRetainedScope()
       .get<AppNavigator>()
@@ -268,7 +270,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
       return showSearch().let { true }
     }
     return item.onNavDestinationSelected(findNavController(R.id.main_nav_fragment)) ||
-        super.onOptionsItemSelected(item)
+      super.onOptionsItemSelected(item)
   }
 
   fun showSearch() = viewBinding.searchView.showSearch()

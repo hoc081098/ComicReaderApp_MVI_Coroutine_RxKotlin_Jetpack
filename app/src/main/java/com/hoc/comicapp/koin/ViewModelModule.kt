@@ -1,6 +1,5 @@
 package com.hoc.comicapp.koin
 
-import com.hoc.comicapp.activity.main.MainActivity
 import com.hoc.comicapp.activity.main.MainContract
 import com.hoc.comicapp.activity.main.MainInteractorImpl
 import com.hoc.comicapp.activity.main.MainVM
