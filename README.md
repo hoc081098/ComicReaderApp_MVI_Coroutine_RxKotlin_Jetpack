@@ -18,10 +18,11 @@ This project brings to the table set of best practices, tools, and solutions:
 -   Material Design [Material Components for Android](https://github.com/material-components/material-components-android)
 -   Kotlin Gradle DSL
 -   Firebase: Firestore, Authentication, Storage, Analytics, Crashlytics
+-   Gradle Kotlin DSL, Custom plugin
 
 # Develop
 - Clone: `git clone https://github.com/hoc081098/ComicReaderApp_MVI_Coroutine_RxKotlin.git`
-- **Delete `.idea` folder**
+- _Optional: **Delete `.idea` folder** if cannot open project_
 - Open project by `Android Studio` and run as usual
 
 # Screenshots
