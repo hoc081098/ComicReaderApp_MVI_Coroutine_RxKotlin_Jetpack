@@ -59,7 +59,10 @@ class ComicDetailFragment : BaseFragment<
   override val viewModel by viewModel<ComicDetailViewModel> {
     parametersOf(args.isDownloaded)
   }
-  override val viewBinding by viewBinding<FragmentComicDetailBinding>()
+  override val viewBinding by viewBinding<FragmentComicDetailBinding> {
+    recyclerChapters.adapter = null
+    rootDetail.setTransitionListener(null)
+  }
   private val args by navArgs<ComicDetailFragmentArgs>()
 
   private val glide by lazy(NONE) { GlideApp.with(this) }
@@ -79,9 +82,6 @@ class ComicDetailFragment : BaseFragment<
 
   override fun onDestroyView() {
     super.onDestroyView()
-
-    viewBinding.recyclerChapters.adapter = null
-    viewBinding.rootDetail.setTransitionListener(null)
     requireActivity().dismissAlertDialog()
   }
 

@@ -41,7 +41,10 @@ class ChapterDetailFragment : BaseFragment<
   override val viewModel by viewModel<ChapterDetailViewModel> {
     parametersOf(navArgs.isDownloaded)
   }
-  override val viewBinding by viewBinding<FragmentChapterDetailBinding>()
+  override val viewBinding by viewBinding<FragmentChapterDetailBinding> {
+    recyclerImages.adapter = null
+    spinnerChapters.adapter = null
+  }
 
   private val mainActivity get() = requireActivity() as MainActivity
   private var shouldEmitSelectedItem = false
@@ -58,12 +61,6 @@ class ChapterDetailFragment : BaseFragment<
         )
       )
     )
-  }
-
-  override fun onDestroyView() {
-    super.onDestroyView()
-    viewBinding.recyclerImages.adapter = null
-    viewBinding.spinnerChapters.adapter = null
   }
 
   //region Override BaseFragment

@@ -36,7 +36,9 @@ class HomeFragment :
     HomeViewModel,
     >(R.layout.fragment_home) {
   override val viewModel by viewModel<HomeViewModel>()
-  override val viewBinding by viewBinding<FragmentHomeBinding>()
+  override val viewBinding by viewBinding<FragmentHomeBinding> {
+    recyclerHome.adapter = null
+  }
 
   private val homeAdapter by lazy(NONE) {
     HomeAdapter(
@@ -52,11 +54,6 @@ class HomeFragment :
     exitTransition = Hold().apply {
       duration = resources.getInteger(R.integer.reply_motion_default_large).toLong()
     }
-  }
-
-  override fun onDestroyView() {
-    super.onDestroyView()
-    viewBinding.recyclerHome.adapter = null
   }
 
   private fun getMaxSpanCount() = if (requireContext().isOrientationPortrait) 2 else 4

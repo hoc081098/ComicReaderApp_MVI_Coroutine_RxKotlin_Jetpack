@@ -37,7 +37,9 @@ class CategoryDetailFragment : ScopeFragment() {
   private val args by navArgs<CategoryDetailFragmentArgs>()
 
   private val vm by viewModel<CategoryDetailVM> { parametersOf(args.category) }
-  private val viewBinding by viewBinding<FragmentCategoryDetailBinding>()
+  private val viewBinding by viewBinding<FragmentCategoryDetailBinding> {
+    recyclerCategoryDetail.adapter = null
+  }
   private val compositeDisposable = CompositeDisposable()
 
   private val categoryDetailAdapter by lazy(NONE) {
@@ -137,7 +139,6 @@ class CategoryDetailFragment : ScopeFragment() {
 
   override fun onDestroyView() {
     super.onDestroyView()
-    viewBinding.recyclerCategoryDetail.adapter = null
     compositeDisposable.clear()
   }
 

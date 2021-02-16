@@ -90,7 +90,7 @@ object versions {
     const val crashlytics = "17.3.0"
   }
 
-  const val viewBindingDelegate = "1.0.0-alpha02"
+  const val viewBindingDelegate = "1.0.0-alpha03"
 }
 
 object deps {
