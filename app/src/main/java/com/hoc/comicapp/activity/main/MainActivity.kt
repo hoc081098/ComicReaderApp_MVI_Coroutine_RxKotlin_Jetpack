@@ -108,8 +108,17 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     appNavigator
       .commandFlow
       .onEach { command ->
-        runCatching { command(navController, this) }
-          .onFailure { Timber.e(it, "Execute navigation command error: $it") }
+        /**
+         * Performs a navigation on the [NavController] using the provided [directions] and [navigatorExtras],
+         * catching any [IllegalArgumentException] which usually happens when users trigger (e.g. click)
+         * navigation multiple times very quickly on slower devices.
+         * For more context, see [stackoverflow](https://stackoverflow.com/questions/51060762/illegalargumentexception-navigation-destination-xxx-is-unknown-to-this-navcontr).
+         */
+        try {
+          command(navController, this)
+        } catch (e: IllegalStateException) {
+          Timber.e(e, "Execute navigation command error: $e")
+        }
       }
       .launchIn(lifecycleScope)
   }
