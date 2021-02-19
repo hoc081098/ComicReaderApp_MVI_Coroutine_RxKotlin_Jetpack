@@ -5,12 +5,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.activity.main.MainActivity
 import com.hoc.comicapp.databinding.FragmentSearchComicBinding
+import com.hoc.comicapp.navigation.appNavigator
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.SingleEvent
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewIntent
 import com.hoc.comicapp.utils.isOrientationPortrait
@@ -22,7 +22,7 @@ import com.jakewharton.rxbinding4.view.clicks
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
-import io.reactivex.rxjava3.kotlin.subscribeBy
+import kotlinx.coroutines.rx3.rxSingle
 import org.koin.androidx.scope.ScopeFragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
@@ -72,15 +72,20 @@ class SearchComicFragment : ScopeFragment() {
 
     searchComicAdapter
       .clickComicObservable
-      .subscribeBy {
+      .flatMapSingle {
         val toComicDetailFragment =
           SearchComicFragmentDirections.actionSearchComicFragmentToComicDetailFragment(
             comic = it,
             title = it.title,
             isDownloaded = false
           )
-        findNavController().navigate(toComicDetailFragment)
+        rxSingle {
+          appNavigator.execute {
+            navigate(toComicDetailFragment)
+          }
+        }
       }
+      .subscribe()
       .addTo(compositeDisposable)
   }
 

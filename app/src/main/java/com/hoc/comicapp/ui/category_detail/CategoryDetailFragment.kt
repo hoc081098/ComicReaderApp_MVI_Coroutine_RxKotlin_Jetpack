@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import androidx.navigation.fragment.findNavController
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
@@ -14,8 +14,8 @@ import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.databinding.FragmentCategoryDetailBinding
 import com.hoc.comicapp.navigation.Arguments
+import com.hoc.comicapp.navigation.appNavigator
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewIntent
-import com.hoc.comicapp.ui.category_detail.CategoryDetailFragmentDirections.Companion.actionCategoryDetailFragmentToComicDetailFragment
 import com.hoc.comicapp.utils.isOrientationPortrait
 import com.hoc.comicapp.utils.observe
 import com.hoc081098.viewbindingdelegate.viewBinding
@@ -28,6 +28,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import kotlin.LazyThreadSafetyMode.NONE
+import kotlinx.coroutines.launch
 import org.koin.androidx.scope.ScopeFragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -155,11 +156,16 @@ class CategoryDetailFragment : ScopeFragment() {
   private val maxSpanCount get() = if (requireContext().isOrientationPortrait) 2 else 4
 
   private fun onClickComic(comic: Arguments.ComicDetailArgs) {
-    val toComicDetailFragment = actionCategoryDetailFragmentToComicDetailFragment(
-      title = comic.title,
-      isDownloaded = false,
-      comic = comic
-    )
-    findNavController().navigate(toComicDetailFragment)
+    val toComicDetailFragment =
+      CategoryDetailFragmentDirections.actionCategoryDetailFragmentToComicDetailFragment(
+        title = comic.title,
+        isDownloaded = false,
+        comic = comic
+      )
+    lifecycleScope.launch {
+      appNavigator.execute {
+        navigate(toComicDetailFragment)
+      }
+    }
   }
 }

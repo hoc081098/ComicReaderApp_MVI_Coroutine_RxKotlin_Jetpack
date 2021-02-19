@@ -136,7 +136,7 @@ class HomeFragment :
           view.transitionName = transitionName
           val extras = FragmentNavigatorExtras(view to view.transitionName)
 
-          appNavigator.navigate { navigate(toComicDetailFragment, extras) }
+          appNavigator.execute { navigate(toComicDetailFragment, extras) }
         }
       }
       .subscribe()

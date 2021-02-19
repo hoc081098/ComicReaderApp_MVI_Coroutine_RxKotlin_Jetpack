@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.Group
 import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -105,6 +106,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
       dismissAlertDialog()
     }
 
+    FragmentManager.enableDebugLogging(true)
     appNavigator
       .commandFlow
       .onEach { command ->

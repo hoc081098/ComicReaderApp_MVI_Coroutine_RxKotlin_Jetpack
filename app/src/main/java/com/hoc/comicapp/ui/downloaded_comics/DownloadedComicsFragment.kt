@@ -81,7 +81,7 @@ class DownloadedComicsFragment : ScopeFragment() {
     downloadedComicsAdapter.clickItem
       .flatMapSingle { item ->
         rxSingle {
-          appNavigator.navigate {
+          appNavigator.execute {
             navigate(
               toComicDetailFragment(
                 comic = Arguments.ComicDetailArgs(

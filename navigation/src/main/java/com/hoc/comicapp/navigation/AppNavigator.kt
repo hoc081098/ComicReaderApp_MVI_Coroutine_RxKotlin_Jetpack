@@ -13,6 +13,6 @@ class AppNavigator {
 
   val commandFlow get() = _commandFlow.receiveAsFlow()
 
-  suspend fun navigate(command: NavigationCommand) =
+  suspend fun execute(command: NavigationCommand) =
     _commandFlow.send(command).also { Timber.d("Navigate send $command") }
 }

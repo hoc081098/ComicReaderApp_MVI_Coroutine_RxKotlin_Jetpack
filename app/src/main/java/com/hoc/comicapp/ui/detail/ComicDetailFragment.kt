@@ -17,7 +17,6 @@ import com.hoc.comicapp.R
 import com.hoc.comicapp.base.BaseFragment
 import com.hoc.comicapp.databinding.FragmentComicDetailBinding
 import com.hoc.comicapp.navigation.Arguments
-import com.hoc.comicapp.ui.detail.ComicDetailFragmentDirections.Companion.actionComicDetailFragmentToChapterDetailFragment as toChapterDetail
 import com.hoc.comicapp.ui.detail.ComicDetailIntent.CancelDownloadChapter
 import com.hoc.comicapp.ui.detail.ComicDetailIntent.DeleteChapter
 import com.hoc.comicapp.ui.detail.ComicDetailIntent.DownloadChapter
@@ -221,7 +220,7 @@ class ComicDetailFragment : BaseFragment<
     when (view.id) {
       R.id.image_download -> onClickDownload(chapter)
       else -> findNavController().navigate(
-        toChapterDetail(
+        ComicDetailFragmentDirections.actionComicDetailFragmentToChapterDetailFragment(
           chapter = chapter.toChapterDetailArgs(),
           isDownloaded = args.isDownloaded
         )
@@ -300,7 +299,7 @@ class ComicDetailFragment : BaseFragment<
       view?.snack("Chapters list is empty!")
     } else {
       findNavController().navigate(
-        toChapterDetail(
+        ComicDetailFragmentDirections.actionComicDetailFragmentToChapterDetailFragment(
           chapter = chapter.toChapterDetailArgs(),
           isDownloaded = args.isDownloaded
         )
