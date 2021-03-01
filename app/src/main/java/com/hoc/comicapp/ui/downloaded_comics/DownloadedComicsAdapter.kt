@@ -12,7 +12,7 @@ import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.databinding.ItemRecyclerDownloadedComicsBinding
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.ViewState.ComicItem
 import com.hoc.comicapp.utils.asObservable
-import com.hoc.comicapp.utils.inflater
+import com.hoc081098.viewbindingdelegate.inflateViewBinding
 import com.jakewharton.rxbinding4.view.clicks
 import com.jakewharton.rxbinding4.view.detaches
 import com.jakewharton.rxrelay3.PublishRelay
@@ -44,7 +44,7 @@ class DownloadedComicsAdapter(
   val clickItem get() = _clickItem.asObservable()
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-    VH(ItemRecyclerDownloadedComicsBinding.inflate(parent.inflater, parent, false), parent)
+    VH(parent inflateViewBinding false, parent)
 
   override fun onBindViewHolder(holder: VH, position: Int) = holder.bind(getItem(position))
 

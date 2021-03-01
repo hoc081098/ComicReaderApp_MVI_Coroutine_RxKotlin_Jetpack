@@ -9,6 +9,8 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.transition.Hold
+import com.google.android.material.transition.MaterialElevationScale
+import com.google.android.material.transition.MaterialFadeThrough
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.base.BaseFragment
@@ -23,18 +25,18 @@ import com.jakewharton.rxbinding4.swiperefreshlayout.refreshes
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import kotlin.LazyThreadSafetyMode.NONE
 import kotlinx.coroutines.rx3.rxSingle
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
+import kotlin.LazyThreadSafetyMode.NONE
 
 class HomeFragment :
   BaseFragment<
-    HomeViewIntent,
-    HomeViewState,
-    HomeSingleEvent,
-    HomeViewModel,
-    >(R.layout.fragment_home) {
+      HomeViewIntent,
+      HomeViewState,
+      HomeSingleEvent,
+      HomeViewModel,
+      >(R.layout.fragment_home) {
   override val viewModel by viewModel<HomeViewModel>()
   override val viewBinding by viewBinding<FragmentHomeBinding> {
     recyclerHome.adapter = null
@@ -51,8 +53,11 @@ class HomeFragment :
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    enterTransition = MaterialFadeThrough().apply {
+      duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
+    }
     exitTransition = Hold().apply {
-      duration = resources.getInteger(R.integer.reply_motion_default_large).toLong()
+      duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
     }
   }
 
@@ -63,7 +68,8 @@ class HomeFragment :
    */
 
   override fun setupView(view: View, savedInstanceState: Bundle?) {
-    // Transition
+    // Postpone enter transitions to allow shared element transitions to run.
+    // https://github.com/googlesamples/android-architecture-components/issues/495
     postponeEnterTransition()
     view.doOnPreDraw { startPostponedEnterTransition() }
 

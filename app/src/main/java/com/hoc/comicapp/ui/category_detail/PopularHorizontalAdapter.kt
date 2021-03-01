@@ -9,7 +9,7 @@ import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.databinding.ItemRecyclerCategoryDetailPopularComicBinding
 import com.hoc.comicapp.navigation.Arguments
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.PopularItem
-import com.hoc.comicapp.utils.inflater
+import com.hoc081098.viewbindingdelegate.inflateViewBinding
 
 private object PopularItemDiffCallback : DiffUtil.ItemCallback<PopularItem>() {
   override fun areItemsTheSame(oldItem: PopularItem, newItem: PopularItem) =
@@ -25,13 +25,7 @@ class PopularHorizontalAdapter(
   ListAdapter<PopularItem, PopularHorizontalAdapter.VH>(PopularItemDiffCallback) {
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-    VH(
-      ItemRecyclerCategoryDetailPopularComicBinding.inflate(
-        parent.inflater,
-        parent,
-        false
-      )
-    )
+    VH(parent inflateViewBinding false)
 
   override fun onBindViewHolder(holder: VH, position: Int) = holder.bind(getItem(position))
 

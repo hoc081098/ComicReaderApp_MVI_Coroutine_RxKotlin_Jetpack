@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.hoc.comicapp.databinding.ItemRecyclerDownloadingChapterBinding
 import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersContract.ViewState.Chapter
 import com.hoc.comicapp.utils.asObservable
-import com.hoc.comicapp.utils.inflater
+import com.hoc081098.viewbindingdelegate.inflateViewBinding
 import com.jakewharton.rxbinding4.view.clicks
 import com.jakewharton.rxbinding4.view.detaches
 import com.jakewharton.rxrelay3.PublishRelay
@@ -35,7 +35,7 @@ class DownloadingChaptersAdapter(
   val clickCancel get() = _clickCancel.asObservable()
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-    VH(ItemRecyclerDownloadingChapterBinding.inflate(parent.inflater, parent, false), parent)
+    VH(parent inflateViewBinding false, parent)
 
   override fun onBindViewHolder(holder: VH, position: Int) = holder.bind(getItem(position))
 

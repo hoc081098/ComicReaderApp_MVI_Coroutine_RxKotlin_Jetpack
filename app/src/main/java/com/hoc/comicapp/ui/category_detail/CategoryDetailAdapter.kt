@@ -32,7 +32,7 @@ import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.Head
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.HeaderType.Updated
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.Item
 import com.hoc.comicapp.utils.asObservable
-import com.hoc.comicapp.utils.inflater
+import com.hoc081098.viewbindingdelegate.inflateViewBinding
 import com.jakewharton.rxbinding4.recyclerview.scrollStateChanges
 import com.jakewharton.rxbinding4.view.clicks
 import com.jakewharton.rxbinding4.view.detaches
@@ -79,42 +79,16 @@ class CategoryDetailAdapter(
   override fun onCreateViewHolder(parent: ViewGroup, @LayoutRes viewType: Int): VH {
     return when (viewType) {
       R.layout.item_recycler_category_detail_popular_horizontal_recycler -> PopularHorizontalRecyclerVH(
-        ItemRecyclerCategoryDetailPopularHorizontalRecyclerBinding.inflate(
-          parent.inflater,
-          parent,
-          false
-        ),
-        parent
+        parent inflateViewBinding false,
+        parent,
       )
-      R.layout.item_recycler_category_detail_comic -> ComicVH(
-        ItemRecyclerCategoryDetailComicBinding.inflate(
-          parent.inflater,
-          parent,
-          false
-        )
-      )
-      R.layout.item_recycler_category_detail_loading -> LoadingVH(
-        ItemRecyclerCategoryDetailLoadingBinding.inflate(
-          parent.inflater,
-          parent,
-          false
-        )
-      )
+      R.layout.item_recycler_category_detail_comic -> ComicVH(parent inflateViewBinding false)
+      R.layout.item_recycler_category_detail_loading -> LoadingVH(parent inflateViewBinding false)
       R.layout.item_recycler_category_detail_error -> ErrorVH(
-        ItemRecyclerCategoryDetailErrorBinding.inflate(
-          parent.inflater,
-          parent,
-          false
-        ),
+        parent inflateViewBinding false,
         parent
       )
-      R.layout.item_recycler_category_detail_header -> HeaderVH(
-        ItemRecyclerCategoryDetailHeaderBinding.inflate(
-          parent.inflater,
-          parent,
-          false
-        ),
-      )
+      R.layout.item_recycler_category_detail_header -> HeaderVH(parent inflateViewBinding false)
       else -> error("Don't know viewType=$viewType")
     }
   }

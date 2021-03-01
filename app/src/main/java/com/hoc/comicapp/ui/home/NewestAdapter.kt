@@ -10,8 +10,8 @@ import com.hoc.comicapp.databinding.ItemRecyclerviewTopMonthComicOrRecommenedBin
 import com.hoc.comicapp.domain.models.Comic
 import com.hoc.comicapp.ui.home.HomeAdapter.Companion.NEWEST_COMIC_ITEM_VIEW_TYPE
 import com.hoc.comicapp.utils.asObservable
-import com.hoc.comicapp.utils.inflater
 import com.hoc.comicapp.utils.mapNotNull
+import com.hoc081098.viewbindingdelegate.inflateViewBinding
 import com.jakewharton.rxbinding4.view.clicks
 import com.jakewharton.rxrelay3.PublishRelay
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -27,11 +27,7 @@ class NewestAdapter(
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
     return when (viewType) {
       NEWEST_COMIC_ITEM_VIEW_TYPE -> VH(
-        ItemRecyclerviewTopMonthComicOrRecommenedBinding.inflate(
-          parent.inflater,
-          parent,
-          false,
-        )
+        parent inflateViewBinding false
       )
       else -> throw IllegalStateException("viewType must be $NEWEST_COMIC_ITEM_VIEW_TYPE, but viewType=$viewType")
     }

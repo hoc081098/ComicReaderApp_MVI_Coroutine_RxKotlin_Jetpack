@@ -10,8 +10,8 @@ import com.hoc.comicapp.databinding.ItemRecyclerviewTopMonthComicOrRecommenedBin
 import com.hoc.comicapp.domain.models.Comic
 import com.hoc.comicapp.ui.home.HomeAdapter.Companion.MOST_VIEW_COMIC_ITEM_VIEW_TYPE
 import com.hoc.comicapp.utils.asObservable
-import com.hoc.comicapp.utils.inflater
 import com.hoc.comicapp.utils.mapNotNull
+import com.hoc081098.viewbindingdelegate.inflateViewBinding
 import com.jakewharton.rxbinding4.view.clicks
 import com.jakewharton.rxrelay3.PublishRelay
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -27,13 +27,7 @@ class MostViewedAdapter(
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
     when (viewType) {
-      MOST_VIEW_COMIC_ITEM_VIEW_TYPE -> return VH(
-        ItemRecyclerviewTopMonthComicOrRecommenedBinding.inflate(
-          parent.inflater,
-          parent,
-          false,
-        )
-      )
+      MOST_VIEW_COMIC_ITEM_VIEW_TYPE -> return VH(parent inflateViewBinding false)
       else -> throw IllegalStateException("viewType must be $MOST_VIEW_COMIC_ITEM_VIEW_TYPE, but viewType=$viewType")
     }
   }

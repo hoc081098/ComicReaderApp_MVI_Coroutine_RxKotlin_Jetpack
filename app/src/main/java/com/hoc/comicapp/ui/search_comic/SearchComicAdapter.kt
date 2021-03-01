@@ -15,8 +15,8 @@ import com.hoc.comicapp.databinding.ItemRecyclerSearchComicLoadMoreBinding
 import com.hoc.comicapp.navigation.Arguments
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewState.Item
 import com.hoc.comicapp.utils.asObservable
-import com.hoc.comicapp.utils.inflater
 import com.hoc.comicapp.utils.mapNotNull
+import com.hoc081098.viewbindingdelegate.inflateViewBinding
 import com.jakewharton.rxbinding4.view.clicks
 import com.jakewharton.rxbinding4.view.detaches
 import com.jakewharton.rxrelay3.PublishRelay
@@ -52,19 +52,11 @@ class SearchComicAdapter(
   override fun onCreateViewHolder(parent: ViewGroup, @LayoutRes viewType: Int): VH {
     return when (viewType) {
       R.layout.item_recycler_search_comic -> ComicVH(
-        ItemRecyclerSearchComicBinding.inflate(
-          parent.inflater,
-          parent,
-          false
-        ),
+        parent inflateViewBinding false,
         parent
       )
       R.layout.item_recycler_search_comic_load_more -> LoadMoreVH(
-        ItemRecyclerSearchComicLoadMoreBinding.inflate(
-          parent.inflater,
-          parent,
-          false
-        ),
+        parent inflateViewBinding false,
         parent
       )
       else -> error("Don't know viewType=$viewType")

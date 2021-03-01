@@ -18,7 +18,7 @@ import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.Downloading
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.Loading
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.NotYetDownload
 import com.hoc.comicapp.utils.inflate
-import com.hoc.comicapp.utils.inflater
+import com.hoc081098.viewbindingdelegate.inflateViewBinding
 import timber.log.Timber
 
 sealed class ChapterAdapterItem {
@@ -61,23 +61,10 @@ class ChapterAdapter(
   ListAdapter<ChapterAdapterItem, ChapterAdapter.VH>(ChapterDiffUtilItemCallback) {
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-    val view = parent inflate viewType
     return when (viewType) {
-      R.layout.item_recycler_detail -> HeaderVH(
-        ItemRecyclerDetailBinding.inflate(
-          parent.inflater,
-          parent,
-          false
-        )
-      )
-      R.layout.item_recycler_chapter -> ChapterVH(
-        ItemRecyclerChapterBinding.inflate(
-          parent.inflater,
-          parent,
-          false
-        )
-      )
-      R.layout.item_recycler_chapter_dummy -> DummyVH(view)
+      R.layout.item_recycler_detail -> HeaderVH(parent inflateViewBinding false)
+      R.layout.item_recycler_chapter -> ChapterVH(parent inflateViewBinding false)
+      R.layout.item_recycler_chapter_dummy -> DummyVH(parent inflate viewType)
       else -> error("Unknown viewType=$viewType")
     }
   }

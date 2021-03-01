@@ -17,7 +17,7 @@ import com.hoc.comicapp.GlideRequest
 import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
 import com.hoc.comicapp.databinding.ItemRecyclerChapterDetailImageBinding
-import com.hoc.comicapp.utils.inflater
+import com.hoc081098.viewbindingdelegate.inflateViewBinding
 import java.io.File
 import timber.log.Timber
 
@@ -31,13 +31,7 @@ class ChapterImageAdapter(
 ) :
   ListAdapter<String, ChapterImageAdapter.VH>(StringDiffUtilItemCallback) {
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-    VH(
-      ItemRecyclerChapterDetailImageBinding.inflate(
-        parent.inflater,
-        parent,
-        false
-      )
-    )
+    VH(parent inflateViewBinding false)
 
   override fun onBindViewHolder(holder: VH, position: Int) = holder.bind(getItem(position))
 
