@@ -106,7 +106,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
       dismissAlertDialog()
     }
 
-    FragmentManager.enableDebugLogging(true)
+//    FragmentManager.enableDebugLogging(true)
     appNavigator
       .commandFlow
       .onEach { command ->
