@@ -6,6 +6,7 @@ import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.content.Context
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
+import android.graphics.Color
 import android.net.Uri
 import android.os.Looper
 import android.util.DisplayMetrics
@@ -24,6 +25,8 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.use
+import androidx.core.view.doOnPreDraw
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
@@ -94,6 +97,14 @@ inline fun Context.getColorBy(@ColorRes id: Int) = ContextCompat.getColor(this, 
 inline fun Context.getDrawableBy(@DrawableRes id: Int) = ContextCompat.getDrawable(this, id)
 
 /**
+ * Retrieve a color from the current [android.content.res.Resources.Theme].
+ */
+@ColorInt
+@SuppressLint("Recycle")
+fun Context.themeColor(@AttrRes themeAttrId: Int): Int =
+  obtainStyledAttributes(intArrayOf(themeAttrId)).use { it.getColor(0, Color.TRANSPARENT) }
+
+/**
  * Get uri from any resource type
  * @receiver Context
  * @param resId - Resource id
@@ -104,9 +115,9 @@ fun Context.uriFromResourceId(@AnyRes resId: Int): Uri? {
     val res = this@uriFromResourceId.resources
     Uri.parse(
       ContentResolver.SCHEME_ANDROID_RESOURCE +
-        "://" + res.getResourcePackageName(resId) +
-        '/' + res.getResourceTypeName(resId) +
-        '/' + res.getResourceEntryName(resId)
+          "://" + res.getResourcePackageName(resId) +
+          '/' + res.getResourceTypeName(resId) +
+          '/' + res.getResourceEntryName(resId)
     )
   }.getOrNull()
 }
@@ -454,3 +465,16 @@ inline val Any?.unit
   get() = Unit
 
 inline val ViewGroup.inflater: LayoutInflater get() = LayoutInflater.from(context)
+
+/**
+ * Start enter transitions that were postponed for this fragment when its content has been redrawn.
+ * This is meant to be used when the data backing a RecyclerView
+ * has been updated for the first time.
+ *
+ * See [https://developer.android.com/training/basics/fragments/animate#recyclerview]
+ */
+fun Fragment.startPostponedEnterTransitionWhenDrawn() {
+  (requireView().parent as? ViewGroup)?.doOnPreDraw {
+    startPostponedEnterTransition()
+  }
+}
