@@ -1,5 +1,6 @@
 package com.hoc.comicapp.ui.detail
 
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -32,6 +33,8 @@ import com.hoc.comicapp.utils.getDrawableBy
 import com.hoc.comicapp.utils.isOrientationPortrait
 import com.hoc.comicapp.utils.showAlertDialog
 import com.hoc.comicapp.utils.snack
+import com.hoc.comicapp.utils.startPostponedEnterTransitionWhenDrawn
+import com.hoc.comicapp.utils.themeColor
 import com.hoc.comicapp.utils.themeInterpolator
 import com.hoc.comicapp.utils.unit
 import com.hoc081098.viewbindingdelegate.viewBinding
@@ -87,27 +90,16 @@ class ComicDetailFragment : BaseFragment<
 
   //region Setup view
   private fun prepareTransitions() {
-    postponeEnterTransition()
-
     sharedElementEnterTransition = MaterialContainerTransform().apply {
-      // Scope the transition to a view in the hierarchy so we know it will be added under
-      // the bottom app bar but over the Hold transition from the exiting HomeFragment.
+      // Animate behind status bar.
       drawingViewId = R.id.main_nav_fragment
       duration = resources.getInteger(R.integer.reply_motion_default_large).toLong()
-      interpolator = requireContext().themeInterpolator(R.attr.motionInterpolatorPersistent)
-    }
-    sharedElementReturnTransition = MaterialContainerTransform().apply {
-      // Again, scope the return transition so it is added below the bottom app bar.
-      drawingViewId = R.id.recycler_home
-      duration = resources.getInteger(R.integer.reply_motion_default_large).toLong()
-      interpolator = requireContext().themeInterpolator(R.attr.motionInterpolatorPersistent)
-    }
-  }
 
-  private fun startTransitions() {
-    Timber.d("transitionName: ${args.transitionName}")
-    viewBinding.rootDetail.transitionName = args.transitionName
-    startPostponedEnterTransition()
+      setAllContainerColors(requireContext().themeColor(R.attr.colorSurface))
+
+      scrimColor = Color.TRANSPARENT
+      interpolator = requireContext().themeInterpolator(R.attr.motionInterpolatorPersistent)
+    }
   }
 
   private fun loadThumbnail(thumbnail: String) {
@@ -371,6 +363,8 @@ class ComicDetailFragment : BaseFragment<
         loadThumbnail(detail.thumbnail)
       }
     }
+
+    startPostponedEnterTransitionWhenDrawn()
   }
 
   @Suppress("IMPLICIT_CAST_TO_ANY")
@@ -395,7 +389,9 @@ class ComicDetailFragment : BaseFragment<
   }
 
   override fun setupView(view: View, savedInstanceState: Bundle?) = viewBinding.run {
-    startTransitions()
+    Timber.d("transitionName: ${args.transitionName}")
+    viewBinding.rootDetail.transitionName = args.transitionName
+    postponeEnterTransition()
 
 //    TODO: Refresh detail page
 //    swipe_refresh_layout.setColorSchemeColors(*resources.getIntArray(com.hoc.comicapp.R.array.swipe_refresh_colors))
