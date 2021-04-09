@@ -7,7 +7,7 @@ import android.view.View
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.constraintlayout.motion.widget.TransitionAdapter
 import androidx.core.text.HtmlCompat
-import androidx.navigation.fragment.findNavController
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
@@ -18,6 +18,7 @@ import com.hoc.comicapp.R
 import com.hoc.comicapp.base.BaseFragment
 import com.hoc.comicapp.databinding.FragmentComicDetailBinding
 import com.hoc.comicapp.navigation.Arguments
+import com.hoc.comicapp.navigation.appNavigator
 import com.hoc.comicapp.ui.detail.ComicDetailIntent.CancelDownloadChapter
 import com.hoc.comicapp.ui.detail.ComicDetailIntent.DeleteChapter
 import com.hoc.comicapp.ui.detail.ComicDetailIntent.DownloadChapter
@@ -48,6 +49,7 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.math.absoluteValue
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import timber.log.Timber
@@ -211,27 +213,37 @@ class ComicDetailFragment : BaseFragment<
   private fun onClickChapter(chapter: Chapter, view: View) {
     when (view.id) {
       R.id.image_download -> onClickDownload(chapter)
-      else -> findNavController().navigate(
-        ComicDetailFragmentDirections.actionComicDetailFragmentToChapterDetailFragment(
-          chapter = chapter.toChapterDetailArgs(),
-          isDownloaded = args.isDownloaded
-        )
-      )
+      else -> {
+        lifecycleScope.launch {
+          appNavigator.execute {
+            navigate(
+              ComicDetailFragmentDirections.actionComicDetailFragmentToChapterDetailFragment(
+                chapter = chapter.toChapterDetailArgs(),
+                isDownloaded = args.isDownloaded
+              )
+            )
+          }
+        }
+      }
     }
   }
 
   private fun onClickChapterChip(category: ComicDetailViewState.Category) {
-    val toCategoryDetailFragment =
-      ComicDetailFragmentDirections.actionComicDetailFragmentToCategoryDetailFragment(
-        title = category.name,
-        category = Arguments.CategoryDetailArgs(
-          description = "",
-          link = category.link,
-          name = category.name,
-          thumbnail = ""
-        )
-      )
-    findNavController().navigate(toCategoryDetailFragment)
+    lifecycleScope.launch {
+      appNavigator.execute {
+        val toCategoryDetailFragment =
+          ComicDetailFragmentDirections.actionComicDetailFragmentToCategoryDetailFragment(
+            title = category.name,
+            category = Arguments.CategoryDetailArgs(
+              description = "",
+              link = category.link,
+              name = category.name,
+              thumbnail = ""
+            )
+          )
+        navigate(toCategoryDetailFragment)
+      }
+    }
   }
 
   private fun onClickDownload(chapter: Chapter) {
@@ -290,12 +302,16 @@ class ComicDetailFragment : BaseFragment<
     if (chapter === null) {
       view?.snack("Chapters list is empty!")
     } else {
-      findNavController().navigate(
-        ComicDetailFragmentDirections.actionComicDetailFragmentToChapterDetailFragment(
-          chapter = chapter.toChapterDetailArgs(),
-          isDownloaded = args.isDownloaded
-        )
-      )
+      lifecycleScope.launch {
+        appNavigator.execute {
+          navigate(
+            ComicDetailFragmentDirections.actionComicDetailFragmentToChapterDetailFragment(
+              chapter = chapter.toChapterDetailArgs(),
+              isDownloaded = args.isDownloaded
+            )
+          )
+        }
+      }
     }
   }
   //endregion
@@ -375,7 +391,9 @@ class ComicDetailFragment : BaseFragment<
       is ComicDetailSingleEvent.EnqueuedDownloadSuccess -> {
         view?.snack("Enqueued download ${event.chapter.chapterName}") {
           action("View") {
-            findNavController().navigate(R.id.downloadingChaptersFragment)
+            lifecycleScope.launch {
+              appNavigator.execute { navigate(R.id.downloadingChaptersFragment) }
+            }
           }
         }
       }
@@ -406,13 +424,17 @@ class ComicDetailFragment : BaseFragment<
 
     switchMode.isChecked = !args.isDownloaded
     switchMode.setOnCheckedChangeListener { _, _ ->
-      val actionComicDetailFragmentSelf =
-        ComicDetailFragmentDirections.actionComicDetailFragmentSelf(
-          comic = args.comic,
-          title = args.title,
-          isDownloaded = !args.isDownloaded
-        )
-      findNavController().navigate(actionComicDetailFragmentSelf)
+      lifecycleScope.launch {
+        appNavigator.execute {
+          val actionComicDetailFragmentSelf =
+            ComicDetailFragmentDirections.actionComicDetailFragmentSelf(
+              comic = args.comic,
+              title = args.title,
+              isDownloaded = !args.isDownloaded
+            )
+          navigate(actionComicDetailFragmentSelf)
+        }
+      }
     }
   }
 
