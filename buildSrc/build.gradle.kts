@@ -22,7 +22,7 @@ gradlePlugin {
 
 object PluginVersions {
   const val kotlin = "1.4.20"
-  const val androidGradle = "4.1.1"
+  const val androidGradle = "7.0.0-alpha14"
   const val navigationSafeArgs = "2.3.1"
   const val googleServices = "4.3.4"
   const val crashlytics = "2.4.1"
