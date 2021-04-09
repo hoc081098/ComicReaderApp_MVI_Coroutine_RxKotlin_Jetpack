@@ -11,8 +11,8 @@ import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.databinding.FragmentFavoriteComicsBinding
 import com.hoc.comicapp.domain.models.getMessage
+import com.hoc.comicapp.koin.requireAppNavigator
 import com.hoc.comicapp.navigation.Arguments
-import com.hoc.comicapp.navigation.appNavigator
 import com.hoc.comicapp.ui.favorite_comics.FavoriteComicsContract.SortOrder
 import com.hoc.comicapp.ui.favorite_comics.FavoriteComicsContract.ViewIntent
 import com.hoc.comicapp.utils.exhaustMap
@@ -25,7 +25,7 @@ import com.hoc081098.viewbindingdelegate.viewBinding
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
-import kotlinx.coroutines.rx3.rxSingle
+import io.reactivex.rxjava3.kotlin.subscribeBy
 import org.koin.androidx.scope.ScopeFragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -85,14 +85,9 @@ class FavoriteComicsFragment : ScopeFragment() {
           title = it.title
         )
       }
-      .flatMapSingle { directions ->
-        rxSingle {
-          appNavigator.execute {
-            navigate(directions)
-          }
-        }
+      .subscribeBy { directions ->
+        requireAppNavigator.execute { navigate(directions) }
       }
-      .subscribe()
       .addTo(compositeDisposable)
   }
 

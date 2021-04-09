@@ -13,7 +13,7 @@ import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.base.BaseFragment
 import com.hoc.comicapp.databinding.FragmentHomeBinding
-import com.hoc.comicapp.navigation.appNavigator
+import com.hoc.comicapp.koin.requireAppNavigator
 import com.hoc.comicapp.utils.isOrientationPortrait
 import com.hoc.comicapp.utils.snack
 import com.hoc.comicapp.utils.unit
@@ -23,10 +23,9 @@ import com.jakewharton.rxbinding4.swiperefreshlayout.refreshes
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import kotlin.LazyThreadSafetyMode.NONE
-import kotlinx.coroutines.rx3.rxSingle
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
+import kotlin.LazyThreadSafetyMode.NONE
 
 class HomeFragment :
   BaseFragment<
@@ -123,23 +122,20 @@ class HomeFragment :
     // Adapter click event
     homeAdapter
       .clickComicObservable
-      .flatMapSingle { (view, comicArg, transitionName) ->
-        rxSingle {
-          val toComicDetailFragment =
-            HomeFragmentDirections.actionHomeFragmentDestToComicDetailFragment(
-              comic = comicArg,
-              title = comicArg.title,
-              isDownloaded = false,
-              transitionName = transitionName
-            )
+      .subscribeBy { (view, comicArg, transitionName) ->
+        val toComicDetailFragment =
+          HomeFragmentDirections.actionHomeFragmentDestToComicDetailFragment(
+            comic = comicArg,
+            title = comicArg.title,
+            isDownloaded = false,
+            transitionName = transitionName
+          )
 
-          view.transitionName = transitionName
-          val extras = FragmentNavigatorExtras(view to view.transitionName)
+        view.transitionName = transitionName
+        val extras = FragmentNavigatorExtras(view to view.transitionName)
 
-          appNavigator.execute { navigate(toComicDetailFragment, extras) }
-        }
+        requireAppNavigator.execute { navigate(toComicDetailFragment, extras) }
       }
-      .subscribe()
       .addTo(compositeDisposable)
   }
 

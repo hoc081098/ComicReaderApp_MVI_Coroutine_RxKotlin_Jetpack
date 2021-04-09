@@ -17,8 +17,8 @@ import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.ofType
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import io.reactivex.rxjava3.kotlin.withLatestFrom
-import java.util.concurrent.TimeUnit
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 
 class SearchComicViewModel(
   private val interactor: Interactor,

@@ -7,11 +7,9 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.Group
 import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -44,22 +42,24 @@ import de.hdodenhof.circleimageview.CircleImageView
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
-import kotlin.LazyThreadSafetyMode.NONE
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import org.koin.androidx.scope.activityRetainedScope
+import org.koin.androidx.scope.ScopeActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import timber.log.Timber
+import kotlin.LazyThreadSafetyMode.NONE
 
-class MainActivity : AppCompatActivity(R.layout.activity_main) {
+class MainActivity : ScopeActivity(R.layout.activity_main) {
   /**
    * Get [AppNavigator].
    * Should only be called on the main thread.
    */
   val appNavigator by lazy(NONE) {
-    activityRetainedScope()
-      .get<AppNavigator>()
-      .also { Timber.d("Get AppNavigator: $it") }
+    get<AppNavigator> { parametersOf(navController) }
+      .also { Timber.d("appNavigator: $it") }
+  }
+  private val navController by lazy(NONE) {
+    findNavController(R.id.main_nav_fragment)
+      .also { Timber.d("navController: $it") }
   }
 
   private val mainVM by viewModel<MainVM>()
@@ -79,7 +79,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     super.onCreate(savedInstanceState)
     setSupportActionBar(viewBinding.toolbar)
 
-    val navController = findNavController(R.id.main_nav_fragment)
     // Set up action bar
     setupActionBarWithNavController(
       navController,
@@ -104,24 +103,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     if (savedInstanceState !== null) {
       dismissAlertDialog()
     }
-
-//    FragmentManager.enableDebugLogging(true)
-    appNavigator
-      .commandFlow
-      .onEach { command ->
-        /**
-         * Performs a navigation on the [NavController] using the provided [directions] and [navigatorExtras],
-         * catching any [IllegalArgumentException] which usually happens when users trigger (e.g. click)
-         * navigation multiple times very quickly on slower devices.
-         * For more context, see [stackoverflow](https://stackoverflow.com/questions/51060762/illegalargumentexception-navigation-destination-xxx-is-unknown-to-this-navcontr).
-         */
-        try {
-          command(navController, this)
-        } catch (e: IllegalStateException) {
-          Timber.e(e, "Execute navigation command error: $e")
-        }
-      }
-      .launchIn(lifecycleScope)
   }
 
   private fun bindVM() {
@@ -248,7 +229,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
   }
 
   override fun onSupportNavigateUp() =
-    findNavController(R.id.main_nav_fragment).navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
 
   override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
 
@@ -275,12 +256,12 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
     if (item.itemId == R.id.searchComicFragment &&
-      findNavController(R.id.main_nav_fragment).currentDestination?.id == R.id.searchComicFragment
+      navController.currentDestination?.id == R.id.searchComicFragment
     ) {
       return showSearch().let { true }
     }
-    return item.onNavDestinationSelected(findNavController(R.id.main_nav_fragment)) ||
-      super.onOptionsItemSelected(item)
+    return item.onNavDestinationSelected(navController) ||
+        super.onOptionsItemSelected(item)
   }
 
   fun showSearch() = viewBinding.searchView.showSearch()

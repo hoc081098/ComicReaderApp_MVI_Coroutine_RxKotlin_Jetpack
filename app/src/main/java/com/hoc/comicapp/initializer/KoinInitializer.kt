@@ -5,9 +5,9 @@ import androidx.startup.Initializer
 import com.hoc.comicapp.BuildConfig
 import com.hoc.comicapp.koin.appModule
 import com.hoc.comicapp.koin.dataModule
+import com.hoc.comicapp.koin.navigationModule
 import com.hoc.comicapp.koin.networkModule
 import com.hoc.comicapp.koin.viewModelModule
-import com.hoc.comicapp.navigation.navigationModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.Koin

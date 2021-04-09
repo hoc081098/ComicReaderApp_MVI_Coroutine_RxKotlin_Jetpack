@@ -41,8 +41,8 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import java.util.concurrent.TimeUnit
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 
 typealias HomeClickEvent = Triple<View, Arguments.ComicDetailArgs, String>
 typealias _HomeClickEvent = Triple<View, Comic, String>

@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager.VERTICAL
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.databinding.FragmentCategoryBinding
+import com.hoc.comicapp.koin.requireAppNavigator
 import com.hoc.comicapp.navigation.Arguments
 import com.hoc.comicapp.utils.itemSelections
 import com.hoc.comicapp.utils.observe
@@ -65,7 +66,7 @@ class CategoryFragment : ScopeFragment() {
               thumbnail = it.thumbnail
             )
           )
-        findNavController().navigate(toCategoryDetailFragment)
+        requireAppNavigator.execute { navigate(toCategoryDetailFragment) }
       }
       .addTo(compositeDisposable)
 

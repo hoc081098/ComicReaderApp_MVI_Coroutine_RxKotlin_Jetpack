@@ -26,7 +26,7 @@ object PluginVersions {
   const val navigationSafeArgs = "2.3.1"
   const val googleServices = "4.3.4"
   const val crashlytics = "2.4.1"
-  const val spotless = "5.8.2"
+  const val spotless = "5.11.1"
 }
 
 object Plugins {

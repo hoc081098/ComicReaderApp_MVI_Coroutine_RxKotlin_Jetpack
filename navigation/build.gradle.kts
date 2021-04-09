@@ -9,7 +9,6 @@ comicApp { parcelize = true }
 
 dependencies {
     implementation(deps.androidX.navigation.fragment)
-    implementation(deps.kotlin.coroutinesCore)
     implementation(deps.timber)
 
     testImplementation("junit:junit:4.13")

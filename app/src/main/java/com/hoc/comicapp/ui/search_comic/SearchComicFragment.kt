@@ -10,7 +10,7 @@ import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.activity.main.MainActivity
 import com.hoc.comicapp.databinding.FragmentSearchComicBinding
-import com.hoc.comicapp.navigation.appNavigator
+import com.hoc.comicapp.koin.requireAppNavigator
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.SingleEvent
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewIntent
 import com.hoc.comicapp.utils.isOrientationPortrait
@@ -22,7 +22,7 @@ import com.jakewharton.rxbinding4.view.clicks
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
-import kotlinx.coroutines.rx3.rxSingle
+import io.reactivex.rxjava3.kotlin.subscribeBy
 import org.koin.androidx.scope.ScopeFragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
@@ -72,20 +72,17 @@ class SearchComicFragment : ScopeFragment() {
 
     searchComicAdapter
       .clickComicObservable
-      .flatMapSingle {
+      .subscribeBy {
         val toComicDetailFragment =
           SearchComicFragmentDirections.actionSearchComicFragmentToComicDetailFragment(
             comic = it,
             title = it.title,
             isDownloaded = false
           )
-        rxSingle {
-          appNavigator.execute {
-            navigate(toComicDetailFragment)
-          }
+        requireAppNavigator.execute {
+          navigate(toComicDetailFragment)
         }
       }
-      .subscribe()
       .addTo(compositeDisposable)
   }
 

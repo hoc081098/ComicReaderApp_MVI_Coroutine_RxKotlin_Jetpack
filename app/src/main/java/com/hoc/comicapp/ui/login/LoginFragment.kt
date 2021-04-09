@@ -8,8 +8,6 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.Button
 import android.widget.ProgressBar
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.lifecycle.lifecycleScope
-import androidx.navigation.findNavController
 import androidx.transition.ChangeBounds
 import androidx.transition.Fade
 import androidx.transition.TransitionManager
@@ -17,7 +15,8 @@ import androidx.transition.TransitionSet
 import com.hoc.comicapp.R
 import com.hoc.comicapp.databinding.FragmentLoginBinding
 import com.hoc.comicapp.domain.models.getMessage
-import com.hoc.comicapp.navigation.appNavigator
+import com.hoc.comicapp.koin.appNavigator
+import com.hoc.comicapp.koin.requireAppNavigator
 import com.hoc.comicapp.ui.login.LoginContract.Intent
 import com.hoc.comicapp.ui.login.LoginContract.SingleEvent
 import com.hoc.comicapp.utils.observe
@@ -30,7 +29,6 @@ import com.jakewharton.rxbinding4.widget.textChanges
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
-import kotlinx.coroutines.launch
 import org.koin.androidx.scope.ScopeFragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
@@ -56,9 +54,7 @@ class LoginFragment : ScopeFragment() {
     viewBinding.buttonRegister.setOnClickListener {
       val toRegisterFragment =
         LoginFragmentDirections.actionLoginFragmentToRegisterFragment()
-      lifecycleScope.launch {
-        appNavigator.execute { navigate(toRegisterFragment) }
-      }
+      requireAppNavigator.execute { navigate(toRegisterFragment) }
     }
 
     bindVM()
@@ -86,9 +82,7 @@ class LoginFragment : ScopeFragment() {
           view?.snack("Login success") {
             onDismissed {
               Timber.d("onDismissed")
-              activity
-                ?.findNavController(R.id.main_nav_fragment)
-                ?.popBackStack(R.id.home_fragment_dest, false)
+              appNavigator?.execute { popBackStack(R.id.home_fragment_dest, false) }
             }
           }
         }

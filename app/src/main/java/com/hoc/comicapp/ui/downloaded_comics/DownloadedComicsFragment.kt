@@ -11,13 +11,12 @@ import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.databinding.FragmentDownloadedComicsBinding
 import com.hoc.comicapp.domain.models.getMessage
+import com.hoc.comicapp.koin.requireAppNavigator
 import com.hoc.comicapp.navigation.Arguments
-import com.hoc.comicapp.navigation.appNavigator
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.SingleEvent
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.SortOrder
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.ViewIntent
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.ViewState.ComicItem
-import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsFragmentDirections.Companion.actionDownloadedComicsFragmentToComicDetailFragment as toComicDetailFragment
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.itemSelections
 import com.hoc.comicapp.utils.observe
@@ -28,10 +27,11 @@ import com.hoc081098.viewbindingdelegate.viewBinding
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
-import kotlinx.coroutines.rx3.rxSingle
+import io.reactivex.rxjava3.kotlin.subscribeBy
 import org.koin.androidx.scope.ScopeFragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
+import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsFragmentDirections.Companion.actionDownloadedComicsFragmentToComicDetailFragment as toComicDetailFragment
 
 class DownloadedComicsFragment : ScopeFragment() {
   private val viewModel by viewModel<DownloadedComicsViewModel>()
@@ -79,26 +79,23 @@ class DownloadedComicsFragment : ScopeFragment() {
       viewModel.state.value.sortOrder.let { SortOrder.values().indexOf(it) }
 
     downloadedComicsAdapter.clickItem
-      .flatMapSingle { item ->
-        rxSingle {
-          appNavigator.execute {
-            navigate(
-              toComicDetailFragment(
-                comic = Arguments.ComicDetailArgs(
-                  title = item.title,
-                  thumbnail = item.thumbnail.toRelativeString(requireContext().filesDir),
-                  link = item.comicLink,
-                  view = item.view,
-                  remoteThumbnail = item.remoteThumbnail
-                ),
+      .subscribeBy { item ->
+        requireAppNavigator.execute {
+          navigate(
+            toComicDetailFragment(
+              comic = Arguments.ComicDetailArgs(
                 title = item.title,
-                isDownloaded = true
-              )
+                thumbnail = item.thumbnail.toRelativeString(requireContext().filesDir),
+                link = item.comicLink,
+                view = item.view,
+                remoteThumbnail = item.remoteThumbnail
+              ),
+              title = item.title,
+              isDownloaded = true
             )
-          }
+          )
         }
       }
-      .subscribe()
       .addTo(compositeDisposable)
   }
 

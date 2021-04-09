@@ -11,8 +11,8 @@ import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.navigation.Arguments
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.ComicDetail
 import io.reactivex.rxjava3.core.Observable
-import java.util.Date
 import kotlinx.parcelize.Parcelize
+import java.util.Date
 
 interface ComicDetailInteractor {
   fun getFavoriteChange(link: String): Observable<ComicDetailPartialChange>
