@@ -50,6 +50,11 @@ This project brings to the table set of best practices, tools, and solutions:
  Total                  266        20717         2275          716        17726
 --------------------------------------------------------------------------------
 ```
+
+# Server and API
+
+Clone this repository: https://github.com/hoc081098/comic_app_server_nodejs
+
 # License
 
     MIT License
