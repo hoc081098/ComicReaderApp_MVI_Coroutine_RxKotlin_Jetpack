@@ -25,12 +25,12 @@ import com.hoc.comicapp.databinding.ItemRecyclerviewUpdatedComicBinding
 import com.hoc.comicapp.databinding.ItemRecyclerviewUpdatedErrorBinding
 import com.hoc.comicapp.databinding.ItemRecyclerviewUpdatedLoadingBinding
 import com.hoc.comicapp.domain.models.Comic
-import com.hoc.comicapp.ui.detail.ComicArg
+import com.hoc.comicapp.navigation.Arguments
 import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.MOST_VIEWED
 import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.NEWEST
 import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.UPDATED
-import com.hoc.comicapp.utils.inflater
 import com.hoc.comicapp.utils.mapNotNull
+import com.hoc081098.viewbindingdelegate.inflateViewBinding
 import com.jakewharton.rxbinding4.recyclerview.scrollStateChanges
 import com.jakewharton.rxbinding4.view.clicks
 import com.jakewharton.rxbinding4.view.detaches
@@ -41,17 +41,17 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import java.util.concurrent.TimeUnit
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 
-typealias HomeClickEvent = Triple<View, ComicArg, String>
+typealias HomeClickEvent = Triple<View, Arguments.ComicDetailArgs, String>
 typealias _HomeClickEvent = Triple<View, Comic, String>
 
 private fun toHomeClickEvent(event: _HomeClickEvent): HomeClickEvent {
   return Triple(
     event.first,
     event.second.let { comic ->
-      ComicArg(
+      Arguments.ComicDetailArgs(
         link = comic.link,
         thumbnail = comic.thumbnail,
         title = comic.title,
@@ -104,49 +104,12 @@ class HomeAdapter(
 
   override fun onCreateViewHolder(parent: ViewGroup, @ViewType viewType: Int): VH {
     return when (viewType) {
-      NEWEST_LIST_VIEW_TYPE -> NewestComicsListVH(
-        ItemRecyclerHomeRecyclerBinding.inflate(
-          parent.inflater,
-          parent,
-          false
-        )
-      )
-      MOST_VIEWED_LIST_VIEW_TYPE -> MostViewedComicsListVH(
-        ItemRecyclerHomeRecyclerBinding.inflate(
-          parent.inflater,
-          parent,
-          false
-        )
-      )
-      COMIC_ITEM_VIEW_TYPE -> ComicItemVH(
-        ItemRecyclerviewUpdatedComicBinding.inflate(
-          parent.inflater,
-          parent,
-          false
-        ),
-        parent,
-      )
-      ERROR_ITEM_VIEW_TYPE -> ErrorVH(
-        ItemRecyclerviewUpdatedErrorBinding.inflate(
-          parent.inflater,
-          parent,
-          false
-        )
-      )
-      LOADING_ITEM_VIEW_TYPE -> LoadingVH(
-        ItemRecyclerviewUpdatedLoadingBinding.inflate(
-          parent.inflater,
-          parent,
-          false
-        )
-      )
-      HEADER_VIEW_TYPE -> HeaderVH(
-        ItemRecyclerHomeHeaderBinding.inflate(
-          parent.inflater,
-          parent,
-          false
-        )
-      )
+      NEWEST_LIST_VIEW_TYPE -> NewestComicsListVH(parent inflateViewBinding false)
+      MOST_VIEWED_LIST_VIEW_TYPE -> MostViewedComicsListVH(parent inflateViewBinding false)
+      COMIC_ITEM_VIEW_TYPE -> ComicItemVH(parent inflateViewBinding false, parent)
+      ERROR_ITEM_VIEW_TYPE -> ErrorVH(parent inflateViewBinding false)
+      LOADING_ITEM_VIEW_TYPE -> LoadingVH(parent inflateViewBinding false)
+      HEADER_VIEW_TYPE -> HeaderVH(parent inflateViewBinding false)
       else -> error("Unknown view type: $viewType")
     }
   }

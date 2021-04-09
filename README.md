@@ -34,6 +34,22 @@ This project brings to the table set of best practices, tools, and solutions:
 | ![](screenshots/9.jpeg) | ![](screenshots/10.png) | ![](screenshots/11.png) | ![](screenshots/12.png) |
 | ![](screenshots/13.png) | ![](screenshots/14.png) | ![](screenshots/15.png) |                         |
 
+# LOC
+
+```sh
+--------------------------------------------------------------------------------
+ Language             Files        Lines        Blank      Comment         Code
+--------------------------------------------------------------------------------
+ Kotlin                 159        15144         1759          636        12749
+ XML                     95         5182          465           80         4637
+ JSON                     3          117            0            0          117
+ Prolog                   7          116           16            0          100
+ Markdown                 1           74           12            0           62
+ Batch                    1           84           23            0           61
+--------------------------------------------------------------------------------
+ Total                  266        20717         2275          716        17726
+--------------------------------------------------------------------------------
+```
 # License
 
     MIT License

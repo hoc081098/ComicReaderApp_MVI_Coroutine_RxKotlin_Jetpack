@@ -3,13 +3,15 @@ package com.hoc.comicapp.data.local
 import androidx.room.TypeConverter
 import com.hoc.comicapp.data.JsonAdaptersContainer
 import com.hoc.comicapp.data.local.entities.ComicEntity
+import org.koin.core.component.KoinApiExtension
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import java.util.Date
-import org.koin.core.KoinComponent
-import org.koin.core.inject
 
 /**
  * Type converters to allow Room to reference complex data types.
  */
+@OptIn(KoinApiExtension::class)
 class Converters : KoinComponent {
   private val jsonAdapterContainer by inject<JsonAdaptersContainer>()
 

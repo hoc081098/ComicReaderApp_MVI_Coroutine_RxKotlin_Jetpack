@@ -5,12 +5,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.activity.main.MainActivity
 import com.hoc.comicapp.databinding.FragmentSearchComicBinding
+import com.hoc.comicapp.koin.requireAppNavigator
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.SingleEvent
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewIntent
 import com.hoc.comicapp.utils.isOrientationPortrait
@@ -79,7 +79,9 @@ class SearchComicFragment : ScopeFragment() {
             title = it.title,
             isDownloaded = false
           )
-        findNavController().navigate(toComicDetailFragment)
+        requireAppNavigator.execute {
+          navigate(toComicDetailFragment)
+        }
       }
       .addTo(compositeDisposable)
   }

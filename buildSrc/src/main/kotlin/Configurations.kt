@@ -21,7 +21,7 @@ object appConfig {
 }
 
 object versions {
-  const val ktLint = "0.39.0"
+  const val ktLint = "0.41.0"
 
   object sdk {
     const val buildTools = "30.0.2"
@@ -54,7 +54,7 @@ object versions {
     const val work = "2.5.0-beta01"
   }
 
-  const val koin = "2.2.0-beta-1"
+  const val koin = "2.2.2"
   const val moshiKotlin = "1.11.0"
   const val retrofit = "2.9.0"
   const val okHttpLoggingInterceptor = "4.10.0-RC1"
@@ -90,13 +90,14 @@ object versions {
     const val crashlytics = "17.3.0"
   }
 
-  const val viewBindingDelegate = "1.0.0-alpha02"
+  const val viewBindingDelegate = "1.0.0-alpha03"
 }
 
 object deps {
   object module {
     const val baseUi = ":base-ui"
     const val utils = ":utils"
+    const val navigation = ":navigation"
   }
 
   object kotlin {
@@ -147,6 +148,7 @@ object deps {
   object koin {
     const val androidXViewModel = "org.koin:koin-androidx-viewmodel:${versions.koin}"
     const val androidXScope = "org.koin:koin-androidx-scope:${versions.koin}"
+    const val core = "org.koin:koin-core:${versions.koin}"
   }
 
   const val moshiKotlin = "com.squareup.moshi:moshi-kotlin:${versions.moshiKotlin}"

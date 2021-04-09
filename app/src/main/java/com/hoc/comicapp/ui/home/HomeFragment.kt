@@ -5,7 +5,6 @@ import android.view.MotionEvent
 import android.view.View
 import androidx.core.view.doOnPreDraw
 import androidx.navigation.fragment.FragmentNavigatorExtras
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
@@ -14,6 +13,7 @@ import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.base.BaseFragment
 import com.hoc.comicapp.databinding.FragmentHomeBinding
+import com.hoc.comicapp.koin.requireAppNavigator
 import com.hoc.comicapp.utils.isOrientationPortrait
 import com.hoc.comicapp.utils.snack
 import com.hoc.comicapp.utils.unit
@@ -23,9 +23,9 @@ import com.jakewharton.rxbinding4.swiperefreshlayout.refreshes
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import kotlin.LazyThreadSafetyMode.NONE
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
+import kotlin.LazyThreadSafetyMode.NONE
 
 class HomeFragment :
   BaseFragment<
@@ -35,7 +35,9 @@ class HomeFragment :
     HomeViewModel,
     >(R.layout.fragment_home) {
   override val viewModel by viewModel<HomeViewModel>()
-  override val viewBinding by viewBinding<FragmentHomeBinding>()
+  override val viewBinding by viewBinding<FragmentHomeBinding> {
+    recyclerHome.adapter = null
+  }
 
   private val homeAdapter by lazy(NONE) {
     HomeAdapter(
@@ -51,11 +53,6 @@ class HomeFragment :
     exitTransition = Hold().apply {
       duration = resources.getInteger(R.integer.reply_motion_default_large).toLong()
     }
-  }
-
-  override fun onDestroyView() {
-    super.onDestroyView()
-    viewBinding.recyclerHome.adapter = null
   }
 
   private fun getMaxSpanCount() = if (requireContext().isOrientationPortrait) 2 else 4
@@ -137,7 +134,7 @@ class HomeFragment :
         view.transitionName = transitionName
         val extras = FragmentNavigatorExtras(view to view.transitionName)
 
-        findNavController().navigate(toComicDetailFragment, extras)
+        requireAppNavigator.execute { navigate(toComicDetailFragment, extras) }
       }
       .addTo(compositeDisposable)
   }

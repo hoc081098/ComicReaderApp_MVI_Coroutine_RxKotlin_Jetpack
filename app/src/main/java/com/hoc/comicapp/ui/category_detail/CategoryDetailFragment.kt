@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
@@ -13,9 +12,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.databinding.FragmentCategoryDetailBinding
+import com.hoc.comicapp.koin.requireAppNavigator
+import com.hoc.comicapp.navigation.Arguments
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewIntent
-import com.hoc.comicapp.ui.category_detail.CategoryDetailFragmentDirections.Companion.actionCategoryDetailFragmentToComicDetailFragment
-import com.hoc.comicapp.ui.detail.ComicArg
 import com.hoc.comicapp.utils.isOrientationPortrait
 import com.hoc.comicapp.utils.observe
 import com.hoc081098.viewbindingdelegate.viewBinding
@@ -27,17 +26,19 @@ import io.reactivex.rxjava3.core.Observable.mergeArray
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import kotlin.LazyThreadSafetyMode.NONE
 import org.koin.androidx.scope.ScopeFragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import timber.log.Timber
+import kotlin.LazyThreadSafetyMode.NONE
 
 class CategoryDetailFragment : ScopeFragment() {
   private val args by navArgs<CategoryDetailFragmentArgs>()
 
   private val vm by viewModel<CategoryDetailVM> { parametersOf(args.category) }
-  private val viewBinding by viewBinding<FragmentCategoryDetailBinding>()
+  private val viewBinding by viewBinding<FragmentCategoryDetailBinding> {
+    recyclerCategoryDetail.adapter = null
+  }
   private val compositeDisposable = CompositeDisposable()
 
   private val categoryDetailAdapter by lazy(NONE) {
@@ -137,7 +138,6 @@ class CategoryDetailFragment : ScopeFragment() {
 
   override fun onDestroyView() {
     super.onDestroyView()
-    viewBinding.recyclerCategoryDetail.adapter = null
     compositeDisposable.clear()
   }
 
@@ -153,12 +153,13 @@ class CategoryDetailFragment : ScopeFragment() {
 
   private val maxSpanCount get() = if (requireContext().isOrientationPortrait) 2 else 4
 
-  private fun onClickComic(comic: ComicArg) {
-    val toComicDetailFragment = actionCategoryDetailFragmentToComicDetailFragment(
-      title = comic.title,
-      isDownloaded = false,
-      comic = comic
-    )
-    findNavController().navigate(toComicDetailFragment)
+  private fun onClickComic(comic: Arguments.ComicDetailArgs) {
+    val toComicDetailFragment =
+      CategoryDetailFragmentDirections.actionCategoryDetailFragmentToComicDetailFragment(
+        title = comic.title,
+        isDownloaded = false,
+        comic = comic
+      )
+    requireAppNavigator.execute { navigate(toComicDetailFragment) }
   }
 }

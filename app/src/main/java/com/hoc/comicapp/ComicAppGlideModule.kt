@@ -17,17 +17,17 @@ import com.bumptech.glide.load.model.MultiModelLoaderFactory
 import com.bumptech.glide.load.model.stream.BaseGlideUrlLoader
 import com.bumptech.glide.module.AppGlideModule
 import com.hoc.comicapp.ImageHeaders.headersFor
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import okhttp3.logging.HttpLoggingInterceptor.Level.HEADERS
+import okhttp3.logging.HttpLoggingInterceptor.Level.NONE
+import timber.log.Timber
 import java.io.InputStream
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
 import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
-import okhttp3.logging.HttpLoggingInterceptor.Level.HEADERS
-import okhttp3.logging.HttpLoggingInterceptor.Level.NONE
-import timber.log.Timber
 
 @GlideModule
 class ComicAppGlideModule : AppGlideModule() {

@@ -5,7 +5,7 @@ import com.android.build.gradle.AppExtension
 import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.LibraryExtension
 import com.android.build.gradle.LibraryPlugin
-import org.gradle.api.JavaVersion.VERSION_1_8
+import org.gradle.api.JavaVersion.VERSION_11
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaLibraryPlugin
@@ -34,8 +34,8 @@ class ComicAppPlugin : Plugin<Project> {
         when (this) {
           is JavaPlugin, is JavaLibraryPlugin -> {
             project.convention.getPlugin<JavaPluginConvention>().run {
-              targetCompatibility = VERSION_1_8
-              sourceCompatibility = VERSION_1_8
+              targetCompatibility = VERSION_11
+              sourceCompatibility = VERSION_11
             }
           }
           is LibraryPlugin -> {
@@ -60,6 +60,7 @@ class ComicAppPlugin : Plugin<Project> {
             @Suppress("UnstableApiUsage")
             libraryExtension.buildFeatures {
               viewBinding = comicAppExtension.viewBinding
+              dataBinding = false
             }
             enableParcelize(comicAppExtension.parcelize)
           }
@@ -85,7 +86,7 @@ private fun Project.enableParcelize(enabled: Boolean) {
 private fun Project.configKotlinOptions() {
   tasks.withType<KotlinCompile>().configureEach {
     kotlinOptions {
-      jvmTarget = VERSION_1_8.toString()
+      jvmTarget = VERSION_11.toString()
       freeCompilerArgs = freeCompilerArgs + listOf("-Xopt-in=kotlin.RequiresOptIn")
     }
   }
@@ -117,8 +118,8 @@ private fun Project.configAndroidLibrary() = libraryExtension.run {
   }
 
   compileOptions {
-    sourceCompatibility = VERSION_1_8
-    targetCompatibility = VERSION_1_8
+    sourceCompatibility = VERSION_11
+    targetCompatibility = VERSION_11
   }
 }
 
@@ -153,7 +154,7 @@ private fun Project.configAndroidApplication() = appExtension.run {
   }
 
   compileOptions {
-    sourceCompatibility = VERSION_1_8
-    targetCompatibility = VERSION_1_8
+    sourceCompatibility = VERSION_11
+    targetCompatibility = VERSION_11
   }
 }

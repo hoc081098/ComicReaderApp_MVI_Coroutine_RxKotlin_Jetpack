@@ -2,7 +2,6 @@ plugins {
   `comic-app-plugin`
   id("com.android.application")
   id("kotlin-kapt")
-  id("androidx.navigation.safeargs.kotlin")
 }
 
 comicApp {
@@ -14,6 +13,7 @@ dependencies {
   implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
   implementation(project(deps.module.baseUi))
   implementation(project(deps.module.utils))
+  implementation(project(deps.module.navigation))
 
   implementation(deps.kotlin.stdlib)
   implementation(deps.kotlin.coroutinesCore)

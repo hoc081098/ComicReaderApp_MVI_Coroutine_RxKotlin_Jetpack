@@ -3,7 +3,6 @@ repositories {
   google()
   jcenter()
   gradlePluginPortal()
-  maven(url = "https://dl.bintray.com/kotlin/kotlin-eap")
   maven(url = "https://plugins.gradle.org/m2/")
 }
 
@@ -21,16 +20,16 @@ gradlePlugin {
   }
 }
 
-internal object PluginVersions {
+object PluginVersions {
   const val kotlin = "1.4.20"
-  const val androidGradle = "4.1.1"
+  const val androidGradle = "7.0.0-alpha14"
   const val navigationSafeArgs = "2.3.1"
   const val googleServices = "4.3.4"
   const val crashlytics = "2.4.1"
-  const val spotless = "5.8.2"
+  const val spotless = "5.11.1"
 }
 
-internal object Plugins {
+object Plugins {
   const val kotlin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${PluginVersions.kotlin}"
   const val androidGradle = "com.android.tools.build:gradle:${PluginVersions.androidGradle}"
   const val navigationSafeArgs = "androidx.navigation:navigation-safe-args-gradle-plugin:${PluginVersions.navigationSafeArgs}"

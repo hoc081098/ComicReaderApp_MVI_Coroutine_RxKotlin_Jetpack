@@ -25,6 +25,7 @@ import com.hoc.comicapp.activity.main.MainContract.ViewIntent
 import com.hoc.comicapp.activity.main.MainContract.ViewState.User
 import com.hoc.comicapp.databinding.ActivityMainBinding
 import com.hoc.comicapp.domain.models.getMessage
+import com.hoc.comicapp.navigation.AppNavigator
 import com.hoc.comicapp.utils.dismissAlertDialog
 import com.hoc.comicapp.utils.dpToPx
 import com.hoc.comicapp.utils.exhaustMap
@@ -41,12 +42,26 @@ import de.hdodenhof.circleimageview.CircleImageView
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
-import kotlin.LazyThreadSafetyMode.NONE
 import org.koin.androidx.scope.ScopeActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import timber.log.Timber
+import kotlin.LazyThreadSafetyMode.NONE
 
 class MainActivity : ScopeActivity(R.layout.activity_main) {
+  /**
+   * Get [AppNavigator].
+   * Should only be called on the main thread.
+   */
+  val appNavigator by lazy(NONE) {
+    get<AppNavigator> { parametersOf(navController) }
+      .also { Timber.d("appNavigator: $it") }
+  }
+  private val navController by lazy(NONE) {
+    findNavController(R.id.main_nav_fragment)
+      .also { Timber.d("navController: $it") }
+  }
+
   private val mainVM by viewModel<MainVM>()
   private val viewBinding by viewBinding<ActivityMainBinding>()
   private val compositeDisposable = CompositeDisposable()
@@ -64,7 +79,6 @@ class MainActivity : ScopeActivity(R.layout.activity_main) {
     super.onCreate(savedInstanceState)
     setSupportActionBar(viewBinding.toolbar)
 
-    val navController = findNavController(R.id.main_nav_fragment)
     // Set up action bar
     setupActionBarWithNavController(
       navController,
@@ -215,7 +229,7 @@ class MainActivity : ScopeActivity(R.layout.activity_main) {
   }
 
   override fun onSupportNavigateUp() =
-    findNavController(R.id.main_nav_fragment).navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
 
   override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
 
@@ -242,11 +256,11 @@ class MainActivity : ScopeActivity(R.layout.activity_main) {
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
     if (item.itemId == R.id.searchComicFragment &&
-      findNavController(R.id.main_nav_fragment).currentDestination?.id == R.id.searchComicFragment
+      navController.currentDestination?.id == R.id.searchComicFragment
     ) {
       return showSearch().let { true }
     }
-    return item.onNavDestinationSelected(findNavController(R.id.main_nav_fragment)) ||
+    return item.onNavDestinationSelected(navController) ||
       super.onOptionsItemSelected(item)
   }
 

@@ -2,7 +2,10 @@
 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-buildscript { repositories { mavenCentral() } }
+buildscript {
+  repositories { mavenCentral() }
+}
+
 
 subprojects {
   apply(from = "${rootProject.rootDir}/spotless.gradle.kts")
@@ -13,8 +16,8 @@ allprojects {
 
   tasks.withType<KotlinCompile> {
     kotlinOptions {
-      jvmTarget = JavaVersion.VERSION_1_8.toString()
-      freeCompilerArgs = freeCompilerArgs + listOf("-Xopt-in=kotlin.RequiresOptIn")
+      jvmTarget = JavaVersion.VERSION_11.toString()
+      freeCompilerArgs += listOf("-Xopt-in=kotlin.RequiresOptIn")
     }
   }
 
@@ -32,8 +35,10 @@ allprojects {
     mavenCentral()
     maven(url = "https://oss.sonatype.org/content/repositories/snapshots")
     maven(url = "https://jitpack.io")
-    maven(url = "http://dl.bintray.com/amulyakhare/maven")
-    maven(url = "https://dl.bintray.com/kotlin/kotlin-eap")
+    maven {
+      url = uri("http://dl.bintray.com/amulyakhare/maven")
+      isAllowInsecureProtocol = true
+    }
   }
 }
 

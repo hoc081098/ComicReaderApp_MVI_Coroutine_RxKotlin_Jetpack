@@ -43,7 +43,7 @@
 
         <argument
             android:name="comic"
-            app:argType="com.hoc.comicapp.ui.detail.ComicArg"
+            app:argType="com.hoc.comicapp.navigation.Arguments$ComicDetailArgs"
             app:nullable="false" />
 
         <argument
@@ -121,7 +121,7 @@
 
         <argument
             android:name="chapter"
-            app:argType="com.hoc.comicapp.ui.detail.ComicDetailViewState$Chapter"
+            app:argType="com.hoc.comicapp.navigation.Arguments$ChapterDetailArgs"
             app:nullable="false" />
 
         <argument
@@ -161,7 +161,7 @@
 
         <argument
             android:name="category"
-            app:argType="com.hoc.comicapp.ui.category_detail.CategoryDetailContract$CategoryArg"
+            app:argType="com.hoc.comicapp.navigation.Arguments$CategoryDetailArgs"
             app:nullable="false" />
 
         <action

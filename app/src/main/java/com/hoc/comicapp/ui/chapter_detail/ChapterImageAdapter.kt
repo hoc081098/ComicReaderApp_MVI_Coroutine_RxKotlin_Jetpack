@@ -18,8 +18,8 @@ import com.hoc.comicapp.GlideRequests
 import com.hoc.comicapp.R
 import com.hoc.comicapp.databinding.ItemRecyclerChapterDetailImageBinding
 import com.hoc.comicapp.utils.inflater
-import java.io.File
 import timber.log.Timber
+import java.io.File
 
 object StringDiffUtilItemCallback : DiffUtil.ItemCallback<String>() {
   override fun areItemsTheSame(oldItem: String, newItem: String): Boolean = oldItem == newItem

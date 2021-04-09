@@ -26,10 +26,10 @@ import com.hoc081098.viewbindingdelegate.viewBinding
 import com.jakewharton.rxbinding4.view.clicks
 import com.jakewharton.rxbinding4.widget.checkedChanges
 import io.reactivex.rxjava3.core.Observable
-import kotlin.LazyThreadSafetyMode.NONE
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import timber.log.Timber
+import kotlin.LazyThreadSafetyMode.NONE
 
 class ChapterDetailFragment : BaseFragment<
   ViewIntent,
@@ -41,7 +41,10 @@ class ChapterDetailFragment : BaseFragment<
   override val viewModel by viewModel<ChapterDetailViewModel> {
     parametersOf(navArgs.isDownloaded)
   }
-  override val viewBinding by viewBinding<FragmentChapterDetailBinding>()
+  override val viewBinding by viewBinding<FragmentChapterDetailBinding> {
+    recyclerImages.adapter = null
+    spinnerChapters.adapter = null
+  }
 
   private val mainActivity get() = requireActivity() as MainActivity
   private var shouldEmitSelectedItem = false
@@ -58,12 +61,6 @@ class ChapterDetailFragment : BaseFragment<
         )
       )
     )
-  }
-
-  override fun onDestroyView() {
-    super.onDestroyView()
-    viewBinding.recyclerImages.adapter = null
-    viewBinding.spinnerChapters.adapter = null
   }
 
   //region Override BaseFragment

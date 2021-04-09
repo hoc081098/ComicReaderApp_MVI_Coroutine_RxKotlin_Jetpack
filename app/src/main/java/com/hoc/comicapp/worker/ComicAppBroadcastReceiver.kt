@@ -15,10 +15,12 @@ import com.hoc.comicapp.initializer.startKoinIfNeeded
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
-import org.koin.core.KoinComponent
-import org.koin.core.inject
+import org.koin.core.component.KoinApiExtension
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import timber.log.Timber
 
+@OptIn(KoinApiExtension::class)
 class ComicAppBroadcastReceiver : BroadcastReceiver(), KoinComponent {
   private val workManager by inject<WorkManager>()
   private val appCoroutineScope by inject<CoroutineScope>()

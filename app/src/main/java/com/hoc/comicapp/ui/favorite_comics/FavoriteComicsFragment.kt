@@ -5,14 +5,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chauthai.swipereveallayout.ViewBinderHelper
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.databinding.FragmentFavoriteComicsBinding
 import com.hoc.comicapp.domain.models.getMessage
-import com.hoc.comicapp.ui.detail.ComicArg
+import com.hoc.comicapp.koin.requireAppNavigator
+import com.hoc.comicapp.navigation.Arguments
 import com.hoc.comicapp.ui.favorite_comics.FavoriteComicsContract.SortOrder
 import com.hoc.comicapp.ui.favorite_comics.FavoriteComicsContract.ViewIntent
 import com.hoc.comicapp.utils.exhaustMap
@@ -70,7 +70,7 @@ class FavoriteComicsFragment : ScopeFragment() {
     favoriteComicsAdapter
       .clickItem
       .map {
-        ComicArg(
+        Arguments.ComicDetailArgs(
           link = it.url,
           thumbnail = it.thumbnail,
           title = it.title,
@@ -85,7 +85,9 @@ class FavoriteComicsFragment : ScopeFragment() {
           title = it.title
         )
       }
-      .subscribeBy(onNext = findNavController()::navigate)
+      .subscribeBy { directions ->
+        requireAppNavigator.execute { navigate(directions) }
+      }
       .addTo(compositeDisposable)
   }
 

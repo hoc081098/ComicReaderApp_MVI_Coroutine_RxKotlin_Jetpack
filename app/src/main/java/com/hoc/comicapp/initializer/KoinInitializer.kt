@@ -5,6 +5,7 @@ import androidx.startup.Initializer
 import com.hoc.comicapp.BuildConfig
 import com.hoc.comicapp.koin.appModule
 import com.hoc.comicapp.koin.dataModule
+import com.hoc.comicapp.koin.navigationModule
 import com.hoc.comicapp.koin.networkModule
 import com.hoc.comicapp.koin.viewModelModule
 import org.koin.android.ext.koin.androidContext
@@ -42,7 +43,8 @@ fun Context.startKoinIfNeeded(): Koin {
         networkModule,
         dataModule,
         appModule,
-        viewModelModule
+        viewModelModule,
+        navigationModule,
       )
     )
   }.koin
