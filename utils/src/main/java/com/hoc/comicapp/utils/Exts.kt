@@ -58,31 +58,6 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import timber.log.Timber
 
-@CheckResult
-@SchedulerSupport(SchedulerSupport.NONE)
-inline fun <reified U : Any, T : Any> Observable<T>.notOfType() = filter { it !is U }!!
-
-@Suppress("nothing_to_inline")
-inline fun <T : Any> Relay<T>.asObservable(): Observable<T> = this
-
-@Suppress("nothing_to_inline")
-inline fun <T : Any> Subject<T>.asObservable(): Observable<T> = this
-
-@CheckResult
-inline fun <T : Any, R : Any> Observable<T>.exhaustMap(crossinline transform: (T) -> Observable<R>): Observable<R> {
-  return this
-    .toFlowable(BackpressureStrategy.DROP)
-    .flatMap({ transform(it).toFlowable(BackpressureStrategy.MISSING) }, 1)
-    .toObservable()
-}
-
-@CheckResult
-inline fun <T : Any, R : Any> Observable<T>.mapNotNull(crossinline transform: (T) -> R?): Observable<R> {
-  return map { transform(it).toOptional() }
-    .ofType<Some<R>>()
-    .map { it.value }
-}
-
 @Suppress("nothing_to_inline")
 inline infix fun ViewGroup.inflate(layoutRes: Int) =
   LayoutInflater.from(context).inflate(layoutRes, this, false)!!

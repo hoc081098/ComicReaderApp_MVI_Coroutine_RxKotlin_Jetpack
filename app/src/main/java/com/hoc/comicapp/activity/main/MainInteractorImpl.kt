@@ -6,7 +6,6 @@ import com.hoc.comicapp.activity.main.MainContract.ViewState.User
 import com.hoc.comicapp.domain.repository.UserRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
-import com.hoc.comicapp.utils.fold
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.rx3.rxObservable
@@ -22,8 +21,8 @@ class MainInteractorImpl(
       .userObservable()
       .map<PartialChange> { either ->
         either.fold(
-          left = { PartialChange.User.Error(it) },
-          right = {
+          ifLeft = { PartialChange.User.Error(it) },
+          ifRight = {
             val user = it?.let(::User)
             PartialChange.User.UserChanged(user)
           }
@@ -38,8 +37,8 @@ class MainInteractorImpl(
       userRepository
         .signOut()
         .fold(
-          left = { PartialChange.SignOut.Error(it) },
-          right = { PartialChange.SignOut.UserSignedOut }
+          ifLeft = { PartialChange.SignOut.Error(it) },
+          ifRight = { PartialChange.SignOut.UserSignedOut }
         )
         .let { send(it) }
     }

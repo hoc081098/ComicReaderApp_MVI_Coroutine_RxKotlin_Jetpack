@@ -1,5 +1,8 @@
 package com.hoc.comicapp.data.firebase.favorite_comics
 
+import arrow.core.Either
+import arrow.core.left
+import arrow.core.right
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
@@ -10,10 +13,6 @@ import com.hoc.comicapp.data.firebase.user.FirebaseAuthUserDataSource
 import com.hoc.comicapp.domain.models.AuthError
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
-import com.hoc.comicapp.utils.Either
-import com.hoc.comicapp.utils.fold
-import com.hoc.comicapp.utils.left
-import com.hoc.comicapp.utils.right
 import com.hoc.comicapp.utils.snapshots
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.CoroutineScope
@@ -76,10 +75,7 @@ class FavoriteComicsDataSourceImpl(
               .whereEqualTo("url", url)
               .limit(1)
               .snapshots()
-              .map {
-                @Suppress("USELESS_CAST")
-                it.documents.isNotEmpty().right() as Either<Throwable, Boolean>
-              }
+              .map<Either<Throwable, Boolean>> { it.documents.isNotEmpty().right() }
               .onErrorReturn { it.left() }
               .subscribeOn(rxSchedulerProvider.io)
           }

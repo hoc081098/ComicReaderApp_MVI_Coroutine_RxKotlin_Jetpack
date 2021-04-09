@@ -90,6 +90,8 @@ object versions {
     const val crashlytics = "17.3.0"
   }
 
+  const val arrow = "0.13.1"
+
   const val viewBindingDelegate = "1.0.0-alpha03"
 }
 
@@ -201,6 +203,10 @@ object deps {
     const val firestore = "com.google.firebase:firebase-firestore:${versions.firebase.firestore}"
     const val analytics = "com.google.firebase:firebase-analytics:${versions.firebase.analytics}"
     const val crashlytics = "com.google.firebase:firebase-crashlytics:${versions.firebase.crashlytics}"
+  }
+
+  object arrow {
+    const val core = "io.arrow-kt:arrow-core:${versions.arrow}"
   }
 
   const val listenableFuture = "com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava"
