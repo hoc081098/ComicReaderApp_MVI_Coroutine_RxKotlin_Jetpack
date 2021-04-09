@@ -54,7 +54,7 @@ This project brings to the table set of best practices, tools, and solutions:
 
     MIT License
 
-    Copyright (c) 2020 Petrus Nguyễn Thái Học
+    Copyright (c) 2019-2021 Petrus Nguyễn Thái Học
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
