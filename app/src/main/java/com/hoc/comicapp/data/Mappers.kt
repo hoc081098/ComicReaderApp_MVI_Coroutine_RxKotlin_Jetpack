@@ -1,6 +1,7 @@
 package com.hoc.comicapp.data
 
 import android.database.sqlite.SQLiteException
+import arrow.core.left
 import com.google.firebase.FirebaseException
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuthException
@@ -30,7 +31,6 @@ import com.hoc.comicapp.domain.models.LocalStorageError
 import com.hoc.comicapp.domain.models.NetworkError
 import com.hoc.comicapp.domain.models.ServerError
 import com.hoc.comicapp.domain.models.UnexpectedError
-import com.hoc.comicapp.utils.left
 import retrofit2.HttpException
 import retrofit2.Retrofit
 import java.io.IOException
