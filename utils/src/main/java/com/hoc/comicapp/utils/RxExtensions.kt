@@ -42,7 +42,7 @@ private class MapNotNullObserver<T : Any, R : Any>(
       d.dispose()
     } else {
       upstream = d
-      downstream.onSubscribe(d)
+      downstream.onSubscribe(this)
     }
   }
 
