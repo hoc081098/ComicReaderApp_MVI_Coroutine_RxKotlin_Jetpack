@@ -10,6 +10,8 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.await
 import androidx.work.workDataOf
+import arrow.core.left
+import arrow.core.right
 import com.hoc.comicapp.data.ErrorMapper
 import com.hoc.comicapp.data.JsonAdaptersContainer
 import com.hoc.comicapp.data.Mappers
@@ -32,10 +34,8 @@ import com.hoc.comicapp.domain.repository.DownloadComicsRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.utils.copyTo
-import com.hoc.comicapp.utils.fold
-import com.hoc.comicapp.utils.left
+import com.hoc.comicapp.utils.getOrThrow
 import com.hoc.comicapp.utils.retryIO
-import com.hoc.comicapp.utils.right
 import com.hoc.comicapp.worker.DownloadComicWorker
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.flow.Flow
@@ -150,7 +150,7 @@ class DownloadComicsRepositoryImpl(
           .addTag(chapter.chapterLink)
           .build()
 
-        deleteDownloadedChapter(chapter).fold(left = { throw it }, right = { Unit })
+        deleteDownloadedChapter(chapter).getOrThrow()
         workManager.enqueue(workRequest).await()
 
         Unit.right()

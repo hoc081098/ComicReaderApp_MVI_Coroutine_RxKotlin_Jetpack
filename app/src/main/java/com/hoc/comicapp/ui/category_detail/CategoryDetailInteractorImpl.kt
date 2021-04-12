@@ -1,5 +1,7 @@
 package com.hoc.comicapp.ui.category_detail
 
+import arrow.core.flatMap
+import arrow.core.getOrHandle
 import com.hoc.comicapp.domain.repository.ComicRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.Interactor
@@ -11,9 +13,6 @@ import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.PartialChange.
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.PartialChange.Refresh.Loading
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.Item.Comic
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.PopularItem
-import com.hoc.comicapp.utils.flatMap
-import com.hoc.comicapp.utils.fold
-import com.hoc.comicapp.utils.map
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
@@ -45,10 +44,7 @@ class CategoryDetailInteractorImpl(
                 )
               }
           }
-          .fold(
-            left = { Error(it) },
-            right = { it }
-          )
+          .getOrHandle { Error(it) }
           .let { send(it) }
       }
     }
@@ -60,8 +56,8 @@ class CategoryDetailInteractorImpl(
       comicRepository
         .getCategoryDetailPopular(categoryLink)
         .fold(
-          left = { Popular.Error(error = it) },
-          right = { Popular.Data(comics = it.map(::PopularItem)) }
+          ifLeft = { Popular.Error(error = it) },
+          ifRight = { Popular.Data(comics = it.map(::PopularItem)) }
         )
         .let { send(it) }
     }
@@ -76,8 +72,8 @@ class CategoryDetailInteractorImpl(
           page = page
         )
         .fold(
-          left = { ListComics.Error(error = it) },
-          right = { ListComics.Data(comics = it.map(::Comic)) }
+          ifLeft = { ListComics.Error(error = it) },
+          ifRight = { ListComics.Data(comics = it.map(::Comic)) }
         )
         .let { send(it) }
     }

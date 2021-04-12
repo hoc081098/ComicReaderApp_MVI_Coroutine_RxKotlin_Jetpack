@@ -14,7 +14,6 @@ import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersContract.Sing
 import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersContract.ViewIntent
 import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersContract.ViewState
 import com.hoc.comicapp.ui.downloading_chapters.DownloadingChaptersContract.ViewState.Chapter
-import com.hoc.comicapp.utils.fold
 import com.hoc.comicapp.utils.notOfType
 import com.hoc.comicapp.utils.toObservable
 import com.hoc.comicapp.worker.DownloadComicWorker

@@ -1,5 +1,6 @@
 package com.hoc.comicapp.data.repository
 
+import arrow.core.right
 import com.hoc.comicapp.data.ErrorMapper
 import com.hoc.comicapp.data.Mappers
 import com.hoc.comicapp.data.analytics.readChapter
@@ -20,9 +21,7 @@ import com.hoc.comicapp.domain.models.ComicDetail
 import com.hoc.comicapp.domain.repository.ComicRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.utils.Cache
-import com.hoc.comicapp.utils.getOrNull
 import com.hoc.comicapp.utils.getOrThrow
-import com.hoc.comicapp.utils.right
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.async
@@ -217,7 +216,7 @@ class ComicRepositoryImpl(
         .getChapterDetail(chapterLink)
         .let(Mappers::responseToDomainModel)
     }.also { result ->
-      result.getOrNull()?.let { detail ->
+      result.orNull()?.let { detail ->
         analyticsService.track(
           AnalyticsEvent.readChapter(
             chapterLink = detail.chapterLink,

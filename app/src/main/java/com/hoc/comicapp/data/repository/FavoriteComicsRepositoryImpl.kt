@@ -1,13 +1,12 @@
 package com.hoc.comicapp.data.repository
 
+import arrow.core.right
 import com.hoc.comicapp.data.ErrorMapper
 import com.hoc.comicapp.data.Mappers
 import com.hoc.comicapp.data.firebase.favorite_comics.FavoriteComicsDataSource
 import com.hoc.comicapp.domain.DomainResult
 import com.hoc.comicapp.domain.models.FavoriteComic
 import com.hoc.comicapp.domain.repository.FavoriteComicsRepository
-import com.hoc.comicapp.utils.bimap
-import com.hoc.comicapp.utils.right
 import io.reactivex.rxjava3.core.Observable
 
 class FavoriteComicsRepositoryImpl(

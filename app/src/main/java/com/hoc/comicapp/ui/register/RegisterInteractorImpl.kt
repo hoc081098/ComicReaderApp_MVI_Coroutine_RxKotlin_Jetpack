@@ -5,7 +5,6 @@ import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.ui.register.RegisterContract.Interactor
 import com.hoc.comicapp.ui.register.RegisterContract.PartialChange
 import com.hoc.comicapp.ui.register.RegisterContract.User
-import com.hoc.comicapp.utils.fold
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.rx3.rxObservable
@@ -27,8 +26,8 @@ class RegisterInteractorImpl(
       userRepository
         .register(email, password, fullName, avatar)
         .fold(
-          left = { PartialChange.RegisterFailure(it) },
-          right = { PartialChange.RegisterSuccess }
+          ifLeft = { PartialChange.RegisterFailure(it) },
+          ifRight = { PartialChange.RegisterSuccess }
         )
         .let { send(it) }
     }

@@ -1,10 +1,8 @@
 package com.hoc.comicapp.ui.home
 
+import arrow.core.Either
 import com.hoc.comicapp.domain.repository.ComicRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
-import com.hoc.comicapp.utils.Left
-import com.hoc.comicapp.utils.fold
-import com.hoc.comicapp.utils.getOrNull
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.kotlin.cast
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -34,7 +32,7 @@ class HomeInteractorImpl(
        * Send success change
        */
       newestResult
-        .getOrNull()
+        .orNull()
         .orEmpty()
         .let { HomePartialChange.NewestHomePartialChange.Data(it) }
         .let { this.send(it) }
@@ -42,7 +40,7 @@ class HomeInteractorImpl(
       /**
        * Send error change
        */
-      if (newestResult is Left) {
+      if (newestResult is Either.Left) {
         newestResult
           .value
           .let { HomePartialChange.NewestHomePartialChange.Error(it) }
@@ -70,7 +68,7 @@ class HomeInteractorImpl(
        * Send success change
        */
       mostViewedResult
-        .getOrNull()
+        .orNull()
         .orEmpty()
         .let { HomePartialChange.MostViewedHomePartialChange.Data(it) }
         .let { this.send(it) }
@@ -78,7 +76,7 @@ class HomeInteractorImpl(
       /**
        * Send error change
        */
-      if (mostViewedResult is Left) {
+      if (mostViewedResult is Either.Left) {
         mostViewedResult
           .value
           .let { HomePartialChange.MostViewedHomePartialChange.Error(it) }
@@ -121,8 +119,8 @@ class HomeInteractorImpl(
       comicRepository
         .refreshAll()
         .fold(
-          left = { HomePartialChange.RefreshPartialChange.RefreshFailure(it) },
-          right = { (newest, mostViewed, updated) ->
+          ifLeft = { HomePartialChange.RefreshPartialChange.RefreshFailure(it) },
+          ifRight = { (newest, mostViewed, updated) ->
             HomePartialChange.RefreshPartialChange.RefreshSuccess(
               newestComics = newest,
               mostViewedComics = mostViewed,

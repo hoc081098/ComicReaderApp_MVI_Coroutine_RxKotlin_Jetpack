@@ -2,6 +2,9 @@ package com.hoc.comicapp.ui.register
 
 import android.net.Uri
 import android.util.Patterns
+import arrow.core.None
+import arrow.core.Option
+import arrow.core.toOption
 import com.hoc.comicapp.base.BaseViewModel
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.ui.register.RegisterContract.Intent
@@ -10,11 +13,7 @@ import com.hoc.comicapp.ui.register.RegisterContract.PartialChange
 import com.hoc.comicapp.ui.register.RegisterContract.SingleEvent
 import com.hoc.comicapp.ui.register.RegisterContract.User
 import com.hoc.comicapp.ui.register.RegisterContract.ViewState
-import com.hoc.comicapp.utils.None
-import com.hoc.comicapp.utils.Optional
 import com.hoc.comicapp.utils.exhaustMap
-import com.hoc.comicapp.utils.getOrNull
-import com.hoc.comicapp.utils.toOptional
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
 import io.reactivex.rxjava3.core.Observable
@@ -32,7 +31,7 @@ class RegisterVM(
   override fun processIntents(intents: Observable<Intent>) = intents.subscribe(intentS)!!
 
   init {
-    val avatarSubject = BehaviorRelay.createDefault<Optional<Uri>>(None)
+    val avatarSubject = BehaviorRelay.createDefault<Option<Uri>>(None)
 
     val emailObservable = intentS.ofType<Intent.EmailChanged>()
       .map { it.email }
@@ -48,7 +47,7 @@ class RegisterVM(
       .share()
 
     avatarObservable
-      .map { it.toOptional() }
+      .map { it.toOption() }
       .subscribe(avatarSubject)
       .addTo(compositeDisposable)
 
@@ -70,7 +69,7 @@ class RegisterVM(
           email = email,
           password = password,
           fullName = fullName,
-          avatar = avatarOptional.getOrNull()
+          avatar = avatarOptional.orNull()
         )
       }
       .filter(::isValidUser)
