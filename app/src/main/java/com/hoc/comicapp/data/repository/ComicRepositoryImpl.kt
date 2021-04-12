@@ -1,6 +1,8 @@
 package com.hoc.comicapp.data.repository
 
+import arrow.core.Either
 import arrow.core.right
+import arrow.fx.coroutines.parZip
 import com.hoc.comicapp.data.ErrorMapper
 import com.hoc.comicapp.data.Mappers
 import com.hoc.comicapp.data.analytics.readChapter
@@ -24,10 +26,8 @@ import com.hoc.comicapp.utils.Cache
 import com.hoc.comicapp.utils.getOrThrow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ObsoleteCoroutinesApi
-import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.actor
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -175,23 +175,18 @@ class ComicRepositoryImpl(
   }
 
   override suspend fun refreshAll(): DomainResult<Triple<List<Comic>, List<Comic>, List<Comic>>> {
-    return try {
-      coroutineScope {
-        val newestAsync = async { getNewestComics().getOrThrow() }
-        val mostViewedAsync = async { getMostViewedComics().getOrThrow() }
-        val updatedAsync = async { getUpdatedComics().getOrThrow() }
-
-        Triple(
-          newestAsync.await(),
-          mostViewedAsync.await(),
-          updatedAsync.await()
-        ).right()
-      }
-    } catch (throwable: Throwable) {
+    return Either.catch {
+      parZip(
+        ctx = dispatchersProvider.io,
+        fa = { getNewestComics().getOrThrow() },
+        fb = { getMostViewedComics().getOrThrow() },
+        fc = { getUpdatedComics().getOrThrow() },
+      ) { a, b, c -> Triple(a, b, c) }
+    }.mapLeft { throwable ->
       Timber.d(throwable, "ComicRepositoryImpl::refreshAll [ERROR] $throwable")
 
       delay(500)
-      errorMapper.mapAsLeft(throwable)
+      errorMapper.map(throwable)
     }
   }
 

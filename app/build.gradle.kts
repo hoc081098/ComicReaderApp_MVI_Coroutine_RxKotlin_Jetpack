@@ -92,6 +92,7 @@ dependencies {
   implementation(deps.firebase.crashlytics)
 
   implementation(deps.arrow.core)
+  implementation(deps.arrow.fxCoroutines)
 
   implementation(deps.listenableFuture)
   implementation(deps.viewBindingDelegate)

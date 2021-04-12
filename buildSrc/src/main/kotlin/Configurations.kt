@@ -207,6 +207,7 @@ object deps {
 
   object arrow {
     const val core = "io.arrow-kt:arrow-core:${versions.arrow}"
+    const val fxCoroutines = "io.arrow-kt:arrow-fx-coroutines:${versions.arrow}"
   }
 
   const val listenableFuture = "com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava"
