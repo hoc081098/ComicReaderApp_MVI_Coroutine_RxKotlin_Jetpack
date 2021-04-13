@@ -2,7 +2,6 @@ package com.hoc.comicapp.utils
 
 import androidx.annotation.CheckResult
 import com.jakewharton.rxrelay3.Relay
-import io.reactivex.rxjava3.annotations.NonNull
 import io.reactivex.rxjava3.annotations.SchedulerSupport
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Observer
@@ -38,8 +37,8 @@ class ExhaustMapObservable<T : Any, R : Any>(
   private class ExhaustMapObserver<T : Any, R : Any>(
     private val downstream: Observer<in R>,
     private val transform: (T) -> Observable<out R>
-  ) : Observer<T>, @NonNull Disposable {
-    private lateinit var upstream: Disposable
+  ) : Observer<T>, Disposable {
+    private var upstream: Disposable? = null
 
     @Volatile
     private var isActive = false
@@ -63,7 +62,7 @@ class ExhaustMapObservable<T : Any, R : Any>(
         transform(t)
       } catch (t: Throwable) {
         Exceptions.throwIfFatal(t)
-        upstream.dispose()
+        upstream!!.dispose()
         onError(t)
         return
       }
@@ -86,12 +85,12 @@ class ExhaustMapObservable<T : Any, R : Any>(
     }
 
     override fun dispose() {
-      upstream.dispose()
+      upstream!!.dispose()
       DisposableHelper.dispose(innerObserver)
       errors.tryTerminateAndReport()
     }
 
-    override fun isDisposed() = upstream.isDisposed
+    override fun isDisposed() = upstream!!.isDisposed
 
     private fun innerNext(t: R) {
       downstream.onNext(t)
