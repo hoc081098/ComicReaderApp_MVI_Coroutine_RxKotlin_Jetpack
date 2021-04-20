@@ -38,7 +38,10 @@ import com.hoc.comicapp.utils.getOrThrow
 import com.hoc.comicapp.utils.retryIO
 import com.hoc.comicapp.worker.DownloadComicWorker
 import io.reactivex.rxjava3.core.Observable
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
@@ -46,6 +49,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.File
@@ -215,16 +219,20 @@ class DownloadComicsRepositoryImpl(
 
       emit(10)
 
-      var imagePaths = emptyList<String>()
-      downloadAndSaveImages(
-        images = chapterDetail.images,
-        comicName = comicNameEscaped,
-        chapterName = chapterNameEscaped
-      ).collect {
-        val progress = (10 + (it.size.toFloat() / totalImageSize) * 80).toInt()
-        emit(progress)
-        imagePaths = it
+      val imagePaths = if (totalImageSize > 0) {
+        downloadAndSaveImages(
+          images = chapterDetail.images,
+          comicName = comicNameEscaped,
+          chapterName = chapterNameEscaped
+        )
+          .map { it to (10 + (it.size.toFloat() / totalImageSize) * 80).toInt() }
+          .emitAllTo(this) { it.second }
+          ?.first ?: emptyList()
+      } else {
+        emptyList()
       }
+
+      emit(80)
 
       val comicDetail = retryIO(
         times = 3,
@@ -235,6 +243,8 @@ class DownloadComicsRepositoryImpl(
         thumbnailUrl = comicDetail.thumbnail,
         comicName = comicNameEscaped
       )
+
+      emit(90)
 
       appDatabase.withTransaction {
         comicDao.upsert(
@@ -275,7 +285,9 @@ class DownloadComicsRepositoryImpl(
       )
 
       Timber.d("$tag Elapsed = $elapsed, Images = $imagePaths")
-    }.flowOn(dispatchersProvider.io)
+    }
+      .flowOn(dispatchersProvider.io)
+      .distinctUntilChanged()
   }
 
   /*
@@ -358,15 +370,16 @@ class DownloadComicsRepositoryImpl(
   /**
    * @return a [Flow] emit downloaded image paths
    */
+  @OptIn(ExperimentalCoroutinesApi::class)
   private fun downloadAndSaveImages(
     images: List<String>,
     comicName: String,
     chapterName: String,
   ): Flow<List<String>> {
-    return flow {
-      val imagePaths = mutableListOf<String>()
-
-      for ((index, imageUrl) in images.withIndex()) {
+    return images
+      .withIndex()
+      .asFlow()
+      .map { (index, imageUrl) ->
         Timber.d("$tag Begin $index $imageUrl")
 
         retryIO(
@@ -390,28 +403,48 @@ class DownloadComicsRepositoryImpl(
               overwrite = true
             )
 
-            imagePaths += imagePath
-
-            emit(imagePaths)
             Timber.d("$tag Done $index $imageUrl -> $imagePath")
+            imagePath
           }
       }
-
-      emit(imagePaths)
-    }
-  }
-
-  /**
-   * Escape file name: only allow letters, numbers, dots and dashes
-   */
-  private fun String.escapeFileName(): String {
-    return replace(
-      "[^a-zA-Z0-9.\\-]".toRegex(),
-      replacement = "_"
-    )
+      .scan(emptyList(), List<String>::plus)
   }
 
   private companion object {
     const val tag = "[DOWNLOAD_COMIC_REPO]"
   }
+}
+
+/**
+ * Escape file name: only allow letters, numbers, dots and dashes
+ */
+private fun String.escapeFileName(): String {
+  return replace(
+    "[^a-zA-Z0-9.\\-]".toRegex(),
+    replacement = "_"
+  )
+}
+
+private object NULL {
+  @Suppress("UNCHECKED_CAST", "NOTHING_TO_INLINE")
+  inline fun <T : Any?> unbox(value: Any?): T =
+    if (NULL === value) null as T else value as T
+}
+
+/**
+ * Collects all the values from the given flow, transform them by [transformer] and emits them to the [collector].
+ * It is a shorthand for `flow.collect { value -> emit(value) }`.
+ *
+ * @return The last element emitted by the flow, `null` if the flow was empty.
+ */
+private suspend fun <T, R> Flow<T>.emitAllTo(
+  collector: FlowCollector<R>,
+  transformer: (T) -> R,
+): T? {
+  var last: Any? = NULL
+  collect {
+    last = it
+    collector.emit(transformer(it))
+  }
+  return NULL.unbox(last)
 }
