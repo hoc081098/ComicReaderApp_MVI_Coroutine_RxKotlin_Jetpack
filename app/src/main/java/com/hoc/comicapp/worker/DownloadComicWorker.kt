@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.ParcelUuid
 import android.os.SystemClock
 import androidx.core.app.NotificationCompat
@@ -172,7 +173,11 @@ class DownloadComicWorker(
           chapterComicName = chapterComicName,
         )
       ),
-      PendingIntent.FLAG_UPDATE_CURRENT
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+      } else {
+        PendingIntent.FLAG_UPDATE_CURRENT
+      }
     )
 
     return NotificationCompat
@@ -194,7 +199,11 @@ class DownloadComicWorker(
           applicationContext,
           0,
           Intent(applicationContext, SplashActivity::class.java),
-          PendingIntent.FLAG_UPDATE_CURRENT
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+          } else {
+            PendingIntent.FLAG_UPDATE_CURRENT
+          }
         )
       )
       .addAction(R.drawable.ic_close_white_24dp, "Cancel", cancelIntent)
