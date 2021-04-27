@@ -3,6 +3,7 @@ package com.hoc.comicapp.utils
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
+import io.reactivex.rxjava3.core.Observable
 
 open class NotNullLiveData<T : Any>(value: T) : LiveData<T>(value) {
   override fun getValue(): T = super.getValue()!!
@@ -24,3 +25,9 @@ inline fun <T : Any> NotNullLiveData<T>.observe(
   owner: LifecycleOwner,
   crossinline observer: (T) -> Unit,
 ) = Observer { value: T -> observer(value) }.also { observe(owner, it) }
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun <T : Any> NotNullLiveData<T>.toObservable(): Observable<T> {
+  @Suppress("UNCHECKED_CAST")
+  return (this as LiveData<T?>).toObservable { error("Should not reach here!") }
+}

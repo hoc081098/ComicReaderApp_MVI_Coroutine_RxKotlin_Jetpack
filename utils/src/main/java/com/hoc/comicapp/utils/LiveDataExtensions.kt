@@ -8,11 +8,11 @@ import io.reactivex.rxjava3.android.MainThreadDisposable
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.ObservableEmitter
 
-fun <T : Any> LiveData<T>.toObservable(fallbackNullValue: (() -> T)? = null): Observable<T> {
+fun <T : Any> LiveData<T?>.toObservable(fallbackNullValue: (() -> T)? = null): Observable<T> {
   return Observable.create { emitter: ObservableEmitter<T> ->
     MainThreadDisposable.verifyMainThread()
 
-    val observer = Observer<T> { value: T? ->
+    val observer = Observer<T?> { value: T? ->
       if (!emitter.isDisposed) {
         val notnullValue: T = value ?: fallbackNullValue?.invoke() ?: return@Observer
         emitter.onNext(notnullValue)
