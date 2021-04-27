@@ -33,12 +33,11 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
-import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
 
-@OptIn(ExperimentalCoroutinesApi::class, KoinApiExtension::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 class DownloadComicWorker(
   appContext: Context,
   params: WorkerParameters,

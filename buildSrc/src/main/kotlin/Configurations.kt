@@ -50,11 +50,11 @@ object versions {
 
     const val navigation = "2.3.1"
     const val lifecycle = "2.3.0-beta01"
-    const val room = "2.3.0-alpha03"
+    const val room = "2.3.0"
     const val work = "2.5.0-beta01"
   }
 
-  const val koin = "2.2.2"
+  const val koin = "3.0.1"
   const val moshiKotlin = "1.11.0"
   const val retrofit = "2.9.0"
   const val okHttpLoggingInterceptor = "4.10.0-RC1"
@@ -148,9 +148,8 @@ object deps {
   }
 
   object koin {
-    const val androidXViewModel = "org.koin:koin-androidx-viewmodel:${versions.koin}"
-    const val androidXScope = "org.koin:koin-androidx-scope:${versions.koin}"
-    const val core = "org.koin:koin-core:${versions.koin}"
+    const val android = "io.insert-koin:koin-android:${versions.koin}"
+    const val core = "io.insert-koin:koin-core:${versions.koin}"
   }
 
   const val moshiKotlin = "com.squareup.moshi:moshi-kotlin:${versions.moshiKotlin}"

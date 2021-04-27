@@ -33,7 +33,8 @@ class KoinInitializer : Initializer<Koin> {
 fun Context.startKoinIfNeeded(): Koin {
   return GlobalContext.getOrNull() ?: startKoin {
     // use AndroidLogger as Koin Logger
-    androidLogger(level = if (BuildConfig.DEBUG) Level.DEBUG else Level.NONE)
+    // TODO(Koin): androidLogger(level = if (BuildConfig.DEBUG) Level.DEBUG else Level.NONE)
+    androidLogger(level = Level.NONE)
 
     // use the Android context given there
     androidContext(applicationContext)

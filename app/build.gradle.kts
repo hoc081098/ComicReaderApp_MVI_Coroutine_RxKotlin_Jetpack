@@ -46,8 +46,7 @@ dependencies {
 
   implementation(deps.androidX.work.runtimeKtx)
 
-  implementation(deps.koin.androidXViewModel)
-  implementation(deps.koin.androidXScope)
+  implementation(deps.koin.android)
 
   implementation(deps.moshiKotlin)
   implementation(deps.okHttpLoggingInterceptor)
