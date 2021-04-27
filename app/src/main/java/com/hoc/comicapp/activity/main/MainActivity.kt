@@ -262,7 +262,7 @@ class MainActivity : ScopeActivity(R.layout.activity_main) {
       return showSearch().let { true }
     }
     return item.onNavDestinationSelected(navController) ||
-        super.onOptionsItemSelected(item)
+      super.onOptionsItemSelected(item)
   }
 
   fun showSearch() = viewBinding.searchView.showSearch()

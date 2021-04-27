@@ -2,7 +2,6 @@ package com.hoc.comicapp.initializer
 
 import android.content.Context
 import androidx.startup.Initializer
-import com.hoc.comicapp.BuildConfig
 import com.hoc.comicapp.koin.appModule
 import com.hoc.comicapp.koin.dataModule
 import com.hoc.comicapp.koin.navigationModule
