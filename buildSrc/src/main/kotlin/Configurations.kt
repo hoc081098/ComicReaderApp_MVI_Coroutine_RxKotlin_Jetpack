@@ -24,15 +24,15 @@ object versions {
   const val ktLint = "0.41.0"
 
   object sdk {
-    const val buildTools = "30.0.2"
+    const val buildTools = "30.0.3"
     const val compile = 30
-    const val min = 21
+    const val min = 23
     const val target = 30
   }
 
   object kotlin {
-    const val core = "1.4.20"
-    const val coroutines = "1.4.1"
+    const val core = "1.5.0"
+    const val coroutines = "1.5.0-RC"
   }
 
   object androidX {

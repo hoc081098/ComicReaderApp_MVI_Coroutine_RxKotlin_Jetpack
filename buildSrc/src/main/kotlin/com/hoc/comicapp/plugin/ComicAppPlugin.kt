@@ -87,7 +87,7 @@ private fun Project.configKotlinOptions() {
   tasks.withType<KotlinCompile>().configureEach {
     kotlinOptions {
       jvmTarget = VERSION_11.toString()
-      freeCompilerArgs = freeCompilerArgs + listOf("-Xopt-in=kotlin.RequiresOptIn")
+      freeCompilerArgs = freeCompilerArgs + listOf("-Xopt-in=kotlin.RequiresOptIn", "-Xinline-classes")
     }
   }
 }
