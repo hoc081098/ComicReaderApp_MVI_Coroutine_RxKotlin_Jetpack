@@ -1,13 +1,12 @@
 package com.hoc.comicapp.data.repository
 
 import android.net.Uri
+import arrow.core.right
 import com.hoc.comicapp.data.ErrorMapper
 import com.hoc.comicapp.data.firebase.user.FirebaseAuthUserDataSource
 import com.hoc.comicapp.domain.DomainResult
 import com.hoc.comicapp.domain.models.User
 import com.hoc.comicapp.domain.repository.UserRepository
-import com.hoc.comicapp.utils.bimap
-import com.hoc.comicapp.utils.right
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.delay
 import timber.log.Timber

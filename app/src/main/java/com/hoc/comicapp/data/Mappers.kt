@@ -1,6 +1,8 @@
 package com.hoc.comicapp.data
 
 import android.database.sqlite.SQLiteException
+import arrow.core.left
+import arrow.core.nonFatalOrThrow
 import com.google.firebase.FirebaseException
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuthException
@@ -30,7 +32,6 @@ import com.hoc.comicapp.domain.models.LocalStorageError
 import com.hoc.comicapp.domain.models.NetworkError
 import com.hoc.comicapp.domain.models.ServerError
 import com.hoc.comicapp.domain.models.UnexpectedError
-import com.hoc.comicapp.utils.left
 import retrofit2.HttpException
 import retrofit2.Retrofit
 import java.io.IOException
@@ -286,10 +287,11 @@ object Mappers {
 
 class ErrorMapper(private val retrofit: Retrofit) {
   /**
-   * Transform [throwable] to [ComicAppError]
+   * Transform [t] to [ComicAppError].
+   * Throw [t] if fatal.
    */
-  fun map(throwable: Throwable): ComicAppError {
-    return when (throwable) {
+  fun map(t: Throwable): ComicAppError {
+    return when (val throwable = t.nonFatalOrThrow()) {
       is ComicAppError -> throwable
       is FirebaseException -> {
         when (throwable) {
@@ -364,5 +366,9 @@ class ErrorMapper(private val retrofit: Retrofit) {
   /**
    * Transform [throwable] to left branch of [DomainResult]
    */
+  @Deprecated(
+    "Use arrow.core.Either.catch instead",
+    ReplaceWith("")
+  )
   fun <T> mapAsLeft(throwable: Throwable): DomainResult<T> = map(throwable).left()
 }

@@ -1,7 +1,7 @@
 package com.hoc.comicapp.data.firebase.favorite_comics
 
+import arrow.core.Either
 import com.hoc.comicapp.data.firebase.entity._FavoriteComic
-import com.hoc.comicapp.utils.Either
 import io.reactivex.rxjava3.core.Observable
 
 interface FavoriteComicsDataSource {

@@ -1,6 +1,11 @@
 package com.hoc.comicapp.data.firebase.user
 
 import android.net.Uri
+import arrow.core.Either
+import arrow.core.Option
+import arrow.core.left
+import arrow.core.right
+import arrow.core.toOption
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
@@ -8,14 +13,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.hoc.comicapp.data.firebase.entity._User
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
-import com.hoc.comicapp.utils.Either
-import com.hoc.comicapp.utils.Optional
-import com.hoc.comicapp.utils.fold
-import com.hoc.comicapp.utils.left
-import com.hoc.comicapp.utils.map
-import com.hoc.comicapp.utils.right
 import com.hoc.comicapp.utils.snapshots
-import com.hoc.comicapp.utils.toOptional
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -34,10 +32,10 @@ class FirebaseAuthUserDataSourceImpl(
 
   private val userObservable: Observable<Either<Throwable, _User?>> by lazy {
     Observable
-      .create<Optional<String>> { emitter ->
+      .create<Option<String>> { emitter ->
         val authStateListener = FirebaseAuth.AuthStateListener { auth ->
           if (!emitter.isDisposed) {
-            val uid = auth.currentUser.toOptional().map { it.uid }
+            val uid = auth.currentUser.toOption().map { it.uid }
             emitter.onNext(uid)
           }
         }
@@ -56,7 +54,7 @@ class FirebaseAuthUserDataSourceImpl(
             firebaseFirestore
               .document("users/$uid")
               .snapshots()
-              .map { it.toObject(_User::class.java)?.right() as Either<Throwable, _User?> }
+              .map<Either<Throwable, _User?>> { it.toObject(_User::class.java).right() }
               .onErrorReturn { it.left() }
               .subscribeOn(rxSchedulerProvider.io)
           }

@@ -6,7 +6,6 @@ import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.ui.favorite_comics.FavoriteComicsContract.ComicItem
 import com.hoc.comicapp.ui.favorite_comics.FavoriteComicsContract.Interactor
 import com.hoc.comicapp.ui.favorite_comics.FavoriteComicsContract.PartialChange
-import com.hoc.comicapp.utils.fold
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.rx3.rxObservable
@@ -22,8 +21,8 @@ class FavoriteComicsInteractorImpl(
       favoriteComicsRepository
         .removeFromFavorite(item.toDomain())
         .fold(
-          left = { PartialChange.Remove.Failure(item, it) },
-          right = { PartialChange.Remove.Success(item) }
+          ifLeft = { PartialChange.Remove.Failure(item, it) },
+          ifRight = { PartialChange.Remove.Success(item) }
         )
         .let { send(it) }
     }
@@ -34,8 +33,8 @@ class FavoriteComicsInteractorImpl(
       .favoriteComics()
       .map<PartialChange> { either ->
         either.fold(
-          left = { PartialChange.FavoriteComics.Error(it) },
-          right = { PartialChange.FavoriteComics.Data(it.map(::ComicItem)) }
+          ifLeft = { PartialChange.FavoriteComics.Error(it) },
+          ifRight = { PartialChange.FavoriteComics.Data(it.map(::ComicItem)) }
         )
       }
       .observeOn(rxSchedulerProvider.main)

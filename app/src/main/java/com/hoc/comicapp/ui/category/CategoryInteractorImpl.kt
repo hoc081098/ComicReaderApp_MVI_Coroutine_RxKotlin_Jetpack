@@ -2,7 +2,6 @@ package com.hoc.comicapp.ui.category
 
 import com.hoc.comicapp.domain.repository.ComicRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
-import com.hoc.comicapp.utils.fold
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.rx3.rxObservable
@@ -18,8 +17,8 @@ class CategoryInteractorImpl(
       comicRepository
         .getAllCategories()
         .fold(
-          left = { CategoryPartialChange.RefreshPartialChange.Error(it) },
-          right = { CategoryPartialChange.RefreshPartialChange.Data(it) }
+          ifLeft = { CategoryPartialChange.RefreshPartialChange.Error(it) },
+          ifRight = { CategoryPartialChange.RefreshPartialChange.Data(it) }
         )
         .let { send(it) }
     }
@@ -31,8 +30,8 @@ class CategoryInteractorImpl(
       comicRepository
         .getAllCategories()
         .fold(
-          left = { CategoryPartialChange.InitialRetryPartialChange.Error(it) },
-          right = { CategoryPartialChange.InitialRetryPartialChange.Data(it) }
+          ifLeft = { CategoryPartialChange.InitialRetryPartialChange.Error(it) },
+          ifRight = { CategoryPartialChange.InitialRetryPartialChange.Data(it) }
         )
         .let { send(it) }
     }

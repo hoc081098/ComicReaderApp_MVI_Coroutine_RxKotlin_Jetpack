@@ -7,7 +7,6 @@ import com.hoc.comicapp.domain.repository.DownloadComicsRepository
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.PartialChange
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.ViewState.ComicItem
 import com.hoc.comicapp.ui.downloaded_comics.DownloadedComicsContract.ViewState.ComicItem.Companion.fromDomain
-import com.hoc.comicapp.utils.fold
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import kotlinx.coroutines.rx3.rxSingle
@@ -32,8 +31,8 @@ class DownloadedComicsInteractorImpl(
       .getDownloadedComics()
       .map { result ->
         result.fold(
-          left = { PartialChange.Error(it) },
-          right = { list ->
+          ifLeft = { PartialChange.Error(it) },
+          ifRight = { list ->
             PartialChange.Data(
               comics = list.map { fromDomain(it, application) }
             )

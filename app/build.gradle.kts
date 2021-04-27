@@ -46,8 +46,7 @@ dependencies {
 
   implementation(deps.androidX.work.runtimeKtx)
 
-  implementation(deps.koin.androidXViewModel)
-  implementation(deps.koin.androidXScope)
+  implementation(deps.koin.android)
 
   implementation(deps.moshiKotlin)
   implementation(deps.okHttpLoggingInterceptor)
@@ -90,6 +89,9 @@ dependencies {
   implementation(deps.firebase.firestore)
   implementation(deps.firebase.analytics)
   implementation(deps.firebase.crashlytics)
+
+  implementation(deps.arrow.core)
+  implementation(deps.arrow.fxCoroutines)
 
   implementation(deps.listenableFuture)
   implementation(deps.viewBindingDelegate)

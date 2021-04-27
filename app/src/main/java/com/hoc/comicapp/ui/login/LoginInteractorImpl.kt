@@ -4,7 +4,6 @@ import com.hoc.comicapp.domain.repository.UserRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.ui.login.LoginContract.Interactor
 import com.hoc.comicapp.ui.login.LoginContract.PartialChange
-import com.hoc.comicapp.utils.fold
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.rx3.rxObservable
@@ -21,8 +20,8 @@ class LoginInteractorImpl(
       userRepository
         .login(email, password)
         .fold(
-          left = { PartialChange.LoginFailure(it) },
-          right = { PartialChange.LoginSuccess }
+          ifLeft = { PartialChange.LoginFailure(it) },
+          ifRight = { PartialChange.LoginSuccess }
         )
         .let { send(it) }
     }

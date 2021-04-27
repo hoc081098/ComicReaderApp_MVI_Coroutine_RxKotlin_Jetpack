@@ -5,7 +5,6 @@ import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.Interactor
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.PartialChange
 import com.hoc.comicapp.ui.search_comic.SearchComicContract.ViewState.Item.ComicItem
-import com.hoc.comicapp.utils.fold
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.rx3.rxObservable
@@ -25,8 +24,8 @@ class SearchComicInteractorImpl(
         comicRepository
           .searchComic(query = term, page = page)
           .fold(
-            left = { PartialChange.FirstPage.Error(error = it, term = term) },
-            right = { PartialChange.FirstPage.Data(comics = it.map(::ComicItem)) }
+            ifLeft = { PartialChange.FirstPage.Error(error = it, term = term) },
+            ifRight = { PartialChange.FirstPage.Data(comics = it.map(::ComicItem)) }
           )
           .let { send(it) }
       } else {
@@ -34,8 +33,8 @@ class SearchComicInteractorImpl(
         comicRepository
           .searchComic(query = term, page = page)
           .fold(
-            left = { PartialChange.NextPage.Error(error = it, term = term) },
-            right = { PartialChange.NextPage.Data(comics = it.map(::ComicItem)) }
+            ifLeft = { PartialChange.NextPage.Error(error = it, term = term) },
+            ifRight = { PartialChange.NextPage.Data(comics = it.map(::ComicItem)) }
           )
           .let { send(it) }
       }

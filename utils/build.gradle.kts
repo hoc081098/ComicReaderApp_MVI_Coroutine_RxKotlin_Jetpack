@@ -13,8 +13,7 @@ dependencies {
   implementation(deps.androidX.view.material)
 
   implementation(deps.timber)
-  implementation(deps.koin.androidXScope)
-  implementation(deps.koin.androidXViewModel)
+  implementation(deps.koin.android)
 
   implementation(deps.reactiveX.java)
   implementation(deps.reactiveX.kotlin)
@@ -26,6 +25,8 @@ dependencies {
   implementation(deps.customView.materialSearchView)
 
   implementation(deps.firebase.firestore)
+
+  implementation(deps.arrow.core)
 
   testImplementation("junit:junit:4.13")
   androidTestImplementation("androidx.test.ext:junit:1.1.2")

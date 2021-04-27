@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.ParcelUuid
 import android.os.SystemClock
 import androidx.core.app.NotificationCompat
@@ -14,6 +15,9 @@ import androidx.work.ListenableWorker.Result.failure
 import androidx.work.ListenableWorker.Result.success
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
+import arrow.core.Either
+import arrow.core.left
+import arrow.core.right
 import com.hoc.comicapp.R
 import com.hoc.comicapp.activity.SplashActivity
 import com.hoc.comicapp.data.ErrorMapper
@@ -22,10 +26,6 @@ import com.hoc.comicapp.domain.models.getMessage
 import com.hoc.comicapp.domain.repository.DownloadComicsRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.initializer.startKoinIfNeeded
-import com.hoc.comicapp.utils.Either
-import com.hoc.comicapp.utils.fold
-import com.hoc.comicapp.utils.left
-import com.hoc.comicapp.utils.right
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
@@ -33,12 +33,11 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
-import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
 
-@OptIn(ExperimentalCoroutinesApi::class, KoinApiExtension::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 class DownloadComicWorker(
   appContext: Context,
   params: WorkerParameters,
@@ -55,7 +54,7 @@ class DownloadComicWorker(
   @SuppressLint("RestrictedApi")
   override suspend fun doWork(): Result {
     val (chapterLink, chapterJson, comicName, chapterComicName) = extractArgument()
-      .fold(left = { return failure(workDataOf(it)) }, right = { it })
+      .fold(ifLeft = { return failure(workDataOf(it)) }, ifRight = { it })
 
     val notificationManager = NotificationManagerCompat.from(applicationContext)
     val notificationBuilder = createNotificationBuilder(
@@ -173,7 +172,11 @@ class DownloadComicWorker(
           chapterComicName = chapterComicName,
         )
       ),
-      PendingIntent.FLAG_UPDATE_CURRENT
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+      } else {
+        PendingIntent.FLAG_UPDATE_CURRENT
+      }
     )
 
     return NotificationCompat
@@ -195,7 +198,11 @@ class DownloadComicWorker(
           applicationContext,
           0,
           Intent(applicationContext, SplashActivity::class.java),
-          PendingIntent.FLAG_UPDATE_CURRENT
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+          } else {
+            PendingIntent.FLAG_UPDATE_CURRENT
+          }
         )
       )
       .addAction(R.drawable.ic_close_white_24dp, "Cancel", cancelIntent)

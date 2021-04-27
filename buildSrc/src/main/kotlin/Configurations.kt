@@ -24,15 +24,15 @@ object versions {
   const val ktLint = "0.41.0"
 
   object sdk {
-    const val buildTools = "30.0.2"
+    const val buildTools = "30.0.3"
     const val compile = 30
-    const val min = 21
+    const val min = 23
     const val target = 30
   }
 
   object kotlin {
-    const val core = "1.4.20"
-    const val coroutines = "1.4.1"
+    const val core = "1.5.0"
+    const val coroutines = "1.5.0-RC"
   }
 
   object androidX {
@@ -50,11 +50,11 @@ object versions {
 
     const val navigation = "2.3.1"
     const val lifecycle = "2.3.0-beta01"
-    const val room = "2.3.0-alpha03"
+    const val room = "2.3.0"
     const val work = "2.5.0-beta01"
   }
 
-  const val koin = "2.2.2"
+  const val koin = "3.0.1"
   const val moshiKotlin = "1.11.0"
   const val retrofit = "2.9.0"
   const val okHttpLoggingInterceptor = "4.10.0-RC1"
@@ -90,7 +90,9 @@ object versions {
     const val crashlytics = "17.3.0"
   }
 
-  const val viewBindingDelegate = "1.0.0-alpha03"
+  const val arrow = "0.13.1"
+
+  const val viewBindingDelegate = "1.0.0-beta02"
 }
 
 object deps {
@@ -146,9 +148,8 @@ object deps {
   }
 
   object koin {
-    const val androidXViewModel = "org.koin:koin-androidx-viewmodel:${versions.koin}"
-    const val androidXScope = "org.koin:koin-androidx-scope:${versions.koin}"
-    const val core = "org.koin:koin-core:${versions.koin}"
+    const val android = "io.insert-koin:koin-android:${versions.koin}"
+    const val core = "io.insert-koin:koin-core:${versions.koin}"
   }
 
   const val moshiKotlin = "com.squareup.moshi:moshi-kotlin:${versions.moshiKotlin}"
@@ -201,6 +202,11 @@ object deps {
     const val firestore = "com.google.firebase:firebase-firestore:${versions.firebase.firestore}"
     const val analytics = "com.google.firebase:firebase-analytics:${versions.firebase.analytics}"
     const val crashlytics = "com.google.firebase:firebase-crashlytics:${versions.firebase.crashlytics}"
+  }
+
+  object arrow {
+    const val core = "io.arrow-kt:arrow-core:${versions.arrow}"
+    const val fxCoroutines = "io.arrow-kt:arrow-fx-coroutines:${versions.arrow}"
   }
 
   const val listenableFuture = "com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava"

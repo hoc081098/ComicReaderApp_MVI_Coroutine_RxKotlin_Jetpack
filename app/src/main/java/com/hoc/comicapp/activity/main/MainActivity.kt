@@ -54,7 +54,8 @@ class MainActivity : ScopeActivity(R.layout.activity_main) {
    * Should only be called on the main thread.
    */
   val appNavigator by lazy(NONE) {
-    get<AppNavigator> { parametersOf(navController) }
+    scope
+      .get<AppNavigator> { parametersOf(navController) }
       .also { Timber.d("appNavigator: $it") }
   }
   private val navController by lazy(NONE) {
@@ -261,7 +262,7 @@ class MainActivity : ScopeActivity(R.layout.activity_main) {
       return showSearch().let { true }
     }
     return item.onNavDestinationSelected(navController) ||
-      super.onOptionsItemSelected(item)
+        super.onOptionsItemSelected(item)
   }
 
   fun showSearch() = viewBinding.searchView.showSearch()

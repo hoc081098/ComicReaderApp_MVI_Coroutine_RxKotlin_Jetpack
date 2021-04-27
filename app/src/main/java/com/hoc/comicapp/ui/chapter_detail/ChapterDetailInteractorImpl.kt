@@ -9,7 +9,6 @@ import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract.PartialChange.Ge
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract.PartialChange.Refresh
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract.ViewState
 import com.hoc.comicapp.ui.chapter_detail.ChapterDetailContract.ViewState.Detail.Companion.fromDomain
-import com.hoc.comicapp.utils.fold
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
@@ -37,8 +36,8 @@ class ChapterDetailInteractorImpl(
           .getDownloadedChapter(chapter.link)
           .map { either ->
             either.fold(
-              left = { GetChapterDetail.Error(it, chapter) },
-              right = { GetChapterDetail.Data(fromDomain(it)) }
+              ifLeft = { GetChapterDetail.Error(it, chapter) },
+              ifRight = { GetChapterDetail.Data(fromDomain(it)) }
             )
           }
           .let { emitAll(it) }
@@ -46,8 +45,8 @@ class ChapterDetailInteractorImpl(
         comicRepository
           .getChapterDetail(chapter.link)
           .fold(
-            left = { GetChapterDetail.Error(it, chapter) },
-            right = { GetChapterDetail.Data(fromDomain(it)) }
+            ifLeft = { GetChapterDetail.Error(it, chapter) },
+            ifRight = { GetChapterDetail.Data(fromDomain(it)) }
           )
           .let { emit(it) }
       }
@@ -67,14 +66,14 @@ class ChapterDetailInteractorImpl(
           if (isFirstEvent) {
             either
               .fold(
-                left = { Refresh.Error(it) },
-                right = { Refresh.Success(fromDomain(it)) }
+                ifLeft = { Refresh.Error(it) },
+                ifRight = { Refresh.Success(fromDomain(it)) }
               )
               .also { isFirstEvent = false }
           } else {
             either.fold(
-              left = { GetChapterDetail.Error(it, chapter) },
-              right = { GetChapterDetail.Data(fromDomain(it)) }
+              ifLeft = { GetChapterDetail.Error(it, chapter) },
+              ifRight = { GetChapterDetail.Data(fromDomain(it)) }
             )
           }
         }
@@ -83,8 +82,8 @@ class ChapterDetailInteractorImpl(
       comicRepository
         .getChapterDetail(chapter.link)
         .fold(
-          left = { Refresh.Error(it) },
-          right = { Refresh.Success(fromDomain(it)) }
+          ifLeft = { Refresh.Error(it) },
+          ifRight = { Refresh.Success(fromDomain(it)) }
         )
         .let { emit(it) }
     }

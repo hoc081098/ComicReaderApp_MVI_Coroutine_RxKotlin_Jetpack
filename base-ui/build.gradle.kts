@@ -17,7 +17,7 @@ dependencies {
   implementation(deps.reactiveX.kotlin)
   implementation(deps.timber)
 
-  implementation(deps.koin.androidXScope)
+  implementation(deps.koin.android)
 
   testImplementation("junit:junit:4.13")
   androidTestImplementation("androidx.test.ext:junit:1.1.2")

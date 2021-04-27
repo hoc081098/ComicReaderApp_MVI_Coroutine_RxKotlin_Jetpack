@@ -1,6 +1,8 @@
 package com.hoc.comicapp.utils
 
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 
 open class NotNullLiveData<T : Any>(value: T) : LiveData<T>(value) {
   override fun getValue(): T = super.getValue()!!
@@ -17,3 +19,8 @@ class NotNullMutableLiveData<T : Any>(value: T) : NotNullLiveData<T>(value) {
 
   public override fun postValue(value: T) = super.postValue(value)
 }
+
+inline fun <T : Any> NotNullLiveData<T>.observe(
+  owner: LifecycleOwner,
+  crossinline observer: (T) -> Unit,
+) = Observer { value: T -> observer(value) }.also { observe(owner, it) }

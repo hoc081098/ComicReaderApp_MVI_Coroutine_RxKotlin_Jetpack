@@ -11,7 +11,6 @@ import com.hoc.comicapp.ui.detail.ComicDetailPartialChange.InitialRetryPartialCh
 import com.hoc.comicapp.ui.detail.ComicDetailPartialChange.RefreshPartialChange
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.ComicDetail.Detail
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.ComicDetail.Initial
-import com.hoc.comicapp.utils.fold
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.rx3.collect
@@ -67,8 +66,8 @@ class ComicDetailInteractorImpl(
       .isFavorited(link)
       .map<ComicDetailPartialChange> { either ->
         either.fold(
-          left = { ComicDetailPartialChange.FavoriteChange(null) },
-          right = { ComicDetailPartialChange.FavoriteChange(it) }
+          ifLeft = { ComicDetailPartialChange.FavoriteChange(null) },
+          ifRight = { ComicDetailPartialChange.FavoriteChange(it) }
         )
       }
       .observeOn(rxSchedulerProvider.main)
