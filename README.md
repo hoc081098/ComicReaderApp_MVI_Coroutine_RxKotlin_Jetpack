@@ -8,6 +8,10 @@ This project brings to the table set of best practices, tools, and solutions:
 -   Kotlin Coroutines with Flow
 -   Functional & Reactive programming with [RxKotlin](https://github.com/ReactiveX/RxKotlin), [RxJava3](https://github.com/ReactiveX/RxJava)
 -   Clean Architecture with MVI (Uni-directional data flow)
+-   [Λrrow - Functional companion to Kotlin's Standard Library](https://arrow-kt.io/)
+       - [Either](https://arrow-kt.io/docs/apidocs/arrow-core/arrow.core/-either/)
+       - [Option](https://arrow-kt.io/docs/apidocs/arrow-core/arrow.core/-option/)
+       - [parZip](https://arrow-kt.io/docs/fx/async/#parzip)
 -   Modern architecture (Clean Architecture, Model-View-ViewModel)
 -   Navigation, single-activity architecture with [Jetpack Navigation](https://developer.android.com/guide/navigation)
 -   Initialize components at application startup with [AndroidX Startup](https://developer.android.com/topic/libraries/app-startup)
