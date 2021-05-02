@@ -16,10 +16,15 @@ dependencies {
   implementation(project(deps.module.navigation))
 
   implementation(deps.kotlin.stdlib)
-  implementation(deps.kotlin.coroutinesCore)
-  implementation(deps.kotlin.coroutinesAndroid)
-  implementation(deps.kotlin.coroutinesRx3)
-  implementation(deps.kotlin.coroutinesPlayServices)
+  val coroutineDepConfig: (ExternalModuleDependency).() -> Unit = {
+    version {
+      strictly(versions.kotlin.coroutines)
+    }
+  }
+  implementation(deps.kotlin.coroutinesCore, coroutineDepConfig)
+  implementation(deps.kotlin.coroutinesAndroid, coroutineDepConfig)
+  implementation(deps.kotlin.coroutinesRx3, coroutineDepConfig)
+  implementation(deps.kotlin.coroutinesPlayServices, coroutineDepConfig)
 
   implementation(deps.androidX.activity)
   implementation(deps.androidX.appCompat)
