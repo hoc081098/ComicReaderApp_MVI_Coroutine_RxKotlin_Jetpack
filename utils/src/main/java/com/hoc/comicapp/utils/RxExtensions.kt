@@ -145,4 +145,3 @@ private class MapNotNullObserver<T : Any, R : Any>(
 
   override fun isDisposed(): Boolean = upstream!!.isDisposed
 }
-

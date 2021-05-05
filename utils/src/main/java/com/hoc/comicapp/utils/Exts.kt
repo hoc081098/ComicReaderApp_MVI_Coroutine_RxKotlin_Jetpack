@@ -55,9 +55,9 @@ inline fun Context.uriFromResourceId(@AnyRes resId: Int): Uri? {
     val res = this@uriFromResourceId.resources
     Uri.parse(
       ContentResolver.SCHEME_ANDROID_RESOURCE +
-          "://" + res.getResourcePackageName(resId) +
-          '/' + res.getResourceTypeName(resId) +
-          '/' + res.getResourceEntryName(resId)
+        "://" + res.getResourcePackageName(resId) +
+        '/' + res.getResourceTypeName(resId) +
+        '/' + res.getResourceEntryName(resId)
     )
   }.getOrNull()
 }
@@ -82,7 +82,6 @@ inline fun Context.toast(
     if (short) Toast.LENGTH_SHORT else Toast.LENGTH_LONG
   ).apply { show() }!!
 
-
 @SuppressLint("Recycle")
 inline fun Context.themeInterpolator(@AttrRes attr: Int): Interpolator {
   return AnimationUtils.loadInterpolator(
@@ -92,7 +91,6 @@ inline fun Context.themeInterpolator(@AttrRes attr: Int): Interpolator {
     }
   )
 }
-
 
 @Suppress("unused")
 inline val Any?.unit

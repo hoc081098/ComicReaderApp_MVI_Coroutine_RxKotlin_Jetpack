@@ -16,7 +16,6 @@ object Arguments {
     val remoteThumbnail: String,
   ) : Parcelable
 
-
   /**
    * Argument to pass to [com.hoc.comicapp.ui.category_detail.CategoryDetailFragment]
    */
@@ -40,4 +39,3 @@ object Arguments {
     val comicLink: String,
   ) : Parcelable
 }
-
