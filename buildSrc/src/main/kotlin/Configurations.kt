@@ -92,7 +92,7 @@ object versions {
 
   const val arrow = "0.13.1"
 
-  const val viewBindingDelegate = "1.0.0-beta02"
+  const val viewBindingDelegate = "kotlin-1.5.0-SNAPSHOT"
 }
 
 object deps {
