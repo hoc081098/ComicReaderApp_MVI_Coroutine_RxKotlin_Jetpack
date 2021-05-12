@@ -19,7 +19,7 @@ dependencies {
 
   implementation(deps.koin.android)
 
-  testImplementation("junit:junit:4.13")
+  testImplementation("junit:junit:4.13.2")
   androidTestImplementation("androidx.test.ext:junit:1.1.2")
   androidTestImplementation("androidx.test.espresso:espresso-core:3.3.0")
 }

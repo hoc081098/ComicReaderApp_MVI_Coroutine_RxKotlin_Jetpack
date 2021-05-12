@@ -11,7 +11,7 @@ dependencies {
   implementation(deps.androidX.navigation.fragment)
   implementation(deps.timber)
 
-  testImplementation("junit:junit:4.13")
+  testImplementation("junit:junit:4.13.2")
   androidTestImplementation("androidx.test.ext:junit:1.1.2")
   androidTestImplementation("androidx.test.espresso:espresso-core:3.3.0")
 }
