@@ -93,14 +93,12 @@ private fun Project.configKotlinOptions() {
 }
 
 private fun Project.configAndroidLibrary() = libraryExtension.run {
-  compileSdkVersion(versions.sdk.compile)
-  buildToolsVersion(versions.sdk.buildTools)
+  compileSdk = versions.sdk.compile
+  buildToolsVersion = versions.sdk.buildTools
 
   defaultConfig {
-    minSdkVersion(versions.sdk.min)
-    targetSdkVersion(versions.sdk.target)
-    versionCode = appConfig.versionCode
-    versionName = appConfig.versionName
+    minSdk = versions.sdk.min
+    targetSdk = versions.sdk.target
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     consumerProguardFiles("consumer-rules.pro")
@@ -130,13 +128,13 @@ private fun Project.configAndroidApplication() = appExtension.run {
   defaultConfig {
     applicationId = appConfig.applicationId
 
-    minSdkVersion(versions.sdk.min)
-    targetSdkVersion(versions.sdk.target)
+    minSdk = versions.sdk.min
+    targetSdk = versions.sdk.target
 
     versionCode = appConfig.versionCode
     versionName = appConfig.versionName
 
-    resConfigs(appConfig.supportedLocales)
+    resourceConfigurations.addAll(appConfig.supportedLocales)
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }

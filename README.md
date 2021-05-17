@@ -24,6 +24,10 @@ This project brings to the table set of best practices, tools, and solutions:
 -   Firebase: Firestore, Authentication, Storage, Analytics, Crashlytics
 -   Gradle Kotlin DSL, Custom plugin
 
+## Download APK
+
+[Download latest debug APK here](https://nightly.link/hoc081098/ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack/workflows/build/master/app-debug.zip)
+
 # Develop
 - Clone: `git clone https://github.com/hoc081098/ComicReaderApp_MVI_Coroutine_RxKotlin.git`
 - _Optional: **Delete `.idea` folder** if cannot open project_

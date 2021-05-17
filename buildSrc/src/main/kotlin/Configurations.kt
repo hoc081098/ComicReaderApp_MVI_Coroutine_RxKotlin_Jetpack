@@ -17,7 +17,7 @@ object appConfig {
     "$x.$y.$z $date"
   }
 
-  val supportedLocales = listOf("en")
+  val supportedLocales = setOf("en")
 }
 
 object versions {
@@ -32,7 +32,7 @@ object versions {
 
   object kotlin {
     const val core = "1.5.0"
-    const val coroutines = "1.5.0-RC"
+    const val coroutines = "1.5.0"
   }
 
   object androidX {
