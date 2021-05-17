@@ -29,6 +29,7 @@ This project brings to the table set of best practices, tools, and solutions:
 [Download latest debug APK here](https://nightly.link/hoc081098/ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack/workflows/build/master/app-debug.zip)
 
 # Develop
+- You must use **Android Studio Arctic Fox (2020.3.1) Canary 15** (**note: Java 11 is now the minimum version required**)
 - Clone: `git clone https://github.com/hoc081098/ComicReaderApp_MVI_Coroutine_RxKotlin.git`
 - _Optional: **Delete `.idea` folder** if cannot open project_
 - Open project by `Android Studio` and run as usual
