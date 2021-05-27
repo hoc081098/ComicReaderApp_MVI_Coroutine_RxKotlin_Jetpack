@@ -1,5 +1,6 @@
 package com.hoc.comicapp.ui.register
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,6 +14,9 @@ import androidx.transition.ChangeBounds
 import androidx.transition.Fade
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
+import arrow.core.Option
+import arrow.core.Some
+import arrow.core.toOption
 import com.hoc.comicapp.GlideApp
 import com.hoc.comicapp.R
 import com.hoc.comicapp.databinding.FragmentRegisterBinding
@@ -30,10 +34,11 @@ import com.hoc.comicapp.utils.uriFromResourceId
 import com.hoc081098.viewbindingdelegate.viewBinding
 import com.jakewharton.rxbinding4.view.clicks
 import com.jakewharton.rxbinding4.widget.textChanges
-import io.reactivex.rxjava3.android.MainThreadDisposable
+import com.jakewharton.rxrelay3.PublishRelay
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.ofType
 import org.koin.androidx.scope.ScopeFragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
@@ -45,6 +50,12 @@ class RegisterFragment : ScopeFragment() {
   private val viewBinding by viewBinding<FragmentRegisterBinding>()
   private val compositeDisposable = CompositeDisposable()
   private val glide by lazy(NONE) { GlideApp.with(this) }
+
+  private val avatarUriS = PublishRelay.create<Option<Uri>>()
+  private val openDocumentLauncher =
+    registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
+      avatarUriS.accept(uri.toOption())
+    }
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -122,21 +133,16 @@ class RegisterFragment : ScopeFragment() {
     return viewBinding.imageAvatar
       .clicks()
       .exhaustMap {
-        Timber.d("Select image")
-
-        Observable.create<Intent.AvatarChanged> { emitter ->
-          val launcher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-            uri?.let { emitter.onNext(Intent.AvatarChanged(it)) }
-            emitter.onComplete()
-          }.apply { launch(arrayOf("image/*")) }
-
-          emitter.setDisposable(
-            object : MainThreadDisposable() {
-              override fun onDispose() = launcher.unregister()
-            }
-          )
-        }
+        avatarUriS
+          .take(1)
+          .doOnSubscribe {
+            Timber.d("Start image")
+            openDocumentLauncher.launch(arrayOf("image/*"))
+          }
       }
+      .doOnNext { Timber.d("Picked $it") }
+      .ofType<Some<Uri>>()
+      .map { Intent.AvatarChanged(it.value) }
       .doOnNext { Timber.d("Select image $it") }
   }
 
