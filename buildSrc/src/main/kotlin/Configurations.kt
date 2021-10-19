@@ -6,9 +6,9 @@ import java.util.Date
 object appConfig {
   const val applicationId = "com.hoc.comicapp"
 
-  private const val MAJOR = 1
+  private const val MAJOR = 0
   private const val MINOR = 0
-  private const val PATCH = 0
+  private const val PATCH = 2
   const val versionCode = MAJOR * 10_000 + MINOR * 100 + PATCH
   val versionName by lazy {
     val date = SimpleDateFormat("yyyy-MM-dd").format(Date())
