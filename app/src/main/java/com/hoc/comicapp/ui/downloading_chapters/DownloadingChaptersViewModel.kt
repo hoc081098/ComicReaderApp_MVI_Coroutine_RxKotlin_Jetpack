@@ -20,6 +20,7 @@ import com.hoc.comicapp.worker.DownloadComicWorker
 import com.jakewharton.rxrelay3.PublishRelay
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.ObservableTransformer
+import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.functions.BiFunction
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.ofType
@@ -76,7 +77,8 @@ class DownloadingChaptersViewModel(
       }
     }
 
-  override fun processIntents(intents: Observable<ViewIntent>) = intents.subscribe(intentS)!!
+  override fun processIntents(intents: Observable<ViewIntent>): Disposable =
+    intents.subscribe(intentS)
 
   init {
     Timber.d("DownloadingChaptersViewModel::init")

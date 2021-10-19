@@ -15,6 +15,7 @@ import com.jakewharton.rxrelay3.PublishRelay
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Observable.mergeArray
 import io.reactivex.rxjava3.core.ObservableTransformer
+import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.ofType
 import io.reactivex.rxjava3.kotlin.subscribeBy
@@ -27,7 +28,7 @@ class CategoryDetailVM(
   private val intentS = PublishRelay.create<ViewIntent>()
   private val stateS = BehaviorRelay.createDefault(initialState)
 
-  override fun processIntents(intents: Observable<ViewIntent>) = intents.subscribe(intentS)!!
+  override fun processIntents(intents: Observable<ViewIntent>): Disposable = intents.subscribe(intentS)
 
   private val initialProcessor =
     ObservableTransformer<ViewIntent.Initial, PartialChange> { intent ->
