@@ -17,6 +17,8 @@ import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.plugin.KotlinBasePluginWrapper
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import versions
+import java.lang.System.getenv
+import java.util.Properties
 
 private inline val Project.libraryExtension get() = extensions.getByType<LibraryExtension>()
 private inline val Project.appExtension get() = extensions.getByType<AppExtension>()
@@ -148,7 +150,54 @@ private fun Project.configAndroidApplication() = appExtension.run {
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
 
+  signingConfigs {
+    getByName("debug") {
+      val keystoreProperties = Properties().apply {
+        load(
+          rootProject.file("keystore/debugkey.properties")
+            .apply { check(exists()) }
+            .reader()
+        )
+      }
+
+      keyAlias = keystoreProperties["keyAlias"] as String
+      keyPassword = keystoreProperties["keyPassword"] as String
+      storeFile = rootProject.file(keystoreProperties["storeFile"] as String).apply { check(exists()) }
+      storePassword = keystoreProperties["storePassword"] as String
+    }
+
+    create("release") {
+      val keystoreProperties by lazy {
+        Properties().apply {
+          load(
+            rootProject.file("keystore/debugkey.properties")
+              .apply { check(exists()) }
+              .reader()
+          )
+        }
+      }
+
+      keyAlias = getenv("keyAlias") ?: keystoreProperties["keyAlias"] as String
+      keyPassword = getenv("keyPassword") ?: keystoreProperties["keyPassword"] as String
+      storeFile = (getenv("storeFile")?.let { rootProject.file(it) }
+        ?: rootProject.file(keystoreProperties["storeFile"] as String)).apply { check(exists()) }
+      storePassword = getenv("storePassword") ?: keystoreProperties["storePassword"] as String
+
+      // Optional, specify signing versions used
+      enableV1Signing = true
+      enableV2Signing = true
+    }
+  }
+
   buildTypes {
+    getByName("debug") {
+      isMinifyEnabled = false
+      isShrinkResources = false
+
+      signingConfig = signingConfigs.getByName("debug")
+      isDebuggable = true
+    }
+
     getByName("release") {
       isMinifyEnabled = true
       isShrinkResources = true
@@ -157,6 +206,8 @@ private fun Project.configAndroidApplication() = appExtension.run {
         getDefaultProguardFile("proguard-android-optimize.txt"),
         "proguard-rules.pro"
       )
+      signingConfig = signingConfigs.getByName("release")
+      isDebuggable = false
     }
   }
 
