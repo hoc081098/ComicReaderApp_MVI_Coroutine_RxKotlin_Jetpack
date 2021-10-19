@@ -82,6 +82,14 @@ class RegisterVM(
             when (it) {
               PartialChange.RegisterSuccess -> sendEvent(SingleEvent.RegisterSuccess)
               is PartialChange.RegisterFailure -> sendEvent(SingleEvent.RegisterFailure(it.error))
+              is PartialChange.AvatarChanged -> return@doOnNext
+              is PartialChange.EmailChanged -> return@doOnNext
+              is PartialChange.EmailError -> return@doOnNext
+              is PartialChange.FullNameChanged -> return@doOnNext
+              is PartialChange.FullNameError -> return@doOnNext
+              PartialChange.Loading -> return@doOnNext
+              is PartialChange.PasswordChanged -> return@doOnNext
+              is PartialChange.PasswordError -> return@doOnNext
             }
           }
       }
@@ -142,7 +150,7 @@ class RegisterVM(
   private fun isValidUser(user: User): Boolean {
     val (email, password, fullName) = user
     return getEmailError(email) === null &&
-      getPasswordError(password) === null &&
-      getFullNameError(fullName) === null
+        getPasswordError(password) === null &&
+        getFullNameError(fullName) === null
   }
 }
