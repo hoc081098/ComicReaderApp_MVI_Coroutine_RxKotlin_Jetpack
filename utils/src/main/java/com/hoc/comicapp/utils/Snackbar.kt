@@ -5,7 +5,8 @@ import androidx.annotation.StringRes
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 
-inline class SnackbarLength private constructor(val length: Int) {
+@JvmInline
+value class SnackbarLength private constructor(val length: Int) {
   companion object Factory {
     val SHORT = SnackbarLength(Snackbar.LENGTH_SHORT)
     val LONG = SnackbarLength(Snackbar.LENGTH_LONG)

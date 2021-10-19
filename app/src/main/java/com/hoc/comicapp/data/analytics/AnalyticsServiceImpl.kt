@@ -27,7 +27,7 @@ class AnalyticsServiceImpl : AnalyticsService {
 
 class SnakeCaseFirebaseAnalyticsEventMapper {
   fun nameFor(event: String): String =
-    CAMEL_REGEX.replace(event) { "_" + it.value }.toLowerCase()
+    CAMEL_REGEX.replace(event) { "_" + it.value }.lowercase()
 
   fun paramsFor(params: Map<String, Any>?): Bundle? {
     return bundleOf(

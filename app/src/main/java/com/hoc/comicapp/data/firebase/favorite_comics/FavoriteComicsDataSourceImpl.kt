@@ -14,6 +14,7 @@ import com.hoc.comicapp.domain.models.AuthError
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.utils.snapshots
+import com.hoc.comicapp.utils.unit
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ObsoleteCoroutinesApi
@@ -138,9 +139,7 @@ class FavoriteComicsDataSourceImpl(
     }
   }
 
-  override fun update(comics: List<_FavoriteComic>) {
-    actor.offer(comics)
-  }
+  override fun update(comics: List<_FavoriteComic>) = actor.trySend(comics).unit
 
   private val favoriteCollectionForCurrentUserOrNull: CollectionReference?
     get() = firebaseAuth.currentUser?.uid?.let {

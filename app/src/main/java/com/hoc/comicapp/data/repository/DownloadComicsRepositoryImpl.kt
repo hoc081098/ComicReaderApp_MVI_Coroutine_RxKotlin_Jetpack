@@ -54,6 +54,7 @@ import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.File
 import java.util.Date
+import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
 import kotlin.time.TimeSource
 
@@ -279,7 +280,7 @@ class DownloadComicsRepositoryImpl(
           chapterName = chapterDetail.chapterName,
           comicLink = chapterDetail.comicLink,
           comicName = chapterDetail.comicName,
-          elapsedInMilliseconds = elapsed.inMilliseconds,
+          elapsedInMilliseconds = elapsed.toDouble(DurationUnit.MILLISECONDS),
           elapsedInString = elapsed.toString()
         )
       )

@@ -174,7 +174,7 @@ class MainActivity : ScopeActivity(R.layout.activity_main) {
                     .height(size)
                     .endConfig()
                     .buildRect(
-                      firstLetter.toUpperCase().toString(),
+                      firstLetter.uppercase(),
                       ColorGenerator.MATERIAL.getColor(user.email)
                     )
                 }

@@ -259,7 +259,7 @@ class ComicRepositoryImpl(
     favoriteComicsDataSource.update(listOf(entity))
 
     // update downloaded
-    actor.offer(Mappers.responseToLocalEntity(comicDetail))
+    actor.trySend(Mappers.responseToLocalEntity(comicDetail))
   }
 
   private companion object {
