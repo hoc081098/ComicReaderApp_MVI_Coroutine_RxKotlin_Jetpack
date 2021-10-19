@@ -150,7 +150,7 @@ class RegisterVM(
   private fun isValidUser(user: User): Boolean {
     val (email, password, fullName) = user
     return getEmailError(email) === null &&
-        getPasswordError(password) === null &&
-        getFullNameError(fullName) === null
+      getPasswordError(password) === null &&
+      getFullNameError(fullName) === null
   }
 }
