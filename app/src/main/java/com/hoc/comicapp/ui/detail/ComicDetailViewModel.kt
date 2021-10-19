@@ -226,6 +226,9 @@ class ComicDetailViewModel(
             Timber.d("$operation error $it")
             sendMessageEvent("$operation error: ${event.chapter.chapterName}")
           }
+          is ComicDetailSingleEvent.EnqueuedDownloadFailure -> return@subscribeBy
+          is ComicDetailSingleEvent.EnqueuedDownloadSuccess -> return@subscribeBy
+          is ComicDetailSingleEvent.MessageEvent -> return@subscribeBy
         }
       }
       .addTo(compositeDisposable)

@@ -49,10 +49,10 @@ class FavoriteComicsAdapter(
   inner class VH(private val binding: ItemRecyclerFavoriteComicsBinding, parent: View) :
     RecyclerView.ViewHolder(binding.root) {
 
-    private fun <T> Observable<T>.getItemAtPosition(): Observable<ComicItem> {
+    private fun <T : Any> Observable<T>.getItemAtPosition(): Observable<ComicItem> {
       return map { bindingAdapterPosition }
         .filter { it != NO_POSITION }
-        .map { getItem(it) }
+        .map(::getItem)
     }
 
     init {
