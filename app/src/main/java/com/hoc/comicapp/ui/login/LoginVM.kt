@@ -11,6 +11,7 @@ import com.hoc.comicapp.ui.login.LoginContract.ViewState
 import com.hoc.comicapp.utils.exhaustMap
 import com.jakewharton.rxrelay3.PublishRelay
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.ofType
 import io.reactivex.rxjava3.kotlin.subscribeBy
@@ -22,7 +23,7 @@ class LoginVM(
 
   private val intentS = PublishRelay.create<Intent>()
 
-  override fun processIntents(intents: Observable<Intent>) = intents.subscribe(intentS)!!
+  override fun processIntents(intents: Observable<Intent>): Disposable = intents.subscribe(intentS)
 
   init {
     val emailObservable = intentS.ofType<Intent.EmailChanged>()

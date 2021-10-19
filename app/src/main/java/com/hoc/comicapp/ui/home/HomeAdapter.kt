@@ -6,10 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.IntDef
 import androidx.core.view.isVisible
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.OnLifecycleEvent
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.LinearSnapHelper
@@ -30,6 +28,7 @@ import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.MOST_VIEWED
 import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.NEWEST
 import com.hoc.comicapp.ui.home.HomeListItem.HeaderType.UPDATED
 import com.hoc.comicapp.utils.mapNotNull
+import com.hoc.comicapp.utils.unit
 import com.hoc081098.viewbindingdelegate.inflateViewBinding
 import com.jakewharton.rxbinding4.recyclerview.scrollStateChanges
 import com.jakewharton.rxbinding4.view.clicks
@@ -89,18 +88,18 @@ class HomeAdapter(
   private val clickComicS = PublishRelay.create<_HomeClickEvent>()
 
   // Retry observables
-  val newestRetryObservable = newestRetryS.throttleFirst(500, TimeUnit.MILLISECONDS)!!
-  val mostViewedRetryObservable = mostViewedRetryS.throttleFirst(500, TimeUnit.MILLISECONDS)!!
-  val updatedRetryObservable = updatedRetryS.throttleFirst(500, TimeUnit.MILLISECONDS)!!
+  val newestRetryObservable: Observable<Unit> = newestRetryS.throttleFirst(500, TimeUnit.MILLISECONDS)
+  val mostViewedRetryObservable: Observable<Unit> = mostViewedRetryS.throttleFirst(500, TimeUnit.MILLISECONDS)
+  val updatedRetryObservable: Observable<Unit> = updatedRetryS.throttleFirst(500, TimeUnit.MILLISECONDS)
 
   // Click observables
-  val clickComicObservable = Observable.mergeArray(
+  val clickComicObservable: Observable<HomeClickEvent> = Observable.mergeArray(
     newestAdapter.clickComicObservable,
     mostViewedAdapter.clickComicObservable,
     clickComicS,
   )
     .map(::toHomeClickEvent)
-    .doOnNext { Timber.d("[*] Click comic $it") }!!
+    .doOnNext { Timber.d("[*] Click comic $it") }
 
   override fun onCreateViewHolder(parent: ViewGroup, @ViewType viewType: Int): VH {
     return when (viewType) {
@@ -207,11 +206,10 @@ class HomeAdapter(
       }
 
       lifecycleOwner.lifecycle.addObserver(
-        object : LifecycleObserver {
+        object : DefaultLifecycleObserver {
           var disposable: Disposable? = null
 
-          @OnLifecycleEvent(Lifecycle.Event.ON_START)
-          private fun onCreate() {
+          override fun onCreate(owner: LifecycleOwner) {
             disposable = startStopAutoScrollS
               .doOnNext { Timber.d("[###] [1] $it") }
               .concatMap {
@@ -263,18 +261,16 @@ class HomeAdapter(
             Timber.d("[>>>] ON_CREATE")
           }
 
-          @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
-          private fun onResume() = startStopAutoScrollS.accept(true)
+          override fun onResume(owner: LifecycleOwner) = startStopAutoScrollS.accept(true)
             .also { Timber.d("[>>>] ON_RESUME -> start") }
 
-          @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-          private fun onPause() = startStopAutoScrollS.accept(false)
+          override fun onPause(owner: LifecycleOwner) = startStopAutoScrollS.accept(false)
             .also { Timber.d("[>>>] ON_PAUSE -> stop") }
 
-          @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-          private fun onDestroy() = disposable?.dispose()
+          override fun onDestroy(owner: LifecycleOwner) = disposable?.dispose()
             .also { lifecycleOwner.lifecycle.removeObserver(this) }
             .also { Timber.d("[>>>] ON_DESTROY -> disposed") }
+            .unit
         }
       )
     }

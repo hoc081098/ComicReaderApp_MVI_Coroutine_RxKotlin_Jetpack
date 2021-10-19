@@ -6,15 +6,13 @@ import java.util.Date
 object appConfig {
   const val applicationId = "com.hoc.comicapp"
 
-  const val versionCode = 1
+  private const val MAJOR = 0
+  private const val MINOR = 0
+  private const val PATCH = 2
+  const val versionCode = MAJOR * 10_000 + MINOR * 100 + PATCH
   val versionName by lazy {
-    val x = versionCode / 10_000
-    val y = (versionCode % 10_000) / 100
-    val z = versionCode % 100
-
     val date = SimpleDateFormat("yyyy-MM-dd").format(Date())
-
-    "$x.$y.$z $date"
+    "$MAJOR.$MINOR.$PATCH $date"
   }
 
   val supportedLocales = setOf("en")
@@ -24,52 +22,52 @@ object versions {
   const val ktLint = "0.41.0"
 
   object sdk {
-    const val buildTools = "30.0.3"
-    const val compile = 30
+    const val buildTools = "31.0.0"
+    const val compile = 31
     const val min = 23
-    const val target = 30
+    const val target = 31
   }
 
   object kotlin {
-    const val core = "1.5.0"
-    const val coroutines = "1.5.0"
+    const val core = "1.6.0-RC"
+    const val coroutines = "1.5.2"
   }
 
   object androidX {
-    const val activity = "1.2.0-beta01"
-    const val appCompat = "1.3.0-alpha02"
-    const val core = "1.5.0-alpha05"
-    const val fragment = "1.3.0-beta01"
-    const val startUp = "1.0.0"
+    const val activity = "1.4.0-rc01"
+    const val appCompat = "1.4.0-beta01"
+    const val core = "1.7.0-rc01"
+    const val fragment = "1.4.0-alpha10"
+    const val startUp = "1.1.0"
 
     object view {
-      const val constraintLayout = "2.1.0-alpha1"
-      const val material = "1.3.0-alpha04"
-      const val recyclerView = "1.2.0-alpha06"
+      const val constraintLayout = "2.1.1"
+      const val material = "1.5.0-alpha04"
+      const val recyclerView = "1.3.0-alpha01"
     }
 
-    const val navigation = "2.3.1"
-    const val lifecycle = "2.3.0-beta01"
-    const val room = "2.3.0"
-    const val work = "2.5.0-beta01"
+    const val navigation = "2.4.0-alpha10"
+    const val lifecycle = "2.4.0-rc01"
+    const val room = "2.4.0-beta01"
+    const val work = "2.7.0"
   }
 
-  const val koin = "3.0.1"
-  const val moshiKotlin = "1.11.0"
+  const val koin = "3.1.2"
+  const val moshiKotlin = "1.12.0"
   const val retrofit = "2.9.0"
-  const val okHttpLoggingInterceptor = "4.10.0-RC1"
-  const val leakCanaryAndroid = "2.5"
-  const val rxRelay = "3.0.0"
+  const val okHttpLoggingInterceptor = "5.0.0-alpha.2"
+  const val leakCanaryAndroid = "2.7"
+  const val rxRelay = "3.0.1"
   const val rxBinding = "4.0.0"
-  const val timber = "4.7.1"
+  const val timber = "5.0.1"
 
   object reactiveX {
     const val kotlin = "3.0.1"
-    const val java = "3.0.7"
+    const val java = "3.1.2"
     const val android = "3.0.0"
   }
 
-  const val glide = "4.11.0"
+  const val glide = "4.12.0"
 
   object customView {
     const val materialSearchView = "1.4.0"
@@ -83,16 +81,16 @@ object versions {
   }
 
   object firebase {
-    const val auth = "20.0.1"
-    const val storage = "19.2.0"
-    const val firestore = "22.0.0"
-    const val analytics = "18.0.0"
-    const val crashlytics = "17.3.0"
+    const val auth = "21.0.1"
+    const val storage = "20.0.0"
+    const val firestore = "23.0.4"
+    const val analytics = "19.0.2"
+    const val crashlytics = "18.2.3"
   }
 
-  const val arrow = "0.13.1"
+  const val arrow = "1.0.0"
 
-  const val viewBindingDelegate = "1.0.0"
+  const val viewBindingDelegate = "1.2.0"
 }
 
 object deps {

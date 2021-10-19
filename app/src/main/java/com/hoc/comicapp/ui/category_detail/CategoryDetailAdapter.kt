@@ -7,10 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
 import androidx.core.view.isVisible
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.OnLifecycleEvent
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
@@ -33,6 +31,7 @@ import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.Head
 import com.hoc.comicapp.ui.category_detail.CategoryDetailContract.ViewState.Item
 import com.hoc.comicapp.utils.asObservable
 import com.hoc.comicapp.utils.inflater
+import com.hoc.comicapp.utils.unit
 import com.jakewharton.rxbinding4.recyclerview.scrollStateChanges
 import com.jakewharton.rxbinding4.view.clicks
 import com.jakewharton.rxbinding4.view.detaches
@@ -186,11 +185,10 @@ class CategoryDetailAdapter(
       lifecycleOwner
         .lifecycle
         .addObserver(
-          object : LifecycleObserver {
+          object : DefaultLifecycleObserver {
             var disposable: Disposable? = null
 
-            @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
-            private fun onCreate() {
+            override fun onCreate(owner: LifecycleOwner) {
               disposable = startStopAutoScrollS
                 .mergeWith(
                   binding.popularRecyclerHorizontal
@@ -229,14 +227,11 @@ class CategoryDetailAdapter(
                 )
             }
 
-            @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
-            private fun onResume() = startStopAutoScrollS.accept(true)
+            override fun onResume(owner: LifecycleOwner) = startStopAutoScrollS.accept(true)
 
-            @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-            private fun onPause() = startStopAutoScrollS.accept(false)
+            override fun onPause(owner: LifecycleOwner) = startStopAutoScrollS.accept(false)
 
-            @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-            private fun onDestroy() = disposable?.dispose()
+            override fun onDestroy(owner: LifecycleOwner) = disposable?.dispose().unit
           }
         )
     }

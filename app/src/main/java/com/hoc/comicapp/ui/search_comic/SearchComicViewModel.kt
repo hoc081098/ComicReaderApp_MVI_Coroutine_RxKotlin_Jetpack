@@ -12,6 +12,7 @@ import com.hoc.comicapp.utils.exhaustMap
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.functions.BiFunction
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.ofType
@@ -27,8 +28,8 @@ class SearchComicViewModel(
   BaseViewModel<ViewIntent, ViewState, SingleEvent>(ViewState.initialState()) {
   private val intentS = PublishRelay.create<ViewIntent>()
 
-  override fun processIntents(intents: Observable<ViewIntent>) =
-    intents.subscribe(intentS)!!
+  override fun processIntents(intents: Observable<ViewIntent>): Disposable =
+    intents.subscribe(intentS)
 
   init {
     val stateS = BehaviorRelay.createDefault(initialState)

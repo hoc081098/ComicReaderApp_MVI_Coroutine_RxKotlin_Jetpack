@@ -29,9 +29,9 @@ import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
-import kotlin.time.seconds
 
 @OptIn(
   ExperimentalTime::class,
@@ -259,7 +259,7 @@ class ComicRepositoryImpl(
     favoriteComicsDataSource.update(listOf(entity))
 
     // update downloaded
-    actor.offer(Mappers.responseToLocalEntity(comicDetail))
+    actor.trySend(Mappers.responseToLocalEntity(comicDetail))
   }
 
   private companion object {

@@ -26,6 +26,7 @@ import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.ObservableTransformer
+import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.ofType
 import io.reactivex.rxjava3.kotlin.subscribeBy
@@ -52,8 +53,8 @@ class ComicDetailViewModel(
   private val intentS = PublishRelay.create<ComicDetailIntent>()
   private val stateS = BehaviorRelay.createDefault(initialState)
 
-  override fun processIntents(intents: Observable<ComicDetailIntent>) =
-    intents.subscribe(intentS)!!
+  override fun processIntents(intents: Observable<ComicDetailIntent>): Disposable =
+    intents.subscribe(intentS)
 
   private val initialProcessor =
     ObservableTransformer<ComicDetailIntent.Initial, ComicDetailPartialChange> { intent ->
@@ -225,6 +226,9 @@ class ComicDetailViewModel(
             Timber.d("$operation error $it")
             sendMessageEvent("$operation error: ${event.chapter.chapterName}")
           }
+          is ComicDetailSingleEvent.EnqueuedDownloadFailure -> return@subscribeBy
+          is ComicDetailSingleEvent.EnqueuedDownloadSuccess -> return@subscribeBy
+          is ComicDetailSingleEvent.MessageEvent -> return@subscribeBy
         }
       }
       .addTo(compositeDisposable)

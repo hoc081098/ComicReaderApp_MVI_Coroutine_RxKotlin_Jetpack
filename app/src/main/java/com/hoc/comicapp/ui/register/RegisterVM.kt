@@ -17,6 +17,7 @@ import com.hoc.comicapp.utils.exhaustMap
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.ofType
 import io.reactivex.rxjava3.kotlin.subscribeBy
@@ -28,7 +29,7 @@ class RegisterVM(
 
   private val intentS = PublishRelay.create<Intent>()
 
-  override fun processIntents(intents: Observable<Intent>) = intents.subscribe(intentS)!!
+  override fun processIntents(intents: Observable<Intent>): Disposable = intents.subscribe(intentS)
 
   init {
     val avatarSubject = BehaviorRelay.createDefault<Option<Uri>>(None)
@@ -81,6 +82,14 @@ class RegisterVM(
             when (it) {
               PartialChange.RegisterSuccess -> sendEvent(SingleEvent.RegisterSuccess)
               is PartialChange.RegisterFailure -> sendEvent(SingleEvent.RegisterFailure(it.error))
+              is PartialChange.AvatarChanged -> return@doOnNext
+              is PartialChange.EmailChanged -> return@doOnNext
+              is PartialChange.EmailError -> return@doOnNext
+              is PartialChange.FullNameChanged -> return@doOnNext
+              is PartialChange.FullNameError -> return@doOnNext
+              PartialChange.Loading -> return@doOnNext
+              is PartialChange.PasswordChanged -> return@doOnNext
+              is PartialChange.PasswordError -> return@doOnNext
             }
           }
       }
@@ -141,7 +150,7 @@ class RegisterVM(
   private fun isValidUser(user: User): Boolean {
     val (email, password, fullName) = user
     return getEmailError(email) === null &&
-      getPasswordError(password) === null &&
-      getFullNameError(fullName) === null
+        getPasswordError(password) === null &&
+        getFullNameError(fullName) === null
   }
 }

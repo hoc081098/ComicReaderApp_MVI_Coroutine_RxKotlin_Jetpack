@@ -9,6 +9,7 @@ import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.ObservableTransformer
+import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.ofType
 import io.reactivex.rxjava3.kotlin.subscribeBy
@@ -198,8 +199,8 @@ class HomeViewModel(
         .observeOn(rxSchedulerProvider.main)
     }
 
-  override fun processIntents(intents: Observable<HomeViewIntent>) =
-    intents.subscribe(intentS)!!
+  override fun processIntents(intents: Observable<HomeViewIntent>): Disposable =
+    intents.subscribe(intentS)
 
   init {
     intentS

@@ -58,10 +58,10 @@ class DownloadedComicsAdapter(
       )
     }
 
-    private fun <T> Observable<T>.getItemAtPosition(): Observable<ComicItem> {
+    private fun <T : Any> Observable<T>.getItemAtPosition(): Observable<ComicItem> {
       return map { bindingAdapterPosition }
         .filter { it != NO_POSITION }
-        .map { getItem(it) }
+        .map(::getItem)
     }
 
     init {

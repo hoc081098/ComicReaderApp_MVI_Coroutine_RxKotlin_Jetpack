@@ -9,6 +9,7 @@ import com.hoc.comicapp.utils.notOfType
 import com.jakewharton.rxrelay3.PublishRelay
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.ObservableTransformer
+import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.cast
 import io.reactivex.rxjava3.kotlin.ofType
@@ -87,6 +88,7 @@ class CategoryViewModel(
             when (it) {
               is CategoryPartialChange.RefreshPartialChange.Error -> sendMessageEvent(message = "Refresh error occurred: ${it.error.getMessage()}")
               is CategoryPartialChange.RefreshPartialChange.Data -> sendMessageEvent(message = "Refresh success")
+              CategoryPartialChange.RefreshPartialChange.Loading -> return@doOnNext
             }
           }
           .cast<CategoryPartialChange>()
@@ -109,8 +111,8 @@ class CategoryViewModel(
       }
     }
 
-  override fun processIntents(intents: Observable<CategoryViewIntent>) =
-    intents.subscribe(intentS)!!
+  override fun processIntents(intents: Observable<CategoryViewIntent>): Disposable =
+    intents.subscribe(intentS)
 
   init {
     intentS
