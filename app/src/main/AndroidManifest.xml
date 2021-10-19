@@ -61,13 +61,12 @@
                 android:name="com.hoc.comicapp.initializer.AnalyticsInitializer"
                 android:value="androidx.startup" />
 
+            <!-- If you are using androidx.startup to initialize other components -->
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
         </provider>
-
-        <provider
-            android:name="androidx.work.impl.WorkManagerInitializer"
-            android:authorities="${applicationId}.workmanager-init"
-            android:exported="false"
-            tools:node="remove" />
 
         <receiver
             android:name=".worker.ComicAppBroadcastReceiver"
