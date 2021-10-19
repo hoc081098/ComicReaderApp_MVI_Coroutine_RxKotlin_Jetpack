@@ -42,7 +42,7 @@ object versions {
 
     object view {
       const val constraintLayout = "2.1.1"
-      const val material = "1.5.0-alpha04"
+      const val material = "1.4.0"
       const val recyclerView = "1.3.0-alpha01"
     }
 
