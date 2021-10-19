@@ -1,6 +1,11 @@
 # ComicReaderApp_MVI_Coroutine_RxKotlin
 Comic reader app 📘. Learning MVVM / MVI with RxKotlin, Retrofit, Kotlin Coroutines
 
+[![Build CI](https://github.com/hoc081098/ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack/actions/workflows/build.yml/badge.svg)](https://github.com/hoc081098/ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack/actions/workflows/build.yml)
+[![Build Release APK](https://github.com/hoc081098/ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack/actions/workflows/build-release.yml/badge.svg)](https://github.com/hoc081098/ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack/actions/workflows/build-release.yml)
+[![Spotless check](https://github.com/hoc081098/ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack/actions/workflows/spotless.yml/badge.svg)](https://github.com/hoc081098/ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack/actions/workflows/spotless.yml)
+[![Validate Gradle Wrapper](https://github.com/hoc081098/ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack/actions/workflows/gradle-wrapper-validation.yml/badge.svg)](https://github.com/hoc081098/ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack/actions/workflows/gradle-wrapper-validation.yml)
+
 # Project features 🚀
 This project brings to the table set of best practices, tools, and solutions:
 
