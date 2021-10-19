@@ -32,6 +32,7 @@ This project brings to the table set of best practices, tools, and solutions:
 ## Download APK
 
 [Download latest debug APK here](https://nightly.link/hoc081098/ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack/workflows/build/master/app-debug.zip)
+[Download latest release APK here](https://nightly.link/hoc081098/ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack/actions/runs/1360316687/app-release.zip)
 
 # Develop
 - You must use **Android Studio Arctic Fox (2020.3.1)** (**note: Java 11 is now the minimum version required**)
