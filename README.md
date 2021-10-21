@@ -20,7 +20,7 @@ This project brings to the table set of best practices, tools, and solutions:
 -   [Λrrow - Functional companion to Kotlin's Standard Library](https://arrow-kt.io/)
        - [Either](https://arrow-kt.io/docs/apidocs/arrow-core/arrow.core/-either/)
        - [Option](https://arrow-kt.io/docs/apidocs/arrow-core/arrow.core/-option/)
-       - [parZip](https://arrow-kt.io/docs/fx/async/#parzip)
+       - [parZip](https://arrow-kt.io/docs/apidocs/arrow-fx-coroutines/arrow.fx.coroutines/par-zip.html)
 -   Modern architecture (Clean Architecture, Model-View-ViewModel)
 -   Navigation, single-activity architecture with [Jetpack Navigation](https://developer.android.com/guide/navigation)
 -   Initialize components at application startup with [AndroidX Startup](https://developer.android.com/topic/libraries/app-startup)
