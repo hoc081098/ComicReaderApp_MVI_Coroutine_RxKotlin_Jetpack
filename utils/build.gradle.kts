@@ -25,6 +25,7 @@ dependencies {
   implementation(deps.customView.materialSearchView)
 
   implementation(deps.firebase.firestore)
+  implementation(platform(deps.firebase.bom))
 
   implementation(deps.arrow.core)
 

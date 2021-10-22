@@ -94,6 +94,7 @@ dependencies {
   implementation(deps.firebase.firestore)
   implementation(deps.firebase.analytics)
   implementation(deps.firebase.crashlytics)
+  implementation(platform(deps.firebase.bom))
 
   implementation(deps.arrow.core)
   implementation(deps.arrow.fxCoroutines)
