@@ -98,7 +98,7 @@ class ComicRepositoryImpl(
         }
       }
     } catch (throwable: Throwable) {
-      Timber.d(throwable, "ComicRepositoryImpl::$cacheKey [ERROR] $throwable")
+      Timber.e(throwable, "ComicRepositoryImpl::$cacheKey [ERROR] $throwable")
 
       delay(500)
       errorMapper.mapAsLeft(throwable)
@@ -180,7 +180,7 @@ class ComicRepositoryImpl(
       fc = { getUpdatedComics() },
     ) { a, b, c -> Triple(a, b, c) }
       .mapLeft { error ->
-        Timber.d(error, "ComicRepositoryImpl::refreshAll [ERROR] $error")
+        Timber.e(error, "ComicRepositoryImpl::refreshAll [ERROR] $error")
         delay(500)
 
         error

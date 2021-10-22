@@ -118,7 +118,7 @@ class DownloadComicWorker(
                 .build()
             )
 
-            Timber.d(throwable, "Download failed. Throwable: $throwable")
+            Timber.e(throwable, "Download failed. Throwable: $throwable")
           }
         }
       }

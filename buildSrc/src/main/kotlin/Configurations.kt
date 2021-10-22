@@ -81,11 +81,7 @@ object versions {
   }
 
   object firebase {
-    const val auth = "21.0.1"
-    const val storage = "20.0.0"
-    const val firestore = "23.0.4"
-    const val analytics = "19.0.2"
-    const val crashlytics = "18.2.3"
+    const val bom = "28.4.2"
   }
 
   const val arrow = "1.0.0"
@@ -195,11 +191,12 @@ object deps {
   }
 
   object firebase {
-    const val auth = "com.google.firebase:firebase-auth:${versions.firebase.auth}"
-    const val storage = "com.google.firebase:firebase-storage:${versions.firebase.storage}"
-    const val firestore = "com.google.firebase:firebase-firestore:${versions.firebase.firestore}"
-    const val analytics = "com.google.firebase:firebase-analytics:${versions.firebase.analytics}"
-    const val crashlytics = "com.google.firebase:firebase-crashlytics:${versions.firebase.crashlytics}"
+    const val bom = "com.google.firebase:firebase-bom:${versions.firebase.bom}"
+    const val auth = "com.google.firebase:firebase-auth-ktx"
+    const val storage = "com.google.firebase:firebase-storage-ktx"
+    const val firestore = "com.google.firebase:firebase-firestore-ktx"
+    const val analytics = "com.google.firebase:firebase-analytics-ktx"
+    const val crashlytics = "com.google.firebase:firebase-crashlytics-ktx"
   }
 
   object arrow {
