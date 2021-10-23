@@ -191,8 +191,12 @@ private fun Project.configAndroidApplication() = appExtension.run {
 
   buildTypes {
     getByName("debug") {
-      isMinifyEnabled = false
-      isShrinkResources = false
+      isMinifyEnabled = true
+      isShrinkResources = true
+      proguardFiles(
+        getDefaultProguardFile("proguard-android-optimize.txt"),
+        "proguard-rules.pro"
+      )
 
       signingConfig = signingConfigs.getByName("debug")
       isDebuggable = true
