@@ -49,5 +49,8 @@
 }
 
 -keepnames @kotlin.Metadata class com.hoc.comicapp.data.remote.**
+-keepnames @kotlin.Metadata class com.hoc.comicapp.data.remote.**$*
 -keep class com.hoc.comicapp.data.remote.** { *; }
+-keep class com.hoc.comicapp.data.remote.**$* { *; }
 -keepclassmembers class com.hoc.comicapp.data.remote.** { *; }
+-keepclassmembers class com.hoc.comicapp.data.remote.**$* { *; }
