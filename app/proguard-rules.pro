@@ -50,7 +50,15 @@
 
 -keepnames @kotlin.Metadata class com.hoc.comicapp.data.remote.**
 -keepnames @kotlin.Metadata class com.hoc.comicapp.data.remote.**$*
+-keepnames @kotlin.Metadata class com.hoc.comicapp.data.local.entities.ComicEntity$Author
+-keepnames @kotlin.Metadata class com.hoc.comicapp.data.local.entities.ComicEntity$Category
+
 -keep class com.hoc.comicapp.data.remote.** { *; }
 -keep class com.hoc.comicapp.data.remote.**$* { *; }
+-keep class com.hoc.comicapp.data.local.entities.ComicEntity$Author { *; }
+-keep class com.hoc.comicapp.data.local.entities.ComicEntity$Category { *; }
+
 -keepclassmembers class com.hoc.comicapp.data.remote.** { *; }
 -keepclassmembers class com.hoc.comicapp.data.remote.**$* { *; }
+-keepclassmembers class com.hoc.comicapp.data.local.entities.ComicEntity$Author { *; }
+-keepclassmembers class com.hoc.comicapp.data.local.entities.ComicEntity$Category { *; }

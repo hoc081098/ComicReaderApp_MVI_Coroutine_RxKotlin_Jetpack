@@ -1,7 +1,9 @@
 package com.hoc.comicapp.domain.models
 
+import arrow.core.NonEmptyList
+
 data class Comic(
-  val lastChapters: List<LastChapter>,
+  val lastChapters: NonEmptyList<LastChapter>,
   val link: String, // https://ww2.mangafox.online/volcanic-age
   val thumbnail: String, // https://cdn1.mangafox.online/132/857/695/330/341/5/volcanic-age.jpg
   val title: String, // Volcanic Age

@@ -1,5 +1,6 @@
 package com.hoc.comicapp.data.local.entities
 
+import androidx.annotation.Keep
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -35,17 +36,19 @@ data class ComicEntity(
   @ColumnInfo(name = "remote_thumbnail")
   val remoteThumbnail: String,
 ) {
+  @Keep
   data class Category(
-    @Json(name = "link")
+    @field:Json(name = "link")
     val link: String, // https://ww2.mangafox.online/category/webtoons
-    @Json(name = "name")
+    @field:Json(name = "name")
     val name: String, // Webtoons
   )
 
+  @Keep
   data class Author(
-    @Json(name = "link")
+    @field:Json(name = "link")
     val link: String, // https://ww2.mangafox.online/author/sung-lak-jang
-    @Json(name = "name")
+    @field:Json(name = "name")
     val name: String, // Sung-Lak Jang
   )
 }

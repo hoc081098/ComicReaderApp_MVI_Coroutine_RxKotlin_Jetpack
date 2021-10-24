@@ -167,6 +167,7 @@ class ComicRepositoryImpl(
     ) {
       comicApiService
         .getNewestComics(page)
+        .also { Timber.d("ComicRepositoryImpl::getNewestComics [RESPONSE] $it") }
         .also(::updateFavoritesAndDownloaded)
         .map(Mappers::responseToDomainModel)
     }
