@@ -10,6 +10,8 @@ Comic reader app 📘. Learning MVVM / MVI with RxKotlin, Retrofit, Kotlin Corou
 [![Validate Gradle Wrapper](https://github.com/hoc081098/ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack/actions/workflows/gradle-wrapper-validation.yml/badge.svg)](https://github.com/hoc081098/ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack/actions/workflows/gradle-wrapper-validation.yml)
 [![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fhoc081098%2FComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false)](https://hits.seeyoufarm.com)
 
+## Observable 🌀 + Flow 🌊 + suspend function ⚡ = 💗💎❤️
+
 # Project features 🚀
 This project brings to the table set of best practices, tools, and solutions:
 
