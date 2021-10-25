@@ -1,7 +1,6 @@
 package com.hoc.comicapp.data
 
 import android.database.sqlite.SQLiteException
-import arrow.core.NonEmptyList
 import arrow.core.left
 import arrow.core.nonFatalOrThrow
 import com.google.firebase.FirebaseException
@@ -156,9 +155,6 @@ object Mappers {
    *
    */
 
-  /**
-   * @throws IndexOutOfBoundsException
-   */
   fun responseToDomainModel(response: ComicResponse): Comic {
     return Comic(
       title = response.title,
@@ -171,7 +167,7 @@ object Mappers {
           chapterName = it.chapterName,
           time = it.time
         )
-      }.let { NonEmptyList.fromListUnsafe(it) }
+      }
     )
   }
 
