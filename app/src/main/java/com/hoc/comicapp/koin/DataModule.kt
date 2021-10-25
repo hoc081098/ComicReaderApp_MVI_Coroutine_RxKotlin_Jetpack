@@ -64,7 +64,7 @@ val dataModule = module {
       rxSchedulerProvider = get(),
       errorMapper = get(),
       workManager = get(),
-      jsonAdapterConstraints = get(),
+      jsonAdaptersContainer = get(),
       analyticsService = get(),
     )
   }
@@ -158,7 +158,7 @@ private fun provideDownloadComicsRepository(
   rxSchedulerProvider: RxSchedulerProvider,
   errorMapper: ErrorMapper,
   workManager: WorkManager,
-  jsonAdapterConstraints: JsonAdaptersContainer,
+  jsonAdaptersContainer: JsonAdaptersContainer,
   analyticsService: AnalyticsService,
 ): DownloadComicsRepository {
   return DownloadComicsRepositoryImpl(
@@ -171,7 +171,7 @@ private fun provideDownloadComicsRepository(
     rxSchedulerProvider = rxSchedulerProvider,
     errorMapper = errorMapper,
     workManager = workManager,
-    jsonAdapterConstraints = jsonAdapterConstraints,
+    jsonAdaptersContainer = jsonAdaptersContainer,
     analyticsService = analyticsService,
   )
 }

@@ -19,6 +19,7 @@ This project brings to the table set of best practices, tools, and solutions:
 -   Clean Architecture with MVI (Uni-directional data flow)
 -   [Λrrow - Functional companion to Kotlin's Standard Library](https://arrow-kt.io/)
        - [Either](https://arrow-kt.io/docs/apidocs/arrow-core/arrow.core/-either/)
+       - [Monad Comprehensions](https://arrow-kt.io/docs/patterns/monad_comprehensions/)
        - [Option](https://arrow-kt.io/docs/apidocs/arrow-core/arrow.core/-option/)
        - [parZip](https://arrow-kt.io/docs/apidocs/arrow-fx-coroutines/arrow.fx.coroutines/par-zip.html)
 -   Modern architecture (Clean Architecture, Model-View-ViewModel)

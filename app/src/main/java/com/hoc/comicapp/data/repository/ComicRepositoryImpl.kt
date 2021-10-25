@@ -1,6 +1,6 @@
 package com.hoc.comicapp.data.repository
 
-import arrow.core.right
+import arrow.core.Either
 import com.hoc.comicapp.data.ErrorMapper
 import com.hoc.comicapp.data.Mappers
 import com.hoc.comicapp.data.analytics.readChapter
@@ -78,7 +78,7 @@ class ComicRepositoryImpl(
   ): DomainResult<T> {
     val cacheKey = buildKey(path, queryItems)
 
-    return try {
+    return Either.catch(errorMapper) {
       when (val cachedResponse = cache[cacheKey] as? T) {
         null -> {
           Timber.d("ComicRepositoryImpl::$cacheKey [MISS] request...")
@@ -87,21 +87,18 @@ class ComicRepositoryImpl(
             comicApiService
               .request()
               .also { cache[cacheKey] = it }
-              .right()
           }
         }
         else -> {
           Timber.d("ComicRepositoryImpl::$cacheKey [HIT] cached")
 
           delay(250)
-          cachedResponse.right()
+          cachedResponse
         }
       }
-    } catch (throwable: Throwable) {
+    }.tapLeft { throwable ->
       Timber.e(throwable, "ComicRepositoryImpl::$cacheKey [ERROR] $throwable")
-
       delay(500)
-      errorMapper.mapAsLeft(throwable)
     }
   }
 

@@ -1,6 +1,7 @@
 package com.hoc.comicapp.data.repository
 
 import arrow.core.Either
+import arrow.core.left
 import arrow.core.right
 import com.hoc.comicapp.data.ErrorMapper
 import com.hoc.comicapp.domain.DomainResult
@@ -51,5 +52,5 @@ private fun <T1 : Any, T2 : Any, T3 : Any> Singles.zipDomainResult(
     source3.map { it.getOrThrow() }
   )
     .map<DomainResult<Triple<T1, T2, T3>>> { it.right() }
-    .onErrorReturn { errorMapper.mapAsLeft(it) }
+    .onErrorReturn { errorMapper(it).left() }
 }

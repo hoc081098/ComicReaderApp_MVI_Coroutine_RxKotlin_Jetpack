@@ -24,7 +24,7 @@ class WorkManagerInitializer : Initializer<Unit> {
 
     // logs work information in debug mode
     if (BuildConfig.DEBUG) {
-      var times = 0
+      var times = 0L
       WorkManager
         .getInstance(context)
         .getWorkInfosByTagLiveData(DownloadComicWorker.TAG)
@@ -36,7 +36,7 @@ class WorkManagerInitializer : Initializer<Unit> {
               prefix = "\n",
               postfix = "\n",
             )
-          Timber.d("workInfomations [${times++}]: $s")
+          Timber.d("workInfos [${times++}]: $s")
         }
     }
 

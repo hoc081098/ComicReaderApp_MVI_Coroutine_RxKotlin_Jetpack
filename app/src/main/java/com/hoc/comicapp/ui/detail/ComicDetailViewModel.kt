@@ -245,10 +245,16 @@ class ComicDetailViewModel(
       .map { it.chapter }
       .flatMap { chapter ->
         Observable.defer {
-          val comicName = when (val detail = state.value.comicDetail) {
-            is ComicDetailViewState.ComicDetail.Detail -> detail.title
-            is ComicDetailViewState.ComicDetail.Initial -> detail.title
-            null -> return@defer Observable.just(
+          state.value
+            .comicDetail
+            ?.let {
+              comicDetailInteractor.enqueueDownloadComic(
+                chapter = chapter,
+                comicName = it.title,
+                comicLink = it.link,
+              )
+            }
+            ?: Observable.just(
               ComicDetailSingleEvent.EnqueuedDownloadFailure(
                 chapter,
                 UnexpectedError(
@@ -257,8 +263,6 @@ class ComicDetailViewModel(
                 )
               )
             )
-          }
-          comicDetailInteractor.enqueueDownloadComic(chapter, comicName)
         }
       }
       .observeOn(rxSchedulerProvider.main)

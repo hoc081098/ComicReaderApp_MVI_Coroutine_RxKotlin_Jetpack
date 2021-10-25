@@ -6,12 +6,18 @@ import androidx.lifecycle.map
 import androidx.room.withTransaction
 import androidx.work.Constraints
 import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.await
 import androidx.work.workDataOf
+import arrow.core.Either
+import arrow.core.computations.ResultEffect.bind
+import arrow.core.computations.either
+import arrow.core.identity
 import arrow.core.left
 import arrow.core.right
+import com.hoc.comicapp.BuildConfig
 import com.hoc.comicapp.data.ErrorMapper
 import com.hoc.comicapp.data.JsonAdaptersContainer
 import com.hoc.comicapp.data.Mappers
@@ -26,7 +32,9 @@ import com.hoc.comicapp.data.remote.ComicApiService
 import com.hoc.comicapp.domain.DomainResult
 import com.hoc.comicapp.domain.analytics.AnalyticsEvent
 import com.hoc.comicapp.domain.analytics.AnalyticsService
+import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.ComicDetail
+import com.hoc.comicapp.domain.models.DownloadProgress
 import com.hoc.comicapp.domain.models.DownloadedChapter
 import com.hoc.comicapp.domain.models.DownloadedComic
 import com.hoc.comicapp.domain.models.LocalStorageError
@@ -34,7 +42,6 @@ import com.hoc.comicapp.domain.repository.DownloadComicsRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.utils.copyTo
-import com.hoc.comicapp.utils.getOrThrow
 import com.hoc.comicapp.utils.retryIO
 import com.hoc.comicapp.worker.DownloadComicWorker
 import io.reactivex.rxjava3.core.Observable
@@ -68,120 +75,17 @@ class DownloadComicsRepositoryImpl(
   private val rxSchedulerProvider: RxSchedulerProvider,
   private val errorMapper: ErrorMapper,
   private val workManager: WorkManager,
-  private val jsonAdapterConstraints: JsonAdaptersContainer,
+  private val jsonAdaptersContainer: JsonAdaptersContainer,
   private val analyticsService: AnalyticsService,
 ) : DownloadComicsRepository {
 
-  /*
-   * Implement DownloadComicsRepository
-   */
+  override fun getDownloadedChapters(): LiveData<List<DownloadedChapter>> =
+    chapterDao
+      .getAllChaptersLiveData()
+      .map { it.map(Mappers::entityToDomainModel) }
 
-  override fun getDownloadedChapter(chapterLink: String): Flow<DomainResult<DownloadedChapter>> {
-    val allChaptersF = chapterDao.getAllChaptersFlow().distinctUntilChanged()
-    val chapterF = chapterDao.getByChapterLink(chapterLink).distinctUntilChanged()
-
-    return chapterF
-      .combine(allChaptersF) { chapter, chapters ->
-        val index = chapters.indexOfFirst { it.chapterLink == chapterLink }
-        Mappers.entityToDomainModel(chapter)
-          .copy(
-            chapters = chapters.map(Mappers::entityToDomainModel),
-            prevChapterLink = chapters.getOrNull(index - 1)?.chapterLink,
-            nextChapterLink = chapters.getOrNull(index + 1)?.chapterLink
-          )
-      }
-      .map {
-        @Suppress("USELESS_CAST")
-        it.right() as DomainResult<DownloadedChapter>
-      }
-      .catch { emit(errorMapper.mapAsLeft(it)) }
-      .flowOn(dispatchersProvider.io)
-  }
-
-  override fun getDownloadedComic(link: String): Observable<DomainResult<DownloadedComic>> {
-    return comicDao
-      .getByComicLink(link)
-      .map<DomainResult<DownloadedComic>> { comicAndChapters ->
-        Mappers.entityToDomainModel(
-          comicAndChapters.apply {
-            chapters = chapters.sortedByDescending { it.order }
-          }
-        ).right()
-      }
-      .onErrorReturn { errorMapper.mapAsLeft(it) }
-      .subscribeOn(rxSchedulerProvider.io)
-  }
-
-  override suspend fun deleteComic(comic: DownloadedComic): DomainResult<Unit> {
-    return runCatching {
-      withContext(dispatchersProvider.main) {
-        comicDao.delete(Mappers.domainToLocalEntity(comic))
-      }
-    }.fold(
-      onSuccess = { Unit.right() },
-      onFailure = { errorMapper.mapAsLeft(it) }
-    )
-  }
-
-  override suspend fun enqueueDownload(
-    chapter: DownloadedChapter,
-    comicName: String,
-  ): DomainResult<Unit> {
-    return try {
-      withContext(dispatchersProvider.io) {
-        val chapterJson = jsonAdapterConstraints.comicDetailChapterAdapter.toJson(
-          ComicDetail.Chapter(
-            chapterLink = chapter.chapterLink,
-            chapterName = chapter.chapterName,
-            time = chapter.time,
-            view = chapter.view
-          )
-        )
-
-        val workRequest = OneTimeWorkRequestBuilder<DownloadComicWorker>()
-          .setInputData(
-            workDataOf(
-              DownloadComicWorker.CHAPTER to chapterJson,
-              DownloadComicWorker.COMIC_NAME to comicName
-            )
-          )
-          .setConstraints(
-            Constraints.Builder()
-              .setRequiredNetworkType(NetworkType.CONNECTED)
-              .setRequiresStorageNotLow(true)
-              .build()
-          )
-          .addTag(DownloadComicWorker.TAG)
-          .addTag(chapter.chapterLink)
-          .build()
-
-        deleteDownloadedChapter(chapter).getOrThrow()
-        workManager.enqueue(workRequest).await()
-
-        Unit.right()
-      }
-    } catch (e: Throwable) {
-      errorMapper.mapAsLeft(e)
-    }
-  }
-
-  override suspend fun deleteDownloadedChapter(chapter: DownloadedChapter): DomainResult<Unit> {
-    return try {
-      workManager.cancelAllWorkByTag(chapter.chapterLink).await()
-      deleteEntityAndImages(chapter)
-    } catch (e: Exception) {
-      errorMapper.mapAsLeft(e)
-    }
-  }
-
-  override fun getDownloadedChapters(): LiveData<List<DownloadedChapter>> {
-    return chapterDao.getAllChaptersLiveData().map { chapters ->
-      chapters.map { Mappers.entityToDomainModel(it) }
-    }
-  }
-
-  override fun getDownloadedComics(): Observable<DomainResult<List<DownloadedComic>>> {
-    return chapterDao
+  override fun getDownloadedComics(): Observable<DomainResult<List<DownloadedComic>>> =
+    chapterDao
       .getComicAndChapters()
       .map<DomainResult<List<DownloadedComic>>> { list ->
         list
@@ -196,17 +100,92 @@ class DownloadComicsRepositoryImpl(
           }
           .right()
       }
-      .onErrorReturn { errorMapper.mapAsLeft(it) }
+      .onErrorReturn { errorMapper(it).left() }
       .subscribeOn(rxSchedulerProvider.io)
+
+  override fun getDownloadedChapter(chapterLink: String): Flow<DomainResult<DownloadedChapter>> {
+    val allChaptersF = chapterDao.getAllChaptersFlow().distinctUntilChanged()
+    val chapterF = chapterDao.getByChapterLink(chapterLink).distinctUntilChanged()
+
+    return combine(chapterF, allChaptersF) { chapter, chapters ->
+      val index = chapters.indexOfFirst { it.chapterLink == chapterLink }
+      Mappers.entityToDomainModel(chapter)
+        .copy(
+          chapters = chapters.map(Mappers::entityToDomainModel),
+          prevChapterLink = chapters.getOrNull(index - 1)?.chapterLink,
+          nextChapterLink = chapters.getOrNull(index + 1)?.chapterLink
+        )
+    }
+      .map {
+        @Suppress("USELESS_CAST")
+        it.right() as DomainResult<DownloadedChapter>
+      }
+      .catch { emit(errorMapper(it).left()) }
+      .flowOn(dispatchersProvider.io)
+  }
+
+  override fun getDownloadedComic(link: String): Observable<DomainResult<DownloadedComic>> =
+    comicDao
+      .getByComicLink(link)
+      .map<DomainResult<DownloadedComic>> { comicAndChapters ->
+        Mappers.entityToDomainModel(
+          comicAndChapters.apply {
+            chapters = chapters.sortedByDescending { it.order }
+          }
+        ).right()
+      }
+      .onErrorReturn { errorMapper(it).left() }
+      .subscribeOn(rxSchedulerProvider.io)
+
+  override suspend fun deleteComic(comic: DownloadedComic) =
+    either<Throwable, Unit> {
+      val images = comic.chapters.flatMap { it.images }
+      workManager.runCatching { cancelAllWorkByTag(comic.comicLink).await() }.bind()
+      Either.catch { comicDao.delete(Mappers.domainToLocalEntity(comic)) }.bind()
+      deleteImages(images).bind()
+    }
+      .tapLeft { Timber.e(it, "Error occurred while deleting downloaded comic=$comic") }
+      .mapLeft(errorMapper)
+
+  override suspend fun deleteDownloadedChapter(chapter: DownloadedChapter): DomainResult<Unit> =
+    either<Throwable, Unit> {
+      workManager.runCatching { cancelAllWorkByTag(chapter.chapterLink).await() }.bind()
+      deleteChapterAndComicEntityIfNeeded(chapter).bind()
+      deleteImages(chapter.images).bind()
+    }
+      .tapLeft { Timber.e(it, "Error occurred while deleting downloaded chapter=$chapter") }
+      .mapLeft(errorMapper)
+
+  override suspend fun enqueueDownload(
+    chapter: DownloadedChapter,
+    comicName: String,
+    comicLink: String,
+  ): DomainResult<Unit> = either<ComicAppError, Unit> {
+    deleteDownloadedChapter(chapter).bind()
+
+    workManager.runCatching {
+      enqueue(
+        buildDownloadWorkRequest(
+          chapter,
+          comicName,
+          comicLink,
+        )
+      ).await()
+    }.bind()
+  }.tapLeft {
+    Timber.e(
+      it,
+      "Error occurred when enqueuing download work, comicName=$comicName, chapter=$chapter"
+    )
   }
 
   @OptIn(ExperimentalTime::class)
-  override fun downloadChapter(chapterLink: String): Flow<Int> {
+  override fun downloadChapter(chapterLink: String): Flow<DownloadProgress> {
     return flow {
-      Timber.d("$tag Begin")
+      Timber.d("$LOG_TAG Begin")
       val start = TimeSource.Monotonic.markNow()
 
-      emit(0)
+      emit(DownloadProgress.require(0))
 
       val chapterDetail = retryIO(
         times = 3,
@@ -216,9 +195,9 @@ class DownloadComicsRepositoryImpl(
       val comicNameEscaped = chapterDetail.comicName.escapeFileName()
       val chapterNameEscaped = chapterDetail.chapterName.escapeFileName()
       val totalImageSize = chapterDetail.images.size
-      Timber.d("$tag Images.size = $totalImageSize")
+      Timber.d("$LOG_TAG Images.size = $totalImageSize")
 
-      emit(10)
+      emit(DownloadProgress.require(10))
 
       val imagePaths = if (totalImageSize > 0) {
         downloadAndSaveImages(
@@ -227,13 +206,13 @@ class DownloadComicsRepositoryImpl(
           chapterName = chapterNameEscaped
         )
           .map { it to (10 + (it.size.toFloat() / totalImageSize) * 80).toInt() }
-          .emitAllTo(this) { it.second }
+          .emitAllTo(this) { DownloadProgress.require(it.second) }
           ?.first ?: emptyList()
       } else {
         emptyList()
       }
 
-      emit(80)
+      emit(DownloadProgress.require(80))
 
       val comicDetail = retryIO(
         times = 3,
@@ -245,7 +224,7 @@ class DownloadComicsRepositoryImpl(
         comicName = comicNameEscaped
       )
 
-      emit(90)
+      emit(DownloadProgress.require(90))
 
       appDatabase.withTransaction {
         comicDao.upsert(
@@ -271,7 +250,7 @@ class DownloadComicsRepositoryImpl(
         )
       }
 
-      emit(100)
+      emit(DownloadProgress.require(100))
 
       val elapsed = start.elapsedNow()
       analyticsService.track(
@@ -285,57 +264,112 @@ class DownloadComicsRepositoryImpl(
         )
       )
 
-      Timber.d("$tag Elapsed = $elapsed, Images = $imagePaths")
+      Timber.d("$LOG_TAG Elapsed = $elapsed, Images = $imagePaths")
     }
       .flowOn(dispatchersProvider.io)
       .distinctUntilChanged()
   }
 
-  /*
-   * Private helper methods
-   */
+  // Private helper methods
+
+  private fun buildDownloadWorkRequest(
+    chapter: DownloadedChapter,
+    comicName: String,
+    comicLink: String,
+  ): OneTimeWorkRequest {
+    val chapterJson = jsonAdaptersContainer.comicDetailChapterAdapter.toJson(
+      ComicDetail.Chapter(
+        chapterLink = chapter.chapterLink,
+        chapterName = chapter.chapterName,
+        time = chapter.time,
+        view = chapter.view
+      )
+    )
+
+    return OneTimeWorkRequestBuilder<DownloadComicWorker>()
+      .setInputData(
+        workDataOf(
+          DownloadComicWorker.CHAPTER to chapterJson,
+          DownloadComicWorker.COMIC_NAME to comicName
+        )
+      )
+      .setConstraints(
+        Constraints.Builder()
+          .setRequiredNetworkType(NetworkType.CONNECTED)
+          .setRequiresStorageNotLow(true)
+          .build()
+      )
+      .apply {
+        if (BuildConfig.DEBUG) {
+          addTag(DownloadComicWorker.TAG) // for debugging
+        }
+      }
+      .addTag(chapter.chapterLink) // for cancelling work by chapter
+      .addTag(comicLink) // for cancelling all works by comic
+      .build()
+  }
 
   /**
    * Delete chapter entity and delete comic entity if comic's chapters is empty
    */
-  private suspend fun deleteEntityAndImages(chapter: DownloadedChapter): DomainResult<Unit> {
-    return runCatching {
-      withContext(dispatchersProvider.io) {
-        chapterDao.delete(Mappers.domainToLocalEntity(chapter))
+  private suspend fun deleteChapterAndComicEntityIfNeeded(chapter: DownloadedChapter): Either<LocalStorageError.DatabaseError, Unit> =
+    Either
+      .catch {
+        withContext(dispatchersProvider.io) {
+          appDatabase.withTransaction {
+            chapterDao.delete(Mappers.domainToLocalEntity(chapter))
 
-        val chaptersCount = chapterDao.getCountByComicLink(chapter.comicLink).firstOrNull() ?: 0
-        if (chaptersCount == 0) {
-          comicDao.delete(
-            ComicEntity(
-              comicLink = chapter.comicLink,
-              view = "",
-              categories = emptyList(),
-              authors = emptyList(),
-              thumbnail = "",
-              title = "",
-              lastUpdated = "",
-              shortenedContent = "",
-              remoteThumbnail = ""
-            )
-          )
+            val chaptersCount =
+              chapterDao.getCountByComicLink(chapter.comicLink).firstOrNull() ?: 0
+
+            if (chaptersCount == 0) {
+              comicDao.delete(
+                ComicEntity(
+                  comicLink = chapter.comicLink,
+                  view = "",
+                  categories = emptyList(),
+                  authors = emptyList(),
+                  thumbnail = "",
+                  title = "",
+                  lastUpdated = "",
+                  shortenedContent = "",
+                  remoteThumbnail = ""
+                )
+              )
+            }
+          }
         }
-
-        chapter
-          .images
-          .map { File(application.filesDir, it) }
-          .all(File::delete)
       }
-    }.fold(
-      {
-        if (it) {
-          Unit.right()
-        } else {
-          LocalStorageError.DeleteFileError.left()
+      .mapLeft { LocalStorageError.DatabaseError(it) }
+
+  /**
+   * Delete image files.
+   */
+  private suspend fun deleteImages(imagePaths: List<String>): Either<LocalStorageError.DeleteFileError, Unit> =
+    if (imagePaths.isEmpty()) Unit.right()
+    else {
+      Either.catch {
+        val success = withContext(dispatchersProvider.io) {
+          imagePaths
+            .mapNotNull { path ->
+              File(application.filesDir, path)
+                .takeIf { it.exists() }
+                ?.delete()
+            }
+            .all(::identity)
         }
-      },
-      { errorMapper.mapAsLeft(it) }
-    )
-  }
+        if (!success) {
+          throw LocalStorageError.DeleteFileError
+        }
+      }.mapLeft { LocalStorageError.DeleteFileError }
+    }
+
+  private suspend inline fun <R> WorkManager.runCatching(crossinline block: suspend WorkManager.() -> R): Either<Throwable, R> =
+    Either.catch {
+      withContext(dispatchersProvider.io) {
+        block()
+      }
+    }
 
   /**
    * Download comic thumbnail
@@ -381,7 +415,7 @@ class DownloadComicsRepositoryImpl(
       .withIndex()
       .asFlow()
       .map { (index, imageUrl) ->
-        Timber.d("$tag Begin $index $imageUrl")
+        Timber.d("$LOG_TAG Begin $index $imageUrl")
 
         retryIO(
           times = 3,
@@ -404,7 +438,7 @@ class DownloadComicsRepositoryImpl(
               overwrite = true
             )
 
-            Timber.d("$tag Done $index $imageUrl -> $imagePath")
+            Timber.d("$LOG_TAG Done $index $imageUrl -> $imagePath")
             imagePath
           }
       }
@@ -412,7 +446,7 @@ class DownloadComicsRepositoryImpl(
   }
 
   private companion object {
-    const val tag = "[DOWNLOAD_COMIC_REPO]"
+    const val LOG_TAG = "[DOWNLOAD_COMIC_REPO]"
   }
 }
 

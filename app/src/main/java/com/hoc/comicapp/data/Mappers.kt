@@ -1,7 +1,6 @@
 package com.hoc.comicapp.data
 
-import android.database.sqlite.SQLiteException
-import arrow.core.left
+import android.database.SQLException
 import arrow.core.nonFatalOrThrow
 import com.google.firebase.FirebaseException
 import com.google.firebase.FirebaseNetworkException
@@ -17,7 +16,6 @@ import com.hoc.comicapp.data.remote.response.CategoryResponse
 import com.hoc.comicapp.data.remote.response.ChapterDetailResponse
 import com.hoc.comicapp.data.remote.response.ComicDetailResponse
 import com.hoc.comicapp.data.remote.response.ComicResponse
-import com.hoc.comicapp.domain.DomainResult
 import com.hoc.comicapp.domain.models.AuthError
 import com.hoc.comicapp.domain.models.Category
 import com.hoc.comicapp.domain.models.CategoryDetailPopularComic
@@ -285,90 +283,88 @@ object Mappers {
   }
 }
 
-class ErrorMapper(private val retrofit: Retrofit) {
+class ErrorMapper(private val retrofit: Retrofit) : (Throwable) -> ComicAppError {
   /**
    * Transform [t] to [ComicAppError].
    * Throw [t] if fatal.
    */
-  fun map(t: Throwable): ComicAppError {
-    return when (val throwable = t.nonFatalOrThrow()) {
-      is ComicAppError -> throwable
-      is FirebaseException -> {
-        when (throwable) {
-          is FirebaseNetworkException -> NetworkError
-          is FirebaseAuthException -> {
-            when (throwable.errorCode) {
-              "ERROR_INVALID_CUSTOM_TOKEN" -> AuthError.InvalidCustomToken
-              "ERROR_CUSTOM_TOKEN_MISMATCH" -> AuthError.CustomTokenMismatch
-              "ERROR_INVALID_CREDENTIAL" -> AuthError.InvalidCredential
-              "ERROR_INVALID_EMAIL" -> AuthError.InvalidEmail
-              "ERROR_WRONG_PASSWORD" -> AuthError.WrongPassword
-              "ERROR_USER_MISMATCH" -> AuthError.UserMismatch
-              "ERROR_REQUIRES_RECENT_LOGIN" -> AuthError.RequiresRecentLogin
-              "ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL" -> AuthError.AccountExistsWithDifferenceCredential
-              "ERROR_EMAIL_ALREADY_IN_USE" -> AuthError.EmailAlreadyInUse
-              "ERROR_CREDENTIAL_ALREADY_IN_USE" -> AuthError.CredentialAlreadyInUse
-              "ERROR_USER_DISABLED" -> AuthError.UserDisabled
-              "ERROR_USER_TOKEN_EXPIRED" -> AuthError.TokenExpired
-              "ERROR_USER_NOT_FOUND" -> AuthError.UserNotFound
-              "ERROR_INVALID_USER_TOKEN" -> AuthError.InvalidUserToken
-              "ERROR_OPERATION_NOT_ALLOWED" -> AuthError.OperationNotAllowed
-              "ERROR_WEAK_PASSWORD" -> AuthError.WeakPassword
-              else -> UnexpectedError(
-                cause = throwable,
-                message = "Unknown throwable $this"
-              )
-            }
-          }
-          is StorageException -> AuthError.UploadFile
-          else -> UnexpectedError(
-            cause = throwable,
-            message = "Unknown throwable $throwable"
-          )
-        }
-      }
-      is SQLiteException -> {
-        LocalStorageError.DatabaseError(throwable)
-      }
-      is IOException -> {
-        when (throwable) {
-          is UnknownHostException -> NetworkError
-          is SocketTimeoutException -> NetworkError
-          else -> UnexpectedError(
-            cause = throwable,
-            message = "Unknown IOException $this"
-          )
-        }
-      }
-      is HttpException -> {
-        ErrorResponseParser
-          .getError(
-            throwable.response() ?: return ServerError("Response is null", -1),
-            retrofit
-          )
-          ?.let {
-            ServerError(
-              message = it.message,
-              statusCode = it.statusCode
-            )
-          }
-          ?: ServerError("", -1)
-      }
-      else -> {
-        UnexpectedError(
+  override fun invoke(t: Throwable): ComicAppError {
+    val throwable = t.nonFatalOrThrow()
+    return runCatching {
+      when (throwable) {
+        is ComicAppError -> throwable
+        is FirebaseException -> mapFirebaseException(throwable)
+        is SQLException -> LocalStorageError.DatabaseError(throwable)
+        is IOException -> mapIOException(throwable)
+        is HttpException -> mapHttpException(throwable)
+        else -> UnexpectedError(
           cause = throwable,
           message = "Unknown throwable $throwable"
         )
       }
+    }.getOrElse {
+      it.nonFatalOrThrow()
+      UnexpectedError(
+        cause = it,
+        message = "Unknown throwable $it"
+      )
     }
   }
 
-  /**
-   * Transform [throwable] to left branch of [DomainResult]
-   */
-  @Deprecated(
-    "Use arrow.core.Either.catch instead",
-    ReplaceWith("")
+  private fun mapHttpException(throwable: HttpException): ComicAppError {
+    return ErrorResponseParser
+      .getError(
+        throwable.response() ?: return ServerError("Response is null", -1),
+        retrofit
+      )
+      ?.let {
+        ServerError(
+          message = it.message,
+          statusCode = it.statusCode
+        )
+      }
+      ?: ServerError("Parsed error response is null", -1)
+  }
+}
+
+private fun mapFirebaseException(fbException: FirebaseException) = when (fbException) {
+  is FirebaseNetworkException -> NetworkError
+  is FirebaseAuthException -> {
+    when (fbException.errorCode) {
+      "ERROR_INVALID_CUSTOM_TOKEN" -> AuthError.InvalidCustomToken
+      "ERROR_CUSTOM_TOKEN_MISMATCH" -> AuthError.CustomTokenMismatch
+      "ERROR_INVALID_CREDENTIAL" -> AuthError.InvalidCredential
+      "ERROR_INVALID_EMAIL" -> AuthError.InvalidEmail
+      "ERROR_WRONG_PASSWORD" -> AuthError.WrongPassword
+      "ERROR_USER_MISMATCH" -> AuthError.UserMismatch
+      "ERROR_REQUIRES_RECENT_LOGIN" -> AuthError.RequiresRecentLogin
+      "ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL" -> AuthError.AccountExistsWithDifferenceCredential
+      "ERROR_EMAIL_ALREADY_IN_USE" -> AuthError.EmailAlreadyInUse
+      "ERROR_CREDENTIAL_ALREADY_IN_USE" -> AuthError.CredentialAlreadyInUse
+      "ERROR_USER_DISABLED" -> AuthError.UserDisabled
+      "ERROR_USER_TOKEN_EXPIRED" -> AuthError.TokenExpired
+      "ERROR_USER_NOT_FOUND" -> AuthError.UserNotFound
+      "ERROR_INVALID_USER_TOKEN" -> AuthError.InvalidUserToken
+      "ERROR_OPERATION_NOT_ALLOWED" -> AuthError.OperationNotAllowed
+      "ERROR_WEAK_PASSWORD" -> AuthError.WeakPassword
+      else -> UnexpectedError(
+        cause = fbException,
+        message = "Unknown throwable $fbException"
+      )
+    }
+  }
+  is StorageException -> AuthError.UploadFile
+  else -> UnexpectedError(
+    cause = fbException,
+    message = "Unknown throwable $fbException"
   )
-  fun <T> mapAsLeft(throwable: Throwable): DomainResult<T> = map(throwable).left()
+}
+
+private fun mapIOException(ioException: IOException) = when (ioException) {
+  is UnknownHostException -> NetworkError
+  is SocketTimeoutException -> NetworkError
+  else -> UnexpectedError(
+    cause = ioException,
+    message = "Unknown IOException $ioException"
+  )
 }
