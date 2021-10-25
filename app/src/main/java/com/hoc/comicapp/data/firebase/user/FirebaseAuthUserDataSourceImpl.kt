@@ -14,6 +14,7 @@ import com.hoc.comicapp.data.firebase.entity._User
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.utils.snapshots
+import com.hoc.comicapp.utils.unit
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -132,7 +133,7 @@ class FirebaseAuthUserDataSourceImpl(
 
   override suspend fun login(email: String, password: String) = Either.catch {
     withContext(dispatchersProvider.io) {
-      firebaseAuth.signInWithEmailAndPassword(email, password).await()
+      firebaseAuth.signInWithEmailAndPassword(email, password).await().unit
     }
   }
 }
