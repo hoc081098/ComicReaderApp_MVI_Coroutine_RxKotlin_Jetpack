@@ -137,21 +137,19 @@ class DownloadComicsRepositoryImpl(
       .onErrorReturn { errorMapper(it).left() }
       .subscribeOn(rxSchedulerProvider.io)
 
-  override suspend fun deleteComic(comic: DownloadedComic) = either<Throwable, Unit> {
-    withContext(dispatchersProvider.io) {
+  override suspend fun deleteComic(comic: DownloadedComic) =
+    either<Throwable, Unit> {
       val images = comic.chapters.flatMap { it.images }
       workManager.runCatching { cancelAllWorkByTag(comic.comicLink).await() }.bind()
       Either.catch { comicDao.delete(Mappers.domainToLocalEntity(comic)) }.bind()
       deleteImages(images).bind()
     }
-  }.tapLeft { Timber.e(it, "Error occurred when deleting downloaded comic=$comic") }
-    .mapLeft(errorMapper)
+      .tapLeft { Timber.e(it, "Error occurred while deleting downloaded comic=$comic") }
+      .mapLeft(errorMapper)
 
   override suspend fun deleteDownloadedChapter(chapter: DownloadedChapter): DomainResult<Unit> =
     either<Throwable, Unit> {
-      workManager.runCatching {
-        cancelAllWorkByTag(chapter.chapterLink).await()
-      }.bind()
+      workManager.runCatching { cancelAllWorkByTag(chapter.chapterLink).await() }.bind()
       deleteChapterAndComicEntityIfNeeded(chapter).bind()
       deleteImages(chapter.images).bind()
     }
@@ -347,21 +345,24 @@ class DownloadComicsRepositoryImpl(
   /**
    * Delete image files.
    */
-  private suspend fun deleteImages(images: List<String>): Either<LocalStorageError.DeleteFileError, Unit> =
-    Either.catch {
-      val success = withContext(dispatchersProvider.io) {
-        images
-          .mapNotNull {
-            File(application.filesDir, it)
-              .takeIf { it.exists() }
-              ?.delete()
-          }
-          .all(::identity)
-      }
-      if (!success) {
-        throw LocalStorageError.DeleteFileError
-      }
-    }.mapLeft { LocalStorageError.DeleteFileError }
+  private suspend fun deleteImages(imagePaths: List<String>): Either<LocalStorageError.DeleteFileError, Unit> =
+    if (imagePaths.isEmpty()) Unit.right()
+    else {
+      Either.catch {
+        val success = withContext(dispatchersProvider.io) {
+          imagePaths
+            .mapNotNull { path ->
+              File(application.filesDir, path)
+                .takeIf { it.exists() }
+                ?.delete()
+            }
+            .all(::identity)
+        }
+        if (!success) {
+          throw LocalStorageError.DeleteFileError
+        }
+      }.mapLeft { LocalStorageError.DeleteFileError }
+    }
 
   private suspend inline fun <R> WorkManager.runCatching(crossinline block: suspend WorkManager.() -> R): Either<Throwable, R> =
     Either.catch {
