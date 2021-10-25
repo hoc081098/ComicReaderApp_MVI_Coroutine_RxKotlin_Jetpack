@@ -39,12 +39,14 @@ class ComicDetailInteractorImpl(
   override fun enqueueDownloadComic(
     chapter: ComicDetailViewState.Chapter,
     comicName: String,
+    comicLink: String,
   ): Observable<ComicDetailSingleEvent> {
     return rxObservable(dispatchersProvider.main) {
       downloadedComicRepository
         .enqueueDownload(
           chapter = chapter.toDownloadedChapterDomain(),
-          comicName = comicName
+          comicName = comicName,
+          comicLink = comicLink,
         )
         .fold(
           { ComicDetailSingleEvent.EnqueuedDownloadFailure(chapter, it) },

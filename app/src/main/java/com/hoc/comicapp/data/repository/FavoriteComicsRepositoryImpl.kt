@@ -24,7 +24,7 @@ class FavoriteComicsRepositoryImpl(
           Timber.e(it, "Error occurred when observe favorite state $url")
         }
       }
-      .map { it.bimap(errorMapper::map, ::identity) }
+      .map { it.bimap(errorMapper, ::identity) }
 
   override fun favoriteComics(): Observable<DomainResult<List<FavoriteComic>>> =
     favoriteComicsDataSource
@@ -35,17 +35,17 @@ class FavoriteComicsRepositoryImpl(
         }
       }
       .map { either ->
-        either.bimap(errorMapper::map) { it.map(_FavoriteComic::toDomain) }
+        either.bimap(errorMapper) { it.map(_FavoriteComic::toDomain) }
       }
 
   override suspend fun removeFromFavorite(comic: FavoriteComic) =
     favoriteComicsDataSource
       .removeFromFavorite(Mappers.domainToFirebaseEntity(comic))
       .tapLeft { Timber.e(it, "Error when remove comic from favorite $comic") }
-      .mapLeft(errorMapper::map)
+      .mapLeft(errorMapper)
 
   override suspend fun toggle(comic: FavoriteComic) =
     favoriteComicsDataSource.toggle(Mappers.domainToFirebaseEntity(comic))
       .tapLeft { Timber.e(it, "Error when toggle comic $comic") }
-      .mapLeft(errorMapper::map)
+      .mapLeft(errorMapper)
 }

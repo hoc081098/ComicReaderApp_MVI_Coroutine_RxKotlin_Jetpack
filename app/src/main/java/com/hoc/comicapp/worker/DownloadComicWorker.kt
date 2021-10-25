@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.ParcelUuid
 import android.os.SystemClock
 import androidx.core.app.NotificationCompat
@@ -16,6 +15,7 @@ import androidx.work.ListenableWorker.Result.success
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import arrow.core.Either
+import arrow.core.getOrHandle
 import arrow.core.left
 import arrow.core.right
 import com.hoc.comicapp.R
@@ -29,6 +29,7 @@ import com.hoc.comicapp.initializer.startKoinIfNeeded
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
@@ -54,7 +55,7 @@ class DownloadComicWorker(
   @SuppressLint("RestrictedApi")
   override suspend fun doWork(): Result {
     val (chapterLink, chapterJson, comicName, chapterComicName) = extractArgument()
-      .fold(ifLeft = { return failure(workDataOf(it)) }, ifRight = { it })
+      .getOrHandle { return failure(workDataOf(it)) }
 
     val notificationManager = NotificationManagerCompat.from(applicationContext)
     val notificationBuilder = createNotificationBuilder(
@@ -64,6 +65,7 @@ class DownloadComicWorker(
 
     downloadComicsRepo
       .downloadChapter(chapterLink)
+      .map { it.value }
       .onStart {
         notificationManager.notify(
           chapterLink,
@@ -111,7 +113,7 @@ class DownloadComicWorker(
               notificationBuilder
                 .setContentText(
                   if (throwable is CancellationException) "Download cancelled"
-                  else "Download failed: ${errorMapper.map(throwable).getMessage()}"
+                  else "Download failed: ${errorMapper(throwable).getMessage()}"
                 )
                 .apply { mActions.clear() }
                 .setProgress(0, 0, false)
@@ -172,11 +174,7 @@ class DownloadComicWorker(
           chapterComicName = chapterComicName,
         )
       ),
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-      } else {
-        PendingIntent.FLAG_UPDATE_CURRENT
-      }
+      PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
 
     return NotificationCompat
@@ -198,11 +196,7 @@ class DownloadComicWorker(
           applicationContext,
           0,
           Intent(applicationContext, SplashActivity::class.java),
-          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-          } else {
-            PendingIntent.FLAG_UPDATE_CURRENT
-          }
+          PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
       )
       .addAction(R.drawable.ic_close_white_24dp, "Cancel", cancelIntent)

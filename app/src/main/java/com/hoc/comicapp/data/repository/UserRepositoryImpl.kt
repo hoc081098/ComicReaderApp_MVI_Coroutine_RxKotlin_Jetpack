@@ -17,7 +17,7 @@ class UserRepositoryImpl(
 
   override suspend fun signOut() = userDataSource.signOut()
     .tapLeft { Timber.e(it, "Failed to sign out") }
-    .mapLeft(errorMapper::map)
+    .mapLeft(errorMapper)
 
   override fun userObservable(): Observable<DomainResult<User?>> =
     userDataSource.userObservable()
@@ -26,7 +26,7 @@ class UserRepositoryImpl(
           Timber.e(it, "Failed to observe the user state")
         }
       }
-      .map { either -> either.bimap(errorMapper::map) { it?.toDomain() } }
+      .map { either -> either.bimap(errorMapper) { it?.toDomain() } }
 
   override suspend fun register(
     email: String,
@@ -43,7 +43,7 @@ class UserRepositoryImpl(
       Timber.e(it, "Failed to register user")
       delay(1_000)
     }
-    .mapLeft(errorMapper::map)
+    .mapLeft(errorMapper)
 
   override suspend fun login(email: String, password: String) =
     userDataSource.login(email, password)
@@ -51,5 +51,5 @@ class UserRepositoryImpl(
         Timber.e(it, "Failed to login")
         delay(1_000)
       }
-      .mapLeft(errorMapper::map)
+      .mapLeft(errorMapper)
 }

@@ -78,7 +78,7 @@ class ComicRepositoryImpl(
   ): DomainResult<T> {
     val cacheKey = buildKey(path, queryItems)
 
-    return Either.catch(errorMapper::map) {
+    return Either.catch(errorMapper) {
       when (val cachedResponse = cache[cacheKey] as? T) {
         null -> {
           Timber.d("ComicRepositoryImpl::$cacheKey [MISS] request...")

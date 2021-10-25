@@ -4,7 +4,8 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.rx3.asCoroutineDispatcher
 
 class CoroutinesDispatchersProviderImpl(
-  private val rxSchedulerProvider: RxSchedulerProvider,
-  override val main: CoroutineDispatcher = rxSchedulerProvider.main.asCoroutineDispatcher(),
-  override val io: CoroutineDispatcher = rxSchedulerProvider.io.asCoroutineDispatcher(),
-) : CoroutinesDispatchersProvider
+  rxSchedulerProvider: RxSchedulerProvider
+) : CoroutinesDispatchersProvider {
+  override val main: CoroutineDispatcher = rxSchedulerProvider.main.asCoroutineDispatcher()
+  override val io: CoroutineDispatcher = rxSchedulerProvider.io.asCoroutineDispatcher()
+}

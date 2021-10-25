@@ -38,6 +38,7 @@ interface ComicDetailInteractor {
   fun enqueueDownloadComic(
     chapter: ComicDetailViewState.Chapter,
     comicName: String,
+    comicLink: String,
   ): Observable<ComicDetailSingleEvent>
 }
 

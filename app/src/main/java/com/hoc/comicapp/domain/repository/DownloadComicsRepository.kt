@@ -2,19 +2,14 @@ package com.hoc.comicapp.domain.repository
 
 import androidx.lifecycle.LiveData
 import com.hoc.comicapp.domain.DomainResult
+import com.hoc.comicapp.domain.models.DownloadProgress
 import com.hoc.comicapp.domain.models.DownloadedChapter
 import com.hoc.comicapp.domain.models.DownloadedComic
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.flow.Flow
 
 interface DownloadComicsRepository {
-  /**
-   * Download chapter by [chapterLink]
-   * @param chapterLink chapter url
-   * @return Flow of progress (from 0 to 100)
-   */
-  fun downloadChapter(chapterLink: String): Flow<Int>
-
+  //region Query operations
   /**
    * Get all downloaded comics
    * @return observable
@@ -33,6 +28,14 @@ interface DownloadComicsRepository {
    */
   fun getDownloadedChapters(): LiveData<List<DownloadedChapter>>
 
+  /**
+   * Get downloaded chapter by [chapterLink]
+   * @return flow
+   */
+  fun getDownloadedChapter(chapterLink: String): Flow<DomainResult<DownloadedChapter>>
+  //endregion
+
+  //region Modification operations
   /**
    * Delete downloaded [chapter]
    * @return either
@@ -54,7 +57,14 @@ interface DownloadComicsRepository {
   suspend fun enqueueDownload(
     chapter: DownloadedChapter,
     comicName: String,
+    comicLink: String,
   ): DomainResult<Unit>
 
-  fun getDownloadedChapter(chapterLink: String): Flow<DomainResult<DownloadedChapter>>
+  /**
+   * Download chapter by [chapterLink]
+   * @param chapterLink chapter url
+   * @return Flow of progress (from 0 to 100)
+   */
+  fun downloadChapter(chapterLink: String): Flow<DownloadProgress>
+  //endregion
 }
