@@ -8,11 +8,11 @@ object appConfig {
 
   private const val MAJOR = 0
   private const val MINOR = 0
-  private const val PATCH = 2
+  private const val PATCH = 3
   const val versionCode = MAJOR * 10_000 + MINOR * 100 + PATCH
   val versionName by lazy {
     val date = SimpleDateFormat("yyyy-MM-dd").format(Date())
-    "$MAJOR.$MINOR.$PATCH $date"
+    "$MAJOR.$MINOR.$PATCH-SNAPSHOT $date"
   }
 
   val supportedLocales = setOf("en")
