@@ -10,6 +10,8 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.await
 import androidx.work.workDataOf
+import arrow.core.Either
+import arrow.core.computations.either
 import arrow.core.left
 import arrow.core.right
 import com.hoc.comicapp.data.ErrorMapper
@@ -26,6 +28,7 @@ import com.hoc.comicapp.data.remote.ComicApiService
 import com.hoc.comicapp.domain.DomainResult
 import com.hoc.comicapp.domain.analytics.AnalyticsEvent
 import com.hoc.comicapp.domain.analytics.AnalyticsService
+import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.ComicDetail
 import com.hoc.comicapp.domain.models.DownloadedChapter
 import com.hoc.comicapp.domain.models.DownloadedComic
@@ -34,7 +37,6 @@ import com.hoc.comicapp.domain.repository.DownloadComicsRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.utils.copyTo
-import com.hoc.comicapp.utils.getOrThrow
 import com.hoc.comicapp.utils.retryIO
 import com.hoc.comicapp.worker.DownloadComicWorker
 import io.reactivex.rxjava3.core.Observable
@@ -126,53 +128,53 @@ class DownloadComicsRepositoryImpl(
   override suspend fun enqueueDownload(
     chapter: DownloadedChapter,
     comicName: String,
-  ): DomainResult<Unit> {
-    return try {
-      withContext(dispatchersProvider.io) {
-        val chapterJson = jsonAdapterConstraints.comicDetailChapterAdapter.toJson(
-          ComicDetail.Chapter(
-            chapterLink = chapter.chapterLink,
-            chapterName = chapter.chapterName,
-            time = chapter.time,
-            view = chapter.view
+  ): DomainResult<Unit> = either<ComicAppError, Unit> {
+    withContext(dispatchersProvider.io) {
+      val chapterJson = jsonAdapterConstraints.comicDetailChapterAdapter.toJson(
+        ComicDetail.Chapter(
+          chapterLink = chapter.chapterLink,
+          chapterName = chapter.chapterName,
+          time = chapter.time,
+          view = chapter.view
+        )
+      )
+
+      val workRequest = OneTimeWorkRequestBuilder<DownloadComicWorker>()
+        .setInputData(
+          workDataOf(
+            DownloadComicWorker.CHAPTER to chapterJson,
+            DownloadComicWorker.COMIC_NAME to comicName
           )
         )
+        .setConstraints(
+          Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .setRequiresStorageNotLow(true)
+            .build()
+        )
+        .addTag(DownloadComicWorker.TAG)
+        .addTag(chapter.chapterLink)
+        .build()
 
-        val workRequest = OneTimeWorkRequestBuilder<DownloadComicWorker>()
-          .setInputData(
-            workDataOf(
-              DownloadComicWorker.CHAPTER to chapterJson,
-              DownloadComicWorker.COMIC_NAME to comicName
-            )
-          )
-          .setConstraints(
-            Constraints.Builder()
-              .setRequiredNetworkType(NetworkType.CONNECTED)
-              .setRequiresStorageNotLow(true)
-              .build()
-          )
-          .addTag(DownloadComicWorker.TAG)
-          .addTag(chapter.chapterLink)
-          .build()
+      deleteDownloadedChapter(chapter).bind()
+      Either.catch(errorMapper::map) { workManager.enqueue(workRequest).await() }.bind()
 
-        deleteDownloadedChapter(chapter).getOrThrow()
-        workManager.enqueue(workRequest).await()
-
-        Unit.right()
-      }
-    } catch (e: Throwable) {
-      errorMapper.mapAsLeft(e)
+      Unit
     }
+  }.tapLeft {
+    Timber.e(
+      it,
+      "Error occurred when enqueuing download work, comicName=$comicName, chapter=$chapter"
+    )
   }
 
-  override suspend fun deleteDownloadedChapter(chapter: DownloadedChapter): DomainResult<Unit> {
-    return try {
-      workManager.cancelAllWorkByTag(chapter.chapterLink).await()
-      deleteEntityAndImages(chapter)
-    } catch (e: Exception) {
-      errorMapper.mapAsLeft(e)
+  override suspend fun deleteDownloadedChapter(chapter: DownloadedChapter): DomainResult<Unit> =
+    either {
+      Either
+        .catch(errorMapper::map) { workManager.cancelAllWorkByTag(chapter.chapterLink).await() }
+        .bind()
+      deleteEntityAndImages(chapter).bind()
     }
-  }
 
   override fun getDownloadedChapters(): LiveData<List<DownloadedChapter>> {
     return chapterDao.getAllChaptersLiveData().map { chapters ->
