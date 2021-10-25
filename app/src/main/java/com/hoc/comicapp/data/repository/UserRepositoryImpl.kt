@@ -1,7 +1,6 @@
 package com.hoc.comicapp.data.repository
 
 import android.net.Uri
-import arrow.core.right
 import com.hoc.comicapp.data.ErrorMapper
 import com.hoc.comicapp.data.firebase.user.FirebaseAuthUserDataSource
 import com.hoc.comicapp.domain.DomainResult
@@ -16,49 +15,41 @@ class UserRepositoryImpl(
   private val userDataSource: FirebaseAuthUserDataSource,
 ) : UserRepository {
 
-  override suspend fun signOut(): DomainResult<Unit> {
-    return try {
-      userDataSource.signOut()
-      Unit.right()
-    } catch (e: Throwable) {
-      errorMapper.mapAsLeft(e)
-    }
-  }
+  override suspend fun signOut() = userDataSource.signOut()
+    .tapLeft { Timber.e(it, "Failed to sign out") }
+    .mapLeft(errorMapper::map)
 
-  override fun userObservable(): Observable<DomainResult<User?>> {
-    return userDataSource.userObservable().map { either ->
-      either.bimap(errorMapper::map) { it?.toDomain() }
-    }
-  }
+  override fun userObservable(): Observable<DomainResult<User?>> =
+    userDataSource.userObservable()
+      .doOnNext { either ->
+        either.tapLeft {
+          Timber.e(it, "Failed to observe the user state")
+        }
+      }
+      .map { either -> either.bimap(errorMapper::map) { it?.toDomain() } }
 
   override suspend fun register(
     email: String,
     password: String,
     fullName: String,
     avatar: Uri?,
-  ): DomainResult<Unit> {
-    return try {
-      userDataSource.register(
-        email = email,
-        password = password,
-        fullName = fullName,
-        avatar = avatar
-      )
-      Unit.right()
-    } catch (e: Throwable) {
-      Timber.d("register error $e")
+  ) = userDataSource.register(
+    email = email,
+    password = password,
+    fullName = fullName,
+    avatar = avatar
+  )
+    .tapLeft {
+      Timber.e(it, "Failed to register user")
       delay(1_000)
-      errorMapper.mapAsLeft(e)
     }
-  }
+    .mapLeft(errorMapper::map)
 
-  override suspend fun login(email: String, password: String): DomainResult<Unit> {
-    return try {
-      userDataSource.login(email, password)
-      Unit.right()
-    } catch (e: Throwable) {
-      delay(1_000)
-      errorMapper.mapAsLeft(e)
-    }
-  }
+  override suspend fun login(email: String, password: String) =
+    userDataSource.login(email, password)
+      .tapLeft {
+        Timber.e(it, "Failed to login")
+        delay(1_000)
+      }
+      .mapLeft(errorMapper::map)
 }

@@ -9,9 +9,9 @@ interface FavoriteComicsDataSource {
 
   fun favoriteComics(): Observable<Either<Throwable, List<_FavoriteComic>>>
 
-  suspend fun removeFromFavorite(comic: _FavoriteComic)
+  suspend fun removeFromFavorite(comic: _FavoriteComic): Either<Throwable, Unit>
 
-  suspend fun toggle(comic: _FavoriteComic)
+  suspend fun toggle(comic: _FavoriteComic): Either<Throwable, Unit>
 
   fun update(comics: List<_FavoriteComic>)
 }

@@ -69,11 +69,11 @@ class FirebaseAuthUserDataSourceImpl(
 
   override fun userObservable() = userObservable
 
-  override suspend fun signOut() {
+  override suspend fun signOut() = Either.catch {
     withContext(dispatchersProvider.io) { firebaseAuth.signOut() }
   }
 
-  override suspend fun register(email: String, password: String, fullName: String, avatar: Uri?) {
+  override suspend fun register(email: String, password: String, fullName: String, avatar: Uri?) = Either.catch {
     withContext(dispatchersProvider.io) {
 
       val authResult = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
@@ -125,10 +125,12 @@ class FirebaseAuthUserDataSourceImpl(
           }
         )
       }
+
+      Unit
     }
   }
 
-  override suspend fun login(email: String, password: String) {
+  override suspend fun login(email: String, password: String) = Either.catch {
     withContext(dispatchersProvider.io) {
       firebaseAuth.signInWithEmailAndPassword(email, password).await()
     }

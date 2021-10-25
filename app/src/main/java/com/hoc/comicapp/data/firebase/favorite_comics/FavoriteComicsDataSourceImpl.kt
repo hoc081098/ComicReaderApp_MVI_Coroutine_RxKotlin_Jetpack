@@ -112,18 +112,20 @@ class FavoriteComicsDataSourceImpl(
       }
   }
 
-  override suspend fun removeFromFavorite(comic: _FavoriteComic) {
+  override suspend fun removeFromFavorite(comic: _FavoriteComic) = Either.catch {
     withContext(dispatchersProvider.io) {
       val snapshot = findQueryDocumentSnapshotByUrl(comic.url)
       if (snapshot?.exists() == true) {
-        snapshot.reference.delete().await()
+        snapshot.reference.delete()
+          .await()
+          .unit
       } else {
         error("Comic is not exists")
       }
     }
   }
 
-  override suspend fun toggle(comic: _FavoriteComic) {
+  override suspend fun toggle(comic: _FavoriteComic) = Either.catch {
     withContext(dispatchersProvider.io) {
       val snapshot = findQueryDocumentSnapshotByUrl(comic.url)
       if (snapshot?.exists() == true) {
