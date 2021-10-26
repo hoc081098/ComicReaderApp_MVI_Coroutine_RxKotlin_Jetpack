@@ -12,7 +12,6 @@ import androidx.work.WorkManager
 import androidx.work.await
 import androidx.work.workDataOf
 import arrow.core.Either
-import arrow.core.computations.ResultEffect.bind
 import arrow.core.computations.either
 import arrow.core.identity
 import arrow.core.left
@@ -32,7 +31,6 @@ import com.hoc.comicapp.data.remote.ComicApiService
 import com.hoc.comicapp.domain.DomainResult
 import com.hoc.comicapp.domain.analytics.AnalyticsEvent
 import com.hoc.comicapp.domain.analytics.AnalyticsService
-import com.hoc.comicapp.domain.models.ComicAppError
 import com.hoc.comicapp.domain.models.ComicDetail
 import com.hoc.comicapp.domain.models.DownloadProgress
 import com.hoc.comicapp.domain.models.DownloadedChapter
@@ -160,7 +158,7 @@ class DownloadComicsRepositoryImpl(
     chapter: DownloadedChapter,
     comicName: String,
     comicLink: String,
-  ): DomainResult<Unit> = either<ComicAppError, Unit> {
+  ): DomainResult<Unit> = either<Throwable, Unit> {
     deleteDownloadedChapter(chapter).bind()
 
     workManager.runCatching {
@@ -177,7 +175,7 @@ class DownloadComicsRepositoryImpl(
       it,
       "Error occurred when enqueuing download work, comicName=$comicName, chapter=$chapter"
     )
-  }
+  }.mapLeft(errorMapper)
 
   @OptIn(ExperimentalTime::class)
   override fun downloadChapter(chapterLink: String): Flow<DownloadProgress> {
