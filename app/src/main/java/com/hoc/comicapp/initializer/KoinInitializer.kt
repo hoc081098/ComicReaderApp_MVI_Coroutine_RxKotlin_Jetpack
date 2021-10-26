@@ -2,6 +2,7 @@ package com.hoc.comicapp.initializer
 
 import android.content.Context
 import androidx.startup.Initializer
+import com.hoc.comicapp.BuildConfig
 import com.hoc.comicapp.koin.appModule
 import com.hoc.comicapp.koin.dataModule
 import com.hoc.comicapp.koin.navigationModule
@@ -32,8 +33,7 @@ class KoinInitializer : Initializer<Koin> {
 fun Context.startKoinIfNeeded(): Koin {
   return GlobalContext.getOrNull() ?: startKoin {
     // use AndroidLogger as Koin Logger
-    // TODO(Koin): androidLogger(level = if (BuildConfig.DEBUG) Level.DEBUG else Level.NONE)
-    androidLogger(level = Level.NONE)
+    androidLogger(level = if (BuildConfig.DEBUG) Level.DEBUG else Level.NONE)
 
     // use the Android context given there
     androidContext(applicationContext)
