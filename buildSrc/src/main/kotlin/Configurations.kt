@@ -94,6 +94,8 @@ object deps {
     const val baseUi = ":base-ui"
     const val utils = ":utils"
     const val navigation = ":navigation"
+    const val domain = ":domain"
+    const val featureHome = ":feature-home"
   }
 
   object kotlin {

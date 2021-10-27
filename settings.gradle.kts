@@ -1,7 +1,8 @@
+include(":app")
 include(":navigation")
 include(":utils")
 include(":base-ui")
-include(":app")
+include(":domain")
 includeProject(":feature-home", "features/feature-home")
 
 fun includeProject(name: String, filePath: String) {
