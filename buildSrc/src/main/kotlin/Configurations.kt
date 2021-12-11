@@ -29,7 +29,7 @@ object versions {
   }
 
   object kotlin {
-    const val core = "1.6.0-RC"
+    const val core = "1.6.10-RC"
     const val coroutines = "1.5.2"
   }
 
