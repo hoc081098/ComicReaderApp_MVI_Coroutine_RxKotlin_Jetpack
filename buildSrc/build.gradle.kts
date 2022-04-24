@@ -1,7 +1,6 @@
 repositories {
   mavenCentral()
   google()
-  jcenter()
   gradlePluginPortal()
   maven(url = "https://plugins.gradle.org/m2/")
 }
@@ -21,9 +20,9 @@ gradlePlugin {
 }
 
 object PluginVersions {
-  const val kotlin = "1.6.0-RC"
-  const val androidGradle = "7.0.3"
-  const val navigationSafeArgs = "2.4.0-alpha10"
+  const val kotlin = "1.6.20"
+  const val androidGradle = "7.1.2"
+  const val navigationSafeArgs = "2.5.0-alpha04"
   const val googleServices = "4.3.10"
   const val crashlytics = "2.7.1"
   const val spotless = "5.17.0"

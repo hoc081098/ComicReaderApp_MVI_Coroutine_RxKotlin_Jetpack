@@ -38,17 +38,17 @@ data class ComicEntity(
 ) {
   @Keep
   data class Category(
-    @field:Json(name = "link")
+    @Json(name = "link")
     val link: String, // https://ww2.mangafox.online/category/webtoons
-    @field:Json(name = "name")
+    @Json(name = "name")
     val name: String, // Webtoons
   )
 
   @Keep
   data class Author(
-    @field:Json(name = "link")
+    @Json(name = "link")
     val link: String, // https://ww2.mangafox.online/author/sung-lak-jang
-    @field:Json(name = "name")
+    @Json(name = "name")
     val name: String, // Sung-Lak Jang
   )
 }

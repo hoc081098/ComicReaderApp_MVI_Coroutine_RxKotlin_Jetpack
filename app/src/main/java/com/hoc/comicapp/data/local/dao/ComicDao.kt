@@ -3,7 +3,7 @@ package com.hoc.comicapp.data.local.dao
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
-import androidx.room.OnConflictStrategy.IGNORE
+import androidx.room.OnConflictStrategy.Companion.IGNORE
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
