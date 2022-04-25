@@ -232,11 +232,6 @@ class MainActivity : ScopeActivity(R.layout.activity_main) {
   override fun onSupportNavigateUp() =
     navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
 
-  override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
-
-    return true
-  }
-
   override fun onCreateOptionsMenu(menu: Menu): Boolean {
     // Inflate the menu; this adds items to the action bar if it is present.
     menuInflater.inflate(R.menu.main, menu)

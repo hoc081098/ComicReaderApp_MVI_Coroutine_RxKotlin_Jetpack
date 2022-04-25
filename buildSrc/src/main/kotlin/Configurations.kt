@@ -1,7 +1,7 @@
-@file:Suppress("ClassName", "SpellCheckingInspection", "MemberVisibilityCanBePrivate", "SimpleDateFormat")
+@file:Suppress("ClassName", "SpellCheckingInspection", "MemberVisibilityCanBePrivate")
 
-import java.text.SimpleDateFormat
-import java.util.Date
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 object appConfig {
   const val applicationId = "com.hoc.comicapp"
@@ -11,7 +11,7 @@ object appConfig {
   private const val PATCH = 3
   const val versionCode = MAJOR * 10_000 + MINOR * 100 + PATCH
   val versionName by lazy {
-    val date = SimpleDateFormat("yyyy-MM-dd").format(Date())
+    val date = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(LocalDateTime.now())
     "$MAJOR.$MINOR.$PATCH-SNAPSHOT $date"
   }
 
@@ -29,31 +29,31 @@ object versions {
   }
 
   object kotlin {
-    const val core = "1.6.0-RC"
-    const val coroutines = "1.5.2"
+    const val core = "1.6.20"
+    const val coroutines = "1.6.1"
   }
 
   object androidX {
-    const val activity = "1.4.0-rc01"
-    const val appCompat = "1.4.0-beta01"
-    const val core = "1.7.0-rc01"
-    const val fragment = "1.4.0-alpha10"
-    const val startUp = "1.1.0"
+    const val activity = "1.4.0"
+    const val appCompat = "1.4.1"
+    const val core = "1.7.0"
+    const val fragment = "1.4.1"
+    const val startUp = "1.1.1"
 
     object view {
-      const val constraintLayout = "2.1.1"
+      const val constraintLayout = "2.1.3"
       const val material = "1.4.0"
-      const val recyclerView = "1.3.0-alpha01"
+      const val recyclerView = "1.3.0-alpha02"
     }
 
-    const val navigation = "2.4.0-alpha10"
-    const val lifecycle = "2.4.0-rc01"
-    const val room = "2.4.0-beta01"
-    const val work = "2.7.0"
+    const val navigation = "2.5.0-alpha04"
+    const val lifecycle = "2.5.0-alpha06"
+    const val room = "2.5.0-alpha01"
+    const val work = "2.8.0-alpha02"
   }
 
   const val koin = "3.1.2"
-  const val moshiKotlin = "1.12.0"
+  const val moshiKotlin = "1.13.0"
   const val retrofit = "2.9.0"
   const val okHttpLoggingInterceptor = "5.0.0-alpha.2"
   const val leakCanaryAndroid = "2.7"
@@ -84,9 +84,8 @@ object versions {
     const val bom = "28.4.2"
   }
 
-  const val arrow = "1.0.0"
-
-  const val viewBindingDelegate = "1.2.0"
+  const val arrow = "1.1.2"
+  const val viewBindingDelegate = "1.3.1"
 }
 
 object deps {
