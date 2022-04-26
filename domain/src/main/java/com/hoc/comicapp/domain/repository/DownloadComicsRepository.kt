@@ -1,6 +1,5 @@
 package com.hoc.comicapp.domain.repository
 
-import androidx.lifecycle.LiveData
 import com.hoc.comicapp.domain.DomainResult
 import com.hoc.comicapp.domain.models.DownloadProgress
 import com.hoc.comicapp.domain.models.DownloadedChapter
@@ -26,7 +25,7 @@ interface DownloadComicsRepository {
    * Get all downloaded chapters
    * @return live data
    */
-  fun getDownloadedChapters(): LiveData<List<DownloadedChapter>>
+  fun getDownloadedChapters(): Flow<List<DownloadedChapter>>
 
   /**
    * Get downloaded chapter by [chapterLink]

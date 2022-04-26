@@ -1,7 +1,7 @@
 package com.hoc.comicapp.ui.detail
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
+import androidx.lifecycle.asFlow
+import androidx.lifecycle.viewModelScope
 import androidx.work.WorkInfo
 import androidx.work.WorkInfo.State.RUNNING
 import androidx.work.WorkManager
@@ -16,8 +16,6 @@ import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.Downloaded
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.Downloading
 import com.hoc.comicapp.ui.detail.ComicDetailViewState.DownloadState.NotYetDownload
-import com.hoc.comicapp.utils.NotNullMutableLiveData
-import com.hoc.comicapp.utils.combineLatest
 import com.hoc.comicapp.utils.exhaustMap
 import com.hoc.comicapp.utils.mapNotNull
 import com.hoc.comicapp.utils.notOfType
@@ -31,6 +29,12 @@ import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.ofType
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import io.reactivex.rxjava3.kotlin.withLatestFrom
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.rx3.asFlow
 import timber.log.Timber
 
 class ComicDetailViewModel(
@@ -41,15 +45,7 @@ class ComicDetailViewModel(
   private val isDownloaded: Boolean,
 ) : BaseViewModel<ComicDetailIntent, ComicDetailViewState, ComicDetailSingleEvent>(
   ComicDetailViewState.initialState()
-),
-  Observer<ComicDetailViewState> {
-
-  override fun onChanged(t: ComicDetailViewState?) {
-    setNewState(t ?: return)
-  }
-
-  private val _stateD: LiveData<ComicDetailViewState>
-
+) {
   private val intentS = PublishRelay.create<ComicDetailIntent>()
   private val stateS = BehaviorRelay.createDefault(initialState)
 
@@ -138,7 +134,10 @@ class ComicDetailViewModel(
       .doOnNext { Timber.d("intent=$it") }
       .share()
 
-    _stateD = initStateD(filteredIntent)
+    initViewState(filteredIntent)
+      .onEach(setNewState)
+      .launchIn(viewModelScope)
+
     processDownloadChapterIntent(filteredIntent)
     processDeleteAndCancelDownloadingChapterIntent(filteredIntent)
     processToggleFavorite(filteredIntent)
@@ -158,32 +157,30 @@ class ComicDetailViewModel(
       .addTo(compositeDisposable)
   }
 
-  private fun initStateD(filteredIntent: Observable<ComicDetailIntent>): LiveData<ComicDetailViewState> {
-    // intent -> behavior subject
-    filteredIntent
+  private fun initViewState(intents: Observable<ComicDetailIntent>): Flow<ComicDetailViewState> {
+    val stateFlow = intents
       .compose(intentToViewState)
       .doOnNext { Timber.d("view_state=$it") }
-      .subscribeBy(onNext = stateS::accept)
-      .addTo(compositeDisposable)
+      .asFlow()
+      .distinctUntilChanged()
 
-    // behavior subject -> live data
-    val stateD = NotNullMutableLiveData(initialState)
-    stateS
-      .subscribeBy(onNext = stateD::setValue)
-      .addTo(compositeDisposable)
+    val workInfosFlow = workManager.getWorkInfosByTagLiveData(DownloadComicWorker.TAG)
+      .asFlow()
+      .distinctUntilChanged()
 
-    // combine live datas -> state live data
-    val workInfosD = workManager.getWorkInfosByTagLiveData(DownloadComicWorker.TAG)
-    val downloadedChaptersD = downloadComicsRepository.getDownloadedChapters()
+    val downloadedChaptersFlow = downloadComicsRepository
+      .getDownloadedChapters()
+      .distinctUntilChanged()
 
-    return stateD.combineLatest(
-      workInfosD,
-      downloadedChaptersD
+    return combine(
+      stateFlow,
+      workInfosFlow,
+      downloadedChaptersFlow
     ) { state, workInfos, downloadedChapters ->
       Timber.d("[combine] ${workInfos.size} ${downloadedChapters.size}")
 
       val comicDetail = state.comicDetail as? ComicDetailViewState.ComicDetail.Detail
-        ?: return@combineLatest state
+        ?: return@combine state
 
       val newChapters = comicDetail.chapters.map { chapter ->
         chapter.copy(
@@ -196,7 +193,7 @@ class ComicDetailViewModel(
       }
 
       state.copy(comicDetail = comicDetail.copy(chapters = newChapters))
-    }.apply { observeForever(this@ComicDetailViewModel) }
+    }
   }
 
   private fun processDeleteAndCancelDownloadingChapterIntent(filteredIntent: Observable<ComicDetailIntent>) {
@@ -232,11 +229,6 @@ class ComicDetailViewModel(
         }
       }
       .addTo(compositeDisposable)
-  }
-
-  override fun onCleared() {
-    super.onCleared()
-    _stateD.removeObserver(this)
   }
 
   private fun processDownloadChapterIntent(filteredIntent: Observable<ComicDetailIntent>) {
