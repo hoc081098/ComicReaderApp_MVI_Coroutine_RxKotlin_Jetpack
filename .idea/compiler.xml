@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
-    <bytecodeTargetLevel target="13" />
+    <bytecodeTargetLevel target="1.8">
+      <module name="ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack.app" target="13" />
+      <module name="ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack.base-ui" target="13" />
+      <module name="ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack.buildSrc" target="13" />
+      <module name="ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack.feature-home" target="13" />
+      <module name="ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack.navigation" target="13" />
+      <module name="ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack.utils" target="13" />
+    </bytecodeTargetLevel>
   </component>
 </project>

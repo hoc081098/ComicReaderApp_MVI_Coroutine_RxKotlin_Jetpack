@@ -1,5 +1,7 @@
 package com.hoc.comicapp.ui.register
 
+import com.chrynan.uri.core.Uri
+import com.chrynan.uri.core.fromString
 import com.hoc.comicapp.domain.repository.UserRepository
 import com.hoc.comicapp.domain.thread.CoroutinesDispatchersProvider
 import com.hoc.comicapp.ui.register.RegisterContract.Interactor
@@ -24,7 +26,12 @@ class RegisterInteractorImpl(
       val (email, password, fullName, avatar) = user
 
       userRepository
-        .register(email, password, fullName, avatar)
+        .register(
+          email = email,
+          password = password,
+          fullName = fullName,
+          avatar = avatar?.toString()?.let(Uri::fromString),
+        )
         .fold(
           ifLeft = { PartialChange.RegisterFailure(it) },
           ifRight = { PartialChange.RegisterSuccess }

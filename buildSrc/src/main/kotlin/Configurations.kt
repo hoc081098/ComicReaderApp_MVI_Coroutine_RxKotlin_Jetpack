@@ -85,6 +85,7 @@ object versions {
   }
 
   const val arrow = "1.1.2"
+  const val uri = "0.3.3"
   const val viewBindingDelegate = "1.3.1"
 }
 
@@ -203,6 +204,10 @@ object deps {
   object arrow {
     const val core = "io.arrow-kt:arrow-core:${versions.arrow}"
     const val fxCoroutines = "io.arrow-kt:arrow-fx-coroutines:${versions.arrow}"
+  }
+
+  object uri {
+    const val core = "com.chrynan.uri:uri-core:${versions.uri}"
   }
 
   const val listenableFuture = "com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava"

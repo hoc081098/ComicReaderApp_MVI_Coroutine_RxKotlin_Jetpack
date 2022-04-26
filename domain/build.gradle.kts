@@ -1,14 +1,11 @@
 plugins {
   `comic-app-plugin`
-  `android-library`
-//  kotlin
+  kotlin
 }
 
 dependencies {
   implementation(deps.reactiveX.java)
   implementation(deps.kotlin.coroutinesCore)
-
   implementation(deps.arrow.core)
-
-  implementation(deps.androidX.lifecycle.liveData)
+  api(deps.uri.core)
 }
