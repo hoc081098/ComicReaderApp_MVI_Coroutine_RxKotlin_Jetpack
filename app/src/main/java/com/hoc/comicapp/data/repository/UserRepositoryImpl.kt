@@ -1,6 +1,7 @@
 package com.hoc.comicapp.data.repository
 
-import android.net.Uri
+import androidx.core.net.toUri
+import com.chrynan.uri.core.Uri
 import com.hoc.comicapp.data.ErrorMapper
 import com.hoc.comicapp.data.firebase.user.FirebaseAuthUserDataSource
 import com.hoc.comicapp.domain.DomainResult
@@ -37,7 +38,7 @@ class UserRepositoryImpl(
     email = email,
     password = password,
     fullName = fullName,
-    avatar = avatar
+    avatar = avatar?.uriString?.toUri()
   )
     .tapLeft {
       Timber.e(it, "Failed to register user")

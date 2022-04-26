@@ -1,6 +1,6 @@
 package com.hoc.comicapp.domain.repository
 
-import android.net.Uri
+import com.chrynan.uri.core.Uri
 import com.hoc.comicapp.domain.DomainResult
 import com.hoc.comicapp.domain.models.User
 import io.reactivex.rxjava3.core.Observable

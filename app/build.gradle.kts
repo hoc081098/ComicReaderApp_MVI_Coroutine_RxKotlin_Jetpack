@@ -14,6 +14,7 @@ dependencies {
   implementation(project(deps.module.baseUi))
   implementation(project(deps.module.utils))
   implementation(project(deps.module.navigation))
+  implementation(project(deps.module.domain))
 
   implementation(deps.kotlin.stdlib)
   val coroutineDepConfig: (ExternalModuleDependency).() -> Unit = {

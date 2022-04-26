@@ -1,6 +1,5 @@
 package com.hoc.comicapp.data.local.dao
 
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -20,9 +19,6 @@ abstract class ChapterDao {
 
   @Query("SELECT COUNT(*) FROM downloaded_chapters WHERE comic_link = :comicLink")
   abstract suspend fun getCountByComicLink(comicLink: String): List<Int>
-
-  @Query("SELECT * FROM downloaded_chapters")
-  abstract fun getAllChaptersLiveData(): LiveData<List<ChapterEntity>>
 
   @Query("SELECT * FROM downloaded_chapters")
   abstract fun getAllChaptersFlow(): Flow<List<ChapterEntity>>

@@ -1,7 +1,6 @@
 package com.hoc.comicapp.data.repository
 
 import android.app.Application
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
 import androidx.room.withTransaction
 import androidx.work.Constraints
@@ -77,9 +76,9 @@ class DownloadComicsRepositoryImpl(
   private val analyticsService: AnalyticsService,
 ) : DownloadComicsRepository {
 
-  override fun getDownloadedChapters(): LiveData<List<DownloadedChapter>> =
+  override fun getDownloadedChapters(): Flow<List<DownloadedChapter>> =
     chapterDao
-      .getAllChaptersLiveData()
+      .getAllChaptersFlow()
       .map { it.map(Mappers::entityToDomainModel) }
 
   override fun getDownloadedComics(): Observable<DomainResult<List<DownloadedComic>>> =
