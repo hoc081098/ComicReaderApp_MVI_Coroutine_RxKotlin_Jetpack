@@ -19,7 +19,7 @@ object appConfig {
 }
 
 object versions {
-  const val ktLint = "0.41.0"
+  const val ktLint = "0.44.0"
 
   object sdk {
     const val buildTools = "31.0.0"

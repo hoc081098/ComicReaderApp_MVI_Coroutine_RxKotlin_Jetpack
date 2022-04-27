@@ -7,10 +7,14 @@ import com.hoc.comicapp.domain.models.User
 @Suppress("ClassName")
 @IgnoreExtraProperties
 data class _User(
-  @get:PropertyName("uid") @set:PropertyName("uid") var uid: String,
-  @get:PropertyName("display_name") @set:PropertyName("display_name") var displayName: String,
-  @get:PropertyName("email") @set:PropertyName("email") var email: String,
-  @get:PropertyName("photo_url") @set:PropertyName("photo_url") var photoURL: String,
+  @get:PropertyName("uid") @set:PropertyName("uid")
+  var uid: String,
+  @get:PropertyName("display_name") @set:PropertyName("display_name")
+  var displayName: String,
+  @get:PropertyName("email") @set:PropertyName("email")
+  var email: String,
+  @get:PropertyName("photo_url") @set:PropertyName("photo_url")
+  var photoURL: String,
 ) {
   @Suppress("unused")
   constructor() : this("", "", "", "")

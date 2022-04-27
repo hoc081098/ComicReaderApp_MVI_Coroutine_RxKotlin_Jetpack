@@ -1,3 +1,5 @@
+// ktlint-disable filename
+
 package com.hoc.comicapp.navigation
 
 import android.os.Parcelable

@@ -291,7 +291,7 @@ class ComicDetailFragment : BaseFragment<
     }
   }
 
-  private fun onClickButtonRead(readFirst: @ParameterName(name = "readFirst") Boolean) {
+  private fun onClickButtonRead(readFirst: Boolean) {
     val comicDetail = viewModel.state.value.comicDetail as? ComicDetail.Detail ?: return
     val chapter =
       comicDetail.chapters.let { if (readFirst) it.lastOrNull() else it.firstOrNull() }

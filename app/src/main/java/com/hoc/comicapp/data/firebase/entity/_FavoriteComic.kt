@@ -9,11 +9,16 @@ import com.hoc.comicapp.domain.models.FavoriteComic
 @Suppress("ClassName")
 @IgnoreExtraProperties
 data class _FavoriteComic(
-  @get:PropertyName("url") @set:PropertyName("url") var url: String,
-  @get:PropertyName("title") @set:PropertyName("title") var title: String,
-  @get:PropertyName("thumbnail") @set:PropertyName("thumbnail") var thumbnail: String,
-  @get:PropertyName("view") @set:PropertyName("view") var view: String,
-  @get:ServerTimestamp @get:PropertyName("created_at") @set:PropertyName("created_at") var createdAt: Timestamp?,
+  @get:PropertyName("url") @set:PropertyName("url")
+  var url: String,
+  @get:PropertyName("title") @set:PropertyName("title")
+  var title: String,
+  @get:PropertyName("thumbnail") @set:PropertyName("thumbnail")
+  var thumbnail: String,
+  @get:PropertyName("view") @set:PropertyName("view")
+  var view: String,
+  @get:ServerTimestamp @get:PropertyName("created_at") @set:PropertyName("created_at")
+  var createdAt: Timestamp?,
 ) {
   fun toDomain(): FavoriteComic {
     return FavoriteComic(

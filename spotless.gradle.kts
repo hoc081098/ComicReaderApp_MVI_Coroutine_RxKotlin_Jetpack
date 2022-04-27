@@ -5,13 +5,18 @@ apply(plugin = "com.diffplug.spotless")
 configure<SpotlessExtension> {
   kotlin {
     target("**/*.kt")
-    ktlint(versions.ktLint).userData(
-      mapOf(
-        "indent_size" to "2",
-        "continuation_indent_size" to "4",
-        "kotlin_imports_layout" to "ascii"
+    ktlint(versions.ktLint)
+      .setUseExperimental(true)
+      .userData(
+        mapOf(
+          "continuation_indent_size" to "4",
+          "indent_size" to "2",
+          "ij_kotlin_imports_layout" to "*",
+          "end_of_line" to "lf",
+          "charset" to "utf-8",
+          "disabled_rules" to "experimental:package-name,experimental:trailing-comma",
+        )
       )
-    )
 
     trimTrailingWhitespace()
     indentWithSpaces()
@@ -29,13 +34,18 @@ configure<SpotlessExtension> {
   kotlinGradle {
     target("**/*.gradle.kts", "*.gradle.kts")
 
-    ktlint(versions.ktLint).userData(
-      mapOf(
-        "indent_size" to "2",
-        "continuation_indent_size" to "4",
-        "kotlin_imports_layout" to "ascii"
+    ktlint(versions.ktLint)
+      .setUseExperimental(true)
+      .userData(
+        mapOf(
+          "continuation_indent_size" to "4",
+          "indent_size" to "2",
+          "ij_kotlin_imports_layout" to "*",
+          "end_of_line" to "lf",
+          "charset" to "utf-8",
+          "disabled_rules" to "no-wildcard-imports",
+        )
       )
-    )
 
     trimTrailingWhitespace()
     indentWithSpaces()

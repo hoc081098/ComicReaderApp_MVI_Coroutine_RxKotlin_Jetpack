@@ -69,7 +69,6 @@ class HomeFragment :
     // Swipe refresh layout and recycler view
     viewBinding.swipeRefreshLayout.setColorSchemeColors(*resources.getIntArray(R.array.swipe_refresh_colors))
     viewBinding.recyclerHome.run {
-
       setHasFixedSize(true)
       layoutManager = GridLayoutManager(this@HomeFragment.context, getMaxSpanCount()).apply {
         spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {

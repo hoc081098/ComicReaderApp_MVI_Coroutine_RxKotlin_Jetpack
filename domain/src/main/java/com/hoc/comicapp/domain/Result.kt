@@ -1,3 +1,5 @@
+// ktlint-disable filename
+
 package com.hoc.comicapp.domain
 
 import arrow.core.Either

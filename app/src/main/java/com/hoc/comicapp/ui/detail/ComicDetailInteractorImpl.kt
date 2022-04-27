@@ -130,7 +130,6 @@ class ComicDetailInteractorImpl(
     link: String,
   ): Observable<ComicDetailPartialChange> {
     return rxObservable(dispatchersProvider.main) {
-
       if (thumbnail != null && name != null && view != null && remoteThumbnail != null) {
         send(
           InitialRetryPartialChange.InitialData(

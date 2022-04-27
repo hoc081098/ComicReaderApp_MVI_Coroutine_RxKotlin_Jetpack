@@ -76,7 +76,6 @@ class FirebaseAuthUserDataSourceImpl(
 
   override suspend fun register(email: String, password: String, fullName: String, avatar: Uri?) = Either.catch {
     withContext(dispatchersProvider.io) {
-
       val authResult = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
       val user = authResult.user ?: throw IllegalStateException("User is null")
 

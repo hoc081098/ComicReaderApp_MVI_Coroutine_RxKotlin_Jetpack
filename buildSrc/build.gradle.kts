@@ -25,7 +25,7 @@ object PluginVersions {
   const val navigationSafeArgs = "2.5.0-alpha04"
   const val googleServices = "4.3.10"
   const val crashlytics = "2.7.1"
-  const val spotless = "5.17.0"
+  const val spotless = "6.5.0"
   const val gradleVersions = "0.39.0"
 }
 
