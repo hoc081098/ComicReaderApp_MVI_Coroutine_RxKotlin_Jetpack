@@ -97,7 +97,7 @@ private fun Project.configKotlinOptions() {
       jvmTarget = version
       sourceCompatibility = version
       targetCompatibility = version
-      freeCompilerArgs = freeCompilerArgs + listOf("-Xopt-in=kotlin.RequiresOptIn", "-Xinline-classes")
+      freeCompilerArgs = freeCompilerArgs + listOf("-opt-in=kotlin.RequiresOptIn")
       languageVersion = "1.6"
     }
   }
