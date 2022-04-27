@@ -102,6 +102,7 @@ dependencies {
 
   implementation(deps.listenableFuture)
   implementation(deps.viewBindingDelegate)
+  implementation(deps.flowExt)
 }
 
 apply {

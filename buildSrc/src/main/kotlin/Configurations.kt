@@ -87,6 +87,7 @@ object versions {
   const val arrow = "1.1.2"
   const val uri = "0.3.3"
   const val viewBindingDelegate = "1.3.1"
+  const val flowExt = "0.3.0-SNAPSHOT"
 }
 
 object deps {
@@ -211,6 +212,7 @@ object deps {
   }
 
   const val listenableFuture = "com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava"
+  const val flowExt = "io.github.hoc081098:FlowExt:${versions.flowExt}"
   const val viewBindingDelegate = "com.github.hoc081098:ViewBindingDelegate:${versions.viewBindingDelegate}"
 }
 

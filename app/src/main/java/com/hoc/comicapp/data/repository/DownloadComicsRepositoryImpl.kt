@@ -41,6 +41,7 @@ import com.hoc.comicapp.domain.thread.RxSchedulerProvider
 import com.hoc.comicapp.utils.copyTo
 import com.hoc.comicapp.utils.retryIO
 import com.hoc.comicapp.worker.DownloadComicWorker
+import com.hoc081098.flowext.utils.NULL_VALUE
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -457,12 +458,6 @@ private fun String.escapeFileName(): String {
   )
 }
 
-private object NULL {
-  @Suppress("UNCHECKED_CAST", "NOTHING_TO_INLINE")
-  inline fun <T : Any?> unbox(value: Any?): T =
-    if (NULL === value) null as T else value as T
-}
-
 /**
  * Collects all the values from the given flow, transform them by [transformer] and emits them to the [collector].
  * It is a shorthand for `flow.collect { value -> emit(value) }`.
@@ -473,10 +468,10 @@ private suspend fun <T, R> Flow<T>.emitAllTo(
   collector: FlowCollector<R>,
   transformer: (T) -> R,
 ): T? {
-  var last: Any? = NULL
+  var last: Any? = NULL_VALUE
   collect {
     last = it
     collector.emit(transformer(it))
   }
-  return NULL.unbox(last)
+  return NULL_VALUE.unbox(last)
 }
