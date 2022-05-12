@@ -3,6 +3,10 @@ plugins {
   `android-library`
 }
 
+comicApp {
+  namespace = "com.hoc.comicapp.utils"
+}
+
 dependencies {
 
   implementation(deps.kotlin.stdlib)

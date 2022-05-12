@@ -7,6 +7,7 @@ plugins {
 comicApp {
   viewBinding = true
   parcelize = true
+  namespace = "com.hoc.comicapp"
 }
 
 dependencies {

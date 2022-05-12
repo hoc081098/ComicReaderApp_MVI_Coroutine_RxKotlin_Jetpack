@@ -5,7 +5,10 @@ plugins {
   id("androidx.navigation.safeargs.kotlin")
 }
 
-comicApp { parcelize = true }
+comicApp {
+  parcelize = true
+  namespace = "com.hoc.comicapp.navigation"
+}
 
 dependencies {
   implementation(deps.androidX.navigation.fragment)

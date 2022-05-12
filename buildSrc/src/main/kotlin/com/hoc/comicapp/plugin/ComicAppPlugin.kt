@@ -1,10 +1,13 @@
 package com.hoc.comicapp.plugin
 
 import appConfig
+import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.LibraryExtension
 import com.android.build.gradle.LibraryPlugin
+import java.lang.System.getenv
+import java.util.Properties
 import org.gradle.api.JavaVersion.VERSION_1_8
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -17,8 +20,6 @@ import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.plugin.KotlinBasePluginWrapper
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import versions
-import java.lang.System.getenv
-import java.util.Properties
 
 private inline val Project.libraryExtension get() = extensions.getByType<LibraryExtension>()
 private inline val Project.appExtension get() = extensions.getByType<AppExtension>()
@@ -27,6 +28,9 @@ private inline val Project.javaPluginExtension get() = extensions.getByType<Java
 open class ComicAppExtension {
   var viewBinding: Boolean = false
   var parcelize: Boolean = false
+  var namespace: String? = null
+
+  override fun toString(): String = "ComicAppExtension(viewBinding=$viewBinding, parcelize=$parcelize, namespace=$namespace)"
 }
 
 class ComicAppPlugin : Plugin<Project> {
@@ -63,18 +67,42 @@ class ComicAppPlugin : Plugin<Project> {
     val comicAppExtension = project.extensions.create("comicApp", ComicAppExtension::class)
 
     project.afterEvaluate {
+      println("After evaluate $project -> config $comicAppExtension")
+
+      val namespace by lazy {
+        checkNotNull(comicAppExtension.namespace) {
+          """
+            |Require ComicAppExtension.namespace.
+            |Add comicApp { namespace = "..." } to ${project.name}/build.gradle.kts""".trimMargin()
+        }
+      }
+
+      val extension by lazy {
+        project.extensions.getByName(
+          "androidComponents"
+        ) as AndroidComponentsExtension<*, *, *>
+      }
+
       project.plugins.all {
         when (this) {
           is LibraryPlugin -> {
-            libraryExtension.buildFeatures {
-              viewBinding = comicAppExtension.viewBinding
-              dataBinding = false
+            extension.finalizeDsl { it.namespace = namespace }
+
+            libraryExtension.run {
+              buildFeatures {
+                viewBinding = comicAppExtension.viewBinding
+                dataBinding = false
+              }
             }
             enableParcelize(comicAppExtension.parcelize)
           }
           is AppPlugin -> {
-            appExtension.buildFeatures.run {
-              viewBinding = comicAppExtension.viewBinding
+            extension.finalizeDsl { it.namespace = namespace }
+
+            appExtension.run {
+              buildFeatures.run {
+                viewBinding = comicAppExtension.viewBinding
+              }
             }
             enableParcelize(comicAppExtension.parcelize)
           }

@@ -22,14 +22,14 @@ object versions {
   const val ktLint = "0.44.0"
 
   object sdk {
-    const val buildTools = "31.0.0"
-    const val compile = 31
+    const val buildTools = "32.0.0"
+    const val compile = 32
     const val min = 23
-    const val target = 31
+    const val target = 32
   }
 
   object kotlin {
-    const val core = "1.6.20"
+    const val core = "1.6.21"
     const val coroutines = "1.6.1"
   }
 
@@ -47,7 +47,7 @@ object versions {
     }
 
     const val navigation = "2.5.0-alpha04"
-    const val lifecycle = "2.5.0-alpha06"
+    const val lifecycle = "2.4.1"
     const val room = "2.5.0-alpha01"
     const val work = "2.8.0-alpha02"
   }

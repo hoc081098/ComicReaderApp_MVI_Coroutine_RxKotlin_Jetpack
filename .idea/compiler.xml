@@ -5,6 +5,8 @@
       <module name="ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack.app" target="13" />
       <module name="ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack.base-ui" target="13" />
       <module name="ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack.buildSrc" target="13" />
+      <module name="ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack.buildSrc.main" target="13" />
+      <module name="ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack.buildSrc.test" target="13" />
       <module name="ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack.feature-home" target="13" />
       <module name="ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack.navigation" target="13" />
       <module name="ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack.utils" target="13" />

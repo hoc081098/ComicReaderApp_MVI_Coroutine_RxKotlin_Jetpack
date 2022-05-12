@@ -3,7 +3,10 @@ plugins {
   `android-library`
 }
 
-comicApp { viewBinding = true }
+comicApp {
+  viewBinding = true
+  namespace = "com.hoc.comicapp.base"
+}
 
 dependencies {
   implementation(project(deps.module.utils))
