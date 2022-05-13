@@ -2,6 +2,14 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="1.8">
+      <module name="ComicApp.app" target="13" />
+      <module name="ComicApp.base-ui" target="13" />
+      <module name="ComicApp.buildSrc" target="13" />
+      <module name="ComicApp.buildSrc.main" target="13" />
+      <module name="ComicApp.buildSrc.test" target="13" />
+      <module name="ComicApp.feature-home" target="13" />
+      <module name="ComicApp.navigation" target="13" />
+      <module name="ComicApp.utils" target="13" />
       <module name="ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack.app" target="13" />
       <module name="ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack.base-ui" target="13" />
       <module name="ComicReaderApp_MVI_Coroutine_RxKotlin_Jetpack.buildSrc" target="13" />

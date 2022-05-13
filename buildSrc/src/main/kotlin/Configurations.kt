@@ -46,7 +46,7 @@ object versions {
       const val recyclerView = "1.3.0-alpha02"
     }
 
-    const val navigation = "2.5.0-alpha04"
+    const val navigation = "2.4.2"
     const val lifecycle = "2.4.1"
     const val room = "2.5.0-alpha01"
     const val work = "2.8.0-alpha02"
@@ -87,7 +87,7 @@ object versions {
   const val arrow = "1.1.2"
   const val uri = "0.3.3"
   const val viewBindingDelegate = "1.3.1"
-  const val flowExt = "0.3.0-SNAPSHOT"
+  const val flowExt = "0.3.0"
 }
 
 object deps {
