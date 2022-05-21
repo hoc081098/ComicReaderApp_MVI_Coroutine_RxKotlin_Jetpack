@@ -52,7 +52,7 @@ object versions {
     const val work = "2.8.0-alpha02"
   }
 
-  const val koin = "3.1.2"
+  const val koin = "3.2.0"
   const val moshiKotlin = "1.13.0"
   const val retrofit = "2.9.0"
   const val okHttpLoggingInterceptor = "5.0.0-alpha.2"

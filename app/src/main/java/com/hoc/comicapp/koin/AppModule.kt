@@ -1,6 +1,5 @@
 package com.hoc.comicapp.koin
 
-import android.content.Context
 import androidx.work.WorkManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -15,75 +14,49 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import org.koin.android.ext.koin.androidContext
+import org.koin.core.module.dsl.bind
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
+
+private val provideAppCoroutineScope = { dispatchersProvider: CoroutinesDispatchersProvider ->
+  CoroutineScope(dispatchersProvider.io + SupervisorJob())
+}
+
+private val provideMoshi = {
+  Moshi
+    .Builder()
+    .add(KotlinJsonAdapterFactory())
+    .build()
+}
 
 val appModule = module {
   /*
    * Rx Schedulers + CoroutinesDispatchers + App CoroutineScope
    */
 
-  single { provideRxSchedulerProvider() }
+  singleOf(::RxSchedulerProviderImpl) { bind<RxSchedulerProvider>() }
 
-  single { provideCoroutinesDispatchersProvider(get()) }
+  singleOf(::CoroutinesDispatchersProviderImpl) { bind<CoroutinesDispatchersProvider>() }
 
-  single { provideAppCoroutineScope(get()) }
+  singleOf(provideAppCoroutineScope)
 
   /*
    * WorkManager + Moshi + JsonAdaptersContainer
    */
 
-  single { provideWorkManager(androidContext()) }
+  single { WorkManager.getInstance(androidContext()) }
 
-  single { provideMoshi() }
+  singleOf(provideMoshi)
 
-  single { provideJsonAdaptersContainer(get()) }
+  singleOf(::JsonAdaptersContainer)
 
   /*
    * FirebaseAuth + FirebaseStorage + FirebaseFirestore
    */
 
-  single { provideFirebaseAuth() }
+  single { FirebaseAuth.getInstance() }
 
-  single { provideFirebaseStorage() }
+  single { FirebaseStorage.getInstance() }
 
-  single { provideFirebaseFirestore() }
-}
-
-private fun provideAppCoroutineScope(dispatchersProvider: CoroutinesDispatchersProvider): CoroutineScope {
-  return CoroutineScope(dispatchersProvider.io + SupervisorJob())
-}
-
-private fun provideFirebaseAuth(): FirebaseAuth {
-  return FirebaseAuth.getInstance()
-}
-
-private fun provideFirebaseStorage(): FirebaseStorage {
-  return FirebaseStorage.getInstance()
-}
-
-private fun provideFirebaseFirestore(): FirebaseFirestore {
-  return FirebaseFirestore.getInstance()
-}
-
-private fun provideWorkManager(context: Context): WorkManager {
-  return WorkManager.getInstance(context)
-}
-
-private fun provideRxSchedulerProvider(): RxSchedulerProvider {
-  return RxSchedulerProviderImpl()
-}
-
-private fun provideCoroutinesDispatchersProvider(rxSchedulerProvider: RxSchedulerProvider): CoroutinesDispatchersProvider {
-  return CoroutinesDispatchersProviderImpl(rxSchedulerProvider)
-}
-
-private fun provideJsonAdaptersContainer(moshi: Moshi): JsonAdaptersContainer {
-  return JsonAdaptersContainer(moshi)
-}
-
-private fun provideMoshi(): Moshi {
-  return Moshi
-    .Builder()
-    .add(KotlinJsonAdapterFactory())
-    .build()
+  single { FirebaseFirestore.getInstance() }
 }
