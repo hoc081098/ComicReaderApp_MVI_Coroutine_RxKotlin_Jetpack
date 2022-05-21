@@ -3,7 +3,6 @@ package com.hoc.comicapp.koin
 import com.hoc.comicapp.activity.main.MainContract
 import com.hoc.comicapp.activity.main.MainInteractorImpl
 import com.hoc.comicapp.activity.main.MainVM
-import com.hoc.comicapp.navigation.Arguments
 import com.hoc.comicapp.ui.category.CategoryFragment
 import com.hoc.comicapp.ui.category.CategoryInteractor
 import com.hoc.comicapp.ui.category.CategoryInteractorImpl
@@ -46,206 +45,80 @@ import com.hoc.comicapp.ui.search_comic.SearchComicContract
 import com.hoc.comicapp.ui.search_comic.SearchComicFragment
 import com.hoc.comicapp.ui.search_comic.SearchComicInteractorImpl
 import com.hoc.comicapp.ui.search_comic.SearchComicViewModel
-import org.koin.android.ext.koin.androidApplication
-import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.androidx.viewmodel.dsl.viewModelOf
+import org.koin.core.module.dsl.bind
+import org.koin.core.module.dsl.factoryOf
+import org.koin.core.module.dsl.scopedOf
 import org.koin.dsl.module
 
 val viewModelModule = module {
   scope<HomeFragment> {
-    scoped<HomeInteractor> {
-      HomeInteractorImpl(
-        comicRepository = get(),
-        dispatchersProvider = get(),
-      )
-    }
+    scopedOf(::HomeInteractorImpl) { bind<HomeInteractor>() }
 
-    viewModel {
-      HomeViewModel(
-        homeInteractor = get(),
-        rxSchedulerProvider = get(),
-      )
-    }
+    viewModelOf(::HomeViewModel)
   }
 
   scope<ComicDetailFragment> {
-    scoped<ComicDetailInteractor> {
-      ComicDetailInteractorImpl(
-        comicRepository = get(),
-        dispatchersProvider = get(),
-        downloadedComicRepository = get(),
-        favoriteComicsRepository = get(),
-        rxSchedulerProvider = get(),
-      )
-    }
+    scopedOf(::ComicDetailInteractorImpl) { bind<ComicDetailInteractor>() }
 
-    viewModel { (isDownloaded: Boolean) ->
-      ComicDetailViewModel(
-        comicDetailInteractor = get(),
-        downloadComicsRepository = get(),
-        rxSchedulerProvider = get(),
-        workManager = get(),
-        isDownloaded = isDownloaded,
-      )
-    }
+    viewModelOf(::ComicDetailViewModel)
   }
 
   scope<SearchComicFragment> {
-    scoped<SearchComicContract.Interactor> {
-      SearchComicInteractorImpl(
-        comicRepository = get(),
-        dispatchersProvider = get(),
-      )
-    }
+    scopedOf(::SearchComicInteractorImpl) { bind<SearchComicContract.Interactor>() }
 
-    viewModel {
-      SearchComicViewModel(
-        interactor = get(),
-        rxSchedulerProvider = get(),
-      )
-    }
+    viewModelOf(::SearchComicViewModel)
   }
 
   scope<CategoryFragment> {
-    scoped<CategoryInteractor> {
-      CategoryInteractorImpl(
-        comicRepository = get(),
-        dispatchersProvider = get(),
-      )
-    }
+    scopedOf(::CategoryInteractorImpl) { bind<CategoryInteractor>() }
 
-    viewModel {
-      CategoryViewModel(
-        categoryInteractor = get(),
-        rxSchedulerProvider = get(),
-      )
-    }
+    viewModelOf(::CategoryViewModel)
   }
 
   scope<ChapterDetailFragment> {
-    scoped<ChapterDetailContract.Interactor> {
-      ChapterDetailInteractorImpl(
-        comicRepository = get(),
-        dispatchersProvider = get(),
-        downloadComicsRepository = get(),
-      )
-    }
+    scopedOf(::ChapterDetailInteractorImpl) { bind<ChapterDetailContract.Interactor>() }
 
-    viewModel { (isDownloaded: Boolean) ->
-      ChapterDetailViewModel(
-        interactor = get(),
-        rxSchedulerProvider = get(),
-        isDownloaded = isDownloaded,
-      )
-    }
+    viewModelOf(::ChapterDetailViewModel)
   }
 
   scope<DownloadedComicsFragment> {
-    scoped<DownloadedComicsContract.Interactor> {
-      DownloadedComicsInteractorImpl(
-        downloadComicsRepository = get(),
-        application = androidApplication(),
-      )
-    }
+    scopedOf(::DownloadedComicsInteractorImpl) { bind<DownloadedComicsContract.Interactor>() }
 
-    viewModel {
-      DownloadedComicsViewModel(
-        rxSchedulerProvider = get(),
-        interactor = get(),
-      )
-    }
+    viewModelOf(::DownloadedComicsViewModel)
   }
 
   scope<CategoryDetailFragment> {
-    scoped<CategoryDetailContract.Interactor> {
-      CategoryDetailInteractorImpl(
-        dispatchersProvider = get(),
-        comicRepository = get(),
-      )
-    }
+    scopedOf(::CategoryDetailInteractorImpl) { bind<CategoryDetailContract.Interactor>() }
 
-    viewModel { (category: Arguments.CategoryDetailArgs) ->
-      CategoryDetailVM(
-        rxSchedulerProvider = get(),
-        interactor = get(),
-        category = category,
-      )
-    }
+    viewModelOf(::CategoryDetailVM)
   }
 
   scope<LoginFragment> {
-    scoped<LoginContract.Interactor> {
-      LoginInteractorImpl(
-        userRepository = get(),
-        dispatchersProvider = get(),
-      )
-    }
+    scopedOf(::LoginInteractorImpl) { bind<LoginContract.Interactor>() }
 
-    viewModel {
-      LoginVM(
-        interactor = get(),
-        rxSchedulerProvider = get(),
-      )
-    }
+    viewModelOf(::LoginVM)
   }
 
   scope<RegisterFragment> {
-    scoped<RegisterContract.Interactor> {
-      RegisterInteractorImpl(
-        userRepository = get(),
-        dispatchersProvider = get(),
-      )
-    }
+    scopedOf(::RegisterInteractorImpl) { bind<RegisterContract.Interactor>() }
 
-    viewModel {
-      RegisterVM(
-        interactor = get(),
-        rxSchedulerProvider = get(),
-      )
-    }
+    viewModelOf(::RegisterVM)
   }
 
   scope<FavoriteComicsFragment> {
-    scoped<FavoriteComicsContract.Interactor> {
-      FavoriteComicsInteractorImpl(
-        favoriteComicsRepository = get(),
-        rxSchedulerProvider = get(),
-        dispatchersProvider = get(),
-      )
-    }
+    scopedOf(::FavoriteComicsInteractorImpl) { bind<FavoriteComicsContract.Interactor>() }
 
-    viewModel {
-      FavoriteComicsVM(
-        interactor = get(),
-        rxSchedulerProvider = get(),
-      )
-    }
+    viewModelOf(::FavoriteComicsVM)
   }
 
   //region MainActivity
-  factory<MainContract.Interactor> {
-    MainInteractorImpl(
-      userRepository = get(),
-      dispatchersProvider = get(),
-      rxSchedulerProvider = get(),
-    )
-  }
+  factoryOf(::MainInteractorImpl) { bind<MainContract.Interactor>() }
 
-  viewModel {
-    MainVM(
-      interactor = get(),
-      rxSchedulerProvider = get(),
-    )
-  }
+  viewModelOf(::MainVM)
   //endregion
 
   scope<DownloadingChaptersFragment> {
-    viewModel {
-      DownloadingChaptersViewModel(
-        rxSchedulerProvider = get(),
-        workManager = get(),
-        jsonAdaptersContainer = get(),
-        downloadComicsRepository = get(),
-      )
-    }
+    viewModelOf(::DownloadingChaptersViewModel)
   }
 }

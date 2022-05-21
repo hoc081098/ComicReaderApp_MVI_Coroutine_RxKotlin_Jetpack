@@ -7,33 +7,22 @@ import com.hoc.comicapp.data.remote.ComicApiService
 import com.squareup.moshi.Moshi
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
 
-val networkModule = module {
-  single { provideOkHttpClient() }
-
-  single { provideRetrofit(get(), get()) }
-
-  single { provideComicApiService(get()) }
-}
-
-private fun provideComicApiService(retrofit: Retrofit): ComicApiService {
-  return ComicApiService(retrofit)
-}
-
-private fun provideRetrofit(client: OkHttpClient, moshi: Moshi): Retrofit {
-  return Retrofit.Builder()
+private val provideRetrofit = { client: OkHttpClient, moshi: Moshi ->
+  Retrofit.Builder()
     .baseUrl(COMIC_BASE_URL)
     .client(client)
     .addConverterFactory(MoshiConverterFactory.create(moshi))
     .build()
 }
 
-private fun provideOkHttpClient(): OkHttpClient {
-  return OkHttpClient.Builder()
+private val provideOkHttpClient = {
+  OkHttpClient.Builder()
     .connectTimeout(15, TimeUnit.SECONDS)
     .readTimeout(15, TimeUnit.SECONDS)
     .writeTimeout(15, TimeUnit.SECONDS)
@@ -58,4 +47,12 @@ private fun provideOkHttpClient(): OkHttpClient {
       }
     }
     .build()
+}
+
+val networkModule = module {
+  singleOf(provideOkHttpClient)
+
+  singleOf(provideRetrofit)
+
+  singleOf(ComicApiService::invoke)
 }
