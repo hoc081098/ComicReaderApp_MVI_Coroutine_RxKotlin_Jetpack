@@ -81,7 +81,7 @@ object versions {
   }
 
   object firebase {
-    const val bom = "28.4.2"
+    const val bom = "32.8.0"
   }
 
   const val arrow = "1.1.2"
