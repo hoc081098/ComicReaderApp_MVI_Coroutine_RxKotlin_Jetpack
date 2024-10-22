@@ -29,45 +29,45 @@ object versions {
   }
 
   object kotlin {
-    const val core = "1.6.21"
-    const val coroutines = "1.6.1"
+    const val core = "1.9.25"
+    const val coroutines = "1.9.0"
   }
 
   object androidX {
-    const val activity = "1.4.0"
-    const val appCompat = "1.4.1"
-    const val core = "1.7.0"
-    const val fragment = "1.4.1"
-    const val startUp = "1.1.1"
+    const val activity = "1.9.3"
+    const val appCompat = "1.7.0"
+    const val core = "1.13.1"
+    const val fragment = "1.8.4"
+    const val startUp = "1.2.0"
 
     object view {
-      const val constraintLayout = "2.1.3"
-      const val material = "1.4.0"
-      const val recyclerView = "1.3.0-alpha02"
+      const val constraintLayout = "2.1.4"
+      const val material = "1.12.0"
+      const val recyclerView = "1.3.2"
     }
 
-    const val navigation = "2.4.2"
-    const val lifecycle = "2.4.1"
-    const val room = "2.5.0-alpha01"
-    const val work = "2.8.0-alpha02"
+    const val navigation = "2.8.3"
+    const val lifecycle = "2.8.6"
+    const val room = "2.6.1"
+    const val work = "2.9.1"
   }
 
-  const val koin = "3.2.0"
-  const val moshiKotlin = "1.13.0"
-  const val retrofit = "2.9.0"
-  const val okHttpLoggingInterceptor = "5.0.0-alpha.2"
-  const val leakCanaryAndroid = "2.7"
+  const val koin = "3.5.6"
+  const val moshiKotlin = "1.15.1"
+  const val retrofit = "2.11.0"
+  const val okHttpLoggingInterceptor = "5.0.0-SNAPSHOT"
+  const val leakCanaryAndroid = "2.14"
   const val rxRelay = "3.0.1"
   const val rxBinding = "4.0.0"
   const val timber = "5.0.1"
 
   object reactiveX {
     const val kotlin = "3.0.1"
-    const val java = "3.1.2"
-    const val android = "3.0.0"
+    const val java = "3.1.9"
+    const val android = "3.0.2"
   }
 
-  const val glide = "4.12.0"
+  const val glide = "4.16.0"
 
   object customView {
     const val materialSearchView = "1.4.0"
@@ -84,10 +84,10 @@ object versions {
     const val bom = "28.4.2"
   }
 
-  const val arrow = "1.1.2"
-  const val uri = "0.3.3"
-  const val viewBindingDelegate = "1.3.1"
-  const val flowExt = "0.3.0"
+  const val arrow = "1.2.4"
+  const val uri = "0.4.0"
+  const val viewBindingDelegate = "1.4.0"
+  const val flowExt = "0.8.1"
 }
 
 object deps {
