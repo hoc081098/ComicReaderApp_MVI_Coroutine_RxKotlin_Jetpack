@@ -29,7 +29,7 @@ object versions {
   }
 
   object kotlin {
-    const val core = "1.6.21"
+    const val core = "2.0.21"
     const val coroutines = "1.6.1"
   }
 
@@ -52,7 +52,7 @@ object versions {
     const val work = "2.8.0-alpha02"
   }
 
-  const val koin = "3.2.0"
+  const val koin = "4.0.0"
   const val moshiKotlin = "1.13.0"
   const val retrofit = "2.9.0"
   const val okHttpLoggingInterceptor = "5.0.0-alpha.2"
@@ -81,13 +81,13 @@ object versions {
   }
 
   object firebase {
-    const val bom = "28.4.2"
+    const val bom = "33.5.1"
   }
 
   const val arrow = "1.1.2"
   const val uri = "0.3.3"
   const val viewBindingDelegate = "1.3.1"
-  const val flowExt = "0.3.0"
+  const val flowExt = "1.0.0"
 }
 
 object deps {
